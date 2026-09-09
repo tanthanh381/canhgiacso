@@ -172,11 +172,14 @@ async function renderCertificateCanvas(certificate: TrainingCertificate, templat
   context.strokeStyle = "#d89a68";
   context.lineWidth = 4;
   context.setLineDash([12, 8]);
+  context.beginPath();
   context.roundRect(76, 34, 1602, 1168, 24);
   context.stroke();
   context.restore();
 
   context.fillStyle = "#d90000";
+  // save/restore does not reset paths; keep the logo fill off the frame.
+  context.beginPath();
   context.roundRect(270, 92, 112, 112, 16);
   context.fill();
   context.fillStyle = "#ffffff";
@@ -239,6 +242,7 @@ async function renderCertificateCanvas(certificate: TrainingCertificate, templat
   context.fillStyle = "#f5e3bf";
   context.strokeStyle = "#e87500";
   context.lineWidth = 2;
+  context.beginPath();
   context.roundRect(690, 820, 374, 170, 15);
   context.fill();
   context.stroke();
