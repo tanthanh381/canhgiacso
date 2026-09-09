@@ -1,3 +1,5 @@
+import type { CertificateTemplate } from "./data";
+
 export type TrainingCertificate = {
   certificateId: string;
   certificateCode: string;
@@ -130,12 +132,28 @@ function certificateFileName(certificate: TrainingCertificate) {
   return `Chung-nhan-Canh-Giac-So-${safeName}.pdf`;
 }
 
+function applyCertificateTemplate(template: string, certificate: TrainingCertificate, config: CertificateTemplate) {
+  const values: Record<string, string> = {
+    courseName: config.courseName,
+    scenarioTotal: String(certificate.scenarioTotal),
+    completed: String(certificate.completed),
+    correct: String(certificate.correct),
+    accuracy: String(certificate.accuracy),
+    score: String(certificate.score),
+    rating: certificate.rating,
+    displayName: certificate.displayName,
+    username: certificate.username,
+    certificateCode: certificate.certificateCode,
+  };
+  return Object.entries(values).reduce((text, [key, value]) => text.replaceAll(`{${key}}`, value), template);
+}
+
 function formatIssuedDate(value: string) {
   const date = new Date(value);
   return Number.isNaN(date.valueOf()) ? value : date.toLocaleDateString("vi-VN");
 }
 
-async function renderCertificateCanvas(certificate: TrainingCertificate) {
+async function renderCertificateCanvas(certificate: TrainingCertificate, template: CertificateTemplate) {
   if ("fonts" in document) await document.fonts.ready;
   const canvas = document.createElement("canvas");
   canvas.width = 1754;
@@ -169,18 +187,18 @@ async function renderCertificateCanvas(certificate: TrainingCertificate) {
   context.textAlign = "left";
   context.fillStyle = "#c50000";
   context.font = "800 38px Arial, Helvetica, sans-serif";
-  context.fillText("NGÂN HÀNG CP PHÁT TRIỂN TP. HỒ CHÍ MINH (HDBANK)", 410, 145);
+  context.fillText(template.organizationName, 410, 145);
   context.fillStyle = "#334155";
   context.font = "700 22px Arial, Helvetica, sans-serif";
-  context.fillText("KHỐI AN NINH THÔNG TIN & BAN ĐÀO TẠO HDBANK", 410, 184);
+  context.fillText(template.departmentName, 410, 184);
 
   context.fillStyle = "#9a3e00";
   context.textAlign = "center";
   context.font = "700 21px Arial, Helvetica, sans-serif";
-  context.fillText("CHỨNG NHẬN CHUYÊN MÔN HOÀN THÀNH DIỄN TẬP", 877, 288);
+  context.fillText(template.eyebrow, 877, 288);
   drawCenteredText(
     context,
-    "HOÀN THÀNH KHÓA ĐÀO TẠO AN TOÀN THÔNG TIN",
+    template.title,
     370,
     1450,
     53,
@@ -191,7 +209,7 @@ async function renderCertificateCanvas(certificate: TrainingCertificate) {
 
   context.fillStyle = "#475569";
   context.font = "italic 22px Georgia, 'Times New Roman', serif";
-  context.fillText("Chứng nhận này được trân trọng trao cho:", 877, 470);
+  context.fillText(template.recipientIntro, 877, 470);
   drawCenteredText(
     context,
     certificate.displayName.toLocaleUpperCase("vi-VN"),
@@ -211,11 +229,11 @@ async function renderCertificateCanvas(certificate: TrainingCertificate) {
 
   context.fillStyle = "#1e3a5f";
   context.font = "600 23px Arial, Helvetica, sans-serif";
-  context.fillText(`Tài khoản: @${certificate.username}  |  Mã chứng chỉ: ${certificate.certificateCode}`, 877, 612);
+  context.fillText(`${template.accountLabel}: @${certificate.username}  |  ${template.codeLabel}: ${certificate.certificateCode}`, 877, 612);
 
   context.fillStyle = "#0f2847";
   context.font = "23px Arial, Helvetica, sans-serif";
-  const description = `Đã hoàn thành toàn bộ chương trình diễn tập tương tác “Cảnh Giác Số”, gồm ${certificate.scenarioTotal} tình huống mô phỏng lừa đảo và an toàn thông tin; hoàn thành ${certificate.completed}/${certificate.scenarioTotal} tình huống với ${certificate.correct} lựa chọn an toàn.`;
+  const description = applyCertificateTemplate(template.description, certificate, template);
   drawCenteredWrappedText(context, description, 877, 710, 1200, 37);
 
   context.fillStyle = "#f5e3bf";
@@ -226,7 +244,7 @@ async function renderCertificateCanvas(certificate: TrainingCertificate) {
   context.stroke();
   context.fillStyle = "#7c2d12";
   context.font = "700 20px Arial, Helvetica, sans-serif";
-  context.fillText("XẾP LOẠI NĂNG LỰC", 877, 865);
+  context.fillText(template.ratingLabel, 877, 865);
   context.fillStyle = "#a00000";
   context.font = "800 31px Arial, Helvetica, sans-serif";
   context.fillText(certificate.rating, 877, 910);
@@ -244,18 +262,18 @@ async function renderCertificateCanvas(certificate: TrainingCertificate) {
   context.fillStyle = "#475569";
   context.textAlign = "left";
   context.font = "17px Arial, Helvetica, sans-serif";
-  context.fillText(`Cấp ngày: ${formatIssuedDate(certificate.issuedAt)}`, 145, 1104);
+  context.fillText(`${template.issuedDateLabel}: ${formatIssuedDate(certificate.issuedAt)}`, 145, 1104);
   context.textAlign = "right";
-  context.fillText(`Mã xác thực nội bộ: ${certificate.certificateCode}`, 1609, 1104);
+  context.fillText(`${template.codeLabel}: ${certificate.certificateCode}`, 1609, 1104);
   context.textAlign = "center";
   context.fillStyle = "#64748b";
   context.font = "15px Arial, Helvetica, sans-serif";
-  context.fillText("Chứng nhận hoàn thành nội dung đào tạo mô phỏng; không xác nhận chức danh, quan hệ lao động hoặc chứng chỉ hành nghề.", 877, 1150);
+  context.fillText(template.footerNote, 877, 1150);
   return canvas;
 }
 
-export async function downloadTrainingCertificatePdf(certificate: TrainingCertificate) {
-  const canvas = await renderCertificateCanvas(certificate);
+export async function downloadTrainingCertificatePdf(certificate: TrainingCertificate, template: CertificateTemplate) {
+  const canvas = await renderCertificateCanvas(certificate, template);
   const jpegBlob = await new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((blob) => {
       if (blob) resolve(blob);

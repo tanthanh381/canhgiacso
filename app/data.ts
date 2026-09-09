@@ -583,9 +583,25 @@ export type SiteCopy = {
   footerNotice: string;
 };
 
+export type CertificateTemplate = {
+  organizationName: string;
+  departmentName: string;
+  eyebrow: string;
+  title: string;
+  recipientIntro: string;
+  courseName: string;
+  description: string;
+  ratingLabel: string;
+  accountLabel: string;
+  codeLabel: string;
+  issuedDateLabel: string;
+  footerNote: string;
+};
+
 export type SiteContent = {
   version: 1;
   copy: SiteCopy;
+  certificateTemplate: CertificateTemplate;
   scenarios: Scenario[];
   knowledgeCards: KnowledgeCard[];
 };
@@ -616,6 +632,20 @@ export const defaultSiteContent: SiteContent = {
     footerTagline: "Cảnh Giác Số · Đào tạo nhận thức an toàn thông tin",
     footerNotice: "**Website được quản lý và vận hành bởi: IT Security Team - HDBank.**\nĐược xây dựng với mục tiêu nâng cao nhận thức cộng đồng về phòng chống tội phạm lừa đảo trực tuyến.\nLưu ý: Nội dung và số tiền trên website chỉ là mô phỏng đào tạo.",
   },
+  certificateTemplate: {
+    organizationName: "NGÂN HÀNG CP PHÁT TRIỂN TP. HỒ CHÍ MINH (HDBANK)",
+    departmentName: "KHỐI AN NINH THÔNG TIN & BAN ĐÀO TẠO HDBANK",
+    eyebrow: "CHỨNG NHẬN CHUYÊN MÔN HOÀN THÀNH DIỄN TẬP",
+    title: "HOÀN THÀNH KHÓA ĐÀO TẠO AN TOÀN THÔNG TIN",
+    recipientIntro: "Chứng nhận này được trân trọng trao cho:",
+    courseName: "Cảnh Giác Số",
+    description: "Đã hoàn thành toàn bộ chương trình diễn tập tương tác “{courseName}”, gồm {scenarioTotal} tình huống mô phỏng lừa đảo và an toàn thông tin; hoàn thành {completed}/{scenarioTotal} tình huống với {correct} lựa chọn an toàn.",
+    ratingLabel: "XẾP LOẠI NĂNG LỰC",
+    accountLabel: "Tài khoản",
+    codeLabel: "Mã chứng chỉ",
+    issuedDateLabel: "Cấp ngày",
+    footerNote: "Chứng nhận hoàn thành nội dung đào tạo mô phỏng; không xác nhận chức danh, quan hệ lao động hoặc chứng chỉ hành nghề.",
+  },
   scenarios,
   knowledgeCards,
 };
@@ -637,6 +667,18 @@ export function normalizeSiteContent(value: unknown): SiteContent | null {
     "dashboardTitle", "dashboardIntro", "footerTagline", "footerNotice",
   ];
   if (copyKeys.some((key) => !isText(copy[key], key.endsWith("Intro") || key === "footerNotice" ? 1000 : 180))) return null;
+  const certificateTemplateCandidate = candidate.certificateTemplate && typeof candidate.certificateTemplate === "object"
+    ? candidate.certificateTemplate as Partial<CertificateTemplate>
+    : defaultSiteContent.certificateTemplate;
+  const certificateKeys: Array<keyof CertificateTemplate> = [
+    "organizationName", "departmentName", "eyebrow", "title", "recipientIntro", "courseName",
+    "description", "ratingLabel", "accountLabel", "codeLabel", "issuedDateLabel", "footerNote",
+  ];
+  if (certificateKeys.some((key) => !isText(
+    certificateTemplateCandidate[key],
+    key === "description" || key === "footerNote" ? 1200 : key === "organizationName" || key === "departmentName" || key === "title" ? 240 : 160,
+  ))) return null;
+  const normalizedCertificateTemplate = { ...certificateTemplateCandidate } as CertificateTemplate;
   if (!Array.isArray(candidate.scenarios) || candidate.scenarios.length < 1 || candidate.scenarios.length > 100) return null;
   const ids = new Set<number>();
   const validScenarios = candidate.scenarios.every((scenario) => {
@@ -683,6 +725,7 @@ export function normalizeSiteContent(value: unknown): SiteContent | null {
   return {
     version: 1,
     copy: normalizedCopy,
+    certificateTemplate: normalizedCertificateTemplate,
     scenarios: normalizedScenarios,
     knowledgeCards: normalizedKnowledgeCards,
   };

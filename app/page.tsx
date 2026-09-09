@@ -828,7 +828,7 @@ export default function Home() {
     if (certificateDownloading) return;
     setCertificateDownloading(true);
     try {
-      await downloadTrainingCertificatePdf(certificate);
+      await downloadTrainingCertificatePdf(certificate, siteContent.certificateTemplate);
       setDataStatus("Đã tạo chứng chỉ PDF trên thiết bị của bạn.");
     } catch {
       setDataStatus("Không thể tạo file PDF trên trình duyệt này. Vui lòng thử lại.");

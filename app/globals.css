@@ -463,3 +463,20 @@ footer { font-size: 12px; }.footer-brand small { font-size: 12px; }
 .certificate-complete-code strong { font-size: 18px; letter-spacing: .06em; }
 .certificate-complete-actions { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
 @media (max-width: 760px) { .training-certificate-card { grid-template-columns: 52px minmax(0,1fr); } .certificate-card-mark { width: 50px; height: 50px; } .certificate-download { grid-column: 1 / -1; width: 100%; } }
+
+
+/* Certificate template admin */
+.certificate-admin-layout { display: grid; gap: 20px; }
+.certificate-token-note { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: color-mix(in srgb, var(--surface) 96%, #fff2cf); }
+.certificate-token-note strong { font-size: 12px; }
+.certificate-token-note span { color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; line-height: 1.6; }
+.certificate-admin-preview { max-width: 960px; margin: 4px auto 0; width: 100%; padding: 30px; text-align: center; border: 2px dashed #d89a68; border-radius: 18px; background: linear-gradient(135deg, #fffaf0, #eef3f8); color: #0f172a; }
+.certificate-admin-preview > strong { display: block; color: #c50000; font-size: 20px; }
+.certificate-admin-preview > small { display: block; margin-top: 4px; color: #475569; }
+.certificate-admin-preview > em { display: block; margin-top: 24px; color: #9a3e00; font-style: normal; font-weight: 700; font-size: 12px; }
+.certificate-admin-preview h3 { margin: 8px 0 24px; font-family: Georgia, serif; font-size: clamp(24px, 4vw, 38px); }
+.certificate-admin-preview > b { display: block; margin: 8px 0 16px; color: #b00000; font-family: Georgia, serif; font-size: 30px; }
+.certificate-admin-preview > p { max-width: 760px; margin: 10px auto; line-height: 1.55; }
+.certificate-admin-preview > div { display: inline-grid; gap: 4px; margin: 18px auto; padding: 12px 30px; border: 1px solid #e87500; border-radius: 12px; background: #f5e3bf; }
+.certificate-admin-preview > div span { color: #7c2d12; font-size: 11px; font-weight: 700; }
+.certificate-admin-preview > div strong { color: #a00000; font-size: 20px; }
