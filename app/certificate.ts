@@ -268,7 +268,9 @@ async function renderCertificateCanvas(certificate: TrainingCertificate, templat
   context.textAlign = "center";
   context.fillStyle = "#64748b";
   context.font = "15px Arial, Helvetica, sans-serif";
-  context.fillText(template.footerNote, 877, 1150);
+  context.fillText(certificate.certificateCode.startsWith("CGS-GUEST-")
+    ? "Bản ghi nhận chế độ khách - không phải chứng chỉ nội bộ đã xác minh."
+    : template.footerNote, 877, 1150);
   return canvas;
 }
 
