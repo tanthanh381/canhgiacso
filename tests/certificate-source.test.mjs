@@ -11,7 +11,7 @@ test("certificate feature is server-issued and downloadable as PDF", async () =>
   assert.match(page, /get_my_training_certificates/);
   assert.match(page, /issue_training_certificate/);
   assert.match(page, /Tải chứng chỉ PDF/);
-  assert.match(certificate, /%PDF-1\.4/);
+  assert.match(certificate, /new Uint8Array\(\[37, 80, 68, 70, 45, 49, 46, 52/);
   assert.match(certificate, /application\/pdf/);
   assert.match(certificate, /Chứng nhận hoàn thành nội dung đào tạo mô phỏng/);
   assert.match(sql, /private\.training_certificates/);
