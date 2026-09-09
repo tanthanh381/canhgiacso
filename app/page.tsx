@@ -854,7 +854,7 @@ export default function Home() {
           </aside>
 
           <section className="stage">
-            {!sessionAccount && <div className="guest-mode-note" role="note"><span><b>Đang tham gia với tư cách khách</b><small>Không cần tài khoản · Kết quả chỉ lưu trên thiết bị này</small></span><button onClick={() => openAuth("register")}>Đăng ký để đồng bộ</button></div>}
+            {!sessionAccount && <div className="guest-mode-note" role="note"><span><b>Đang tham gia với tư cách khách</b><small>Không cần tài khoản · Kết quả chỉ lưu trên thiết bị này</small></span><button onClick={() => openAuth("register")}>Đăng ký để lưu lượt chơi mới</button></div>}
             <div className="status-grid">
               <div className="status-card"><BadgeIcon>₫</BadgeIcon><span><small>Tài sản an toàn</small><strong>{money.format(balance)}đ</strong></span></div>
               <div className="status-card"><BadgeIcon>⌁</BadgeIcon><span><small>Mức cảnh giác</small><strong>{awareness}%</strong></span><div className="meter"><i style={{ width: `${awareness}%` }} /></div></div>
@@ -1011,7 +1011,7 @@ export default function Home() {
           <button type="button" aria-pressed={authMode === "register"} className={authMode === "register" ? "active" : ""} onClick={() => switchAuthMode("register")}>Đăng ký</button>
         </div>
         <h2 id="auth-title">{authMode === "login" ? "Chào mừng trở lại" : "Tạo hồ sơ phòng vệ"}</h2>
-        <p className="auth-intro">Đăng nhập để lưu kết quả và tiếp tục trên thiết bị khác. Không sử dụng mật khẩu ngân hàng thật.</p>
+        <p className="auth-intro">Đăng nhập để lưu kết quả và tiếp tục trên thiết bị khác. Tiến trình khách được giữ riêng trên thiết bị, không tự chuyển vào tài khoản. Không sử dụng mật khẩu ngân hàng thật.</p>
         <form className="auth-form" onSubmit={submitAuth}>
           {authMode === "register" && <label><span>Tên hiển thị</span><input autoComplete="name" value={authDisplayName} maxLength={32} onChange={(event) => setAuthDisplayName(event.target.value)} placeholder="Ví dụ: Minh An" /></label>}
           {authMode === "register" && <label><span>Tên đăng nhập</span><input autoComplete="username" value={authUsername} minLength={3} maxLength={24} onChange={(event) => setAuthUsername(event.target.value)} placeholder="tanthanh381" autoCapitalize="none" spellCheck={false} /></label>}
