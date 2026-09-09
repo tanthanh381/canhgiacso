@@ -1,0 +1,50 @@
+name: Remove HDBank certificate logo
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - scripts/remove-hdbank-certificate-logo.py
+      - .github/workflows/remove-hdbank-certificate-logo.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Apply certificate patch
+        run: python3 scripts/remove-hdbank-certificate-logo.py
+      - name: Build GitHub Pages
+        run: pnpm run build:pages
+      - name: Run full test suite
+        run: pnpm test
+      - name: Commit generated changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/certificate.ts tests/certificate-hdbank-logo.test.mjs tests/certificate-admin-hdbank-logo.test.mjs
+          if git diff --cached --quiet; then
+            echo "No generated changes to commit."
+            exit 0
+          fi
+          git commit -m "fix: remove HDBank logo from certificate output"
+          git push origin HEAD:main
