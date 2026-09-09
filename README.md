@@ -2,7 +2,7 @@
 
 **Khiên Số** là chương trình mô phỏng tương tác của **HDBank - IT Security**, giúp người chơi hình thành phản xạ trước các thủ đoạn lừa đảo trực tuyến phổ biến.
 
-🌐 Bản public: [https://tanthanh381.github.io/chongluadao/](https://tanthanh381.github.io/chongluadao/)
+🌐 Bản public: [https://canhgiacso.com/](https://canhgiacso.com/)
 
 ## Tính năng
 
@@ -61,9 +61,9 @@ select id from auth.users where email = 'ciso@example.com'
 on conflict (user_id) do nothing;
 ```
 
-Quyền Quản trị mở Dashboard, xuất bản nội dung và tab Phân quyền. Sau khi đăng nhập, Quản trị viên có thể cấp một trong ba trạng thái cho tài khoản khác ngay tại `https://tanthanh381.github.io/chongluadao/#/admin`: Thành viên, Biên tập viên hoặc Quản trị. Biên tập viên được chỉnh sửa và lưu bản nháp nhưng không thể xuất bản hay cấp quyền.
+Quyền Quản trị mở Dashboard, xuất bản nội dung và tab Phân quyền. Sau khi đăng nhập, Quản trị viên có thể cấp một trong ba trạng thái cho tài khoản khác ngay tại `https://canhgiacso.com/#/admin`: Thành viên, Biên tập viên hoặc Quản trị. Biên tập viên được chỉnh sửa và lưu bản nháp nhưng không thể xuất bản hay cấp quyền.
 
-Trong Supabase Authentication → URL Configuration, đặt Site URL là `https://tanthanh381.github.io/chongluadao/` và thêm cùng URL vào Redirect URLs để liên kết xác nhận email quay lại đúng website.
+Trong Supabase Authentication → URL Configuration, đặt Site URL là `https://canhgiacso.com/`. Thêm `https://canhgiacso.com/**`, `https://www.canhgiacso.com/**` và tạm giữ `https://tanthanh381.github.io/chongluadao/**` trong Redirect URLs để các liên kết xác nhận email mới và cũ đều hoạt động trong giai đoạn chuyển đổi.
 
 ## Lưu ý
 
