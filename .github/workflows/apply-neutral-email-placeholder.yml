@@ -1,0 +1,50 @@
+name: Apply neutral email placeholder
+
+on:
+  push:
+    branches:
+      - fix/neutral-email-placeholder
+    paths:
+      - scripts/replace-email-placeholder.py
+      - .github/workflows/apply-neutral-email-placeholder.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: fix/neutral-email-placeholder
+          fetch-depth: 0
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Apply placeholder patch
+        run: python3 scripts/replace-email-placeholder.py
+      - name: Build GitHub Pages
+        run: pnpm run build:pages
+      - name: Run tests
+        run: pnpm test
+      - name: Commit change
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/page.tsx
+          if git diff --cached --quiet; then
+            echo "No change to commit."
+            exit 0
+          fi
+          git commit -m "fix: use neutral email placeholder"
+          git push origin HEAD:fix/neutral-email-placeholder
