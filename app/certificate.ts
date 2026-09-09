@@ -1,3 +1,4 @@
+import { certificateParts, type CertificateDesign } from "./certificate-design";
 import type { CertificateTemplate } from "./data";
 
 export type TrainingCertificate = {
@@ -153,13 +154,18 @@ function formatIssuedDate(value: string) {
   return Number.isNaN(date.valueOf()) ? value : date.toLocaleDateString("vi-VN");
 }
 
-async function renderCertificateCanvas(certificate: TrainingCertificate, template: CertificateTemplate) {
+export async function renderCertificateCanvas(certificate: TrainingCertificate, template: CertificateTemplate) {
   if ("fonts" in document) await document.fonts.ready;
   const canvas = document.createElement("canvas");
   canvas.width = 1754;
   canvas.height = 1240;
   const context = canvas.getContext("2d");
   if (!context) throw new Error("Trình duyệt không hỗ trợ tạo chứng chỉ.");
+
+  if (template.design) {
+    await renderDesignedCertificate(context, certificate, template, template.design);
+    return canvas;
+  }
 
   const background = context.createLinearGradient(0, 0, canvas.width, canvas.height);
   background.addColorStop(0, "#fffaf0");
@@ -299,5 +305,59 @@ export async function downloadTrainingCertificatePdf(certificate: TrainingCertif
     link.remove();
   } finally {
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+}
+
+async function renderDesignedCertificate(context: CanvasRenderingContext2D, certificate: TrainingCertificate, template: CertificateTemplate, design: CertificateDesign) {
+  context.fillStyle = design.background;
+  context.fillRect(0, 0, 1754, 1240);
+  context.strokeStyle = design.border;
+  context.lineWidth = 4;
+  context.setLineDash([12, 8]);
+  context.beginPath(); context.roundRect(76, 34, 1602, 1168, 24); context.stroke();
+  context.setLineDash([]);
+  const text = {
+    ...template, logo: 'HD', recipient: certificate.displayName.toLocaleUpperCase('vi-VN'),
+    account: `${template.accountLabel}: @${certificate.username} | ${template.codeLabel}: ${certificate.certificateCode}`,
+    description: applyCertificateTemplate(template.description, certificate, template),
+    rating: `${template.ratingLabel}\n${certificate.rating}\nĐiểm: ${certificate.score} PTS | Tỷ lệ đúng: ${certificate.accuracy}%`,
+    issued: `${template.issuedDateLabel}: ${formatIssuedDate(certificate.issuedAt)} | ${template.codeLabel}: ${certificate.certificateCode}`,
+    footerNote: certificate.certificateCode.startsWith('CGS-GUEST-') ? 'Bản ghi nhận chế độ khách - không phải chứng chỉ nội bộ đã xác minh.' : template.footerNote,
+  };
+  for (const key of certificateParts) {
+    const e = design.elements[key];
+    context.save();
+    context.beginPath(); context.rect(e.x, e.y, e.width, e.height); context.clip();
+    if (key === 'logo') {
+      if (design.logo) {
+        const image = new Image();
+        image.src = design.logo;
+        await image.decode();
+        const scale = Math.min(e.width / image.naturalWidth, e.height / image.naturalHeight);
+        context.drawImage(image, e.x + (e.width - image.naturalWidth * scale) / 2, e.y + (e.height - image.naturalHeight * scale) / 2, image.naturalWidth * scale, image.naturalHeight * scale);
+      } else {
+        context.fillStyle=e.color; context.fillRect(e.x,e.y,e.width,e.height);
+        context.fillStyle='#ffffff';context.font=`bold ${Math.min(e.fontSize,e.height*.6)}px Georgia`;context.textAlign='center';context.textBaseline='middle';context.fillText('HD',e.x+e.width/2,e.y+e.height/2,e.width);
+      }
+      context.restore(); continue;
+    }
+    if (key==='rating') { context.fillStyle='#f5e3bf';context.fillRect(e.x,e.y,e.width,e.height); }
+    let size=e.fontSize; let lines:string[]=[];
+    const family=key==='title'||key==='recipient' ? 'Georgia' : 'Arial';
+    do {
+      context.font=`${key==='description'||key==='footerNote'||key==='issued'?400:700} ${size}px ${family}`;
+      lines=[];
+      for(const paragraph of text[key].split('\n')) {
+        let line='';
+        for(const word of paragraph.split(/\s+/)) {const next=line?`${line} ${word}`:word;if(context.measureText(next).width>e.width-12&&line){lines.push(line);line=word;}else line=next;}
+        lines.push(line);
+      }
+      if(lines.length*size*1.3<=e.height-6||size<=10)break;
+      size--;
+    }while(size>=10);
+    context.fillStyle=e.color;context.textAlign=e.align;context.textBaseline='middle';
+    const x=e.align==='center'?e.x+e.width/2:e.align==='right'?e.x+e.width-6:e.x+6;
+    lines.forEach((line,index)=>context.fillText(line,x,e.y+e.height/2+(index-(lines.length-1)/2)*size*1.3,e.width-12));
+    context.restore();
   }
 }

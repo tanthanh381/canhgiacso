@@ -480,3 +480,20 @@ footer { font-size: 12px; }.footer-brand small { font-size: 12px; }
 .certificate-admin-preview > div { display: inline-grid; gap: 4px; margin: 18px auto; padding: 12px 30px; border: 1px solid #e87500; border-radius: 12px; background: #f5e3bf; }
 .certificate-admin-preview > div span { color: #7c2d12; font-size: 11px; font-weight: 700; }
 .certificate-admin-preview > div strong { color: #a00000; font-size: 20px; }
+
+.cert-editor { display:grid; gap:16px; }
+.cert-toolbar { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+.cert-toolbar > div { flex:1; min-width:240px; }
+.cert-toolbar h3 { margin:0 0 6px; }
+.cert-toolbar p,.cert-properties p { font-size:14px; color:var(--muted); line-height:1.5; }
+.cert-workspace { display:grid; grid-template-columns:minmax(0,1fr) 230px; gap:20px; align-items:start; }
+.cert-stage { position:relative; aspect-ratio:1754/1240; background:#fffaf0; box-shadow:0 3px 20px #0002; }
+.cert-stage canvas { width:100%; height:100%; display:block; }
+.cert-stage .cert-hit { position:absolute; display:block; background:transparent; padding:0; border:1px dashed transparent; border-radius:0; cursor:move; touch-action:none; box-shadow:none; min-height:0; }
+.cert-stage .cert-hit:hover,.cert-stage .cert-hit.selected,.cert-stage .cert-hit:focus-visible { border-color:#2563eb; outline:2px solid #2563eb; outline-offset:1px; }
+.cert-hit span { display:none; position:absolute; top:0; left:0; background:#1d4ed8; color:white; padding:2px 5px; font-size:12px; white-space:nowrap; }
+.cert-hit.selected span,.cert-hit:focus-visible span { display:block; }
+.cert-properties { display:grid; gap:12px; }
+.cert-properties label { display:grid; gap:5px; font-size:14px; }
+.cert-properties input,.cert-properties select { width:100%; min-width:0; min-height:36px; border:1px solid var(--line); border-radius:6px; padding:5px; color:var(--text); background:var(--surface); }
+@media(max-width:900px) { .cert-workspace { grid-template-columns:1fr; } .cert-properties { grid-template-columns:repeat(2,minmax(0,1fr)); } .cert-properties p { grid-column:1/-1; } }

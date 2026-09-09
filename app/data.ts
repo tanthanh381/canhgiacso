@@ -1,3 +1,4 @@
+import { normalizeCertificateDesign, type CertificateDesign } from "./certificate-design";
 export type Difficulty = "Dễ" | "Trung bình" | "Khó" | "Rất khó";
 
 export type Choice = {
@@ -584,6 +585,7 @@ export type SiteCopy = {
 };
 
 export type CertificateTemplate = {
+  design?: CertificateDesign;
   organizationName: string;
   departmentName: string;
   eyebrow: string;
@@ -679,6 +681,11 @@ export function normalizeSiteContent(value: unknown): SiteContent | null {
     key === "description" || key === "footerNote" ? 1200 : key === "organizationName" || key === "departmentName" || key === "title" ? 240 : 160,
   ))) return null;
   const normalizedCertificateTemplate = { ...certificateTemplateCandidate } as CertificateTemplate;
+  if (certificateTemplateCandidate.design !== undefined) {
+    const design = normalizeCertificateDesign(certificateTemplateCandidate.design);
+    if (!design) return null;
+    normalizedCertificateTemplate.design = design;
+  }
   if (!Array.isArray(candidate.scenarios) || candidate.scenarios.length < 1 || candidate.scenarios.length > 100) return null;
   const ids = new Set<number>();
   const validScenarios = candidate.scenarios.every((scenario) => {

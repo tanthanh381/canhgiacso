@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { CertificateTemplate, Difficulty, KnowledgeCard, Scenario, SiteContent, normalizeSiteContent } from "./data";
+import { CertificateEditor } from "./certificate-editor";
 import { supabase } from "./supabase";
 
 type AdminAccount = { id: string; displayName: string; email: string };
@@ -111,7 +112,7 @@ export function AdminPage({
     setDraft((current) => ({ ...current, copy: { ...current.copy, [key]: value } }));
   }
 
-  function changeCertificateTemplate(key: keyof CertificateTemplate, value: string) {
+  function changeCertificateTemplate(key: Exclude<keyof CertificateTemplate, "design">, value: string) {
     setDraft((current) => ({
       ...current,
       certificateTemplate: { ...current.certificateTemplate, [key]: value },
@@ -331,6 +332,7 @@ export function AdminPage({
 
       {tab === "certificate" && <div className="certificate-admin-layout">
         <div className="admin-section-title"><div><span className="eyebrow">MẪU CHỨNG CHỈ PDF</span><h2>Tùy chỉnh nội dung chứng chỉ</h2><p>Các biến trong ngoặc nhọn sẽ được thay bằng dữ liệu kết quả thực tế khi người dùng tải PDF.</p></div></div>
+        <CertificateEditor template={draft.certificateTemplate} onChange={(certificateTemplate) => setDraft((current) => ({ ...current, certificateTemplate }))} />
         <div className="certificate-token-note" role="note"><strong>Biến hỗ trợ</strong><span>{"{courseName}"} · {"{scenarioTotal}"} · {"{completed}"} · {"{correct}"} · {"{accuracy}"} · {"{score}"} · {"{rating}"} · {"{displayName}"} · {"{username}"} · {"{certificateCode}"}</span></div>
         <div className="admin-form-grid">
           {([
@@ -346,30 +348,9 @@ export function AdminPage({
             ["issuedDateLabel", "Nhãn ngày cấp", false],
             ["description", "Nội dung mô tả", true],
             ["footerNote", "Ghi chú cuối chứng chỉ", true],
-          ] as Array<[keyof CertificateTemplate, string, boolean]>).map(([key, label, multiline]) => <label key={key} className={multiline ? "admin-wide" : ""}><span>{label}</span>{multiline ? <textarea rows={4} value={draft.certificateTemplate[key]} onChange={(event) => changeCertificateTemplate(key, event.target.value)} /> : <input value={draft.certificateTemplate[key]} onChange={(event) => changeCertificateTemplate(key, event.target.value)} />}</label>)}
+          ] as Array<[Exclude<keyof CertificateTemplate, "design">, string, boolean]>).map(([key, label, multiline]) => <label key={key} className={multiline ? "admin-wide" : ""}><span>{label}</span>{multiline ? <textarea rows={4} value={draft.certificateTemplate[key]} onChange={(event) => changeCertificateTemplate(key, event.target.value)} /> : <input value={draft.certificateTemplate[key]} onChange={(event) => changeCertificateTemplate(key, event.target.value)} />}</label>)}
         </div>
-        <article className="certificate-admin-preview" aria-label="Xem trước nội dung chứng chỉ">
-          <span className="eyebrow">XEM TRƯỚC NỘI DUNG</span>
-          <strong>{draft.certificateTemplate.organizationName}</strong>
-          <small>{draft.certificateTemplate.departmentName}</small>
-          <em>{draft.certificateTemplate.eyebrow}</em>
-          <h3>{draft.certificateTemplate.title}</h3>
-          <p>{draft.certificateTemplate.recipientIntro}</p>
-          <b>NGUYỄN VĂN A</b>
-          <p>{draft.certificateTemplate.description
-            .replaceAll("{courseName}", draft.certificateTemplate.courseName)
-            .replaceAll("{scenarioTotal}", String(draft.scenarios.length))
-            .replaceAll("{completed}", String(draft.scenarios.length))
-            .replaceAll("{correct}", String(Math.round(draft.scenarios.length * .9)))
-            .replaceAll("{accuracy}", "90")
-            .replaceAll("{score}", String(Math.round(draft.scenarios.length * 120 * .9)))
-            .replaceAll("{rating}", "XUẤT SẮC")
-            .replaceAll("{displayName}", "NGUYỄN VĂN A")
-            .replaceAll("{username}", "nguyenvana")
-            .replaceAll("{certificateCode}", "CGS-2026-DEMO")}</p>
-          <div><span>{draft.certificateTemplate.ratingLabel}</span><strong>XUẤT SẮC</strong></div>
-          <small>{draft.certificateTemplate.footerNote}</small>
-        </article>
+
       </div>}
 
       {tab === "scenarios" && selectedScenario && <div className="scenario-admin-layout">
