@@ -6,11 +6,12 @@
 
 ## Tính năng
 
-- 10 kịch bản phân nhánh theo 4 cấp độ khó
+- 42 kịch bản phân nhánh theo 4 cấp độ khó, mở khóa tuần tự từ Dễ đến Rất khó
 - Hệ thống tài sản, cảnh giác và điểm phòng vệ
 - Phản hồi giải thích sau từng lựa chọn
 - Tìm kiếm và lọc tình huống
 - Chứng cứ, huy hiệu, chuỗi thành tích và thống kê
+- Cấp chứng chỉ hoàn thành theo kết quả đã được máy chủ xác minh và cho phép tải chứng chỉ dưới dạng PDF
 - Cẩm nang xử lý khẩn cấp theo quy tắc Dừng — Kiểm — Báo
 - Chế độ sáng/tối và giao diện responsive
 - Đăng ký/đăng nhập email bằng Supabase Auth
@@ -52,6 +53,8 @@ React 19, TypeScript, vinext/Vite, Supabase Auth/Postgres và Cloudflare Workers
 Cấu trúc cơ sở dữ liệu nằm tại `supabase/schema.sql`. Website chỉ chứa khóa Supabase publishable dành cho trình duyệt; không chứa secret key hoặc `service_role`.
 
 Với dự án Supabase đã tồn tại, áp dụng `supabase/admin_content.sql`, sau đó `supabase/content_roles.sql` để bổ sung kho nội dung, hai nhóm quyền và chính sách RLS. Nội dung công khai chỉ đọc bản có trạng thái `published`; tài khoản thường không thể đọc bản nháp hoặc ghi dữ liệu.
+
+Chứng chỉ được lưu trong schema `private` và chỉ được cấp cho lượt đào tạo đã hoàn thành toàn bộ tình huống với kết quả `server_verified`. Người dùng đã đăng nhập chỉ nhận được chứng chỉ của chính mình thông qua RPC được kiểm soát phía máy chủ; chế độ khách không được cấp chứng chỉ định danh.
 
 Để cấp quyền Dashboard cho một tài khoản đã xác nhận email, chạy bằng SQL Editor của Supabase với email quản trị thực tế:
 
