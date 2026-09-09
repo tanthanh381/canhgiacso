@@ -6,6 +6,7 @@ on:
       - feature/training-certificates
     paths:
       - scripts/fix-guest-certificate-flow.py
+      - tests/certificate-source.test.mjs
       - .github/workflows/fix-guest-certificate-flow.yml
 
 permissions:
@@ -41,7 +42,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/page.tsx app/certificate.ts tests/guest-certificate-flow.test.mjs
+          git add app/page.tsx app/certificate.ts tests/certificate-source.test.mjs tests/guest-certificate-flow.test.mjs
           if git diff --cached --quiet; then
             echo "No generated changes to commit."
             exit 0
