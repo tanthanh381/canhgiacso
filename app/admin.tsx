@@ -201,6 +201,7 @@ export function AdminPage({
       setStatus("Nội dung chưa hợp lệ. Mỗi tình huống cần đúng 3 lựa chọn và chỉ 1 đáp án đúng.");
       return;
     }
+    if (target === "publish" && !window.confirm("Xác nhận xuất bản? Hãy bảo đảm nội dung đã được kiểm tra nguồn, không chứa dữ liệu cá nhân và mỗi tình huống chỉ có một đáp án an toàn.")) return;
     setBusy(true);
     setStatus(target === "publish" ? "Đang xuất bản…" : "Đang lưu bản nháp…");
     const now = new Date().toISOString();
@@ -300,6 +301,7 @@ export function AdminPage({
         <div className="admin-actions"><button className="admin-secondary" disabled={busy} onClick={() => { setDraft(cloneContent(published)); setStatus("Đã khôi phục bản nháp từ nội dung đang xuất bản."); }}>Khôi phục bản đã đăng</button><button className="admin-secondary" disabled={busy} onClick={() => void save("draft")}>Lưu bản nháp</button>{role === "admin" && <button className="primary-button" disabled={busy} onClick={() => void save("publish")}>Xuất bản</button>}</div>
       </div>
       <div className="admin-meta"><span><b>{role === "admin" ? "Quản trị viên" : "Biên tập viên"}:</b> {account.displayName} · {account.email}</span><span><b>Cập nhật gần nhất:</b> {updatedAt ? new Date(updatedAt).toLocaleString("vi-VN") : "Chưa có"}</span></div>
+      <div className="publishing-guardrail" role="note"><strong>Kiểm soát trước khi xuất bản</strong><span>Kiểm tra nguồn khuyến cáo · Không đưa dữ liệu cá nhân vào kịch bản · Chỉ một đáp án an toàn · Diễn đạt trung lập, không gây hoang mang</span></div>
       {role === "editor" && <div className="admin-role-note" role="note"><strong>Quyền Biên tập viên</strong><span>Bạn có thể chỉnh sửa và lưu bản nháp. Chỉ Quản trị viên mới được xuất bản nội dung.</span></div>}
       {status && <div className="admin-status" role="status" aria-live="polite">{status}</div>}
       <div className="admin-tabs" role="tablist" aria-label="Nhóm nội dung">

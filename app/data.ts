@@ -35,7 +35,7 @@ const scenarioDefinitions: Scenario[] = [
     tip: "Cơ quan công an không điều tra qua điện thoại và không yêu cầu chuyển tiền vào tài khoản cá nhân.",
     evidence: "Ghi chú số điện thoại mạo danh",
     choices: [
-      { text: "Tắt máy, gọi 113 hoặc công an địa phương qua số chính thức", correct: true, moneyDelta: 0, awarenessDelta: 4, feedback: "Chính xác. Bạn đã chủ động xác minh bằng một kênh độc lập." },
+      { text: "Tắt máy, xác minh qua công an địa phương hoặc phản ánh cuộc gọi tới 156", correct: true, moneyDelta: 0, awarenessDelta: 4, feedback: "Chính xác. Bạn đã dừng tương tác và chuyển sang kênh xác minh độc lập." },
       { text: "Chuyển thử 5 triệu để chứng minh mình hợp tác", correct: false, moneyDelta: -5000000, awarenessDelta: -18, feedback: "Kẻ gian sẽ tiếp tục ép chuyển thêm. Không có ‘tài khoản giám sát’ cho người dân chuyển tiền." },
       { text: "Gửi ảnh CCCD và ảnh số dư để họ kiểm tra", correct: false, moneyDelta: 0, awarenessDelta: -12, feedback: "Thông tin này có thể bị dùng để mở tài khoản, vay tiền hoặc tạo kịch bản lừa đảo sâu hơn." },
     ],
@@ -596,7 +596,7 @@ export const knowledgeCards: KnowledgeCard[] = [
   { icon: "⌾", title: "Giữ bí mật mã xác thực", text: "Mật khẩu, OTP, mã QR đăng nhập và mã khôi phục chỉ dành cho bạn." },
   { icon: "▣", title: "Kiểm tra trước khi chuyển", text: "Đọc lại người nhận, số tiền và nội dung trên màn hình xác nhận cuối cùng." },
   { icon: "⚑", title: "Lưu bằng chứng", text: "Chụp màn hình, lưu số điện thoại, đường link và mã giao dịch trước khi báo cáo." },
-  { icon: "☏", title: "Kênh trợ giúp", text: "Liên hệ ngân hàng và công an gần nhất càng sớm càng tốt khi đã phát sinh thiệt hại." },
+  { icon: "☏", title: "Báo cáo đúng kênh", text: "Nếu đã chuyển tiền, liên hệ ngay ngân hàng qua kênh chính thức, lưu bằng chứng và trình báo cơ quan công an gần nhất." },
 ];
 
 export const defaultSiteContent: SiteContent = {
@@ -611,10 +611,10 @@ export const defaultSiteContent: SiteContent = {
     knowledgeTitle: "Sáu thói quen nhỏ, một lớp giáp lớn.",
     knowledgeIntro: "Cẩm nang an toàn số giúp bạn nhận ra áp lực, kiểm tra danh tính và giữ quyền kiểm soát trước mọi giao dịch.",
     dashboardEyebrow: "HDBANK · IT SECURITY",
-    dashboardTitle: "Dashboard nhận thức an toàn",
-    dashboardIntro: "Góc nhìn tổng hợp phục vụ báo cáo CISO trên dữ liệu tập trung của toàn bộ người dùng.",
+    dashboardTitle: "Dashboard rủi ro nhận thức",
+    dashboardIntro: "Tổng hợp mức độ tham gia, kết quả mô phỏng và nhóm cần ưu tiên đào tạo lại để hỗ trợ báo cáo an toàn thông tin.",
     footerTagline: "Khiên Số · Đào tạo nhận thức an toàn thông tin",
-    footerNotice: "**Website được quản lý và vận hành bởi: IT Security Team - HDBank.**\nĐược xây dựng với mục tiêu nâng cao nhận thức cộng đồng về phòng chống tội phạm lừa đảo trực tuyến.",
+    footerNotice: "**Website được quản lý và vận hành bởi: IT Security Team - HDBank.**\nĐược xây dựng với mục tiêu nâng cao nhận thức cộng đồng về phòng chống tội phạm lừa đảo trực tuyến.\nLưu ý: Nội dung và số tiền trên website chỉ là mô phỏng đào tạo.",
   },
   scenarios,
   knowledgeCards,
@@ -664,10 +664,26 @@ export function normalizeSiteContent(value: unknown): SiteContent | null {
   if (!validScenarios) return null;
   if (!Array.isArray(candidate.knowledgeCards) || candidate.knowledgeCards.length < 1 || candidate.knowledgeCards.length > 24) return null;
   if (!candidate.knowledgeCards.every((card) => isText(card.icon, 12) && isText(card.title, 160) && isText(card.text, 1200))) return null;
+  const normalizedCopy = { ...copy } as SiteCopy;
+  if (normalizedCopy.dashboardTitle === "Dashboard nhận thức an toàn") {
+    normalizedCopy.dashboardTitle = "Dashboard rủi ro nhận thức";
+  }
+  if (normalizedCopy.dashboardIntro === "Góc nhìn tổng hợp phục vụ báo cáo CISO trên dữ liệu tập trung của toàn bộ người dùng.") {
+    normalizedCopy.dashboardIntro = "Tổng hợp mức độ tham gia, kết quả mô phỏng và nhóm cần ưu tiên đào tạo lại để hỗ trợ báo cáo an toàn thông tin.";
+  }
+  const normalizedScenarios = (candidate.scenarios as Scenario[]).map((scenario) => ({
+    ...scenario,
+    choices: scenario.choices.map((choice) => choice.text === "Tắt máy, gọi 113 hoặc công an địa phương qua số chính thức"
+      ? { ...choice, text: "Tắt máy, xác minh qua công an địa phương hoặc phản ánh cuộc gọi tới 156", feedback: "Chính xác. Bạn đã dừng tương tác và chuyển sang kênh xác minh độc lập." }
+      : choice),
+  }));
+  const normalizedKnowledgeCards = (candidate.knowledgeCards as KnowledgeCard[]).map((card) => card.title === "Kênh trợ giúp"
+    ? { ...card, title: "Báo cáo đúng kênh", text: "Nếu đã chuyển tiền, liên hệ ngay ngân hàng qua kênh chính thức, lưu bằng chứng và trình báo cơ quan công an gần nhất." }
+    : card);
   return {
     version: 1,
-    copy: copy as SiteCopy,
-    scenarios: candidate.scenarios,
-    knowledgeCards: candidate.knowledgeCards,
+    copy: normalizedCopy,
+    scenarios: normalizedScenarios,
+    knowledgeCards: normalizedKnowledgeCards,
   };
 }

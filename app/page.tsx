@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { defaultSiteContent, Difficulty, normalizeSiteContent, SiteContent } from "./data";
-import { AdminPage } from "./admin";
 import { supabase } from "./supabase";
+
+const AdminPage = lazy(() => import("./admin").then((module) => ({ default: module.AdminPage })));
 
 type Result = { scenarioId: number; correct: boolean; choiceIndex: number };
 type View = "game" | "knowledge" | "stats" | "evidence" | "dashboard" | "admin";
@@ -57,7 +58,7 @@ type DefenseBadge = {
 
 const LEGACY_PROGRESS_KEY = "khien-so-progress";
 const THEME_KEY = "khien-so-theme";
-const PUBLIC_SITE_URL = "https://tanthanh381.github.io/chongluadao/";
+const PUBLIC_SITE_URL = "https://canhgiacso.com/";
 const USERNAME_PATTERN = /^[a-z0-9._-]{3,24}$/;
 const PASSWORD_PATTERN = /^(?=.{8,72}$)(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d])\S+$/;
 
@@ -224,6 +225,8 @@ export default function Home() {
   const [authError, setAuthError] = useState("");
   const [authNotice, setAuthNotice] = useState("");
   const [authBusy, setAuthBusy] = useState(false);
+  const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
+  const [resetBusy, setResetBusy] = useState(false);
   const [lossNotice, setLossNotice] = useState<LossNotice | null>(null);
   const [sessionAccount, setSessionAccount] = useState<SessionAccount | null>(null);
   const [dataStatus, setDataStatus] = useState("");
@@ -557,6 +560,21 @@ export default function Home() {
   }
 
   async function resetProgress() {
+    if (resetBusy) return;
+    setResetBusy(true);
+    if (sessionAccount) {
+      const [attemptResult, progressResult] = await Promise.all([
+        supabase.from("test_attempts").delete().eq("user_id", sessionAccount.id),
+        supabase.from("user_progress").upsert({ user_id: sessionAccount.id, balance: 300_000_000, awareness: 100, updated_at: new Date().toISOString() }, { onConflict: "user_id" }),
+      ]);
+      if (attemptResult.error || progressResult.error) {
+        setDataStatus("Chưa thể đặt lại dữ liệu trên máy chủ. Tiến trình hiện tại được giữ nguyên.");
+        setResetBusy(false);
+        setResetConfirmOpen(false);
+        return;
+      }
+      setDataStatus("Đã đặt lại tiến trình.");
+    }
     setBalance(300_000_000);
     setAwareness(100);
     setResults([]);
@@ -564,13 +582,8 @@ export default function Home() {
     setLossNotice(null);
     setSelectedId(1);
     setView("game");
-    if (sessionAccount) {
-      const [attemptResult, progressResult] = await Promise.all([
-        supabase.from("test_attempts").delete().eq("user_id", sessionAccount.id),
-        supabase.from("user_progress").upsert({ user_id: sessionAccount.id, balance: 300_000_000, awareness: 100, updated_at: new Date().toISOString() }, { onConflict: "user_id" }),
-      ]);
-      setDataStatus(attemptResult.error || progressResult.error ? "Chưa thể đặt lại dữ liệu trên máy chủ." : "Đã đặt lại tiến trình.");
-    }
+    setResetBusy(false);
+    setResetConfirmOpen(false);
   }
 
   function resetAuthForm() {
@@ -760,6 +773,10 @@ export default function Home() {
           )}
         </div>
       </header>
+      <div className="security-awareness-banner" role="note">
+        <strong>Môi trường mô phỏng</strong>
+        <span>Không nhập mật khẩu ngân hàng, OTP, số thẻ hoặc dữ liệu thật. Mọi số tiền chỉ dùng cho đào tạo.</span>
+      </div>
       {dataStatus && <div className="sync-status" role="status" aria-live="polite">{dataStatus}</div>}
 
       {view === "game" && (
@@ -799,7 +816,7 @@ export default function Home() {
               <section className="game-over card-surface">
                 <span className="giant-icon">!</span><span className="eyebrow">PHÒNG TUYẾN ĐÃ VỠ</span>
                 <h2>Bạn đã để kẻ gian chiếm ưu thế</h2><p>Không sao — mỗi lần nhận ra một dấu hiệu là thêm một lớp bảo vệ ngoài đời thật.</p>
-                <button className="primary-button" onClick={resetProgress}>Bắt đầu hành trình mới</button>
+                <button className="primary-button" onClick={() => setResetConfirmOpen(true)}>Bắt đầu hành trình mới</button>
               </section>
             ) : (
               <section className="scenario-stage card-surface">
@@ -861,7 +878,7 @@ export default function Home() {
             <div className="achievement-heading"><div><span className="eyebrow">BỘ SƯU TẬP CHUYÊN MÔN</span><h2>Huy hiệu phòng vệ</h2><p>Mỗi huy hiệu phản ánh một kỹ năng hoặc cột mốc có thể kiểm chứng từ kết quả của bạn.</p></div><div className="achievement-summary"><strong>{unlockedBadgeCount}/{defenseBadges.length}</strong><span>đã mở khoá</span></div></div>
             <div className="achievement-grid">{defenseBadges.map((badge) => <article className={`${badge.unlocked ? "unlocked" : ""} tone-${badge.tone}`} key={badge.name} aria-label={`${badge.name}: ${badge.unlocked ? "đã mở khoá" : `${badge.current} trên ${badge.target}`}`}><span className="achievement-icon">{badge.icon}</span><div className="achievement-copy"><div className="achievement-name"><strong>{badge.name}</strong><em>{badge.tier}</em></div><p>{badge.description}</p><div className="achievement-progress"><i style={{ width: `${badge.progress}%` }} /><span>{badge.unlocked ? "Đã mở khoá" : `${badge.current}/${badge.target}`}</span></div></div></article>)}</div>
           </div>
-          <button className="reset-button" onClick={resetProgress}>Đặt lại toàn bộ tiến trình</button>
+          <button className="reset-button" onClick={() => setResetConfirmOpen(true)}>Đặt lại toàn bộ tiến trình</button>
         </section>
       )}
 
@@ -879,12 +896,13 @@ export default function Home() {
             <div><span className="eyebrow">{siteContent.copy.dashboardEyebrow}</span><h1>{siteContent.copy.dashboardTitle}</h1><p>{siteContent.copy.dashboardIntro}</p></div>
             {visibleDashboardStatus === "ready" && <button className="export-button" onClick={exportCisoReport} disabled={!analyticsUsers.length}>⇩ Xuất báo cáo CSV</button>}
           </div>
-          {!sessionAccount && <div className="dashboard-gate"><BadgeIcon>◇</BadgeIcon><h2>Đăng nhập để truy cập Dashboard</h2><p>Dữ liệu tổng hợp chỉ dành cho tài khoản đã được IT Security cấp quyền CISO.</p><button className="primary-button" onClick={() => openAuth("login")}>Đăng nhập</button></div>}
+          {!sessionAccount && <div className="dashboard-gate"><BadgeIcon>◇</BadgeIcon><h2>Đăng nhập để truy cập Dashboard</h2><p>Dữ liệu tổng hợp chỉ dành cho tài khoản Quản trị đã được IT Security phê duyệt.</p><button className="primary-button" onClick={() => openAuth("login")}>Đăng nhập</button></div>}
           {sessionAccount && visibleDashboardStatus === "loading" && <div className="dashboard-gate"><h2>Đang tải dữ liệu báo cáo…</h2></div>}
           {sessionAccount && visibleDashboardStatus === "error" && <div className="dashboard-gate"><h2>Chưa thể tải Dashboard</h2><p>Vui lòng kiểm tra kết nối và thử lại.</p></div>}
-          {sessionAccount && visibleDashboardStatus === "forbidden" && <div className="dashboard-gate"><BadgeIcon>◇</BadgeIcon><h2>Tài khoản chưa có quyền CISO</h2><p>Dashboard tổng hợp được bảo vệ bằng phân quyền máy chủ. Hãy liên hệ IT Security để được cấp quyền.</p></div>}
+          {sessionAccount && visibleDashboardStatus === "forbidden" && <div className="dashboard-gate"><BadgeIcon>◇</BadgeIcon><h2>Tài khoản chưa có quyền Quản trị</h2><p>Dashboard tổng hợp được bảo vệ bằng phân quyền phía máy chủ. Hãy liên hệ IT Security để được phê duyệt.</p></div>}
           {visibleDashboardStatus === "ready" && <>
-            <div className="data-scope-note" role="note"><strong>Phạm vi dữ liệu:</strong> {analyticsUsers.length} tài khoản trên hệ thống · Dữ liệu tập trung · Không chứa mật khẩu hoặc dữ liệu ngân hàng.</div>
+            <div className="data-scope-note" role="note"><strong>Phạm vi dữ liệu:</strong> {analyticsUsers.length} tài khoản · Chỉ gồm hồ sơ đăng ký và kết quả mô phỏng · Không chứa mật khẩu, OTP hoặc dữ liệu ngân hàng.</div>
+            <div className="dashboard-handling-note" role="note"><strong>Phân loại sử dụng nội bộ:</strong> Chỉ xuất và chia sẻ báo cáo cho người có trách nhiệm; không dùng kết quả mô phỏng làm kết luận duy nhất về rủi ro cá nhân.</div>
             <div className="ciso-kpis">
               <article><small>Người dùng đã đăng ký</small><strong>{analyticsUsers.length}</strong><span>{analytics.active} đã tham gia đào tạo</span></article>
               <article><small>Tỷ lệ tham gia</small><strong>{analytics.participation}%</strong><span>{analytics.active}/{analyticsUsers.length || 0} người dùng hoạt động</span></article>
@@ -901,16 +919,16 @@ export default function Home() {
         </section>
       )}
 
-      {view === "admin" && <AdminPage
-        account={sessionAccount}
-        publishedContent={siteContent}
-        onLogin={() => openAuth("login")}
-        onPublished={(content) => {
-          setSiteContent(content);
-          setDataStatus("Nội dung website đã được xuất bản.");
-          window.setTimeout(() => setDataStatus(""), 2600);
-        }}
-      />}
+      {view === "admin" && <Suspense fallback={<section className="content-page admin-page"><div className="dashboard-gate"><h1>Đang mở trang quản trị…</h1><p>Vui lòng chờ trong giây lát.</p></div></section>}><AdminPage
+          account={sessionAccount}
+          publishedContent={siteContent}
+          onLogin={() => openAuth("login")}
+          onPublished={(content) => {
+            setSiteContent(content);
+            setDataStatus("Nội dung website đã được xuất bản.");
+            window.setTimeout(() => setDataStatus(""), 2600);
+          }}
+        /></Suspense>}
 
       <footer><div className="footer-brand" aria-label="Khiên Số"><BrandMark /><span><b>{siteContent.copy.departmentName}</b><small>{siteContent.copy.footerTagline}</small></span></div><FooterNotice notice={siteContent.copy.footerNotice}/><button onClick={() => setGuide(true)}>Hướng dẫn & trợ giúp</button></footer>
 
@@ -929,7 +947,7 @@ export default function Home() {
         <button className="primary-button loss-confirm" onClick={() => setLossNotice(null)}>Đã hiểu hậu quả</button>
       </Modal>}
 
-      <Modal open={guide} onClose={() => setGuide(false)} labelledBy="guide-title"><button className="modal-close" aria-label="Đóng hướng dẫn" onClick={() => setGuide(false)}>×</button><span className="modal-symbol">H</span><span className="eyebrow">HDBANK · IT SECURITY</span><h2 id="guide-title">Dừng — Kiểm — Báo</h2><ol><li><b>01</b><div><strong>Dừng giao dịch</strong><p>Không chuyển thêm tiền, không cài ứng dụng và không cung cấp mã xác thực.</p></div></li><li><b>02</b><div><strong>Kiểm tra độc lập</strong><p>Tự gọi số chính thức của ngân hàng, tổ chức hoặc người thân qua kênh quen thuộc.</p></div></li><li><b>03</b><div><strong>Báo sớm, lưu kỹ</strong><p>Liên hệ HDBank qua kênh chính thức, lưu ảnh chụp và trình báo cơ quan công an gần nhất.</p></div></li></ol><button className="primary-button" onClick={() => setGuide(false)}>Tôi đã hiểu</button></Modal>
+      <Modal open={guide} onClose={() => setGuide(false)} labelledBy="guide-title" className="response-guide-modal"><button className="modal-close" aria-label="Đóng hướng dẫn" onClick={() => setGuide(false)}>×</button><span className="modal-symbol">H</span><span className="eyebrow">HDBANK · IT SECURITY</span><h2 id="guide-title">Dừng — Khóa — Báo</h2><ol><li><b>01</b><div><strong>Dừng tương tác</strong><p>Không chuyển thêm tiền, không cài ứng dụng, không chia sẻ màn hình, mật khẩu hoặc OTP.</p></div></li><li><b>02</b><div><strong>Chặn tổn thất</strong><p>Nếu đã chuyển tiền hoặc lộ thông tin, tự mở ứng dụng hoặc liên hệ ngân hàng qua kênh chính thức để yêu cầu hỗ trợ, khóa dịch vụ cần thiết.</p></div></li><li><b>03</b><div><strong>Lưu bằng chứng và báo cáo</strong><p>Lưu số điện thoại, liên kết, tin nhắn và mã giao dịch; trình báo cơ quan công an gần nhất. Cuộc gọi có dấu hiệu lừa đảo có thể phản ánh tới 156 hoặc 5656.</p></div></li></ol><p className="guide-disclaimer">Không tin dịch vụ “thu hồi tiền” yêu cầu nộp phí trước. Hướng dẫn này phục vụ đào tạo và không thay thế quy trình xử lý sự cố của tổ chức.</p><button className="primary-button" onClick={() => setGuide(false)}>Tôi đã hiểu</button></Modal>
 
       <Modal open={authOpen} onClose={closeAuth} labelledBy="auth-title" className="auth-modal">
         <button className="modal-close" aria-label="Đóng đăng nhập" onClick={closeAuth}>×</button>
@@ -957,6 +975,19 @@ export default function Home() {
       </Modal>
 
       <Modal open={profileOpen} onClose={closeProfile} labelledBy="profile-title" className="profile-modal"><button className="modal-close" aria-label="Đóng hồ sơ" onClick={closeProfile}>×</button><span className="eyebrow">TÀI KHOẢN ĐÃ ĐĂNG NHẬP</span><h2 id="profile-title">Hồ sơ của bạn</h2><p className="account-username">@{sessionAccount?.username} · {sessionAccount?.email}</p><label className="profile-name-field"><span>Tên hiển thị</span><input aria-label="Tên hiển thị" value={playerName} maxLength={32} onChange={(event) => setPlayerName(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void closeProfile(); }} /></label><div className="profile-actions"><button className="primary-button" onClick={closeProfile}>Lưu thay đổi</button><button className="logout-button" onClick={logout}>Đăng xuất</button></div><p className="profile-note">Tiến trình được đồng bộ an toàn và phiên cũ trên trình duyệt được xoá khi đổi tài khoản.</p></Modal>
+
+      <Modal open={resetConfirmOpen} onClose={() => { if (!resetBusy) setResetConfirmOpen(false); }} labelledBy="reset-confirm-title" className="reset-confirm-modal">
+        <button className="modal-close" aria-label="Đóng xác nhận đặt lại" disabled={resetBusy} onClick={() => setResetConfirmOpen(false)}>×</button>
+        <span className="loss-symbol" aria-hidden="true">!</span>
+        <span className="eyebrow">XÁC NHẬN XÓA TIẾN TRÌNH</span>
+        <h2 id="reset-confirm-title">Bắt đầu lại từ đầu?</h2>
+        <p>Toàn bộ kết quả, huy hiệu, chứng cứ và tài sản mô phỏng sẽ được đặt lại. {sessionAccount ? "Dữ liệu đã đồng bộ của tài khoản này cũng sẽ bị xóa." : "Dữ liệu khách trên thiết bị này cũng sẽ bị xóa."}</p>
+        <p className="reset-warning">Thao tác này không thể hoàn tác.</p>
+        <div className="reset-confirm-actions">
+          <button className="admin-secondary" disabled={resetBusy} onClick={() => setResetConfirmOpen(false)}>Giữ tiến trình</button>
+          <button className="danger-button" disabled={resetBusy} onClick={() => void resetProgress()}>{resetBusy ? "Đang đặt lại…" : "Xóa và bắt đầu lại"}</button>
+        </div>
+      </Modal>
     </main>
   );
 }
