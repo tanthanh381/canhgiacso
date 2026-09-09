@@ -73,9 +73,6 @@ function progressKey(username: string | null) {
   return `khien-so-progress:${username ?? "guest"}`;
 }
 
-function openPhishingQuiz() {
-  window.open(PHISHING_QUIZ_URL, "_blank", "noopener,noreferrer");
-}
 
 const money = new Intl.NumberFormat("vi-VN");
 const difficulties: Array<"Tất cả" | Difficulty> = ["Tất cả", "Dễ", "Trung bình", "Khó", "Rất khó"];
@@ -1082,8 +1079,18 @@ export default function Home() {
         <section className="content-page">
           <div className="page-hero"><span className="eyebrow">{siteContent.copy.knowledgeEyebrow}</span><h1>{siteContent.copy.knowledgeTitle}</h1><p>{siteContent.copy.knowledgeIntro}</p></div>
           <article className="dashboard-card phishing-quiz-card">
-            <div><span className="eyebrow">THỰC HÀNH BỔ SUNG · JIGSAW / GOOGLE</span><h2>Trắc nghiệm email lừa đảo</h2><p>Kiểm tra khả năng nhận diện email và trang đăng nhập giả mạo qua bộ câu hỏi tương tác của Jigsaw. Bài trắc nghiệm mở trên website của Google và không yêu cầu bạn nhập mật khẩu ngân hàng, OTP hoặc dữ liệu thật.</p></div>
-            <button className="primary-button" onClick={openPhishingQuiz}>Bắt đầu trắc nghiệm ↗</button>
+            <div><span className="eyebrow">THỰC HÀNH BỔ SUNG · JIGSAW / GOOGLE</span><h2>Trắc nghiệm email lừa đảo</h2><p>Thực hành nhận diện email và trang đăng nhập giả mạo ngay trên Cảnh Giác Số. Nội dung bên dưới được tải trực tiếp từ Jigsaw/Google; không nhập mật khẩu ngân hàng, OTP, số thẻ hoặc dữ liệu thật.</p></div>
+            <div style={{ marginTop: 18, overflow: "hidden", border: "1px solid var(--line)", borderRadius: 16, background: "#fff" }}>
+              <iframe
+                src={PHISHING_QUIZ_URL}
+                title="Trắc nghiệm email lừa đảo của Jigsaw / Google"
+                loading="lazy"
+                referrerPolicy="no-referrer"
+                sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+                style={{ display: "block", width: "100%", minHeight: 920, border: 0, background: "#fff" }}
+              />
+            </div>
+            <p style={{ marginTop: 12, fontSize: 13, color: "var(--muted)" }}>Nếu trình duyệt hoặc chính sách của Google chặn nội dung nhúng, bạn vẫn có thể <a href={PHISHING_QUIZ_URL} target="_blank" rel="noopener noreferrer">mở bài trắc nghiệm trong tab mới ↗</a>.</p>
           </article>
           <div className="knowledge-grid">{knowledgeCards.map((card, index) => <article key={card.title}><span>{String(index + 1).padStart(2, "0")}</span><BadgeIcon>{card.icon}</BadgeIcon><h2>{card.title}</h2><p>{card.text}</p></article>)}</div>
         </section>
