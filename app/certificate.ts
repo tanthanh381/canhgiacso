@@ -154,6 +154,53 @@ function formatIssuedDate(value: string) {
   return Number.isNaN(date.valueOf()) ? value : date.toLocaleDateString("vi-VN");
 }
 
+function drawHdbankWordmark(
+  context: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+) {
+  context.save();
+  context.fillStyle = "rgba(255, 255, 255, 0.96)";
+  context.strokeStyle = "rgba(148, 163, 184, 0.36)";
+  context.lineWidth = 1.5;
+  context.beginPath();
+  context.roundRect(x, y, width, height, 16);
+  context.fill();
+  context.stroke();
+
+  const left = x + 18;
+  const baseline = y + Math.round(height * 0.58);
+  const logoFontSize = Math.min(54, Math.round(height * 0.46));
+  context.textAlign = "left";
+  context.textBaseline = "alphabetic";
+  context.font = `800 ${logoFontSize}px Arial, Helvetica, sans-serif`;
+  context.fillStyle = "#e30613";
+  context.fillText("HD", left, baseline);
+  const hdWidth = context.measureText("HD").width;
+
+  context.font = `700 ${logoFontSize}px Arial, Helvetica, sans-serif`;
+  context.fillStyle = "#374151";
+  context.fillText("Bank", left + hdWidth - 2, baseline);
+  const bankWidth = context.measureText("Bank").width;
+
+  const leafX = Math.min(x + width - 28, left + hdWidth + bankWidth + 12);
+  const leafY = y + Math.round(height * 0.31);
+  context.fillStyle = "#f2b705";
+  context.beginPath();
+  context.ellipse(leafX, leafY, 18, 8, -0.55, 0, Math.PI * 2);
+  context.fill();
+  context.beginPath();
+  context.ellipse(leafX + 4, leafY + 18, 20, 9, 0.5, 0, Math.PI * 2);
+  context.fill();
+
+  context.fillStyle = "#6b7280";
+  context.font = "500 12px Arial, Helvetica, sans-serif";
+  context.fillText("Cam kết lợi ích cao nhất", left, y + height - 14, width - 36);
+  context.restore();
+}
+
 export async function renderCertificateCanvas(certificate: TrainingCertificate, template: CertificateTemplate) {
   if ("fonts" in document) await document.fonts.ready;
   const canvas = document.createElement("canvas");
@@ -199,7 +246,10 @@ export async function renderCertificateCanvas(certificate: TrainingCertificate, 
   context.fillText(template.organizationName, 410, 145);
   context.fillStyle = "#334155";
   context.font = "700 22px Arial, Helvetica, sans-serif";
-  context.fillText(template.departmentName, 410, 184);
+  context.fillText(template.departmentName, 410, 184, 900);
+
+  // Keep the HDBank brand visible in the exported PDF even when a custom team logo is used on the left.
+  drawHdbankWordmark(context, 1390, 82, 250, 118);
 
   context.fillStyle = "#9a3e00";
   context.textAlign = "center";
@@ -360,4 +410,8 @@ async function renderDesignedCertificate(context: CanvasRenderingContext2D, cert
     lines.forEach((line,index)=>context.fillText(line,x,e.y+e.height/2+(index-(lines.length-1)/2)*size*1.3,e.width-12));
     context.restore();
   }
+
+  // The right-side HDBank wordmark is intentionally outside the editable certificate parts
+  // so it is always present in the final PDF and cannot be accidentally removed by layout edits.
+  drawHdbankWordmark(context, 1390, 82, 250, 118);
 }
