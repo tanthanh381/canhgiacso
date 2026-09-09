@@ -7,6 +7,9 @@ import { supabase } from "./supabase";
 const AdminPage = lazy(() => import("./admin").then((module) => ({ default: module.AdminPage })));
 
 type Result = { scenarioId: number; correct: boolean; choiceIndex: number };
+type GameHistory = { runId: string; finishedAt: string; balance: number; completed: number; correct: number };
+type GameState = { run_id: string; balance: number; awareness: number; results: Result[]; history: GameHistory[] };
+type PendingChoice = { userId: string; runId: string; scenario: SiteContent["scenarios"][number]; snapshot: SiteContent["scenarios"][number]; index: number };
 type View = "game" | "knowledge" | "stats" | "evidence" | "dashboard" | "admin";
 type StoredProgress = {
   balance: number;
@@ -233,8 +236,17 @@ export default function Home() {
   const [analyticsUsers, setAnalyticsUsers] = useState<AnalyticsUser[]>([]);
   const [dashboardStatus, setDashboardStatus] = useState<DashboardStatus>("idle");
   const [dashboardScenarioRisks, setDashboardScenarioRisks] = useState<ScenarioRisk[]>([]);
+  const [historySummary, setHistorySummary] = useState({ runs: 0, attempts: 0, correct: 0, legacyAttempts: 0 });
   const [playerName, setPlayerName] = useState("Người chơi ẩn danh");
   const [hydrated, setHydrated] = useState(false);
+  const [runId, setRunId] = useState<string | null>(null);
+  const [gameHistory, setGameHistory] = useState<GameHistory[]>([]);
+  const [pendingChoice, setPendingChoice] = useState<PendingChoice | null>(null);
+  const [savingChoice, setSavingChoice] = useState(false);
+  const saveLock = useRef(false);
+  const accountEpoch = useRef(0);
+  const activeUser = useRef<string | null>(null);
+  const publishedScenarios = useRef<SiteContent["scenarios"]>([]);
   const scenarios = siteContent.scenarios;
   const knowledgeCards = siteContent.knowledgeCards;
 
@@ -258,7 +270,10 @@ export default function Home() {
         .maybeSingle();
       if (!active) return;
       const normalized = normalizeSiteContent(data?.content);
-      if (normalized) setSiteContent(normalized);
+      if (normalized) {
+        publishedScenarios.current = data.content.scenarios;
+        setSiteContent(normalized);
+      }
     })();
     return () => { active = false; };
   }, []);
@@ -282,7 +297,10 @@ export default function Home() {
         return;
       }
       if ((event === "SIGNED_IN" || event === "USER_UPDATED") && session?.user) {
-        window.setTimeout(() => void loadRemoteAccount(session.user.id, session.user.email ?? ""), 0);
+        if (activeUser.current !== session.user.id || event === "USER_UPDATED") {
+          activeUser.current = session.user.id;
+          window.setTimeout(() => { if (active && activeUser.current === session.user.id) void loadRemoteAccount(session.user.id, session.user.email ?? ""); }, 0);
+        }
       }
     });
     return () => {
@@ -297,7 +315,7 @@ export default function Home() {
   useEffect(() => {
     if (!hydrated) return;
     localStorage.setItem(THEME_KEY, dark ? "dark" : "light");
-    if (!sessionAccount) localStorage.setItem(progressKey(null), JSON.stringify({ balance, awareness, results, dark, playerName }));
+    if (!sessionAccount && !activeUser.current) localStorage.setItem(progressKey(null), JSON.stringify({ balance, awareness, results, dark, playerName }));
   }, [balance, awareness, results, dark, playerName, hydrated, sessionAccount]);
 
   useEffect(() => {
@@ -308,17 +326,20 @@ export default function Home() {
       await Promise.resolve();
       if (!active) return;
       setDashboardStatus("loading");
-      const { data, error } = await supabase.rpc("get_ciso_dashboard");
+      const [{ data, error }, historical] = await Promise.all([
+        supabase.rpc("get_ciso_dashboard"), supabase.rpc("get_training_history_summary"),
+      ]);
       if (!active) return;
       if (error?.code === "42501") {
         setDashboardStatus("forbidden");
         return;
       }
-      if (error || !data || typeof data !== "object") {
+      if (error || historical.error || !data || typeof data !== "object") {
         setDashboardStatus("error");
         return;
       }
       const payload = data as { users?: Array<Record<string, unknown>>; scenarios?: Array<Record<string, unknown>> };
+      setHistorySummary(historical.data);
       setAnalyticsUsers((payload.users ?? []).map((user) => ({
         username: String(user.username ?? ""),
         displayName: String(user.display_name ?? ""),
@@ -426,6 +447,13 @@ export default function Home() {
   }
 
   function loadGuestProgress() {
+    accountEpoch.current += 1;
+    activeUser.current = null;
+    setRunId(null);
+    setGameHistory([]);
+    setPendingChoice(null);
+    setDataStatus("");
+    setHydrated(true);
     const saved = readStoredProgress(progressKey(null)) ?? readStoredProgress(LEGACY_PROGRESS_KEY) ?? {
       balance: 300_000_000,
       awareness: 100,
@@ -437,64 +465,44 @@ export default function Home() {
     applyProgress(saved);
   }
 
-  async function persistFullProgress(userId: string, progress: StoredProgress) {
-    const progressPromise = supabase.from("user_progress").upsert({
-      user_id: userId,
-      balance: progress.balance,
-      awareness: progress.awareness,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: "user_id" });
-    const attemptsPromise = progress.results.length
-      ? supabase.from("test_attempts").upsert(progress.results.map((result) => ({
-          user_id: userId,
-          scenario_id: result.scenarioId,
-          choice_index: result.choiceIndex,
-          correct: result.correct,
-          balance_after: progress.balance,
-          awareness_after: progress.awareness,
-        })), { onConflict: "user_id,scenario_id" })
-      : Promise.resolve({ error: null });
-    const [progressResult, attemptsResult] = await Promise.all([progressPromise, attemptsPromise]);
-    if (progressResult.error || attemptsResult.error) throw progressResult.error ?? attemptsResult.error;
+  function applyGameState(state: GameState) {
+    setRunId(state.run_id);
+    setBalance(state.balance);
+    setAwareness(state.awareness);
+    setResults(state.results);
+    setGameHistory(state.history);
   }
 
   async function loadRemoteAccount(userId: string, email: string) {
+    const epoch = ++accountEpoch.current;
+    activeUser.current = userId;
+    setHydrated(false);
+    setSessionAccount(null);
+    setResults([]);
+    setBalance(300_000_000);
+    setAwareness(100);
+    setGameHistory([]);
+    setRunId(null);
+    setPendingChoice(null);
     setDataStatus("Đang đồng bộ dữ liệu…");
-    const [profileResult, progressResult, attemptsResult] = await Promise.all([
+    const [profileResult, progressResult] = await Promise.all([
       supabase.from("profiles").select("username, display_name, created_at").eq("id", userId).single(),
-      supabase.from("user_progress").select("balance, awareness").eq("user_id", userId).single(),
-      supabase.from("test_attempts").select("scenario_id, correct, choice_index").eq("user_id", userId).order("attempted_at"),
+      supabase.rpc("get_game_state"),
     ]);
-    if (profileResult.error || progressResult.error || attemptsResult.error) {
+    if (epoch !== accountEpoch.current) return;
+    if (profileResult.error || progressResult.error || !progressResult.data) {
       setDataStatus("Không thể tải dữ liệu tài khoản. Vui lòng đăng nhập lại.");
       return;
     }
     const profile = profileResult.data;
-    const remoteResults: Result[] = (attemptsResult.data ?? []).map((item) => ({
-      scenarioId: item.scenario_id,
-      correct: item.correct,
-      choiceIndex: item.choice_index,
-    }));
-    let progress: StoredProgress = {
-      balance: progressResult.data.balance,
-      awareness: progressResult.data.awareness,
-      results: remoteResults,
+    const state = progressResult.data as GameState;
+    const progress: StoredProgress = {
+      balance: state.balance,
+      awareness: state.awareness,
+      results: state.results,
       dark: localStorage.getItem(THEME_KEY) === "dark",
       playerName: profile.display_name,
     };
-
-    const legacy = readStoredProgress(progressKey(profile.username))
-      ?? readStoredProgress(progressKey(null))
-      ?? readStoredProgress(LEGACY_PROGRESS_KEY);
-    if (!remoteResults.length && legacy?.results.length) {
-      try {
-        progress = { ...legacy, dark: localStorage.getItem(THEME_KEY) === "dark", playerName: profile.display_name };
-        await persistFullProgress(userId, progress);
-        localStorage.setItem(`khien-so-migrated:${userId}`, "true");
-      } catch {
-        setDataStatus("Đã đăng nhập nhưng chưa thể chuyển tiến trình cũ lên máy chủ.");
-      }
-    }
 
     setSessionAccount({
       id: userId,
@@ -504,7 +512,16 @@ export default function Home() {
       createdAt: profile.created_at,
     });
     applyProgress(progress, profile.display_name);
-    setDataStatus("");
+    applyGameState(state);
+    setHydrated(true);
+    try {
+      const saved = localStorage.getItem(`khien-so-pending:${userId}`);
+      const pending = saved ? JSON.parse(saved) as PendingChoice : null;
+      if (pending?.userId === userId && pending.runId === state.run_id && pending.scenario && Number.isInteger(pending.index)) {
+        setPendingChoice(pending);
+        setDataStatus("Có câu trả lời đang chờ xác nhận. Chọn Thử lưu lại để đồng bộ.");
+      } else setDataStatus("");
+    } catch { setDataStatus(""); }
   }
 
   function chooseScenario(id: number) {
@@ -521,7 +538,18 @@ export default function Home() {
   }
 
   async function submitChoice(index: number) {
-    if (answer !== null || completedIds.has(selected.id)) return;
+    if (!hydrated || resetBusy || saveLock.current || pendingChoice || answer !== null || completedIds.has(selected.id)) return;
+    if (activeUser.current) {
+      if (!sessionAccount || !runId) { setDataStatus("Vui lòng chờ tải xong dữ liệu tài khoản."); return; }
+      const snapshot = publishedScenarios.current.find((item) => item.id === selected.id);
+      if (!snapshot) { setDataStatus("Chưa tải được nội dung đã xuất bản. Vui lòng tải lại trang."); return; }
+      const pending = { userId: sessionAccount.id, runId, scenario: selected, snapshot, index };
+      try { localStorage.setItem(`khien-so-pending:${sessionAccount.id}`, JSON.stringify(pending)); }
+      catch { setDataStatus("Không thể lưu tạm câu trả lời trên thiết bị. Hãy cho phép lưu trữ và thử lại."); return; }
+      setPendingChoice(pending);
+      await syncChoice(pending);
+      return;
+    }
     const choice = selected.choices[index];
     const nextBalance = Math.max(0, balance + choice.moneyDelta);
     const nextAwareness = Math.max(0, Math.min(100, awareness + choice.awarenessDelta));
@@ -537,43 +565,60 @@ export default function Home() {
         balanceAfter: nextBalance,
       });
     }
-    if (sessionAccount) {
-      const [attemptResult, progressResult] = await Promise.all([
-        supabase.from("test_attempts").upsert({
-          user_id: sessionAccount.id,
-          scenario_id: selected.id,
-          choice_index: index,
-          correct: choice.correct,
-          balance_after: nextBalance,
-          awareness_after: nextAwareness,
-        }, { onConflict: "user_id,scenario_id" }),
-        supabase.from("user_progress").upsert({
-          user_id: sessionAccount.id,
-          balance: nextBalance,
-          awareness: nextAwareness,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: "user_id" }),
-      ]);
-      setDataStatus(attemptResult.error || progressResult.error ? "Kết quả chưa đồng bộ. Vui lòng kiểm tra kết nối." : "Đã lưu kết quả an toàn.");
-      window.setTimeout(() => setDataStatus(""), 2600);
-    }
+  }
+
+  async function syncChoice(pending: PendingChoice) {
+    if (saveLock.current || activeUser.current !== pending.userId) return;
+    saveLock.current = true;
+    setSavingChoice(true);
+    const epoch = accountEpoch.current;
+    setDataStatus("Đang xác nhận và lưu kết quả…");
+    try {
+      const { data, error } = await supabase.rpc("submit_game_choice", {
+        expected_run: pending.runId, scenario_id: pending.scenario.id,
+        choice_index: pending.index, scenario_snapshot: pending.snapshot,
+      });
+      if (epoch !== accountEpoch.current) return;
+      if (error || !data) {
+        if (error?.code === "22023") {
+          localStorage.removeItem(`khien-so-pending:${pending.userId}`);
+          setPendingChoice(null);
+          setDataStatus("Nội dung hoặc lượt chơi đã thay đổi. Vui lòng tải lại trang trước khi trả lời.");
+        } else setDataStatus("Chưa xác nhận được kết quả. Câu trả lời đã được giữ trên thiết bị; hãy thử lưu lại khi có mạng.");
+        return;
+      }
+      const state = data as GameState;
+      const result = state.results.find((item) => item.scenarioId === pending.scenario.id);
+      applyGameState(state);
+      setSelectedId(pending.scenario.id);
+      setAnswer(result?.choiceIndex ?? null);
+      if (result && !result.correct) setLossNotice({ scenarioTitle: pending.scenario.title,
+        amountLost: Math.max(0, balance - state.balance), awarenessLost: Math.max(0, awareness - state.awareness), balanceAfter: state.balance });
+      localStorage.removeItem(`khien-so-pending:${pending.userId}`);
+      setPendingChoice(null);
+      setDataStatus("Đã xác nhận và lưu kết quả.");
+    } catch { if (epoch === accountEpoch.current) setDataStatus("Chưa xác nhận được kết quả. Vui lòng thử lưu lại khi có mạng."); }
+    finally { saveLock.current = false; setSavingChoice(false); }
   }
 
   async function resetProgress() {
-    if (resetBusy) return;
+    if (resetBusy || saveLock.current || pendingChoice) return;
     setResetBusy(true);
     if (sessionAccount) {
-      const [attemptResult, progressResult] = await Promise.all([
-        supabase.from("test_attempts").delete().eq("user_id", sessionAccount.id),
-        supabase.from("user_progress").upsert({ user_id: sessionAccount.id, balance: 300_000_000, awareness: 100, updated_at: new Date().toISOString() }, { onConflict: "user_id" }),
-      ]);
-      if (attemptResult.error || progressResult.error) {
-        setDataStatus("Chưa thể đặt lại dữ liệu trên máy chủ. Tiến trình hiện tại được giữ nguyên.");
+      const epoch = accountEpoch.current;
+      const { data, error } = await supabase.rpc("restart_game", { expected_run: runId });
+      if (epoch !== accountEpoch.current) { setResetBusy(false); return; }
+      if (error || !data) {
+        setDataStatus("Chưa xác nhận được lượt chơi mới. Vui lòng thử lại để tải trạng thái chính xác.");
         setResetBusy(false);
         setResetConfirmOpen(false);
         return;
       }
-      setDataStatus("Đã đặt lại tiến trình.");
+      applyGameState(data as GameState);
+      setAnswer(null); setLossNotice(null); setSelectedId(scenarios[0].id); setView("game");
+      setResetBusy(false); setResetConfirmOpen(false);
+      setDataStatus("Đã mở lượt chơi mới. Lịch sử lượt trước được giữ lại.");
+      return;
     }
     setBalance(300_000_000);
     setAwareness(100);
@@ -721,7 +766,11 @@ export default function Home() {
 
   function exportCisoReport() {
     const header = ["Tên hiển thị", "Tên đăng nhập", "Ngày đăng ký", "Đã hoàn thành", "Chính xác (%)", "Cảnh giác (%)", "Tổn thất (VND)", "Mức rủi ro"];
-    const escapeCell = (value: string | number) => `"${String(value).replaceAll('"', '""')}"`;
+    const escapeCell = (value: string | number) => {
+      const text = String(value);
+      const safe = typeof value === "string" && /^[\s]*[=+@-]/.test(text) ? `'${text}` : text;
+      return `"${safe.replaceAll('"', '""')}"`;
+    };
     const rows = analyticsUsers.map((user) => [
       user.displayName,
       user.username,
@@ -778,6 +827,7 @@ export default function Home() {
         <span>Không nhập mật khẩu ngân hàng, OTP, số thẻ hoặc dữ liệu thật. Mọi số tiền chỉ dùng cho đào tạo.</span>
       </div>
       {dataStatus && <div className="sync-status" role="status" aria-live="polite">{dataStatus}</div>}
+      {pendingChoice && <div className="sync-status"><button className="admin-secondary" disabled={savingChoice} onClick={() => void syncChoice(pendingChoice)}>{savingChoice ? "Đang lưu…" : "Thử lưu lại"}</button></div>}
 
       {view === "game" && (
         <div className="game-shell">
@@ -829,7 +879,7 @@ export default function Home() {
                   {selected.choices.map((choice, index) => {
                     const isChosen = selectedAnswer === index;
                     const state = selectedAnswer === null ? "" : isChosen ? (choice.correct ? "correct" : "wrong") : "disabled";
-                    return <button key={choice.text} className={`choice ${state}`} onClick={() => submitChoice(index)} disabled={selectedAnswer !== null}>
+                    return <button key={choice.text} className={`choice ${state}`} onClick={() => submitChoice(index)} disabled={!hydrated || savingChoice || !!pendingChoice || resetBusy || selectedAnswer !== null}>
                       <span className="choice-letter">{String.fromCharCode(65 + index)}</span><span>{choice.text}</span>{isChosen && <b>{choice.correct ? "✓" : "×"}</b>}
                     </button>;
                   })}
@@ -878,7 +928,8 @@ export default function Home() {
             <div className="achievement-heading"><div><span className="eyebrow">BỘ SƯU TẬP CHUYÊN MÔN</span><h2>Huy hiệu phòng vệ</h2><p>Mỗi huy hiệu phản ánh một kỹ năng hoặc cột mốc có thể kiểm chứng từ kết quả của bạn.</p></div><div className="achievement-summary"><strong>{unlockedBadgeCount}/{defenseBadges.length}</strong><span>đã mở khoá</span></div></div>
             <div className="achievement-grid">{defenseBadges.map((badge) => <article className={`${badge.unlocked ? "unlocked" : ""} tone-${badge.tone}`} key={badge.name} aria-label={`${badge.name}: ${badge.unlocked ? "đã mở khoá" : `${badge.current} trên ${badge.target}`}`}><span className="achievement-icon">{badge.icon}</span><div className="achievement-copy"><div className="achievement-name"><strong>{badge.name}</strong><em>{badge.tier}</em></div><p>{badge.description}</p><div className="achievement-progress"><i style={{ width: `${badge.progress}%` }} /><span>{badge.unlocked ? "Đã mở khoá" : `${badge.current}/${badge.target}`}</span></div></div></article>)}</div>
           </div>
-          <button className="reset-button" onClick={() => setResetConfirmOpen(true)}>Đặt lại toàn bộ tiến trình</button>
+          <button className="reset-button" disabled={savingChoice || !!pendingChoice || resetBusy} onClick={() => setResetConfirmOpen(true)}>{sessionAccount ? "Bắt đầu lượt chơi mới" : "Đặt lại tiến trình khách"}</button>
+          {sessionAccount && <article className="dashboard-card"><h2>Lịch sử lượt chơi</h2><p>Hiển thị tối đa 50 lượt gần nhất. Tiến trình khách được giữ riêng trên thiết bị.</p>{gameHistory.length ? <div className="analytics-table-wrap"><table><thead><tr><th>Kết thúc</th><th>Đã trả lời</th><th>Đúng</th><th>Tài sản còn lại</th></tr></thead><tbody>{gameHistory.map((run) => <tr key={run.runId}><td>{new Date(run.finishedAt).toLocaleString("vi-VN")}</td><td>{run.completed}</td><td>{run.correct}</td><td>{money.format(run.balance)}đ</td></tr>)}</tbody></table></div> : <p>Chưa có lượt chơi đã lưu trữ.</p>}</article>}
         </section>
       )}
 
@@ -902,6 +953,7 @@ export default function Home() {
           {sessionAccount && visibleDashboardStatus === "forbidden" && <div className="dashboard-gate"><BadgeIcon>◇</BadgeIcon><h2>Tài khoản chưa có quyền Quản trị</h2><p>Dashboard tổng hợp được bảo vệ bằng phân quyền phía máy chủ. Hãy liên hệ IT Security để được phê duyệt.</p></div>}
           {visibleDashboardStatus === "ready" && <>
             <div className="data-scope-note" role="note"><strong>Phạm vi dữ liệu:</strong> {analyticsUsers.length} tài khoản · Chỉ gồm hồ sơ đăng ký và kết quả mô phỏng · Không chứa mật khẩu, OTP hoặc dữ liệu ngân hàng.</div>
+            <div className="data-scope-note" role="note"><strong>Lượt chơi hiện tại:</strong> Các chỉ số và CSV bên dưới phản ánh lượt hiện tại của mỗi tài khoản. <strong>Lịch sử đã lưu:</strong> {historySummary.runs} lượt · {historySummary.attempts} câu trả lời · {historySummary.correct} câu đúng. {historySummary.legacyAttempts > 0 && <span>Có {historySummary.legacyAttempts} kết quả cũ được giữ nguyên, chưa được cơ chế chấm điểm máy chủ mới xác minh.</span>}</div>
             <div className="dashboard-handling-note" role="note"><strong>Phân loại sử dụng nội bộ:</strong> Chỉ xuất và chia sẻ báo cáo cho người có trách nhiệm; không dùng kết quả mô phỏng làm kết luận duy nhất về rủi ro cá nhân.</div>
             <div className="ciso-kpis">
               <article><small>Người dùng đã đăng ký</small><strong>{analyticsUsers.length}</strong><span>{analytics.active} đã tham gia đào tạo</span></article>
@@ -924,6 +976,7 @@ export default function Home() {
           publishedContent={siteContent}
           onLogin={() => openAuth("login")}
           onPublished={(content) => {
+            publishedScenarios.current = content.scenarios;
             setSiteContent(content);
             setDataStatus("Nội dung website đã được xuất bản.");
             window.setTimeout(() => setDataStatus(""), 2600);
@@ -979,13 +1032,13 @@ export default function Home() {
       <Modal open={resetConfirmOpen} onClose={() => { if (!resetBusy) setResetConfirmOpen(false); }} labelledBy="reset-confirm-title" className="reset-confirm-modal">
         <button className="modal-close" aria-label="Đóng xác nhận đặt lại" disabled={resetBusy} onClick={() => setResetConfirmOpen(false)}>×</button>
         <span className="loss-symbol" aria-hidden="true">!</span>
-        <span className="eyebrow">XÁC NHẬN XÓA TIẾN TRÌNH</span>
+        <span className="eyebrow">XÁC NHẬN CHƠI LẠI</span>
         <h2 id="reset-confirm-title">Bắt đầu lại từ đầu?</h2>
-        <p>Toàn bộ kết quả, huy hiệu, chứng cứ và tài sản mô phỏng sẽ được đặt lại. {sessionAccount ? "Dữ liệu đã đồng bộ của tài khoản này cũng sẽ bị xóa." : "Dữ liệu khách trên thiết bị này cũng sẽ bị xóa."}</p>
-        <p className="reset-warning">Thao tác này không thể hoàn tác.</p>
+        <p>{sessionAccount ? "Lượt hiện tại sẽ được lưu vào lịch sử. Lượt mới bắt đầu với tài sản, huy hiệu và chứng cứ ban đầu; kết quả cũ vẫn được giữ để theo dõi quá trình học." : "Toàn bộ kết quả, huy hiệu, chứng cứ và tài sản mô phỏng của khách trên thiết bị này sẽ được đặt lại."}</p>
+        {!sessionAccount && <p className="reset-warning">Thao tác này không thể hoàn tác.</p>}
         <div className="reset-confirm-actions">
           <button className="admin-secondary" disabled={resetBusy} onClick={() => setResetConfirmOpen(false)}>Giữ tiến trình</button>
-          <button className="danger-button" disabled={resetBusy} onClick={() => void resetProgress()}>{resetBusy ? "Đang đặt lại…" : "Xóa và bắt đầu lại"}</button>
+          <button className="danger-button" disabled={resetBusy || savingChoice || !!pendingChoice} onClick={() => void resetProgress()}>{resetBusy ? "Đang đặt lại…" : sessionAccount ? "Lưu lịch sử và chơi lại" : "Xóa và bắt đầu lại"}</button>
         </div>
       </Modal>
     </main>

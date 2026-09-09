@@ -66,8 +66,8 @@ test("ships product metadata and social artwork", async () => {
   assert.match(page, /supabase\.auth\.signOut\(\{ scope: "local" \}\)/);
   assert.match(page, /continueAsGuest/);
   assert.match(page, /Tiếp tục với tư cách khách/);
-  assert.match(page, /test_attempts/);
-  assert.match(page, /user_progress/);
+  assert.match(page, /supabase\.rpc\("submit_game_choice"/);
+  assert.match(page, /supabase\.rpc\("get_game_state"/);
   assert.match(page, /get_ciso_dashboard/);
   assert.match(page, /DefenseBadge/);
   assert.match(page, /Chuyên gia Khiên Số/);

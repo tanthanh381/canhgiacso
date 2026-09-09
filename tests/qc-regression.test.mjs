@@ -34,7 +34,7 @@ test("browser bundle contains no server secret and keeps auth validation", async
   assert.match(page, /PASSWORD_PATTERN/);
   assert.match(page, /USERNAME_PATTERN/);
   assert.match(page, /signOut\(\{ scope: "local" \}\)/);
-  assert.match(page, /progressKey\(profile\.username\)/);
+  assert.doesNotMatch(page, /persistFullProgress|khien-so-migrated/);
   assert.match(page, /progressKey\(null\)/);
 });
 
@@ -61,7 +61,8 @@ test("QC fixes keep destructive reset explicit and mobile text readable", async 
   assert.match(page, /resetConfirmOpen/);
   assert.match(page, /Thao tác này không thể hoàn tác/);
   assert.match(page, /Xóa và bắt đầu lại/);
-  assert.match(page, /Tiến trình hiện tại được giữ nguyên/);
+  assert.match(page, /Lịch sử lượt chơi/);
+  assert.match(page, /supabase\.rpc\("restart_game"/);
   assert.match(styles, /\.topbar nav button \{ font-size: 12px/);
   assert.match(styles, /footer-brand small \{ font-size: 12px/);
   assert.match(config, /manualChunks\(id\)/);
