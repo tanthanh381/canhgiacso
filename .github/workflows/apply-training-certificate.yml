@@ -6,6 +6,9 @@ on:
       - feature/training-certificate-pdf
     paths:
       - scripts/apply-certificate-feature.py
+      - app/certificate.ts
+      - tests/certificate-source.test.mjs
+      - supabase/training_certificates.sql
       - .github/workflows/apply-training-certificate.yml
 
 permissions:
