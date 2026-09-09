@@ -1,0 +1,46 @@
+name: Apply admin certificate template
+
+on:
+  push:
+    branches:
+      - feature/admin-certificate-template
+    paths:
+      - scripts/apply-admin-certificate-template.py
+      - .github/workflows/apply-admin-certificate-template.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: feature/admin-certificate-template
+          fetch-depth: 0
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Apply patch
+        run: python3 scripts/apply-admin-certificate-template.py
+      - name: Build GitHub Pages
+        run: pnpm run build:pages
+      - name: Run full tests
+        run: pnpm test
+      - name: Commit generated changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/data.ts app/admin.tsx app/certificate.ts app/page.tsx app/globals.css tests/certificate-template-admin.test.mjs
+          git commit -m "feat: customize certificate template in admin"
+          git push origin HEAD:feature/admin-certificate-template
