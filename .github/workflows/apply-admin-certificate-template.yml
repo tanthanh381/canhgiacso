@@ -6,6 +6,7 @@ on:
       - feature/admin-certificate-template
     paths:
       - scripts/apply-admin-certificate-template.py
+      - tests/certificate-source.test.mjs
       - .github/workflows/apply-admin-certificate-template.yml
 
 permissions:
