@@ -32,5 +32,5 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build GitHub Pages bundle
         run: pnpm run build:pages
-      - name: Run tests
-        run: node --test tests/*.test.mjs
+      - name: Run full test suite
+        run: pnpm test
