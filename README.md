@@ -1,6 +1,6 @@
-# Khiên Số
+# Cảnh Giác Số
 
-**Khiên Số** là chương trình mô phỏng tương tác của **HDBank - IT Security**, giúp người chơi hình thành phản xạ trước các thủ đoạn lừa đảo trực tuyến phổ biến.
+**Cảnh Giác Số** là chương trình mô phỏng tương tác của **HDBank - IT Security**, giúp người chơi hình thành phản xạ trước các thủ đoạn lừa đảo trực tuyến phổ biến.
 
 🌐 Bản public: [https://canhgiacso.com/](https://canhgiacso.com/)
 
@@ -23,7 +23,7 @@
 - Row Level Security bảo đảm người dùng thường chỉ đọc/ghi dữ liệu của chính mình
 - `localStorage` chỉ dùng cho giao diện và tiến trình khách chưa đăng nhập
 - Không yêu cầu hoặc thu thập dữ liệu ngân hàng
-- Nhận diện Khiên Số riêng với biểu tượng đại bàng trong chiếc khiên do dự án cung cấp
+- Nhận diện Cảnh Giác Số riêng với biểu tượng đại bàng trong chiếc khiên do dự án cung cấp
 
 ## Chạy cục bộ
 

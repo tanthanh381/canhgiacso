@@ -602,7 +602,7 @@ export const knowledgeCards: KnowledgeCard[] = [
 export const defaultSiteContent: SiteContent = {
   version: 1,
   copy: {
-    productName: "KHIÊN SỐ",
+    productName: "CẢNH GIÁC SỐ",
     departmentName: "IT SECURITY",
     libraryEyebrow: "THƯ VIỆN TÌNH HUỐNG",
     libraryTitle: "Chọn một thử thách",
@@ -613,7 +613,7 @@ export const defaultSiteContent: SiteContent = {
     dashboardEyebrow: "HDBANK · IT SECURITY",
     dashboardTitle: "Dashboard rủi ro nhận thức",
     dashboardIntro: "Tổng hợp mức độ tham gia, kết quả mô phỏng và nhóm cần ưu tiên đào tạo lại để hỗ trợ báo cáo an toàn thông tin.",
-    footerTagline: "Khiên Số · Đào tạo nhận thức an toàn thông tin",
+    footerTagline: "Cảnh Giác Số · Đào tạo nhận thức an toàn thông tin",
     footerNotice: "**Website được quản lý và vận hành bởi: IT Security Team - HDBank.**\nĐược xây dựng với mục tiêu nâng cao nhận thức cộng đồng về phòng chống tội phạm lừa đảo trực tuyến.\nLưu ý: Nội dung và số tiền trên website chỉ là mô phỏng đào tạo.",
   },
   scenarios,

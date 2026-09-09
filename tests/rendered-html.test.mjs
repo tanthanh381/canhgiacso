@@ -16,12 +16,12 @@ async function render() {
   );
 }
 
-test("server renders the Khiên Số experience", async () => {
+test("server renders the Cảnh Giác Số experience", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
   const html = await response.text();
-  assert.match(html, /Khiên Số \| HDBank - IT Security/);
+  assert.match(html, /Cảnh Giác Số \| HDBank - IT Security/);
   assert.match(html, /HDBANK · IT SECURITY/);
   assert.match(html, /THƯ VIỆN TÌNH HUỐNG/);
   assert.match(html, /Cuộc gọi ‘điều tra khẩn cấp’/);
@@ -49,7 +49,7 @@ test("ships product metadata and social artwork", async () => {
   assert.match(layout, /HDBank - IT Security/);
   assert.match(layout, /lang="vi"/);
   assert.match(page, /localStorage/);
-  assert.match(page, /KHIÊN SỐ/);
+  assert.match(page, /CẢNH GIÁC SỐ/);
   assert.match(page, /FooterNotice/);
   assert.match(page, /footer-warning/);
   assert.match(page, /split\(\/\\n\+\//);
@@ -70,7 +70,7 @@ test("ships product metadata and social artwork", async () => {
   assert.match(page, /supabase\.rpc\("get_game_state"/);
   assert.match(page, /get_ciso_dashboard/);
   assert.match(page, /DefenseBadge/);
-  assert.match(page, /Chuyên gia Khiên Số/);
+  assert.match(page, /Chuyên gia Cảnh Giác Số/);
   assert.match(page, /achievement-progress/);
   assert.match(page, /defenseBadges\.length/);
   assert.match(page, /Đăng xuất/);
