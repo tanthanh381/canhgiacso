@@ -20,8 +20,14 @@ test("certificate feature is server-issued and downloadable as PDF", async () =>
   assert.match(sql, /perform private\.ensure_training_certificate/);
 });
 
-test("certificate is not issued for guest-only local progress", async () => {
-  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
-  assert.match(page, /Chế độ khách không cấp chứng chỉ định danh/);
+test("guest completion receives a local non-official downloadable PDF", async () => {
+  const [page, certificate] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/certificate.ts", import.meta.url), "utf8"),
+  ]);
+  assert.match(page, /BẢN GHI NHẬN HOÀN THÀNH/);
+  assert.match(page, /Tải bản ghi nhận PDF/);
+  assert.match(page, /không thay thế chứng chỉ nội bộ đã xác minh/);
   assert.match(page, /if \(!sessionAccount \|\| !runId\) return/);
+  assert.match(certificate, /không phải chứng chỉ nội bộ đã xác minh/i);
 });
