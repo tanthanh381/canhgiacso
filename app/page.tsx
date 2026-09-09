@@ -4,6 +4,7 @@ import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { defaultSiteContent, Difficulty, normalizeSiteContent, SiteContent } from "./data";
 import { supabase } from "./supabase";
 import { difficultyOrder, getLevelProgress, getUnlockedDifficulties } from "./progression";
+import { downloadTrainingCertificatePdf, TrainingCertificate } from "./certificate";
 
 const AdminPage = lazy(() => import("./admin").then((module) => ({ default: module.AdminPage })));
 
@@ -242,6 +243,9 @@ export default function Home() {
   const [hydrated, setHydrated] = useState(false);
   const [runId, setRunId] = useState<string | null>(null);
   const [gameHistory, setGameHistory] = useState<GameHistory[]>([]);
+  const [certificates, setCertificates] = useState<TrainingCertificate[]>([]);
+  const [completionCertificate, setCompletionCertificate] = useState<TrainingCertificate | null>(null);
+  const [certificateDownloading, setCertificateDownloading] = useState(false);
   const [pendingChoice, setPendingChoice] = useState<PendingChoice | null>(null);
   const [savingChoice, setSavingChoice] = useState(false);
   const saveLock = useRef(false);
@@ -460,6 +464,8 @@ export default function Home() {
     activeUser.current = null;
     setRunId(null);
     setGameHistory([]);
+    setCertificates([]);
+    setCompletionCertificate(null);
     setPendingChoice(null);
     setDataStatus("");
     setHydrated(true);
@@ -494,9 +500,10 @@ export default function Home() {
     setRunId(null);
     setPendingChoice(null);
     setDataStatus("Đang đồng bộ dữ liệu…");
-    const [profileResult, progressResult] = await Promise.all([
+    const [profileResult, progressResult, certificateResult] = await Promise.all([
       supabase.from("profiles").select("username, display_name, created_at").eq("id", userId).single(),
       supabase.rpc("get_game_state"),
+      supabase.rpc("get_my_training_certificates"),
     ]);
     if (epoch !== accountEpoch.current) return;
     if (profileResult.error || progressResult.error || !progressResult.data) {
@@ -522,6 +529,8 @@ export default function Home() {
     });
     applyProgress(progress, profile.display_name);
     applyGameState(state);
+    setCertificates(!certificateResult.error && Array.isArray(certificateResult.data) ? certificateResult.data as TrainingCertificate[] : []);
+    setCompletionCertificate(null);
     setHydrated(true);
     try {
       const saved = localStorage.getItem(`khien-so-pending:${userId}`);
@@ -618,7 +627,8 @@ export default function Home() {
         amountLost: Math.max(0, balance - state.balance), awarenessLost: Math.max(0, awareness - state.awareness), balanceAfter: state.balance });
       localStorage.removeItem(`khien-so-pending:${pending.userId}`);
       setPendingChoice(null);
-      setDataStatus("Đã xác nhận và lưu kết quả.");
+      if (state.results.length >= scenarios.length) await refreshCertificates(pending.runId);
+      else setDataStatus("Đã xác nhận và lưu kết quả.");
     } catch { if (epoch === accountEpoch.current) setDataStatus("Chưa xác nhận được kết quả. Vui lòng thử lưu lại khi có mạng."); }
     finally { saveLock.current = false; setSavingChoice(false); }
   }
@@ -777,8 +787,54 @@ export default function Home() {
   async function logout() {
     await supabase.auth.signOut({ scope: "local" });
     setSessionAccount(null);
+    setCertificates([]);
+    setCompletionCertificate(null);
     loadGuestProgress();
     setProfileOpen(false);
+  }
+
+  async function refreshCertificates(celebrateRunId?: string) {
+    if (!sessionAccount) return;
+    const { data, error } = await supabase.rpc("get_my_training_certificates");
+    if (error || !Array.isArray(data)) {
+      setDataStatus("Đã hoàn thành khóa đào tạo nhưng chưa tải được thông tin chứng chỉ. Vui lòng thử lại.");
+      return;
+    }
+    const nextCertificates = data as TrainingCertificate[];
+    setCertificates(nextCertificates);
+    if (celebrateRunId) {
+      const issued = nextCertificates.find((item) => item.runId === celebrateRunId);
+      if (issued) {
+        setCompletionCertificate(issued);
+        setDataStatus("Đã hoàn thành khóa đào tạo và được cấp chứng chỉ.");
+        return;
+      }
+    }
+    setDataStatus("Đã cập nhật thông tin chứng chỉ.");
+  }
+
+  async function ensureCurrentCertificate() {
+    if (!sessionAccount || !runId) return;
+    setDataStatus("Đang xác nhận điều kiện cấp chứng chỉ…");
+    const { data, error } = await supabase.rpc("issue_training_certificate", { expected_run: runId });
+    if (error || !data) {
+      setDataStatus(error?.code === "22023" ? "Bạn cần hoàn thành toàn bộ tình huống trước khi nhận chứng chỉ." : "Chưa thể cấp chứng chỉ. Vui lòng thử lại.");
+      return;
+    }
+    await refreshCertificates(runId);
+  }
+
+  async function downloadCertificate(certificate: TrainingCertificate) {
+    if (certificateDownloading) return;
+    setCertificateDownloading(true);
+    try {
+      await downloadTrainingCertificatePdf(certificate);
+      setDataStatus("Đã tạo chứng chỉ PDF trên thiết bị của bạn.");
+    } catch {
+      setDataStatus("Không thể tạo file PDF trên trình duyệt này. Vui lòng thử lại.");
+    } finally {
+      setCertificateDownloading(false);
+    }
   }
 
   function nextScenario() {
@@ -813,6 +869,8 @@ export default function Home() {
     URL.revokeObjectURL(url);
   }
 
+  const currentCertificate = runId ? certificates.find((item) => item.runId === runId) ?? null : null;
+  const latestCertificate = currentCertificate ?? certificates[0] ?? null;
   const previousResult = results.find((result) => result.scenarioId === selected.id);
   const selectedAnswer = answer ?? previousResult?.choiceIndex ?? null;
   const visibleDashboardStatus: DashboardStatus = sessionAccount ? dashboardStatus : "forbidden";
@@ -965,6 +1023,32 @@ export default function Home() {
         <section className="content-page stats-page">
           <div className="page-hero"><span className="eyebrow">HỒ SƠ PHÒNG VỆ</span><h1>{playerName}</h1><p>{sessionAccount ? "Tiến bộ của bạn được đồng bộ an toàn giữa các thiết bị." : "Đăng nhập để đồng bộ tiến bộ giữa các thiết bị."}</p></div>
           <div className="stats-overview"><article><small>Kịch bản đã thử</small><strong>{results.length}</strong><span>/ {scenarios.length}</span></article><article><small>Xử lý an toàn</small><strong>{safeIds.size}</strong><span>{results.length ? Math.round((safeIds.size / results.length) * 100) : 0}% chính xác</span></article><article><small>Điểm phòng vệ</small><strong>{score}</strong><span>cấp {Math.floor(score / 500) + 1}</span></article><article><small>Tài sản còn lại</small><strong className="money-stat">{money.format(balance)}đ</strong><span>bảo toàn {Math.round((balance / 300_000_000) * 100)}%</span></article></div>
+          {sessionAccount ? (
+            latestCertificate ? (
+              <article className="training-certificate-card issued">
+                <span className="certificate-card-mark" aria-hidden="true">HD</span>
+                <div className="certificate-card-copy">
+                  <span className="eyebrow">{currentCertificate ? "CHỨNG CHỈ LƯỢT HIỆN TẠI" : "CHỨNG CHỈ GẦN NHẤT"}</span>
+                  <h2>Chứng nhận hoàn thành Cảnh Giác Số</h2>
+                  <p>{latestCertificate.displayName} · Xếp loại <strong>{latestCertificate.rating}</strong> · Tỷ lệ đúng {latestCertificate.accuracy}%</p>
+                  <small>Mã chứng chỉ {latestCertificate.certificateCode} · Cấp ngày {new Date(latestCertificate.issuedAt).toLocaleDateString("vi-VN")}</small>
+                </div>
+                <button className="primary-button certificate-download" disabled={certificateDownloading} onClick={() => void downloadCertificate(latestCertificate)}>{certificateDownloading ? "Đang tạo PDF…" : "⇩ Tải chứng chỉ PDF"}</button>
+              </article>
+            ) : (
+              <article className={`training-certificate-card ${results.length >= scenarios.length ? "ready" : "locked"}`}>
+                <span className="certificate-card-mark" aria-hidden="true">{results.length >= scenarios.length ? "✓" : "◇"}</span>
+                <div className="certificate-card-copy"><span className="eyebrow">CHỨNG CHỈ HOÀN THÀNH</span><h2>{results.length >= scenarios.length ? "Khóa đào tạo đã hoàn thành" : "Hoàn thành khóa để mở chứng chỉ"}</h2><p>{results.length >= scenarios.length ? "Kết quả đã đủ điều kiện. Xác nhận với máy chủ để cấp chứng chỉ PDF." : `Tiến độ hiện tại ${results.length}/${scenarios.length} tình huống.`}</p></div>
+                {results.length >= scenarios.length && <button className="primary-button certificate-download" onClick={() => void ensureCurrentCertificate()}>Cấp chứng chỉ</button>}
+              </article>
+            )
+          ) : (
+            <article className={`training-certificate-card ${results.length >= scenarios.length ? "ready" : "locked"}`}>
+              <span className="certificate-card-mark" aria-hidden="true">{results.length >= scenarios.length ? "✓" : "◇"}</span>
+              <div className="certificate-card-copy"><span className="eyebrow">CHỨNG CHỈ HOÀN THÀNH</span><h2>{results.length >= scenarios.length ? "Đăng nhập để nhận chứng chỉ chính thức" : "Chứng chỉ sẽ mở khi hoàn thành khóa"}</h2><p>{results.length >= scenarios.length ? "Chế độ khách không cấp chứng chỉ định danh. Đăng nhập và hoàn thành lượt đào tạo đồng bộ để nhận PDF." : `Tiến độ hiện tại ${results.length}/${scenarios.length} tình huống.`}</p></div>
+              {results.length >= scenarios.length && <button className="primary-button certificate-download" onClick={() => openAuth("login")}>Đăng nhập</button>}
+            </article>
+          )}
           <div className="achievement-section">
             <div className="achievement-heading"><div><span className="eyebrow">BỘ SƯU TẬP CHUYÊN MÔN</span><h2>Huy hiệu phòng vệ</h2><p>Mỗi huy hiệu phản ánh một kỹ năng hoặc cột mốc có thể kiểm chứng từ kết quả của bạn.</p></div><div className="achievement-summary"><strong>{unlockedBadgeCount}/{defenseBadges.length}</strong><span>đã mở khoá</span></div></div>
             <div className="achievement-grid">{defenseBadges.map((badge) => <article className={`${badge.unlocked ? "unlocked" : ""} tone-${badge.tone}`} key={badge.name} aria-label={`${badge.name}: ${badge.unlocked ? "đã mở khoá" : `${badge.current} trên ${badge.target}`}`}><span className="achievement-icon">{badge.icon}</span><div className="achievement-copy"><div className="achievement-name"><strong>{badge.name}</strong><em>{badge.tier}</em></div><p>{badge.description}</p><div className="achievement-progress"><i style={{ width: `${badge.progress}%` }} /><span>{badge.unlocked ? "Đã mở khoá" : `${badge.current}/${badge.target}`}</span></div></div></article>)}</div>
@@ -1025,6 +1109,16 @@ export default function Home() {
         /></Suspense>}
 
       <footer><div className="footer-brand" aria-label="Cảnh Giác Số"><BrandMark /><span><b>{siteContent.copy.departmentName}</b><small>{siteContent.copy.footerTagline}</small></span></div><FooterNotice notice={siteContent.copy.footerNotice}/><button onClick={() => setGuide(true)}>Hướng dẫn & trợ giúp</button></footer>
+
+      {completionCertificate && <Modal open onClose={() => setCompletionCertificate(null)} labelledBy="certificate-complete-title" className="certificate-complete-modal">
+        <button className="modal-close" aria-label="Đóng thông báo chứng chỉ" onClick={() => setCompletionCertificate(null)}>×</button>
+        <span className="certificate-complete-symbol" aria-hidden="true">✓</span>
+        <span className="eyebrow">HOÀN THÀNH KHÓA ĐÀO TẠO</span>
+        <h2 id="certificate-complete-title">Chúc mừng, chứng chỉ của bạn đã được cấp</h2>
+        <p>Bạn đã hoàn thành {completionCertificate.completed}/{completionCertificate.scenarioTotal} tình huống với tỷ lệ đúng <strong>{completionCertificate.accuracy}%</strong> và xếp loại <strong>{completionCertificate.rating}</strong>.</p>
+        <div className="certificate-complete-code"><small>Mã chứng chỉ</small><strong>{completionCertificate.certificateCode}</strong></div>
+        <div className="certificate-complete-actions"><button className="primary-button" disabled={certificateDownloading} onClick={() => void downloadCertificate(completionCertificate)}>{certificateDownloading ? "Đang tạo PDF…" : "⇩ Tải chứng chỉ PDF"}</button><button className="admin-secondary" onClick={() => { setCompletionCertificate(null); setView("stats"); }}>Xem thành tích</button></div>
+      </Modal>}
 
       {lossNotice && <Modal open onClose={() => setLossNotice(null)} labelledBy="loss-notice-title" className="loss-modal">
         <button className="modal-close" aria-label="Đóng cảnh báo tổn thất" onClick={() => setLossNotice(null)}>×</button>

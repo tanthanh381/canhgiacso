@@ -441,3 +441,25 @@ footer { font-size: 12px; }.footer-brand small { font-size: 12px; }
   .role-management { padding: 16px; }.role-grant-form { grid-template-columns: 1fr; }.role-grant-form .primary-button { grid-column: auto; width: 100%; }
   .achievement-heading { align-items: flex-start; flex-direction: column; }.achievement-summary { text-align: left; }.achievement-grid { grid-template-columns: 1fr; }
 }
+
+
+/* Training certificate */
+.training-certificate-card { margin: 22px 0; display: grid; grid-template-columns: 64px minmax(0,1fr) auto; gap: 18px; align-items: center; padding: 22px; border-radius: 18px; border: 1px solid var(--line); background: linear-gradient(135deg, color-mix(in srgb, var(--surface) 94%, #fff4d6), color-mix(in srgb, var(--surface) 94%, #e9f2ff)); box-shadow: 0 14px 34px rgba(15,23,42,.08); }
+.training-certificate-card.issued { border-color: color-mix(in srgb, #c50000 38%, var(--line)); }
+.training-certificate-card.ready { border-color: color-mix(in srgb, var(--mint) 55%, var(--line)); }
+.training-certificate-card.locked { opacity: .82; }
+.certificate-card-mark { width: 58px; height: 58px; border-radius: 14px; display: grid; place-items: center; background: #d90000; color: #fff; font: 800 21px Georgia, serif; box-shadow: 0 8px 20px rgba(185,0,0,.22); }
+.training-certificate-card.locked .certificate-card-mark { background: var(--line); color: var(--muted); box-shadow: none; }
+.training-certificate-card.ready .certificate-card-mark { background: var(--mint); color: #17372d; }
+.certificate-card-copy { min-width: 0; }
+.certificate-card-copy h2 { margin: 4px 0 6px; font-size: clamp(19px, 2vw, 27px); }
+.certificate-card-copy p { margin: 0 0 5px; color: var(--text); }
+.certificate-card-copy small { color: var(--muted); }
+.certificate-download { white-space: nowrap; }
+.certificate-complete-modal { max-width: 610px; text-align: center; }
+.certificate-complete-symbol { width: 72px; height: 72px; margin: 0 auto 14px; border-radius: 22px; display: grid; place-items: center; background: var(--mint); color: #17372d; font-size: 38px; font-weight: 900; }
+.certificate-complete-code { margin: 20px auto; max-width: 360px; padding: 14px 18px; border: 1px dashed color-mix(in srgb, #d97706 65%, var(--line)); border-radius: 13px; background: color-mix(in srgb, #f5e3bf 55%, var(--surface)); }
+.certificate-complete-code small { display: block; color: var(--muted); margin-bottom: 4px; }
+.certificate-complete-code strong { font-size: 18px; letter-spacing: .06em; }
+.certificate-complete-actions { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+@media (max-width: 760px) { .training-certificate-card { grid-template-columns: 52px minmax(0,1fr); } .certificate-card-mark { width: 50px; height: 50px; } .certificate-download { grid-column: 1 / -1; width: 100%; } }
