@@ -80,7 +80,11 @@ test("ships product metadata and social artwork", async () => {
   assert.match(page, /resetAuthForm/);
   assert.match(page, /loadRemoteAccount/);
   assert.match(page, /exportCisoReport/);
-  assert.match(data, /Dashboard nhận thức an toàn/);
+  assert.match(data, /Dashboard rủi ro nhận thức/);
+  assert.match(page, /Môi trường mô phỏng/);
+  assert.match(page, /Phân loại sử dụng nội bộ/);
+  assert.match(page, /156 hoặc 5656/);
+  assert.match(admin, /Kiểm soát trước khi xuất bản/);
   assert.match(data, /Website được quản lý và vận hành bởi: IT Security Team - HDBank/);
   assert.match(data, /nâng cao nhận thức cộng đồng về phòng chống tội phạm lừa đảo trực tuyến/);
   assert.match(page, /site_content/);
