@@ -367,7 +367,7 @@ async function renderDesignedCertificate(context: CanvasRenderingContext2D, cert
   context.beginPath(); context.roundRect(76, 34, 1602, 1168, 24); context.stroke();
   context.setLineDash([]);
   const text = {
-    ...template, logo: 'HD', recipient: certificate.displayName.toLocaleUpperCase('vi-VN'),
+    ...template, logo: 'HD', hdbankLogo: '', recipient: certificate.displayName.toLocaleUpperCase('vi-VN'),
     account: `${template.accountLabel}: @${certificate.username} | ${template.codeLabel}: ${certificate.certificateCode}`,
     description: applyCertificateTemplate(template.description, certificate, template),
     rating: `${template.ratingLabel}\n${certificate.rating}\nĐiểm: ${certificate.score} PTS | Tỷ lệ đúng: ${certificate.accuracy}%`,
@@ -378,16 +378,19 @@ async function renderDesignedCertificate(context: CanvasRenderingContext2D, cert
     const e = design.elements[key];
     context.save();
     context.beginPath(); context.rect(e.x, e.y, e.width, e.height); context.clip();
-    if (key === 'logo') {
-      if (design.logo) {
+    if (key === 'logo' || key === 'hdbankLogo') {
+      const imageSource = key === 'logo' ? design.logo : design.hdbankLogo;
+      if (imageSource) {
         const image = new Image();
-        image.src = design.logo;
+        image.src = imageSource;
         await image.decode();
         const scale = Math.min(e.width / image.naturalWidth, e.height / image.naturalHeight);
         context.drawImage(image, e.x + (e.width - image.naturalWidth * scale) / 2, e.y + (e.height - image.naturalHeight * scale) / 2, image.naturalWidth * scale, image.naturalHeight * scale);
-      } else {
+      } else if (key === 'logo') {
         context.fillStyle=e.color; context.fillRect(e.x,e.y,e.width,e.height);
         context.fillStyle='#ffffff';context.font=`bold ${Math.min(e.fontSize,e.height*.6)}px Georgia`;context.textAlign='center';context.textBaseline='middle';context.fillText('HD',e.x+e.width/2,e.y+e.height/2,e.width);
+      } else {
+        drawHdbankWordmark(context, e.x, e.y, e.width, e.height);
       }
       context.restore(); continue;
     }
@@ -411,7 +414,4 @@ async function renderDesignedCertificate(context: CanvasRenderingContext2D, cert
     context.restore();
   }
 
-  // The right-side HDBank wordmark is intentionally outside the editable certificate parts
-  // so it is always present in the final PDF and cannot be accidentally removed by layout edits.
-  drawHdbankWordmark(context, 1390, 82, 250, 118);
 }
