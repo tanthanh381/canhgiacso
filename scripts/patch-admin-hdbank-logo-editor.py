@@ -1,5 +1,6 @@
 from pathlib import Path
 
+# Re-run validation after aligning the legacy HDBank logo regression test with the editable-logo behavior.
 path = Path("app/certificate.ts")
 text = path.read_text(encoding="utf-8")
 
