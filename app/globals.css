@@ -66,6 +66,19 @@ button { color: inherit; }
 .scenario-item.selected { border-color: color-mix(in srgb, var(--green) 35%, var(--line)); background: color-mix(in srgb, var(--green) 7%, var(--surface)); }
 .scenario-number { width: 36px; height: 36px; display: grid; place-items: center; background: var(--paper); color: var(--muted); border: 1px solid var(--line); border-radius: 9px; font-size: 11px; font-weight: 800; }
 .scenario-number.done { background: var(--mint); border-color: var(--mint); color: #464646; }
+.scenario-number.attempted { background: color-mix(in srgb, var(--orange) 18%, var(--surface)); border-color: color-mix(in srgb, var(--orange) 45%, var(--line)); color: var(--orange); }
+.scenario-number.locked { background: color-mix(in srgb, var(--muted) 8%, var(--surface)); color: var(--muted); font-size: 14px; }
+.scenario-item.locked { opacity: .56; cursor: not-allowed; filter: saturate(.55); }
+.scenario-item.locked:hover { background: transparent; }
+.scenario-item:disabled { pointer-events: none; }
+.difficulty-filter button:disabled { opacity: .48; cursor: not-allowed; }
+.unlock-progress { margin: 0 0 12px; padding: 11px 12px; border: 1px solid color-mix(in srgb, var(--mint) 58%, var(--line)); border-radius: 11px; background: color-mix(in srgb, var(--mint) 9%, var(--surface)); }
+.unlock-progress > div:first-child { display: flex; align-items: center; gap: 7px; }
+.unlock-progress strong { font-size: 11px; }
+.unlock-progress small { display: block; margin-top: 5px; color: var(--muted); font-size: 9px; line-height: 1.4; }
+.unlock-progress-bar { height: 4px; margin-top: 8px; overflow: hidden; border-radius: 4px; background: var(--line); }
+.unlock-progress-bar i { display: block; height: 100%; border-radius: inherit; background: var(--mint); transition: width .3s ease; }
+.random-button:disabled { opacity: .45; cursor: not-allowed; }
 .scenario-copy { overflow: hidden; }
 .scenario-copy strong { display: block; font-size: 12px; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .scenario-copy small { display: block; color: var(--muted); font-size: 9px; margin-top: 4px; }

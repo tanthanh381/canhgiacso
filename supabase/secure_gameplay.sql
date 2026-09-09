@@ -32,7 +32,7 @@ end $$;
 
 create or replace function private.submit_game_choice(expected_run uuid, scenario_id integer, choice_index integer, scenario_snapshot jsonb)
 returns jsonb language plpgsql security definer set search_path = '' as $$
-declare uid uuid := auth.uid(); p public.user_progress; s jsonb; c jsonb;
+declare uid uuid := auth.uid(); p public.user_progress; s jsonb; c jsonb; target_rank integer;
 begin
   if uid is null then raise exception 'Sign in required' using errcode = '42501'; end if;
   select * into p from public.user_progress where user_id = uid for update;
@@ -42,6 +42,22 @@ begin
   select item into s from public.site_content t cross join lateral jsonb_array_elements(t.content->'scenarios') item
     where t.slug = 'main' and t.published and (item->>'id')::integer = scenario_id;
   if s is null or s is distinct from scenario_snapshot then raise exception 'Content changed. Reload the scenario.' using errcode = '22023'; end if;
+  target_rank := case s->>'difficulty' when 'Dễ' then 1 when 'Trung bình' then 2 when 'Khó' then 3 when 'Rất khó' then 4 else null end;
+  if target_rank is null then raise exception 'Invalid scenario difficulty' using errcode = '22023'; end if;
+  if exists (
+    select 1
+    from public.site_content t
+    cross join lateral jsonb_array_elements(t.content->'scenarios') lower_item
+    where t.slug = 'main' and t.published
+      and (case lower_item->>'difficulty' when 'Dễ' then 1 when 'Trung bình' then 2 when 'Khó' then 3 when 'Rất khó' then 4 else 99 end) < target_rank
+      and not exists (
+        select 1 from public.test_attempts completed_attempt
+        where completed_attempt.user_id = uid
+          and completed_attempt.scenario_id = (lower_item->>'id')::smallint
+      )
+  ) then
+    raise exception 'Complete lower difficulty scenarios first' using errcode = '42501';
+  end if;
   if choice_index is null or choice_index not between 0 and 2 then raise exception 'Invalid choice' using errcode = '22023'; end if;
   c := s->'choices'->choice_index;
   if c is null or jsonb_typeof(c->'correct') <> 'boolean' then raise exception 'Invalid scenario'; end if;

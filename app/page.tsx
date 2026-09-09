@@ -3,6 +3,7 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { defaultSiteContent, Difficulty, normalizeSiteContent, SiteContent } from "./data";
 import { supabase } from "./supabase";
+import { difficultyOrder, getLevelProgress, getUnlockedDifficulties } from "./progression";
 
 const AdminPage = lazy(() => import("./admin").then((module) => ({ default: module.AdminPage })));
 
@@ -363,9 +364,17 @@ export default function Home() {
     return () => { active = false; };
   }, [view, sessionAccount]);
 
-  const selected = scenarios.find((item) => item.id === selectedId) ?? scenarios[0];
   const completedIds = new Set(results.map((result) => result.scenarioId));
   const safeIds = new Set(results.filter((result) => result.correct).map((result) => result.scenarioId));
+  const unlockedDifficulties = getUnlockedDifficulties(scenarios, completedIds);
+  const availableScenarios = scenarios.filter((item) => unlockedDifficulties.has(item.difficulty));
+  const selectedCandidate = scenarios.find((item) => item.id === selectedId);
+  const selected = selectedCandidate && unlockedDifficulties.has(selectedCandidate.difficulty)
+    ? selectedCandidate
+    : availableScenarios[0] ?? scenarios[0];
+  const levelProgress = getLevelProgress(scenarios, completedIds, unlockedDifficulties);
+  const incompleteUnlockedScenarios = availableScenarios.filter((item) => !completedIds.has(item.id));
+  const randomCandidates = incompleteUnlockedScenarios.length ? incompleteUnlockedScenarios : availableScenarios;
   const evidence = scenarios.filter((item) => safeIds.has(item.id));
   const score = results.reduce((total, result) => total + (result.correct ? 120 : 20), 0);
   const analytics = useMemo(() => {
@@ -525,6 +534,19 @@ export default function Home() {
   }
 
   function chooseScenario(id: number) {
+    const target = scenarios.find((item) => item.id === id);
+    if (!target) return;
+    if (!unlockedDifficulties.has(target.difficulty)) {
+      const targetIndex = difficultyOrder.indexOf(target.difficulty);
+      const blockingDifficulty = difficultyOrder.slice(0, targetIndex).find((level) =>
+        scenarios.some((item) => item.difficulty === level && !completedIds.has(item.id)),
+      ) ?? difficultyOrder[Math.max(0, targetIndex - 1)];
+      const blockingScenarios = scenarios.filter((item) => item.difficulty === blockingDifficulty);
+      const blockingCompleted = blockingScenarios.filter((item) => completedIds.has(item.id)).length;
+      setDataStatus(`Cấp ${target.difficulty} đang khóa. Hoàn thành ${blockingCompleted}/${blockingScenarios.length} thử thách ${blockingDifficulty} để mở khóa.`);
+      window.setTimeout(() => setDataStatus(""), 3200);
+      return;
+    }
     setSelectedId(id);
     setAnswer(null);
     navigateTo("game");
@@ -760,8 +782,9 @@ export default function Home() {
   }
 
   function nextScenario() {
-    const remaining = scenarios.find((item) => !completedIds.has(item.id));
-    chooseScenario(remaining?.id ?? scenarios[0].id);
+    const remaining = availableScenarios.find((item) => !completedIds.has(item.id));
+    const fallback = availableScenarios[0] ?? scenarios[0];
+    if (remaining || fallback) chooseScenario((remaining ?? fallback).id);
   }
 
   function exportCisoReport() {
@@ -838,19 +861,37 @@ export default function Home() {
             </div>
             <div className="search-box"><span>⌕</span><input aria-label="Tìm kịch bản" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Tìm theo tên, kênh..." /></div>
             <div className="difficulty-filter" aria-label="Lọc độ khó">
-              {difficulties.map((item) => <button key={item} aria-pressed={difficulty === item} className={difficulty === item ? "active" : ""} onClick={() => setDifficulty(item)}>{item}</button>)}
+              {difficulties.map((item) => {
+                const locked = item !== "Tất cả" && !unlockedDifficulties.has(item);
+                return <button key={item} aria-pressed={difficulty === item} className={difficulty === item ? "active" : ""} disabled={locked} title={locked ? `Hoàn thành cấp thấp hơn để mở ${item}` : undefined} onClick={() => setDifficulty(item)}>{locked ? "🔒 " : ""}{item}</button>;
+              })}
+            </div>
+            <div className="unlock-progress" role="status" aria-live="polite">
+              <div><span aria-hidden="true">{levelProgress.nextDifficulty ? "🔓" : "🏆"}</span><strong>Cấp đang mở: {levelProgress.currentDifficulty}</strong></div>
+              <small>{levelProgress.nextDifficulty
+                ? `Hoàn thành ${levelProgress.completed}/${levelProgress.total} thử thách ${levelProgress.currentDifficulty} để mở ${levelProgress.nextDifficulty}.`
+                : "Bạn đã mở khóa toàn bộ cấp độ."}</small>
+              <div className="unlock-progress-bar"><i style={{ width: `${levelProgress.total ? Math.round((levelProgress.completed / levelProgress.total) * 100) : 100}%` }} /></div>
             </div>
             <div className="scenario-list">
-              {filtered.map((item) => (
-                <button key={item.id} aria-pressed={selected.id === item.id} onClick={() => chooseScenario(item.id)} className={`scenario-item ${selected.id === item.id ? "selected" : ""}`}>
-                  <span className={`scenario-number ${safeIds.has(item.id) ? "done" : ""}`}>{safeIds.has(item.id) ? "✓" : String(item.id).padStart(2, "0")}</span>
-                  <span className="scenario-copy"><strong>{item.title}</strong><small>{item.channel} · {item.category}</small></span>
-                  <span className={`difficulty-dot ${difficultyTone[item.difficulty]}`} title={item.difficulty}></span>
-                </button>
-              ))}
+              {filtered.map((item) => {
+                const unlocked = unlockedDifficulties.has(item.difficulty);
+                const completed = completedIds.has(item.id);
+                const correct = safeIds.has(item.id);
+                return (
+                  <button key={item.id} aria-pressed={selected.id === item.id} aria-disabled={!unlocked} disabled={!unlocked} onClick={() => chooseScenario(item.id)} className={`scenario-item ${selected.id === item.id ? "selected" : ""} ${!unlocked ? "locked" : ""}`}>
+                    <span className={`scenario-number ${correct ? "done" : completed ? "attempted" : !unlocked ? "locked" : ""}`}>{correct ? "✓" : completed ? "•" : !unlocked ? "🔒" : String(item.id).padStart(2, "0")}</span>
+                    <span className="scenario-copy"><strong>{item.title}</strong><small>{unlocked ? `${item.channel} · ${item.category}` : `Cấp ${item.difficulty} · Hoàn thành cấp thấp hơn để mở khóa`}</small></span>
+                    <span className={`difficulty-dot ${difficultyTone[item.difficulty]}`} title={unlocked ? item.difficulty : `${item.difficulty} · Đang khóa`}></span>
+                  </button>
+                );
+              })}
               {!filtered.length && <p className="empty-state">Không tìm thấy tình huống phù hợp.</p>}
             </div>
-            <button className="random-button" onClick={() => chooseScenario(scenarios[Math.floor(Math.random() * scenarios.length)].id)}>⤨ Chọn tình huống ngẫu nhiên</button>
+            <button className="random-button" disabled={!randomCandidates.length} onClick={() => {
+              const item = randomCandidates[Math.floor(Math.random() * randomCandidates.length)];
+              if (item) chooseScenario(item.id);
+            }}>⤨ Chọn tình huống đã mở ngẫu nhiên</button>
           </aside>
 
           <section className="stage">
