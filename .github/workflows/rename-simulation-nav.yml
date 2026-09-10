@@ -1,0 +1,51 @@
+name: Rename simulation navigation label
+
+on:
+  push:
+    branches:
+      - fix/rename-simulation-nav
+
+permissions:
+  contents: write
+
+jobs:
+  rename:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: fix/rename-simulation-nav
+          fetch-depth: 0
+
+      - name: Rename navigation label
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('app/page.tsx')
+          text = path.read_text(encoding='utf-8')
+          old = '>Mô phỏng</button>'
+          new = '>Tình huống</button>'
+          count = text.count(old)
+          if count != 1:
+              raise SystemExit(f'Expected exactly 1 navigation label, found {count}')
+          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+
+      - name: Validate change
+        run: |
+          git diff --check
+          grep -F '>Tình huống</button>' app/page.tsx
+          if grep -Fq '>Mô phỏng</button>' app/page.tsx; then
+            echo 'Old navigation label still present'
+            exit 1
+          fi
+
+      - name: Commit clean patch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/rename-simulation-nav.yml
+          git add app/page.tsx
+          git commit -m 'chore: rename Mô phỏng to Tình huống'
+          git push origin HEAD:fix/rename-simulation-nav
