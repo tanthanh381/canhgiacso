@@ -750,7 +750,6 @@ export default function Home() {
           email,
           password: authPassword,
           options: {
-            emailRedirectTo: PUBLIC_SITE_URL,
             data: { username, display_name: displayName },
           },
         });
@@ -764,7 +763,7 @@ export default function Home() {
         } else {
           setAuthPassword("");
           setAuthConfirmPassword("");
-          setAuthNotice("Tài khoản đã được tạo. Hãy mở email xác nhận, sau đó quay lại đăng nhập.");
+          setAuthNotice("Tài khoản đã được tạo. Bạn có thể đăng nhập ngay mà không cần xác nhận email.");
         }
       } else {
         await supabase.auth.signOut({ scope: "local" });
@@ -1240,7 +1239,7 @@ export default function Home() {
           <button type="button" aria-pressed={authMode === "register"} className={authMode === "register" ? "active" : ""} onClick={() => switchAuthMode("register")}>Đăng ký</button>
         </div>
         <h2 id="auth-title">{authMode === "login" ? "Chào mừng trở lại" : "Tạo hồ sơ phòng vệ"}</h2>
-        <p className="auth-intro">Đăng nhập để lưu kết quả và tiếp tục trên thiết bị khác. Tiến trình khách được giữ riêng trên thiết bị, không tự chuyển vào tài khoản. Không sử dụng mật khẩu ngân hàng thật.</p>
+        <p className="auth-intro">Đăng nhập để lưu kết quả và tiếp tục trên thiết bị khác. Tài khoản mới được sử dụng ngay, không cần xác nhận email. Tiến trình khách được giữ riêng trên thiết bị và không tự chuyển vào tài khoản. Không sử dụng mật khẩu ngân hàng thật.</p>
         <form className="auth-form" onSubmit={submitAuth}>
           {authMode === "register" && <label><span>Tên hiển thị</span><input autoComplete="name" value={authDisplayName} maxLength={32} onChange={(event) => setAuthDisplayName(event.target.value)} placeholder="Ví dụ: Minh An" /></label>}
           {authMode === "register" && <label><span>Tên đăng nhập</span><input autoComplete="username" value={authUsername} minLength={3} maxLength={24} onChange={(event) => setAuthUsername(event.target.value)} placeholder="tanthanh381" autoCapitalize="none" spellCheck={false} /></label>}
