@@ -10,8 +10,19 @@ permissions:
   contents: read
 
 jobs:
-  quality-gate:
+  code-quality:
+    name: ${{ matrix.check }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        check:
+          - TypeScript
+          - ESLint
+          - Dependency audit
+          - Regression suite
+          - Pages build
+          - Static release checks
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -30,52 +41,53 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: TypeScript check
-        id: typecheck
-        continue-on-error: true
-        run: pnpm exec tsc --noEmit
-
-      - name: ESLint
-        id: lint
-        continue-on-error: true
-        run: pnpm lint
-
-      - name: Production dependency audit
-        id: audit
-        continue-on-error: true
-        run: pnpm audit --prod --audit-level moderate
-
-      - name: Full automated regression suite
-        id: tests
-        continue-on-error: true
-        run: pnpm test
-
-      - name: GitHub Pages build
-        id: pages
-        continue-on-error: true
-        run: pnpm run build:pages
-
-      - name: Static release checks
-        id: release
-        continue-on-error: true
+      - name: Run check
         shell: bash
+        env:
+          CHECK: ${{ matrix.check }}
         run: |
           set -euo pipefail
-          test -s docs/index.html
-          test -s docs/khien-so-logo.png
-          grep -F 'https://canhgiacso.com/' github-pages/index.html
-          grep -F 'Tình huống' app/page.tsx
-          grep -F 'Thực hành tương tác' app/page.tsx
-          ! grep -F '>Mô phỏng<' app/page.tsx
-          ! grep -F '>Trắc nghiệm<' app/page.tsx
-          ! grep -E 'service_role|sb_secret_' app/supabase.ts app/page.tsx
-          js_bytes=$(find docs/assets -type f -name '*.js' -printf '%s\n' | awk '{s+=$1} END {print s+0}')
-          echo "Total JS bytes: ${js_bytes}"
-          test "${js_bytes}" -lt 900000
+          case "$CHECK" in
+            "TypeScript")
+              pnpm exec tsc --noEmit
+              ;;
+            "ESLint")
+              pnpm lint
+              ;;
+            "Dependency audit")
+              pnpm audit --prod --audit-level moderate
+              ;;
+            "Regression suite")
+              pnpm test
+              ;;
+            "Pages build")
+              pnpm run build:pages
+              ;;
+            "Static release checks")
+              pnpm run build:pages
+              test -s docs/index.html
+              test -s docs/khien-so-logo.png
+              grep -F 'https://canhgiacso.com/' github-pages/index.html
+              grep -F 'Tình huống' app/page.tsx
+              grep -F 'Thực hành tương tác' app/page.tsx
+              ! grep -F '>Mô phỏng<' app/page.tsx
+              ! grep -F '>Trắc nghiệm<' app/page.tsx
+              ! grep -E 'service_role|sb_secret_' app/supabase.ts app/page.tsx
+              js_bytes=$(find docs/assets -type f -name '*.js' -printf '%s\n' | awk '{s+=$1} END {print s+0}')
+              echo "Total JS bytes: ${js_bytes}"
+              test "${js_bytes}" -lt 900000
+              ;;
+            *)
+              echo "Unknown QA check: $CHECK" >&2
+              exit 2
+              ;;
+          esac
 
-      - name: Live production smoke
-        id: live
-        continue-on-error: true
+  live-smoke:
+    name: Live production smoke
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify production endpoints
         shell: bash
         run: |
           set -euo pipefail
@@ -85,22 +97,3 @@ jobs:
           test -s /tmp/logo.png
           curl --fail --silent --show-error --location --max-time 20 -o /tmp/quiz.html 'https://phishingquiz.withgoogle.com/?hl=vi'
           test -s /tmp/quiz.html
-
-      - name: QA summary and gate
-        if: always()
-        shell: bash
-        env:
-          TYPECHECK: ${{ steps.typecheck.outcome }}
-          LINT: ${{ steps.lint.outcome }}
-          AUDIT: ${{ steps.audit.outcome }}
-          TESTS: ${{ steps.tests.outcome }}
-          PAGES: ${{ steps.pages.outcome }}
-          RELEASE: ${{ steps.release.outcome }}
-          LIVE: ${{ steps.live.outcome }}
-        run: |
-          printf '%-18s %s\n' TypeScript "$TYPECHECK" ESLint "$LINT" Audit "$AUDIT" Regression "$TESTS" PagesBuild "$PAGES" ReleaseChecks "$RELEASE" LiveSmoke "$LIVE"
-          failed=0
-          for status in "$TYPECHECK" "$LINT" "$AUDIT" "$TESTS" "$PAGES" "$RELEASE" "$LIVE"; do
-            if [ "$status" != success ]; then failed=1; fi
-          done
-          exit "$failed"
