@@ -1,0 +1,88 @@
+name: Adjust status card layout
+
+on:
+  push:
+    branches:
+      - fix/status-card-spacing
+    paths:
+      - .github/workflows/adjust-status-card-layout.yml
+
+permissions:
+  contents: write
+
+jobs:
+  adjust:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: fix/status-card-spacing
+          fetch-depth: 0
+
+      - name: Update status card spacing
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('app/globals.css')
+          text = path.read_text()
+
+          replacements = {
+              '.status-grid { display: grid; grid-template-columns: 1.35fr 1.35fr .85fr .75fr; gap: 10px; margin-bottom: 18px; }':
+              '.status-grid { display: grid; grid-template-columns: minmax(0, 1.22fr) minmax(0, 1.22fr) minmax(150px, .9fr) minmax(150px, .9fr); gap: 18px; margin-bottom: 22px; align-items: stretch; }',
+              '.status-card { min-width: 0; border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 11px 13px; display: flex; align-items: center; gap: 10px; position: relative; box-shadow: 0 5px 16px rgba(24,53,45,.03); }':
+              '.status-card { min-width: 0; min-height: 88px; border: 1px solid var(--line); background: var(--surface); border-radius: 14px; padding: 15px 17px; display: flex; align-items: center; gap: 13px; position: relative; box-shadow: 0 5px 16px rgba(24,53,45,.03); }',
+              '.badge-icon { flex: 0 0 auto; width: 31px; height: 31px; display: inline-grid; place-items: center; border-radius: 9px; background: color-mix(in srgb, var(--mint) 72%, var(--surface)); color: #464646; font-weight: 900; }':
+              '.badge-icon { flex: 0 0 auto; width: 38px; height: 38px; display: inline-grid; place-items: center; border-radius: 11px; background: color-mix(in srgb, var(--mint) 72%, var(--surface)); color: #464646; font-weight: 900; }',
+              '.status-card small { display: block; color: var(--muted); font-size: 9px; margin-bottom: 3px; }':
+              '.status-card small { display: block; color: var(--muted); font-size: 11px; line-height: 1.3; margin-bottom: 5px; }',
+              '.status-card strong { display: block; font-size: clamp(12px, 1.2vw, 16px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }':
+              '.status-card strong { display: block; font-size: clamp(15px, 1.25vw, 19px); line-height: 1.15; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }',
+              '.meter { position: absolute; left: 54px; right: 12px; bottom: 8px; height: 3px; background: var(--line); border-radius: 3px; overflow: hidden; }':
+              '.meter { position: absolute; left: 68px; right: 17px; bottom: 11px; height: 4px; background: var(--line); border-radius: 4px; overflow: hidden; }',
+              '.status-grid { grid-template-columns: 1fr 1fr; }.status-card { padding: 9px; }.status-card .badge-icon { display: none; }.meter { left: 10px; }':
+              '.status-grid { grid-template-columns: 1fr 1fr; gap: 12px; }.status-card { min-height: 78px; padding: 12px; }.status-card .badge-icon { display: none; }.meter { left: 12px; right: 12px; bottom: 8px; }'
+          }
+
+          for old, new in replacements.items():
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'Expected exactly one match for CSS rule, found {count}: {old[:80]}')
+              text = text.replace(old, new)
+
+          path.write_text(text)
+          PY
+
+      - name: Validate layout rules
+        shell: bash
+        run: |
+          grep -F 'gap: 18px' app/globals.css
+          grep -F 'min-height: 88px' app/globals.css
+          grep -F 'minmax(150px, .9fr)' app/globals.css
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build static site
+        run: pnpm run build:pages
+
+      - name: Remove temporary workflow and commit
+        shell: bash
+        run: |
+          rm .github/workflows/adjust-status-card-layout.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app/globals.css .github/workflows/adjust-status-card-layout.yml
+          git commit -m 'fix: balance status card spacing and sizing'
+          git push origin HEAD:fix/status-card-spacing
