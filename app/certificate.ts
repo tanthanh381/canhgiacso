@@ -160,7 +160,7 @@ export async function renderCertificateCanvas(certificate: TrainingCertificate, 
   canvas.width = 1754;
   canvas.height = 1240;
   const context = canvas.getContext("2d");
-  if (!context) throw new Error("Trình duyệt không hỗ trợ tạo chứng chỉ.");
+  if (!context) throw new Error("Trình duyệt không hỗ trợ tạo chứng nhận.");
 
   if (template.design) {
     await renderDesignedCertificate(context, certificate, template, template.design);
@@ -279,7 +279,7 @@ export async function renderCertificateCanvas(certificate: TrainingCertificate, 
   context.fillStyle = "#64748b";
   context.font = "15px Arial, Helvetica, sans-serif";
   context.fillText(certificate.certificateCode.startsWith("CGS-GUEST-")
-    ? "Bản ghi nhận chế độ khách - không phải chứng chỉ nội bộ đã xác minh."
+    ? "Bản ghi nhận chế độ khách - không phải chứng nhận nội bộ đã xác minh."
     : template.footerNote, 877, 1150);
   return canvas;
 }
@@ -289,7 +289,7 @@ export async function downloadTrainingCertificatePdf(certificate: TrainingCertif
   const jpegBlob = await new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((blob) => {
       if (blob) resolve(blob);
-      else reject(new Error("Không thể kết xuất chứng chỉ."));
+      else reject(new Error("Không thể kết xuất chứng nhận."));
     }, "image/jpeg", 0.96);
   });
   const jpegBytes = new Uint8Array(await jpegBlob.arrayBuffer());
@@ -322,7 +322,7 @@ async function renderDesignedCertificate(context: CanvasRenderingContext2D, cert
     description: applyCertificateTemplate(template.description, certificate, template),
     rating: `${template.ratingLabel}\n${certificate.rating}\nĐiểm: ${certificate.score} PTS | Tỷ lệ đúng: ${certificate.accuracy}%`,
     issued: `${template.issuedDateLabel}: ${formatIssuedDate(certificate.issuedAt)} | ${template.codeLabel}: ${certificate.certificateCode}`,
-    footerNote: certificate.certificateCode.startsWith('CGS-GUEST-') ? 'Bản ghi nhận chế độ khách - không phải chứng chỉ nội bộ đã xác minh.' : template.footerNote,
+    footerNote: certificate.certificateCode.startsWith('CGS-GUEST-') ? 'Bản ghi nhận chế độ khách - không phải chứng nhận nội bộ đã xác minh.' : template.footerNote,
   };
   for (const key of certificateParts) {
     // HDBank branding is intentionally not rendered on certificates.

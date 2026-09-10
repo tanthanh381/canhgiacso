@@ -808,7 +808,7 @@ export default function Home() {
     if (!sessionAccount) return;
     const { data, error } = await supabase.rpc("get_my_training_certificates");
     if (error || !Array.isArray(data)) {
-      setDataStatus("Đã hoàn thành khóa đào tạo nhưng chưa tải được thông tin chứng chỉ. Vui lòng thử lại.");
+      setDataStatus("Đã hoàn thành khóa đào tạo nhưng chưa tải được thông tin chứng nhận. Vui lòng thử lại.");
       return;
     }
     const nextCertificates = data as TrainingCertificate[];
@@ -817,19 +817,19 @@ export default function Home() {
       const issued = nextCertificates.find((item) => item.runId === celebrateRunId);
       if (issued) {
         setCompletionCertificate(issued);
-        setDataStatus("Đã hoàn thành khóa đào tạo và được cấp chứng chỉ.");
+        setDataStatus("Đã hoàn thành khóa đào tạo và được cấp chứng nhận.");
         return;
       }
     }
-    setDataStatus("Đã cập nhật thông tin chứng chỉ.");
+    setDataStatus("Đã cập nhật thông tin chứng nhận.");
   }
 
   async function ensureCurrentCertificate() {
     if (!sessionAccount || !runId) return;
-    setDataStatus("Đang xác nhận điều kiện cấp chứng chỉ…");
+    setDataStatus("Đang xác nhận điều kiện cấp chứng nhận…");
     const { data, error } = await supabase.rpc("issue_training_certificate", { expected_run: runId });
     if (error || !data) {
-      setDataStatus(error?.code === "22023" ? "Bạn cần hoàn thành toàn bộ tình huống trước khi nhận chứng chỉ." : "Chưa thể cấp chứng chỉ. Vui lòng thử lại.");
+      setDataStatus(error?.code === "22023" ? "Bạn cần hoàn thành toàn bộ tình huống trước khi nhận chứng nhận." : "Chưa thể cấp chứng nhận. Vui lòng thử lại.");
       return;
     }
     await refreshCertificates(runId);
@@ -882,7 +882,7 @@ export default function Home() {
     setCertificateDownloading(true);
     try {
       await downloadTrainingCertificatePdf(certificate, siteContent.certificateTemplate);
-      setDataStatus("Đã tạo chứng chỉ PDF trên thiết bị của bạn.");
+      setDataStatus("Đã tạo chứng nhận PDF trên thiết bị của bạn.");
     } catch {
       setDataStatus("Không thể tạo file PDF trên trình duyệt này. Vui lòng thử lại.");
     } finally {
@@ -1050,7 +1050,7 @@ export default function Home() {
                 {selectedAnswer !== null && (
                   <div role="status" aria-live="polite" className={`feedback ${selected.choices[selectedAnswer].correct ? "success" : "danger"}`}>
                     <div><strong>{selected.choices[selectedAnswer].correct ? "Lựa chọn an toàn" : "Bạn đã mắc bẫy"}</strong><p>{selected.choices[selectedAnswer].feedback}</p><small>Mẹo ghi nhớ: {selected.tip}</small></div>
-                    <button onClick={nextScenario}>{results.length >= scenarios.length ? "Xem chứng chỉ PDF →" : "Kịch bản tiếp theo →"}</button>
+                    <button onClick={nextScenario}>{results.length >= scenarios.length ? "Xem chứng nhận PDF →" : "Kịch bản tiếp theo →"}</button>
                   </div>
                 )}
               </section>
@@ -1126,21 +1126,21 @@ export default function Home() {
                   <span className="eyebrow">{currentCertificate ? "CHỨNG CHỈ LƯỢT HIỆN TẠI" : "CHỨNG CHỈ GẦN NHẤT"}</span>
                   <h2>Chứng nhận hoàn thành Cảnh Giác Số</h2>
                   <p>{latestCertificate.displayName} · Xếp loại <strong>{latestCertificate.rating}</strong> · Tỷ lệ đúng {latestCertificate.accuracy}%</p>
-                  <small>Mã chứng chỉ {latestCertificate.certificateCode} · Cấp ngày {new Date(latestCertificate.issuedAt).toLocaleDateString("vi-VN")}</small>
+                  <small>Mã chứng nhận {latestCertificate.certificateCode} · Cấp ngày {new Date(latestCertificate.issuedAt).toLocaleDateString("vi-VN")}</small>
                 </div>
-                <button className="primary-button certificate-download" disabled={certificateDownloading} onClick={() => void downloadCertificate(latestCertificate)}>{certificateDownloading ? "Đang tạo PDF…" : "⇩ Tải chứng chỉ PDF"}</button>
+                <button className="primary-button certificate-download" disabled={certificateDownloading} onClick={() => void downloadCertificate(latestCertificate)}>{certificateDownloading ? "Đang tạo PDF…" : "⇩ Tải chứng nhận PDF"}</button>
               </article>
             ) : (
               <article className={`training-certificate-card ${results.length >= scenarios.length ? "ready" : "locked"}`}>
                 <span className="certificate-card-mark" aria-hidden="true">{results.length >= scenarios.length ? "✓" : "◇"}</span>
-                <div className="certificate-card-copy"><span className="eyebrow">CHỨNG CHỈ HOÀN THÀNH</span><h2>{results.length >= scenarios.length ? "Khóa đào tạo đã hoàn thành" : "Hoàn thành khóa để mở chứng chỉ"}</h2><p>{results.length >= scenarios.length ? "Kết quả đã đủ điều kiện. Xác nhận với máy chủ để cấp chứng chỉ PDF." : `Tiến độ hiện tại ${results.length}/${scenarios.length} tình huống.`}</p></div>
-                {results.length >= scenarios.length && <button className="primary-button certificate-download" onClick={() => void ensureCurrentCertificate()}>Cấp chứng chỉ</button>}
+                <div className="certificate-card-copy"><span className="eyebrow">CHỨNG CHỈ HOÀN THÀNH</span><h2>{results.length >= scenarios.length ? "Khóa đào tạo đã hoàn thành" : "Hoàn thành khóa để mở chứng nhận"}</h2><p>{results.length >= scenarios.length ? "Kết quả đã đủ điều kiện. Xác nhận với máy chủ để cấp chứng nhận PDF." : `Tiến độ hiện tại ${results.length}/${scenarios.length} tình huống.`}</p></div>
+                {results.length >= scenarios.length && <button className="primary-button certificate-download" onClick={() => void ensureCurrentCertificate()}>Cấp chứng nhận</button>}
               </article>
             )
           ) : (
             <article className={`training-certificate-card ${results.length >= scenarios.length ? "ready" : "locked"}`}>
               <span className="certificate-card-mark" aria-hidden="true">{results.length >= scenarios.length ? "✓" : "◇"}</span>
-              <div className="certificate-card-copy"><span className="eyebrow">BẢN GHI NHẬN HOÀN THÀNH</span><h2>{results.length >= scenarios.length ? "Khóa đào tạo đã hoàn thành" : "Bản ghi nhận sẽ mở khi hoàn thành khóa"}</h2><p>{results.length >= scenarios.length ? "Bạn có thể tải PDF ngay ở chế độ khách. Bản này lưu cục bộ và không thay thế chứng chỉ nội bộ đã xác minh của tài khoản đăng nhập." : `Tiến độ hiện tại ${results.length}/${scenarios.length} tình huống.`}</p></div>
+              <div className="certificate-card-copy"><span className="eyebrow">BẢN GHI NHẬN HOÀN THÀNH</span><h2>{results.length >= scenarios.length ? "Khóa đào tạo đã hoàn thành" : "Bản ghi nhận sẽ mở khi hoàn thành khóa"}</h2><p>{results.length >= scenarios.length ? "Bạn có thể tải PDF ngay ở chế độ khách. Bản này lưu cục bộ và không thay thế chứng nhận nội bộ đã xác minh của tài khoản đăng nhập." : `Tiến độ hiện tại ${results.length}/${scenarios.length} tình huống.`}</p></div>
               {results.length >= scenarios.length && <button className="primary-button certificate-download" disabled={certificateDownloading} onClick={() => void downloadCertificate(getOrCreateGuestCertificate())}>{certificateDownloading ? "Đang tạo PDF…" : "⇩ Tải bản ghi nhận PDF"}</button>}
             </article>
           )}
@@ -1206,13 +1206,13 @@ export default function Home() {
       <footer><div className="footer-brand" aria-label="Cảnh Giác Số"><BrandMark /><span><b>{siteContent.copy.departmentName}</b><small>{siteContent.copy.footerTagline}</small></span></div><FooterNotice notice={siteContent.copy.footerNotice}/><button onClick={() => setGuide(true)}>Hướng dẫn & trợ giúp</button></footer>
 
       {completionCertificate && <Modal open onClose={() => setCompletionCertificate(null)} labelledBy="certificate-complete-title" className="certificate-complete-modal">
-        <button className="modal-close" aria-label="Đóng thông báo chứng chỉ" onClick={() => setCompletionCertificate(null)}>×</button>
+        <button className="modal-close" aria-label="Đóng thông báo chứng nhận" onClick={() => setCompletionCertificate(null)}>×</button>
         <span className="certificate-complete-symbol" aria-hidden="true">✓</span>
         <span className="eyebrow">HOÀN THÀNH KHÓA ĐÀO TẠO</span>
-        <h2 id="certificate-complete-title">{completionCertificate.certificateCode.startsWith("CGS-GUEST-") ? "Chúc mừng, bạn đã hoàn thành khóa đào tạo" : "Chúc mừng, chứng chỉ của bạn đã được cấp"}</h2>
-        <p>Bạn đã hoàn thành {completionCertificate.completed}/{completionCertificate.scenarioTotal} tình huống với tỷ lệ đúng <strong>{completionCertificate.accuracy}%</strong> và xếp loại <strong>{completionCertificate.rating}</strong>. {completionCertificate.certificateCode.startsWith("CGS-GUEST-") && <span>Bản PDF chế độ khách chỉ là bản ghi nhận trên thiết bị, không phải chứng chỉ nội bộ đã xác minh.</span>}</p>
-        <div className="certificate-complete-code"><small>{completionCertificate.certificateCode.startsWith("CGS-GUEST-") ? "Mã bản ghi nhận" : "Mã chứng chỉ"}</small><strong>{completionCertificate.certificateCode}</strong></div>
-        <div className="certificate-complete-actions"><button className="primary-button" disabled={certificateDownloading} onClick={() => void downloadCertificate(completionCertificate)}>{certificateDownloading ? "Đang tạo PDF…" : completionCertificate.certificateCode.startsWith("CGS-GUEST-") ? "⇩ Tải bản ghi nhận PDF" : "⇩ Tải chứng chỉ PDF"}</button><button className="admin-secondary" onClick={() => { setCompletionCertificate(null); setView("stats"); }}>Xem thành tích</button></div>
+        <h2 id="certificate-complete-title">{completionCertificate.certificateCode.startsWith("CGS-GUEST-") ? "Chúc mừng, bạn đã hoàn thành khóa đào tạo" : "Chúc mừng, chứng nhận của bạn đã được cấp"}</h2>
+        <p>Bạn đã hoàn thành {completionCertificate.completed}/{completionCertificate.scenarioTotal} tình huống với tỷ lệ đúng <strong>{completionCertificate.accuracy}%</strong> và xếp loại <strong>{completionCertificate.rating}</strong>. {completionCertificate.certificateCode.startsWith("CGS-GUEST-") && <span>Bản PDF chế độ khách chỉ là bản ghi nhận trên thiết bị, không phải chứng nhận nội bộ đã xác minh.</span>}</p>
+        <div className="certificate-complete-code"><small>{completionCertificate.certificateCode.startsWith("CGS-GUEST-") ? "Mã bản ghi nhận" : "Mã chứng nhận"}</small><strong>{completionCertificate.certificateCode}</strong></div>
+        <div className="certificate-complete-actions"><button className="primary-button" disabled={certificateDownloading} onClick={() => void downloadCertificate(completionCertificate)}>{certificateDownloading ? "Đang tạo PDF…" : completionCertificate.certificateCode.startsWith("CGS-GUEST-") ? "⇩ Tải bản ghi nhận PDF" : "⇩ Tải chứng nhận PDF"}</button><button className="admin-secondary" onClick={() => { setCompletionCertificate(null); setView("stats"); }}>Xem thành tích</button></div>
       </Modal>}
 
       {lossNotice && <Modal open onClose={() => setLossNotice(null)} labelledBy="loss-notice-title" className="loss-modal">

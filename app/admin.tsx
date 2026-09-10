@@ -314,7 +314,7 @@ export function AdminPage({
       {status && <div className="admin-status" role="status" aria-live="polite">{status}</div>}
       <div className="admin-tabs" role="tablist" aria-label="Nhóm nội dung">
         <button role="tab" aria-selected={tab === "general"} className={tab === "general" ? "active" : ""} onClick={() => setTab("general")}>Nội dung chung</button>
-        <button role="tab" aria-selected={tab === "certificate"} className={tab === "certificate" ? "active" : ""} onClick={() => setTab("certificate")}>Chứng chỉ</button>
+        <button role="tab" aria-selected={tab === "certificate"} className={tab === "certificate" ? "active" : ""} onClick={() => setTab("certificate")}>Chứng nhận</button>
         <button role="tab" aria-selected={tab === "scenarios"} className={tab === "scenarios" ? "active" : ""} onClick={() => setTab("scenarios")}>Tình huống ({draft.scenarios.length})</button>
         <button role="tab" aria-selected={tab === "knowledge"} className={tab === "knowledge" ? "active" : ""} onClick={() => setTab("knowledge")}>Cẩm nang ({draft.knowledgeCards.length})</button>
         {role === "admin" && <button role="tab" aria-selected={tab === "users"} className={tab === "users" ? "active" : ""} onClick={() => setTab("users")}>Phân quyền ({managedUsers.length})</button>}
@@ -331,7 +331,7 @@ export function AdminPage({
       </div>}
 
       {tab === "certificate" && <div className="certificate-admin-layout">
-        <div className="admin-section-title"><div><span className="eyebrow">MẪU CHỨNG CHỈ PDF</span><h2>Tùy chỉnh nội dung chứng chỉ</h2><p>Các biến trong ngoặc nhọn sẽ được thay bằng dữ liệu kết quả thực tế khi người dùng tải PDF.</p></div></div>
+        <div className="admin-section-title"><div><span className="eyebrow">MẪU CHỨNG CHỈ PDF</span><h2>Tùy chỉnh nội dung chứng nhận</h2><p>Các biến trong ngoặc nhọn sẽ được thay bằng dữ liệu kết quả thực tế khi người dùng tải PDF.</p></div></div>
         <CertificateEditor template={draft.certificateTemplate} onChange={(certificateTemplate) => setDraft((current) => ({ ...current, certificateTemplate }))} />
         <div className="certificate-token-note" role="note"><strong>Biến hỗ trợ</strong><span>{"{courseName}"} · {"{scenarioTotal}"} · {"{completed}"} · {"{correct}"} · {"{accuracy}"} · {"{score}"} · {"{rating}"} · {"{displayName}"} · {"{username}"} · {"{certificateCode}"}</span></div>
         <div className="admin-form-grid">
@@ -339,15 +339,15 @@ export function AdminPage({
             ["organizationName", "Tên tổ chức", false],
             ["departmentName", "Đơn vị phụ trách", false],
             ["eyebrow", "Dòng tiêu đề nhỏ", false],
-            ["title", "Tiêu đề chứng chỉ", false],
+            ["title", "Tiêu đề chứng nhận", false],
             ["recipientIntro", "Lời trao chứng nhận", false],
             ["courseName", "Tên chương trình / khóa đào tạo", false],
             ["ratingLabel", "Nhãn xếp loại", false],
             ["accountLabel", "Nhãn tài khoản", false],
-            ["codeLabel", "Nhãn mã chứng chỉ", false],
+            ["codeLabel", "Nhãn mã chứng nhận", false],
             ["issuedDateLabel", "Nhãn ngày cấp", false],
             ["description", "Nội dung mô tả", true],
-            ["footerNote", "Ghi chú cuối chứng chỉ", true],
+            ["footerNote", "Ghi chú cuối chứng nhận", true],
           ] as Array<[Exclude<keyof CertificateTemplate, "design">, string, boolean]>).map(([key, label, multiline]) => <label key={key} className={multiline ? "admin-wide" : ""}><span>{label}</span>{multiline ? <textarea rows={4} value={draft.certificateTemplate[key]} onChange={(event) => changeCertificateTemplate(key, event.target.value)} /> : <input value={draft.certificateTemplate[key]} onChange={(event) => changeCertificateTemplate(key, event.target.value)} />}</label>)}
         </div>
 
