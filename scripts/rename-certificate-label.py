@@ -1,5 +1,6 @@
 from pathlib import Path
 
+# Normalize user-facing Vietnamese terminology: use "chứng nhận" consistently.
 paths = [Path('app/page.tsx'), Path('app/admin.tsx'), Path('app/certificate.ts'), Path('app/data.ts')]
 changed = []
 for path in paths:
