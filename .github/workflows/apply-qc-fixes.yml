@@ -1,0 +1,128 @@
+name: Apply QC fixes
+
+on:
+  push:
+    branches:
+      - qa/full-site-20260910
+    paths:
+      - .github/workflows/apply-qc-fixes.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fix-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout QA branch
+        uses: actions/checkout@v6
+        with:
+          ref: qa/full-site-20260910
+          fetch-depth: 0
+
+      - name: Apply QC fixes
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          def replace_exact(path, replacements):
+              p = Path(path)
+              text = p.read_text()
+              for old, new in replacements:
+                  count = text.count(old)
+                  if count != 1:
+                      raise SystemExit(f"{path}: expected 1 occurrence, found {count}: {old[:90]}")
+                  text = text.replace(old, new)
+              p.write_text(text)
+
+          replace_exact('app/page.tsx', [
+              ('publishedScenarios.current = data.content.scenarios;', 'publishedScenarios.current = normalized.scenarios;'),
+              ('"CHỨNG CHỈ LƯỢT HIỆN TẠI"', '"CHỨNG NHẬN LƯỢT HIỆN TẠI"'),
+              ('"CHỨNG CHỈ GẦN NHẤT"', '"CHỨNG NHẬN GẦN NHẤT"'),
+              ('>CHỨNG CHỈ HOÀN THÀNH</span>', '>CHỨNG NHẬN HOÀN THÀNH</span>'),
+          ])
+
+          replace_exact('app/admin.tsx', [
+              ('role: user.role }];', 'role: user.role as ManagedRole }];'),
+              ('>MẪU CHỨNG CHỈ PDF</span>', '>MẪU CHỨNG NHẬN PDF</span>'),
+          ])
+
+          replace_exact('tests/certificate-source.test.mjs', [
+              ('/Tải chứng chỉ PDF/', '/Tải chứng nhận PDF/'),
+              ('/không thay thế chứng chỉ nội bộ đã xác minh/', '/không thay thế chứng nhận nội bộ đã xác minh/'),
+              ('/không phải chứng chỉ nội bộ đã xác minh/i', '/không phải chứng nhận nội bộ đã xác minh/i'),
+          ])
+
+          replace_exact('tests/certificate-template-admin.test.mjs', [
+              ('/Tùy chỉnh nội dung chứng chỉ/', '/Tùy chỉnh nội dung chứng nhận/'),
+              ('assert.match(admin, /Biến hỗ trợ/);', 'assert.match(admin, /MẪU CHỨNG NHẬN PDF/);\n  assert.match(admin, /Biến hỗ trợ/);'),
+          ])
+
+          replace_exact('tests/guest-certificate-flow.test.mjs', [
+              ('/Xem chứng chỉ PDF/', '/Xem chứng nhận PDF/'),
+              ('/không phải chứng chỉ nội bộ đã xác minh/i', '/không phải chứng nhận nội bộ đã xác minh/i'),
+          ])
+
+          replace_exact('tests/phishing-quiz-standalone.test.mjs', [
+              ('/navigateTo\\("quiz"\\).*Trắc nghiệm/', '/navigateTo\\("quiz"\\).*Thực hành tương tác/'),
+          ])
+
+          replace_exact('tests/phishing-quiz-link.test.mjs', [
+              ('test("Cẩm nang embeds the official Vietnamese Jigsaw phishing quiz"', 'test("Thực hành tương tác embeds the official Vietnamese Jigsaw phishing quiz"'),
+          ])
+
+          replace_exact('tests/rendered-html.test.mjs', [
+              ('assert.match(html, /Mô phỏng/);', 'assert.match(html, /Tình huống/);'),
+          ])
+
+          tsconfig_path = Path('tsconfig.json')
+          config = json.loads(tsconfig_path.read_text())
+          existing = config.get('exclude', [])
+          config['exclude'] = list(dict.fromkeys([*existing, 'worker', 'db']))
+          tsconfig_path.write_text(json.dumps(config, ensure_ascii=False, indent=2) + '\n')
+          PY
+
+      - name: Verify terminology and patches
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F 'publishedScenarios.current = normalized.scenarios;' app/page.tsx
+          grep -F 'CHỨNG NHẬN LƯỢT HIỆN TẠI' app/page.tsx
+          grep -F 'MẪU CHỨNG NHẬN PDF' app/admin.tsx
+          ! grep -F 'CHỨNG CHỈ LƯỢT HIỆN TẠI' app/page.tsx
+          ! grep -F 'MẪU CHỨNG CHỈ PDF' app/admin.tsx
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: TypeScript check
+        run: pnpm exec tsc --noEmit
+
+      - name: Full regression suite
+        run: pnpm test
+
+      - name: GitHub Pages build
+        run: pnpm run build:pages
+
+      - name: Commit verified fixes
+        shell: bash
+        run: |
+          rm .github/workflows/apply-qc-fixes.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app/page.tsx app/admin.tsx tsconfig.json tests/certificate-source.test.mjs tests/certificate-template-admin.test.mjs tests/guest-certificate-flow.test.mjs tests/phishing-quiz-standalone.test.mjs tests/phishing-quiz-link.test.mjs tests/rendered-html.test.mjs .github/workflows/apply-qc-fixes.yml
+          git commit -m 'fix: resolve QC regressions and web type errors'
+          git push origin HEAD:qa/full-site-20260910
