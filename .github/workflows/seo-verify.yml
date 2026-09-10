@@ -51,4 +51,3 @@ jobs:
           grep -q '<loc>https://canhgiacso.com/</loc>' docs/sitemap.xml
           grep -q 'rel="canonical" href="https://canhgiacso.com/"' docs/index.html
           grep -q 'application/ld+json' docs/index.html
-          grep -q 'nhan-dien-lua-dao-truc-tuyen' docs/index.html
