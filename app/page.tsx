@@ -12,7 +12,7 @@ type Result = { scenarioId: number; correct: boolean; choiceIndex: number };
 type GameHistory = { runId: string; finishedAt: string; balance: number; completed: number; correct: number };
 type GameState = { run_id: string; balance: number; awareness: number; results: Result[]; history: GameHistory[] };
 type PendingChoice = { userId: string; runId: string; scenario: SiteContent["scenarios"][number]; snapshot: SiteContent["scenarios"][number]; index: number };
-type View = "game" | "knowledge" | "stats" | "evidence" | "dashboard" | "admin";
+type View = "game" | "knowledge" | "quiz" | "stats" | "evidence" | "dashboard" | "admin";
 type StoredProgress = {
   balance: number;
   awareness: number;
@@ -949,6 +949,7 @@ export default function Home() {
         <nav aria-label="Điều hướng chính">
           <button aria-current={view === "game" ? "page" : undefined} className={view === "game" ? "active" : ""} onClick={() => navigateTo("game")}>Mô phỏng</button>
           <button aria-current={view === "knowledge" ? "page" : undefined} className={view === "knowledge" ? "active" : ""} onClick={() => navigateTo("knowledge")}>Cẩm nang</button>
+          <button aria-current={view === "quiz" ? "page" : undefined} className={view === "quiz" ? "active" : ""} onClick={() => navigateTo("quiz")}>Trắc nghiệm</button>
           <button aria-current={view === "stats" ? "page" : undefined} className={view === "stats" ? "active" : ""} onClick={() => navigateTo("stats")}>Thành tích</button>
           <button aria-current={view === "dashboard" ? "page" : undefined} className={view === "dashboard" ? "active" : ""} onClick={() => navigateTo("dashboard")}>Dashboard</button>
           {sessionAccount && <button aria-current={view === "admin" ? "page" : undefined} className={view === "admin" ? "active" : ""} onClick={() => navigateTo("admin")}>Quản trị</button>}
@@ -1082,31 +1083,34 @@ export default function Home() {
             <p>{siteContent.copy.knowledgeIntro}</p>
           </div>
 
-          <section className="knowledge-feature" aria-labelledby="phishing-quiz-title">
-            <div className="knowledge-feature-copy">
-              <span className="eyebrow">THỰC HÀNH TƯƠNG TÁC · JIGSAW / GOOGLE</span>
-              <h2 id="phishing-quiz-title">Trắc nghiệm email lừa đảo</h2>
-              <p>Thực hành nhận diện email và trang đăng nhập giả mạo ngay trên Cảnh Giác Số. Nội dung được tải trực tiếp từ Jigsaw/Google.</p>
-              <div className="knowledge-safety-note"><strong>Lưu ý an toàn</strong><span>Không nhập mật khẩu ngân hàng, OTP, số thẻ hoặc dữ liệu thật trong bài thực hành.</span></div>
-            </div>
-            <div className="phishing-quiz-shell">
-              <div className="phishing-quiz-toolbar"><span><i aria-hidden="true" /> Bài thực hành bên thứ ba</span><a href={PHISHING_QUIZ_URL} target="_blank" rel="noopener noreferrer">Mở tab riêng ↗</a></div>
-              <iframe
-                src={PHISHING_QUIZ_URL}
-                title="Trắc nghiệm email lừa đảo của Jigsaw / Google"
-                loading="lazy"
-                referrerPolicy="no-referrer"
-                sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"
-              />
-            </div>
-            <p className="phishing-quiz-fallback">Nếu trình duyệt hoặc chính sách của Google chặn nội dung nhúng, hãy <a href={PHISHING_QUIZ_URL} target="_blank" rel="noopener noreferrer">mở bài trắc nghiệm trong tab mới ↗</a>.</p>
-          </section>
-
           <div className="knowledge-section-heading">
             <div><span className="eyebrow">NỘI DUNG THAM KHẢO</span><h2>Cẩm nang thực hành</h2></div>
             <p>Các nguyên tắc ngắn gọn để nhận diện, xác minh và xử lý tình huống có dấu hiệu lừa đảo.</p>
           </div>
           <div className="knowledge-grid">{knowledgeCards.map((card, index) => <article key={card.title}><span>{String(index + 1).padStart(2, "0")}</span><BadgeIcon>{card.icon}</BadgeIcon><h2>{card.title}</h2><p>{card.text}</p></article>)}</div>
+        </section>
+      )}
+
+
+      {view === "quiz" && (
+        <section className="content-page quiz-page">
+          <div className="page-hero quiz-hero">
+            <span className="eyebrow">THỰC HÀNH TƯƠNG TÁC · JIGSAW / GOOGLE</span>
+            <h1>Trắc nghiệm email lừa đảo</h1>
+            <p>Kiểm tra khả năng nhận diện email và trang đăng nhập giả mạo ngay trên Cảnh Giác Số. Bài thực hành được tải trực tiếp từ Jigsaw/Google.</p>
+          </div>
+          <div className="knowledge-safety-note quiz-safety-note"><strong>Lưu ý an toàn</strong><span>Không nhập mật khẩu ngân hàng, OTP, số thẻ hoặc dữ liệu thật trong bài thực hành.</span></div>
+          <div className="phishing-quiz-shell quiz-standalone-shell">
+            <div className="phishing-quiz-toolbar"><span><i aria-hidden="true" /> Bài thực hành bên thứ ba</span><a href={PHISHING_QUIZ_URL} target="_blank" rel="noopener noreferrer">Mở tab riêng ↗</a></div>
+            <iframe
+              src={PHISHING_QUIZ_URL}
+              title="Trắc nghiệm email lừa đảo của Jigsaw / Google"
+              loading="lazy"
+              referrerPolicy="no-referrer"
+              sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+            />
+          </div>
+          <p className="phishing-quiz-fallback">Nếu trình duyệt hoặc chính sách của Google chặn nội dung nhúng, hãy <a href={PHISHING_QUIZ_URL} target="_blank" rel="noopener noreferrer">mở bài trắc nghiệm trong tab mới ↗</a>.</p>
         </section>
       )}
 
