@@ -8,6 +8,7 @@ on:
       - 'public/**'
       - 'app/layout.tsx'
       - 'vite.github-pages.config.ts'
+      - '.github/workflows/pages.yml'
       - '.github/workflows/seo-verify.yml'
   push:
     branches: [main]
@@ -16,6 +17,7 @@ on:
       - 'public/**'
       - 'app/layout.tsx'
       - 'vite.github-pages.config.ts'
+      - '.github/workflows/pages.yml'
 
 permissions:
   contents: read
@@ -38,8 +40,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build GitHub Pages production target
+        env:
+          VITE_GA_MEASUREMENT_ID: G-TEST123456
         run: pnpm run build:pages
-      - name: Verify crawlable SEO assets
+      - name: Verify crawlable SEO and analytics assets
         run: |
           test -f docs/robots.txt
           test -f docs/sitemap.xml
@@ -52,3 +56,5 @@ jobs:
           grep -q 'rel="canonical" href="https://canhgiacso.com/"' docs/index.html
           grep -q 'application/ld+json' docs/index.html
           grep -q 'nhan-dien-lua-dao-truc-tuyen' docs/index.html
+          grep -q 'G-TEST123456' docs/index.html
+          grep -q 'googletagmanager.com/gtag/js' docs/index.html
