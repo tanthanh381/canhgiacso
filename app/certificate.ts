@@ -365,8 +365,26 @@ async function renderDesignedCertificate(context: CanvasRenderingContext2D, cert
     if (key === 'logo') {
       if (design.logo || cyber) {
         const image = await certificateImage(design.logo || '/khien-so-logo.png');
-        if (cyber) {context.fillStyle='#900c23';context.beginPath();context.roundRect(e.x,e.y,e.width,e.height,20);context.fill();}
         const scale = Math.min(e.width / image.naturalWidth, e.height / image.naturalHeight);
+        // Color only the default shield interior, leaving its exterior transparent.
+        // Uploaded logos retain their own silhouette and colors.
+        if (cyber && !design.logo) {
+          context.save();
+          context.translate(e.x + (e.width - image.naturalWidth * scale) / 2, e.y + (e.height - image.naturalHeight * scale) / 2);
+          context.scale(image.naturalWidth * scale / 800, image.naturalHeight * scale / 800);
+          const shieldFill = context.createLinearGradient(0, 130, 0, 620);
+          shieldFill.addColorStop(0, '#0b5684');
+          shieldFill.addColorStop(1, '#03243f');
+          context.fillStyle = shieldFill;
+          context.beginPath();
+          context.moveTo(401, 105);
+          context.quadraticCurveTo(235, 211, 146, 216);
+          context.bezierCurveTo(179, 390, 276, 542, 401, 627);
+          context.bezierCurveTo(526, 542, 623, 390, 657, 216);
+          context.quadraticCurveTo(567, 211, 401, 105);
+          context.closePath(); context.fill();
+          context.restore();
+        }
         context.drawImage(image, e.x + (e.width - image.naturalWidth * scale) / 2, e.y + (e.height - image.naturalHeight * scale) / 2, image.naturalWidth * scale, image.naturalHeight * scale);
       } else {
         context.fillStyle=e.color; context.fillRect(e.x,e.y,e.width,e.height);
