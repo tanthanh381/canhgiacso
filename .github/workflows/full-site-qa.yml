@@ -46,42 +46,54 @@ jobs:
         env:
           CHECK: ${{ matrix.check }}
         run: |
-          set -euo pipefail
+          set -uo pipefail
+          : > /tmp/qa-diagnostics.txt
           case "$CHECK" in
             "TypeScript")
-              pnpm exec tsc --noEmit
+              pnpm exec tsc --noEmit 2>&1 | tee /tmp/qa-diagnostics.txt
               ;;
             "ESLint")
-              pnpm lint
+              pnpm lint 2>&1 | tee /tmp/qa-diagnostics.txt
               ;;
             "Dependency audit")
-              pnpm audit --prod --audit-level moderate
+              pnpm audit --prod --audit-level moderate 2>&1 | tee /tmp/qa-diagnostics.txt
               ;;
             "Regression suite")
-              pnpm test
+              pnpm test 2>&1 | tee /tmp/qa-diagnostics.txt
               ;;
             "Pages build")
-              pnpm run build:pages
+              pnpm run build:pages 2>&1 | tee /tmp/qa-diagnostics.txt
               ;;
             "Static release checks")
-              pnpm run build:pages
-              test -s docs/index.html
-              test -s docs/khien-so-logo.png
-              grep -F 'https://canhgiacso.com/' github-pages/index.html
-              grep -F 'Tình huống' app/page.tsx
-              grep -F 'Thực hành tương tác' app/page.tsx
-              ! grep -F '>Mô phỏng<' app/page.tsx
-              ! grep -F '>Trắc nghiệm<' app/page.tsx
-              ! grep -E 'service_role|sb_secret_' app/supabase.ts app/page.tsx
-              js_bytes=$(find docs/assets -type f -name '*.js' -printf '%s\n' | awk '{s+=$1} END {print s+0}')
-              echo "Total JS bytes: ${js_bytes}"
-              test "${js_bytes}" -lt 900000
+              {
+                set -euo pipefail
+                pnpm run build:pages
+                test -s docs/index.html
+                test -s docs/khien-so-logo.png
+                grep -F 'https://canhgiacso.com/' github-pages/index.html
+                grep -F 'Tình huống' app/page.tsx
+                grep -F 'Thực hành tương tác' app/page.tsx
+                ! grep -F '>Mô phỏng<' app/page.tsx
+                ! grep -F '>Trắc nghiệm<' app/page.tsx
+                ! grep -E 'service_role|sb_secret_' app/supabase.ts app/page.tsx
+                js_bytes=$(find docs/assets -type f -name '*.js' -printf '%s\n' | awk '{s+=$1} END {print s+0}')
+                echo "Total JS bytes: ${js_bytes}"
+                test "${js_bytes}" -lt 900000
+              } 2>&1 | tee /tmp/qa-diagnostics.txt
               ;;
             *)
-              echo "Unknown QA check: $CHECK" >&2
+              echo "Unknown QA check: $CHECK" | tee /tmp/qa-diagnostics.txt >&2
               exit 2
               ;;
           esac
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-${{ strategy.job-index }}-${{ matrix.check }}
+          path: /tmp/qa-diagnostics.txt
+          if-no-files-found: warn
 
   live-smoke:
     name: Live production smoke
