@@ -28,7 +28,7 @@ function parseManagementContext(value: unknown): { role: ContentRole; users: Man
     if (typeof user.id !== "string" || typeof user.email !== "string" || typeof user.username !== "string"
       || typeof user.display_name !== "string" || typeof user.created_at !== "string"
       || (user.role !== "admin" && user.role !== "editor" && user.role !== "member")) return [];
-    return [{ id: user.id, email: user.email, username: user.username, displayName: user.display_name, createdAt: user.created_at, role: user.role }];
+    return [{ id: user.id, email: user.email, username: user.username, displayName: user.display_name, createdAt: user.created_at, role: user.role as ManagedRole }];
   }) : [];
   return { role: record.role, users };
 }
@@ -331,7 +331,7 @@ export function AdminPage({
       </div>}
 
       {tab === "certificate" && <div className="certificate-admin-layout">
-        <div className="admin-section-title"><div><span className="eyebrow">MẪU CHỨNG CHỈ PDF</span><h2>Tùy chỉnh nội dung chứng nhận</h2><p>Các biến trong ngoặc nhọn sẽ được thay bằng dữ liệu kết quả thực tế khi người dùng tải PDF.</p></div></div>
+        <div className="admin-section-title"><div><span className="eyebrow">MẪU CHỨNG NHẬN PDF</span><h2>Tùy chỉnh nội dung chứng nhận</h2><p>Các biến trong ngoặc nhọn sẽ được thay bằng dữ liệu kết quả thực tế khi người dùng tải PDF.</p></div></div>
         <CertificateEditor template={draft.certificateTemplate} onChange={(certificateTemplate) => setDraft((current) => ({ ...current, certificateTemplate }))} />
         <div className="certificate-custom-preview-layout"><div>
         <div className="certificate-token-note" role="note"><strong>Biến hỗ trợ</strong><span>{"{courseName}"} · {"{scenarioTotal}"} · {"{completed}"} · {"{correct}"} · {"{accuracy}"} · {"{score}"} · {"{rating}"} · {"{displayName}"} · {"{username}"} · {"{certificateCode}"}</span></div>

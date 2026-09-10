@@ -279,7 +279,7 @@ export default function Home() {
       if (!active) return;
       const normalized = normalizeSiteContent(data?.content);
       if (normalized) {
-        publishedScenarios.current = data.content.scenarios;
+        publishedScenarios.current = normalized.scenarios;
         setSiteContent(normalized);
       }
     })();
@@ -1123,7 +1123,7 @@ export default function Home() {
               <article className="training-certificate-card issued">
                 <span className="certificate-card-mark" aria-hidden="true">HD</span>
                 <div className="certificate-card-copy">
-                  <span className="eyebrow">{currentCertificate ? "CHỨNG CHỈ LƯỢT HIỆN TẠI" : "CHỨNG CHỈ GẦN NHẤT"}</span>
+                  <span className="eyebrow">{currentCertificate ? "CHỨNG NHẬN LƯỢT HIỆN TẠI" : "CHỨNG NHẬN GẦN NHẤT"}</span>
                   <h2>Chứng nhận hoàn thành Cảnh Giác Số</h2>
                   <p>{latestCertificate.displayName} · Xếp loại <strong>{latestCertificate.rating}</strong> · Tỷ lệ đúng {latestCertificate.accuracy}%</p>
                   <small>Mã chứng nhận {latestCertificate.certificateCode} · Cấp ngày {new Date(latestCertificate.issuedAt).toLocaleDateString("vi-VN")}</small>
@@ -1133,7 +1133,7 @@ export default function Home() {
             ) : (
               <article className={`training-certificate-card ${results.length >= scenarios.length ? "ready" : "locked"}`}>
                 <span className="certificate-card-mark" aria-hidden="true">{results.length >= scenarios.length ? "✓" : "◇"}</span>
-                <div className="certificate-card-copy"><span className="eyebrow">CHỨNG CHỈ HOÀN THÀNH</span><h2>{results.length >= scenarios.length ? "Khóa đào tạo đã hoàn thành" : "Hoàn thành khóa để mở chứng nhận"}</h2><p>{results.length >= scenarios.length ? "Kết quả đã đủ điều kiện. Xác nhận với máy chủ để cấp chứng nhận PDF." : `Tiến độ hiện tại ${results.length}/${scenarios.length} tình huống.`}</p></div>
+                <div className="certificate-card-copy"><span className="eyebrow">CHỨNG NHẬN HOÀN THÀNH</span><h2>{results.length >= scenarios.length ? "Khóa đào tạo đã hoàn thành" : "Hoàn thành khóa để mở chứng nhận"}</h2><p>{results.length >= scenarios.length ? "Kết quả đã đủ điều kiện. Xác nhận với máy chủ để cấp chứng nhận PDF." : `Tiến độ hiện tại ${results.length}/${scenarios.length} tình huống.`}</p></div>
                 {results.length >= scenarios.length && <button className="primary-button certificate-download" onClick={() => void ensureCurrentCertificate()}>Cấp chứng nhận</button>}
               </article>
             )

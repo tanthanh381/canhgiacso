@@ -12,7 +12,8 @@ test("certificate template is customizable from admin and used by PDF renderer",
   assert.match(data, /export type CertificateTemplate/);
   assert.match(data, /certificateTemplate: CertificateTemplate/);
   assert.match(admin, /tab === "certificate"/);
-  assert.match(admin, /Tùy chỉnh nội dung chứng chỉ/);
+  assert.match(admin, /Tùy chỉnh nội dung chứng nhận/);
+  assert.match(admin, /MẪU CHỨNG NHẬN PDF/);
   assert.match(admin, /Biến hỗ trợ/);
   assert.match(certificate, /applyCertificateTemplate/);
   assert.match(certificate, /template\.organizationName/);

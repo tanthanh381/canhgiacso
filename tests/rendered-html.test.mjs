@@ -25,7 +25,7 @@ test("server renders the Cảnh Giác Số experience", async () => {
   assert.match(html, /HDBANK · IT SECURITY/);
   assert.match(html, /THƯ VIỆN TÌNH HUỐNG/);
   assert.match(html, /Cuộc gọi ‘điều tra khẩn cấp’/);
-  assert.match(html, /Mô phỏng/);
+  assert.match(html, /Tình huống/);
   assert.match(html, /Đăng nhập/);
   assert.match(html, /Đăng ký/);
   assert.match(html, /Đang tham gia với tư cách khách/);
