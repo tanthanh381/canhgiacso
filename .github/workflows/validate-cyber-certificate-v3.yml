@@ -1,0 +1,50 @@
+name: Validate cyber certificate v3
+
+on:
+  push:
+    branches:
+      - feature/cyber-certificate-v3
+    paths:
+      - scripts/apply-cyber-certificate-v3.py
+      - .github/workflows/validate-cyber-certificate-v3.yml
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: feature/cyber-certificate-v3
+          fetch-depth: 0
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Apply cyber certificate v3
+        run: python3 scripts/apply-cyber-certificate-v3.py
+      - name: Build GitHub Pages
+        run: pnpm run build:pages
+      - name: Run full test suite
+        run: pnpm test
+      - name: Commit generated changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/certificate-design.ts app/certificate.ts tests/cyber-certificate-v3.test.mjs
+          if git diff --cached --quiet; then
+            echo "No generated changes to commit."
+            exit 0
+          fi
+          git commit -m "feat: apply cyber certificate v3"
+          git push origin HEAD:feature/cyber-certificate-v3
