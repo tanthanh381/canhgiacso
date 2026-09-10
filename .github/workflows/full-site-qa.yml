@@ -1,0 +1,106 @@
+name: Full site QA
+
+on:
+  push:
+    branches:
+      - qa/full-site-20260910
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: TypeScript check
+        id: typecheck
+        continue-on-error: true
+        run: pnpm exec tsc --noEmit
+
+      - name: ESLint
+        id: lint
+        continue-on-error: true
+        run: pnpm lint
+
+      - name: Production dependency audit
+        id: audit
+        continue-on-error: true
+        run: pnpm audit --prod --audit-level moderate
+
+      - name: Full automated regression suite
+        id: tests
+        continue-on-error: true
+        run: pnpm test
+
+      - name: GitHub Pages build
+        id: pages
+        continue-on-error: true
+        run: pnpm run build:pages
+
+      - name: Static release checks
+        id: release
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s docs/index.html
+          test -s docs/khien-so-logo.png
+          grep -F 'https://canhgiacso.com/' github-pages/index.html
+          grep -F 'Tình huống' app/page.tsx
+          grep -F 'Thực hành tương tác' app/page.tsx
+          ! grep -F '>Mô phỏng<' app/page.tsx
+          ! grep -F '>Trắc nghiệm<' app/page.tsx
+          ! grep -E 'service_role|sb_secret_' app/supabase.ts app/page.tsx
+          js_bytes=$(find docs/assets -type f -name '*.js' -printf '%s\n' | awk '{s+=$1} END {print s+0}')
+          echo "Total JS bytes: ${js_bytes}"
+          test "${js_bytes}" -lt 900000
+
+      - name: Live production smoke
+        id: live
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --max-time 20 -o /tmp/site.html https://canhgiacso.com/
+          test -s /tmp/site.html
+          curl --fail --silent --show-error --location --max-time 20 -o /tmp/logo.png https://canhgiacso.com/khien-so-logo.png
+          test -s /tmp/logo.png
+          curl --fail --silent --show-error --location --max-time 20 -o /tmp/quiz.html 'https://phishingquiz.withgoogle.com/?hl=vi'
+          test -s /tmp/quiz.html
+
+      - name: QA summary and gate
+        if: always()
+        shell: bash
+        env:
+          TYPECHECK: ${{ steps.typecheck.outcome }}
+          LINT: ${{ steps.lint.outcome }}
+          AUDIT: ${{ steps.audit.outcome }}
+          TESTS: ${{ steps.tests.outcome }}
+          PAGES: ${{ steps.pages.outcome }}
+          RELEASE: ${{ steps.release.outcome }}
+          LIVE: ${{ steps.live.outcome }}
+        run: |
+          printf '%-18s %s\n' TypeScript "$TYPECHECK" ESLint "$LINT" Audit "$AUDIT" Regression "$TESTS" PagesBuild "$PAGES" ReleaseChecks "$RELEASE" LiveSmoke "$LIVE"
+          failed=0
+          for status in "$TYPECHECK" "$LINT" "$AUDIT" "$TESTS" "$PAGES" "$RELEASE" "$LIVE"; do
+            if [ "$status" != success ]; then failed=1; fi
+          done
+          exit "$failed"
