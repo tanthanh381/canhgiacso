@@ -1,0 +1,37 @@
+name: Validate certificate sync recovery
+
+on:
+  push:
+    branches:
+      - fix/certificate-stale-sync-20260910
+    paths:
+      - .github/workflows/validate-certificate-sync.yml
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/certificate-stale-sync-20260910
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: python3 scripts/patch-certificate-sync.py
+      - run: pnpm run build:pages
+      - run: pnpm test
+      - name: Commit validated source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/page.tsx tests/certificate-sync-recovery.test.mjs
+          git diff --cached --quiet || git commit -m "fix: recover certificate state after completion"
+          git push
