@@ -35,8 +35,10 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Lint
         run: pnpm run lint
-      - name: Test
-        run: pnpm test
+      - name: Build GitHub Pages target
+        run: pnpm run build:pages
+      - name: Run regression tests
+        run: node --test tests/*.test.mjs
 
   build:
     runs-on: ubuntu-latest
