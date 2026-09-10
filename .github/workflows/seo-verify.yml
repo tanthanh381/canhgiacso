@@ -1,0 +1,54 @@
+name: SEO Verify
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'github-pages/**'
+      - 'public/**'
+      - 'app/layout.tsx'
+      - 'vite.github-pages.config.ts'
+      - '.github/workflows/seo-verify.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'github-pages/**'
+      - 'public/**'
+      - 'app/layout.tsx'
+      - 'vite.github-pages.config.ts'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build GitHub Pages production target
+        run: pnpm run build:pages
+      - name: Verify crawlable SEO assets
+        run: |
+          test -f docs/robots.txt
+          test -f docs/sitemap.xml
+          test -f docs/kien-thuc/index.html
+          test -f docs/kien-thuc/nhan-dien-lua-dao-truc-tuyen/index.html
+          test -f docs/kien-thuc/nhan-dien-email-phishing/index.html
+          test -f docs/kien-thuc/xu-ly-khi-bi-lua-dao-chuyen-tien/index.html
+          grep -q 'Sitemap: https://canhgiacso.com/sitemap.xml' docs/robots.txt
+          grep -q '<loc>https://canhgiacso.com/</loc>' docs/sitemap.xml
+          grep -q 'rel="canonical" href="https://canhgiacso.com/"' docs/index.html
+          grep -q 'application/ld+json' docs/index.html
+          grep -q 'nhan-dien-lua-dao-truc-tuyen' docs/index.html
