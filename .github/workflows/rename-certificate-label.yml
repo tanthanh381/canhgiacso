@@ -1,29 +1,28 @@
-name: Rename certificate terminology
+name: Verify certificate terminology
 
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - app/**
+      - scripts/rename-certificate-label.py
+      - .github/workflows/rename-certificate-label.yml
   push:
     branches: [main]
     paths:
+      - app/**
       - scripts/rename-certificate-label.py
+      - .github/workflows/rename-certificate-label.yml
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  apply:
+  verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-        with:
-          ref: main
-          fetch-depth: 0
-      - name: Apply terminology update
+      - name: Apply terminology transformation in working tree
         run: python3 scripts/rename-certificate-label.py
-      - name: Commit changes
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/page.tsx app/admin.tsx app/certificate.ts app/data.ts
-          if git diff --cached --quiet; then exit 0; fi
-          git commit -m "feat: rename certificate wording to chung nhan"
-          git push origin HEAD:main
+      - name: Ensure repository already contains the transformed result
+        run: git diff --exit-code -- app/page.tsx app/admin.tsx app/certificate.ts app/data.ts

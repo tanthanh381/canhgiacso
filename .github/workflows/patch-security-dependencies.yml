@@ -1,0 +1,69 @@
+name: Patch security dependencies
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout hardening branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install current dependency tree
+        run: pnpm install --frozen-lockfile
+      - name: Fix existing lint blockers without changing behavior
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          cert = Path('app/certificate-editor.tsx')
+          text = cert.read_text()
+          text = text.replace(' type="button" autoFocus onClick=', ' type="button" onClick=')
+          old = ' const current=useRef(template);current.current=template;'
+          new = ' const current=useRef(template);\n useEffect(()=>{current.current=template;},[template]);'
+          if old not in text:
+              raise SystemExit('expected certificate ref pattern not found')
+          text = text.replace(old, new, 1)
+          cert.write_text(text)
+
+          page = Path('app/page.tsx')
+          text = page.read_text()
+          old = 'const PUBLIC_SITE_URL = "https://canhgiacso.com/";\n'
+          if old not in text:
+              raise SystemExit('expected unused PUBLIC_SITE_URL not found')
+          page.write_text(text.replace(old, '', 1))
+          PY
+      - name: Patch React and Vite security releases
+        run: pnpm up react@19.2.8 react-dom@19.2.8 react-server-dom-webpack@19.2.8 vite@8.0.16 --save-exact
+      - name: Lint
+        run: pnpm run lint
+      - name: Build static production target
+        run: pnpm run build:pages
+      - name: Regression tests
+        run: node --test tests/*.test.mjs
+      - name: Audit High and Critical vulnerabilities
+        run: pnpm audit --audit-level high
+      - name: Commit verified hardening changes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app/certificate-editor.tsx app/page.tsx package.json pnpm-lock.yaml
+          git diff --cached --quiet || git commit -m 'fix: patch security dependencies and lint blockers'
+          git push origin HEAD:${{ github.head_ref }}
