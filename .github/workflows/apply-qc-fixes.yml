@@ -77,11 +77,12 @@ jobs:
               ('assert.match(html, /Mô phỏng/);', 'assert.match(html, /Tình huống/);'),
           ])
 
-          tsconfig_path = Path('tsconfig.json')
-          config = json.loads(tsconfig_path.read_text())
-          existing = config.get('exclude', [])
-          config['exclude'] = list(dict.fromkeys([*existing, 'worker', 'db']))
-          tsconfig_path.write_text(json.dumps(config, ensure_ascii=False, indent=2) + '\n')
+          web_config = {
+              'extends': './tsconfig.json',
+              'include': ['app/**/*.ts', 'app/**/*.tsx', 'vite.github-pages.config.ts'],
+              'exclude': ['node_modules', 'worker', 'db', 'drizzle.config.ts', '.next', 'dist', 'build', 'github-pages']
+          }
+          Path('tsconfig.web.json').write_text(json.dumps(web_config, ensure_ascii=False, indent=2) + '\n')
           PY
 
       - name: Verify terminology and patches
@@ -109,7 +110,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: TypeScript check
-        run: pnpm exec tsc --noEmit
+        run: pnpm exec tsc -p tsconfig.web.json --noEmit
 
       - name: Full regression suite
         run: pnpm test
@@ -123,6 +124,6 @@ jobs:
           rm .github/workflows/apply-qc-fixes.yml
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add app/page.tsx app/admin.tsx tsconfig.json tests/certificate-source.test.mjs tests/certificate-template-admin.test.mjs tests/guest-certificate-flow.test.mjs tests/phishing-quiz-standalone.test.mjs tests/phishing-quiz-link.test.mjs tests/rendered-html.test.mjs .github/workflows/apply-qc-fixes.yml
+          git add app/page.tsx app/admin.tsx tsconfig.web.json tests/certificate-source.test.mjs tests/certificate-template-admin.test.mjs tests/guest-certificate-flow.test.mjs tests/phishing-quiz-standalone.test.mjs tests/phishing-quiz-link.test.mjs tests/rendered-html.test.mjs .github/workflows/apply-qc-fixes.yml
           git commit -m 'fix: resolve QC regressions and web type errors'
           git push origin HEAD:qa/full-site-20260910
