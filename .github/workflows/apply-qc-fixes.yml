@@ -79,7 +79,7 @@ jobs:
 
           web_config = {
               'extends': './tsconfig.json',
-              'include': ['app/**/*.ts', 'app/**/*.tsx', 'vite.github-pages.config.ts'],
+              'include': ['next-env.d.ts', 'app/**/*.ts', 'app/**/*.tsx', 'vite.github-pages.config.ts'],
               'exclude': ['node_modules', 'worker', 'db', 'drizzle.config.ts', '.next', 'dist', 'build', 'github-pages']
           }
           Path('tsconfig.web.json').write_text(json.dumps(web_config, ensure_ascii=False, indent=2) + '\n')
