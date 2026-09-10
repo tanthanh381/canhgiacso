@@ -40,3 +40,5 @@ jobs:
           git add package.json pnpm-lock.yaml
           git diff --cached --quiet || git commit -m 'fix: patch vulnerable React and Vite dependencies'
           git push origin HEAD:security/hardening-90
+
+# This workflow is temporary and will be removed after the dependency patch is committed.
