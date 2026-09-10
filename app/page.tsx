@@ -5,6 +5,7 @@ import { defaultSiteContent, Difficulty, normalizeSiteContent, SiteContent } fro
 import { supabase } from "./supabase";
 import { difficultyOrder, getLevelProgress, getUnlockedDifficulties } from "./progression";
 import { downloadTrainingCertificatePdf, TrainingCertificate } from "./certificate";
+import { authErrorMessage } from "./auth-error";
 
 const AdminPage = lazy(() => import("./admin").then((module) => ({ default: module.AdminPage })));
 
@@ -754,9 +755,7 @@ export default function Home() {
           },
         });
         if (error) {
-          setAuthError(error.message.toLowerCase().includes("database")
-            ? "Email hoặc tên đăng nhập đã được sử dụng. Vui lòng chọn thông tin khác."
-            : error.message);
+          setAuthError(authErrorMessage(error, "register"));
           return;
         }
         if (data.session && data.user) {
@@ -771,7 +770,7 @@ export default function Home() {
         await supabase.auth.signOut({ scope: "local" });
         const { data, error } = await supabase.auth.signInWithPassword({ email, password: authPassword });
         if (error || !data.user) {
-          setAuthError(error?.message ?? "Email hoặc mật khẩu không đúng.");
+          setAuthError(authErrorMessage(error ?? {}, "login"));
           return;
         }
         await loadRemoteAccount(data.user.id, data.user.email ?? email);
@@ -947,7 +946,7 @@ export default function Home() {
           <span className="product-lockup"><strong>{siteContent.copy.productName}</strong><small>{siteContent.copy.departmentName}</small></span>
         </button>
         <nav aria-label="Điều hướng chính">
-          <button aria-current={view === "game" ? "page" : undefined} className={view === "game" ? "active" : ""} onClick={() => navigateTo("game")}>Tình huống</button>
+          <button aria-current={view === "game" ? "page" : undefined} className={view === "game" ? "active" : ""} onClick={() => navigateTo("game")}>Mô phỏng</button>
           <button aria-current={view === "knowledge" ? "page" : undefined} className={view === "knowledge" ? "active" : ""} onClick={() => navigateTo("knowledge")}>Cẩm nang</button>
           <button aria-current={view === "quiz" ? "page" : undefined} className={view === "quiz" ? "active" : ""} onClick={() => navigateTo("quiz")}>Thực hành tương tác</button>
           <button aria-current={view === "stats" ? "page" : undefined} className={view === "stats" ? "active" : ""} onClick={() => navigateTo("stats")}>Thành tích</button>
