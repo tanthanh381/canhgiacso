@@ -1,10 +1,22 @@
 export const certificateParts = ['logo', 'hdbankLogo', 'organizationName', 'departmentName', 'eyebrow', 'title', 'recipientIntro', 'recipient', 'account', 'description', 'rating', 'issued', 'footerNote'] as const;
 export type CertificatePart = typeof certificateParts[number];
 export type CertificateElement = { x: number; y: number; width: number; height: number; fontSize: number; color: string; align: 'left' | 'center' | 'right' };
-export type CertificateDesign = { background: string; border: string; logo: string; hdbankLogo: string; elements: Record<CertificatePart, CertificateElement> };
+export type CertificateDesign = { theme?: 'classic' | 'cyber'; background: string; border: string; logo: string; hdbankLogo: string; elements: Record<CertificatePart, CertificateElement> };
 export const partLabels: Record<CertificatePart, string> = { logo:'Logo Team/đơn vị', hdbankLogo:'Logo HDBank', organizationName:'Tên tổ chức', departmentName:'Đơn vị', eyebrow:'Tiêu đề nhỏ', title:'Tiêu đề', recipientIntro:'Lời trao', recipient:'Tên học viên', account:'Tài khoản và mã', description:'Mô tả', rating:'Xếp loại', issued:'Ngày cấp và mã', footerNote:'Ghi chú' };
 
 export function defaultCertificateDesign(): CertificateDesign {
+ const box = (x:number,y:number,width:number,height:number,fontSize:number,color='#ffffff',align:CertificateElement['align']='center'):CertificateElement => ({x,y,width,height,fontSize,color,align});
+ return {theme:'cyber',background:'#00182f',border:'#19baff',logo:'',hdbankLogo:'',elements:{
+ logo:box(104,82,112,116,48), hdbankLogo:box(1390,82,250,118,32),
+ organizationName:box(244,88,320,64,34,'#ffffff','left'),departmentName:box(244,148,320,42,23,'#ffffff','left'),
+ title:box(180,260,930,122,86),eyebrow:box(185,390,935,124,39,'#c3e4ff'),
+ recipientIntro:box(210,546,895,66,31),recipient:box(195,620,925,116,78),
+ description:box(210,780,900,135,31),rating:box(1260,835,350,98,22,'#c3e4ff'),
+ issued:box(98,974,950,84,22,'#c3e4ff','left'),account:box(98,1060,950,32,18,'#c3e4ff','left'),
+ footerNote:box(155,1158,1438,44,17,'#b9dbf7') }};
+}
+
+export function classicCertificateDesign(): CertificateDesign {
  const box = (x:number,y:number,width:number,height:number,fontSize:number,color='#0f2847'):CertificateElement => ({x,y,width,height,fontSize,color,align:'center'});
  return {background:'#fffaf0',border:'#d89a68',logo:'',hdbankLogo:'',elements:{
  logo:box(270,92,112,112,48,'#d90000'), hdbankLogo:box(1390,82,250,118,32,'#e30613'), organizationName:box(410,108,900,50,38,'#c50000'), departmentName:box(410,165,900,40,22),
@@ -19,12 +31,12 @@ export function normalizeCertificateDesign(value: unknown): CertificateDesign | 
  const defaults=defaultCertificateDesign();
  const color=(v:unknown)=>typeof v==='string' && /^#[0-9a-f]{6}$/i.test(v);
  const image=(v:unknown)=>typeof v==='string' && v.length<=400000 && (v===''||/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/]+=*$/.test(v));
- if(!color(d.background)||!color(d.border)||!image(d.logo)||!image(d.hdbankLogo??'')||!d.elements) return null;
+ if(!color(d.background)||!color(d.border)||!image(d.logo)||!image(d.hdbankLogo??'')||!d.elements || (d.theme!==undefined&&!['classic','cyber'].includes(d.theme))) return null;
  const elements={} as CertificateDesign['elements'];
  for(const key of certificateParts){
    const e=d.elements[key]??(key==='hdbankLogo'?defaults.elements.hdbankLogo:undefined);
    if(!e||![e.x,e.y,e.width,e.height,e.fontSize].every(Number.isFinite)||e.x<0||e.y<0||e.width<40||e.height<30||e.x+e.width>1754||e.y+e.height>1240||e.fontSize<10||e.fontSize>100||!color(e.color)||!['left','center','right'].includes(e.align))return null;
    elements[key]={x:e.x,y:e.y,width:e.width,height:e.height,fontSize:e.fontSize,color:e.color,align:e.align};
  }
- return {background:d.background!,border:d.border!,logo:d.logo!,hdbankLogo:d.hdbankLogo??'',elements};
+ return {...(d.theme ? {theme:d.theme} : {}),background:d.background!,border:d.border!,logo:d.logo!,hdbankLogo:d.hdbankLogo??'',elements};
 }

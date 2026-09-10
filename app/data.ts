@@ -1,4 +1,4 @@
-import { normalizeCertificateDesign, type CertificateDesign } from "./certificate-design";
+import { defaultCertificateDesign, normalizeCertificateDesign, type CertificateDesign } from "./certificate-design";
 export type Difficulty = "Dễ" | "Trung bình" | "Khó" | "Rất khó";
 
 export type Choice = {
@@ -635,13 +635,14 @@ export const defaultSiteContent: SiteContent = {
     footerNotice: "**Website được quản lý và vận hành bởi: IT Security Team - HDBank.**\nĐược xây dựng với mục tiêu nâng cao nhận thức cộng đồng về phòng chống tội phạm lừa đảo trực tuyến.\nLưu ý: Nội dung và số tiền trên website chỉ là mô phỏng đào tạo.",
   },
   certificateTemplate: {
-    organizationName: "NGÂN HÀNG CP PHÁT TRIỂN TP. HỒ CHÍ MINH (HDBANK)",
-    departmentName: "KHỐI AN NINH THÔNG TIN & BAN ĐÀO TẠO HDBANK",
-    eyebrow: "CHỨNG NHẬN CHUYÊN MÔN HOÀN THÀNH DIỄN TẬP",
-    title: "HOÀN THÀNH KHÓA ĐÀO TẠO AN TOÀN THÔNG TIN",
-    recipientIntro: "Chứng nhận này được trân trọng trao cho:",
+    design: defaultCertificateDesign(),
+    organizationName: "CẢNH GIÁC SỐ",
+    departmentName: "IT SECURITY",
+    eyebrow: "HOÀN THÀNH ĐÀO TẠO NHẬN THỨC\nAN TOÀN THÔNG TIN",
+    title: "CHỨNG NHẬN",
+    recipientIntro: "Trân trọng trao tặng",
     courseName: "Cảnh Giác Số",
-    description: "Đã hoàn thành toàn bộ chương trình diễn tập tương tác “{courseName}”, gồm {scenarioTotal} tình huống mô phỏng lừa đảo và an toàn thông tin; hoàn thành {completed}/{scenarioTotal} tình huống với {correct} lựa chọn an toàn.",
+    description: "Đã hoàn thành Bộ {scenarioTotal} tình huống “{courseName}”\nvới {correct} tình huống nhận thức đúng.",
     ratingLabel: "XẾP LOẠI NĂNG LỰC",
     accountLabel: "Tài khoản",
     codeLabel: "Mã chứng nhận",

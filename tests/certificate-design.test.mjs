@@ -16,7 +16,10 @@ function load(name) {
 const {defaultCertificateDesign, normalizeCertificateDesign}=load('certificate-design');
 const {defaultSiteContent, normalizeSiteContent}=load('data');
 test('legacy certificates retain the original renderer and edited designs survive serialization',()=>{
- assert.equal(normalizeSiteContent(defaultSiteContent).certificateTemplate.design, undefined);
+ assert.equal(normalizeSiteContent(defaultSiteContent).certificateTemplate.design.theme, 'cyber');
+ const legacy=structuredClone(defaultSiteContent);
+ delete legacy.certificateTemplate.design;
+ assert.equal(normalizeSiteContent(legacy).certificateTemplate.design, undefined);
  const content=structuredClone(defaultSiteContent);
  content.certificateTemplate.design=defaultCertificateDesign();
  content.certificateTemplate.design.elements.title.x=200;

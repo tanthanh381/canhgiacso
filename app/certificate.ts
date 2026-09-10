@@ -1,6 +1,17 @@
 import { certificateParts, type CertificateDesign } from "./certificate-design";
 import type { CertificateTemplate } from "./data";
 
+const imageCache = new Map<string, Promise<HTMLImageElement>>();
+function certificateImage(src: string) {
+  let image = imageCache.get(src);
+  if (!image) {
+    image = (async () => { const value = new Image(); value.src = src; await value.decode(); return value; })();
+    imageCache.set(src, image);
+    image.catch(() => imageCache.delete(src));
+  }
+  return image;
+}
+
 export type TrainingCertificate = {
   certificateId: string;
   certificateCode: string;
@@ -311,17 +322,37 @@ export async function downloadTrainingCertificatePdf(certificate: TrainingCertif
 async function renderDesignedCertificate(context: CanvasRenderingContext2D, certificate: TrainingCertificate, template: CertificateTemplate, design: CertificateDesign) {
   context.fillStyle = design.background;
   context.fillRect(0, 0, 1754, 1240);
+  const cyber = design.theme === 'cyber';
+  if (cyber) {
+    const background = await certificateImage('/certificate-cyber-background.png');
+    context.drawImage(background, 0, 0, 1754, 1240);
+    context.fillStyle = '#c3e4ff'; context.textAlign = 'left'; context.font = '500 20px Arial';
+    context.fillText('NÂNG CAO NHẬN THỨC', 604, 118);
+    context.fillText('BẢO VỆ TƯƠNG LAI', 604, 151);
+    context.textAlign = 'center';
+    context.fillText('CON NGƯỜI LÀ TUYẾN PHÒNG THỦ', 1412, 113);
+    context.fillText('QUAN TRỌNG NHẤT', 1412, 146);
+    context.font = 'italic 37px Georgia';
+    context.fillText('An toàn hơn mỗi ngày', 1440, 804);
+    context.font = '700 21px Arial';
+    context.fillText('CÙNG XÂY DỰNG', 1435, 1001);
+    context.fillText('KHÔNG GIAN SỐ AN TOÀN', 1435, 1035);
+    context.font = '21px Arial'; context.fillText('canhgiacso.com', 1435, 1072);
+    context.strokeStyle = '#19baff';context.lineWidth = 1.5;
+    context.beginPath();context.moveTo(195,753);context.lineTo(1100,753);context.stroke();
+  } else {
   context.strokeStyle = design.border;
   context.lineWidth = 4;
   context.setLineDash([12, 8]);
   context.beginPath(); context.roundRect(76, 34, 1602, 1168, 24); context.stroke();
   context.setLineDash([]);
+  }
   const text = {
-    ...template, logo: 'HD', hdbankLogo: '', recipient: certificate.displayName.toLocaleUpperCase('vi-VN'),
-    account: `${template.accountLabel}: @${certificate.username} | ${template.codeLabel}: ${certificate.certificateCode}`,
+    ...template, logo: 'HD', hdbankLogo: '', recipient: cyber ? certificate.displayName : certificate.displayName.toLocaleUpperCase('vi-VN'),
+    account: cyber ? `${template.accountLabel}: @${certificate.username}` : `${template.accountLabel}: @${certificate.username} | ${template.codeLabel}: ${certificate.certificateCode}`,
     description: applyCertificateTemplate(template.description, certificate, template),
-    rating: `${template.ratingLabel}\n${certificate.rating}\nĐiểm: ${certificate.score} PTS | Tỷ lệ đúng: ${certificate.accuracy}%`,
-    issued: `${template.issuedDateLabel}: ${formatIssuedDate(certificate.issuedAt)} | ${template.codeLabel}: ${certificate.certificateCode}`,
+    rating: `${template.ratingLabel}\n${certificate.rating}\n${certificate.score} PTS · ${certificate.accuracy}% đúng`,
+    issued: `${template.issuedDateLabel}: ${formatIssuedDate(certificate.issuedAt)}${cyber ? '\n' : ' | '}${template.codeLabel}: ${certificate.certificateCode}`,
     footerNote: certificate.certificateCode.startsWith('CGS-GUEST-') ? 'Bản ghi nhận chế độ khách - không phải chứng nhận nội bộ đã xác minh.' : template.footerNote,
   };
   for (const key of certificateParts) {
@@ -332,10 +363,9 @@ async function renderDesignedCertificate(context: CanvasRenderingContext2D, cert
     context.save();
     context.beginPath(); context.rect(e.x, e.y, e.width, e.height); context.clip();
     if (key === 'logo') {
-      if (design.logo) {
-        const image = new Image();
-        image.src = design.logo;
-        await image.decode();
+      if (design.logo || cyber) {
+        const image = await certificateImage(design.logo || '/khien-so-logo.png');
+        if (cyber) {context.fillStyle='#900c23';context.beginPath();context.roundRect(e.x,e.y,e.width,e.height,20);context.fill();}
         const scale = Math.min(e.width / image.naturalWidth, e.height / image.naturalHeight);
         context.drawImage(image, e.x + (e.width - image.naturalWidth * scale) / 2, e.y + (e.height - image.naturalHeight * scale) / 2, image.naturalWidth * scale, image.naturalHeight * scale);
       } else {
@@ -344,7 +374,7 @@ async function renderDesignedCertificate(context: CanvasRenderingContext2D, cert
       }
       context.restore(); continue;
     }
-    if (key==='rating') { context.fillStyle='#f5e3bf';context.fillRect(e.x,e.y,e.width,e.height); }
+    if (key==='rating' && !cyber) { context.fillStyle='#f5e3bf';context.fillRect(e.x,e.y,e.width,e.height); }
     let size=e.fontSize; let lines:string[]=[];
     const family=key==='title'||key==='recipient' ? 'Georgia' : 'Arial';
     do {

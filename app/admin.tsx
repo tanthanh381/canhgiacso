@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { CertificateTemplate, Difficulty, KnowledgeCard, Scenario, SiteContent, normalizeSiteContent } from "./data";
-import { CertificateEditor } from "./certificate-editor";
+import { CertificateEditor, CertificateThumbnail } from "./certificate-editor";
 import { supabase } from "./supabase";
 
 type AdminAccount = { id: string; displayName: string; email: string };
@@ -333,12 +333,13 @@ export function AdminPage({
       {tab === "certificate" && <div className="certificate-admin-layout">
         <div className="admin-section-title"><div><span className="eyebrow">MẪU CHỨNG CHỈ PDF</span><h2>Tùy chỉnh nội dung chứng nhận</h2><p>Các biến trong ngoặc nhọn sẽ được thay bằng dữ liệu kết quả thực tế khi người dùng tải PDF.</p></div></div>
         <CertificateEditor template={draft.certificateTemplate} onChange={(certificateTemplate) => setDraft((current) => ({ ...current, certificateTemplate }))} />
+        <div className="certificate-custom-preview-layout"><div>
         <div className="certificate-token-note" role="note"><strong>Biến hỗ trợ</strong><span>{"{courseName}"} · {"{scenarioTotal}"} · {"{completed}"} · {"{correct}"} · {"{accuracy}"} · {"{score}"} · {"{rating}"} · {"{displayName}"} · {"{username}"} · {"{certificateCode}"}</span></div>
         <div className="admin-form-grid">
           {([
             ["organizationName", "Tên tổ chức", false],
             ["departmentName", "Đơn vị phụ trách", false],
-            ["eyebrow", "Dòng tiêu đề nhỏ", false],
+            ["eyebrow", "Dòng tiêu đề nhỏ", true],
             ["title", "Tiêu đề chứng nhận", false],
             ["recipientIntro", "Lời trao chứng nhận", false],
             ["courseName", "Tên chương trình / khóa đào tạo", false],
@@ -350,7 +351,7 @@ export function AdminPage({
             ["footerNote", "Ghi chú cuối chứng nhận", true],
           ] as Array<[Exclude<keyof CertificateTemplate, "design">, string, boolean]>).map(([key, label, multiline]) => <label key={key} className={multiline ? "admin-wide" : ""}><span>{label}</span>{multiline ? <textarea rows={4} value={draft.certificateTemplate[key]} onChange={(event) => changeCertificateTemplate(key, event.target.value)} /> : <input value={draft.certificateTemplate[key]} onChange={(event) => changeCertificateTemplate(key, event.target.value)} />}</label>)}
         </div>
-
+        </div><CertificateThumbnail template={draft.certificateTemplate} /></div>
       </div>}
 
       {tab === "scenarios" && selectedScenario && <div className="scenario-admin-layout">

@@ -1,9 +1,15 @@
 "use client";
 import { useEffect, useRef, useState } from 'react';
 import type { CertificateTemplate } from './data';
-import { certificateParts, defaultCertificateDesign, partLabels, type CertificatePart, type CertificateElement } from './certificate-design';
+import { certificateParts, defaultCertificateDesign, classicCertificateDesign, partLabels, type CertificatePart, type CertificateElement } from './certificate-design';
 import { renderCertificateCanvas, downloadTrainingCertificatePdf, type TrainingCertificate } from './certificate';
-const sample: TrainingCertificate={certificateId:'preview',certificateCode:'CGS-DEMO',runId:'preview',issuedAt:'2026-09-09',displayName:'NGUYỄN VĂN A',username:'nguyenvana',scenarioTotal:42,completed:42,correct:42,accuracy:100,score:5040,rating:'XUẤT SẮC'};
+const sample: TrainingCertificate={certificateId:'preview',certificateCode:'CGS-DEMO',runId:'preview',issuedAt:'2026-09-09',displayName:'Nguyễn Văn A',username:'nguyenvana',scenarioTotal:42,completed:42,correct:42,accuracy:100,score:5040,rating:'XUẤT SẮC'};
+export function CertificateThumbnail({template}:{template:CertificateTemplate}) {
+ const [image,setImage]=useState('');const [error,setError]=useState('');
+ const dialog=useRef<HTMLDialogElement>(null);
+ useEffect(()=>{let active=true;const timer=window.setTimeout(()=>{void renderCertificateCanvas(sample,template).then(canvas=>{if(active){setImage(canvas.toDataURL('image/jpeg',.9));setError('');}}).catch(()=>{if(active)setError('Chưa tải được mẫu. Vui lòng tải lại trang.');});},120);return()=>{active=false;window.clearTimeout(timer);};},[template]);
+ return <aside className="certificate-thumbnail"><h3>Xem trước chứng nhận</h3><p>Cập nhật theo nội dung đang chỉnh sửa · Dữ liệu minh họa</p>{error&&<p role="alert">{error}</p>}{image?<button type="button" className="certificate-thumbnail-button" onClick={()=>dialog.current?.showModal()} aria-label="Phóng to mẫu chứng nhận"><img src={image} alt="Thumbnail chứng nhận với tên Nguyễn Văn A và dữ liệu minh họa" /></button>:<p>Đang tạo bản xem trước…</p>}<small>Bấm vào mẫu để phóng to. Bản PDF sử dụng cùng bố cục này.</small><dialog ref={dialog} className="certificate-preview-dialog"><button type="button" autoFocus onClick={()=>dialog.current?.close()}>Đóng bản xem trước</button>{image&&<img src={image} alt="Chứng nhận mẫu phóng to" />}</dialog></aside>;
+}
 const editableCertificateParts=certificateParts.filter((id):id is CertificatePart=>id!=='hdbankLogo');
 export function CertificateEditor({template,onChange}:{template:CertificateTemplate;onChange:(value:CertificateTemplate)=>void}) {
  const design=template.design??defaultCertificateDesign();
@@ -32,7 +38,8 @@ export function CertificateEditor({template,onChange}:{template:CertificateTempl
   <div className="cert-toolbar"><div><h3>Thiết kế trực quan</h3><p>Chọn và kéo từng thành phần. Dùng phím mũi tên để dịch chuyển; giữ Shift để di chuyển nhanh.</p></div>
   {!template.design&&<button className="primary-button" onClick={()=>onChange({...template,design:defaultCertificateDesign()})}>Bật chỉnh sửa bố cục</button>}
   <button className="admin-secondary" disabled={busy} onClick={async()=>{setBusy(true);try{await downloadTrainingCertificatePdf(sample,template);}catch{setError('Không thể tạo PDF thử. Hãy kiểm tra logo.');}finally{setBusy(false);}}}>{busy?'Đang tạo…':'Tải PDF thử'}</button>
-  <button className="admin-secondary" onClick={()=>{uploadVersion.current++;const {design:removed,...rest}=template;void removed;onChange(rest);}}>Về bố cục gốc</button></div>
+  <button className="admin-secondary" onClick={()=>{uploadVersion.current++;onChange({...template,design:defaultCertificateDesign()});}}>Mẫu xanh công nghệ</button>
+  <button className="admin-secondary" onClick={()=>{uploadVersion.current++;onChange({...template,design:classicCertificateDesign()});}}>Mẫu nền sáng</button></div>
   {error&&<p role="alert">{error}</p>}
   <div className="cert-workspace"><div className="cert-stage" ref={stage}>
    <canvas ref={preview} width={1754} height={1240} aria-label="Xem trước chứng chỉ với dữ liệu mẫu" />
@@ -46,8 +53,8 @@ export function CertificateEditor({template,onChange}:{template:CertificateTempl
     <label>Logo Team/đơn vị (bên trái)<input type="file" accept="image/png,image/jpeg,image/webp" onChange={event=>{void upload(event.target.files?.[0]);event.target.value='';}} /></label>
     {design.logo&&<button type="button" onClick={clearLogo}>Xóa logo Team/đơn vị</button>}
    </fieldset>
-   <label>Màu nền<input type="color" value={design.background} onChange={event=>onChange({...template,design:{...design,background:event.target.value}})} /></label>
-   <label>Màu viền<input type="color" value={design.border} onChange={event=>onChange({...template,design:{...design,border:event.target.value}})} /></label>
+   {design.theme==='cyber'?<p>Nền xanh và họa tiết dùng theo mẫu. Bạn có thể kéo, đổi màu và cỡ chữ của các thành phần.</p>:<><label>Màu nền<input type="color" value={design.background} onChange={event=>onChange({...template,design:{...design,background:event.target.value}})} /></label>
+   <label>Màu viền<input type="color" value={design.border} onChange={event=>onChange({...template,design:{...design,border:event.target.value}})} /></label></>}
    <label>Thành phần<select value={selected} onChange={event=>setSelected(event.target.value as CertificatePart)}>{editableCertificateParts.map(id=><option value={id} key={id}>{partLabels[id]}</option>)}</select></label>
    {!imageSelected&&<label>Màu thành phần<input type="color" value={active.color} onChange={event=>patchElement({color:event.target.value})} /></label>}
    {([['x','Vị trí ngang',0,1754],['y','Vị trí dọc',0,1240],['width','Chiều rộng',40,1754],['height','Chiều cao',30,1240]] as const).map(([key,label,min,max])=><label key={key}>{label}<input type="number" min={min} max={max} value={active[key]} onChange={event=>{const n=event.target.valueAsNumber;if(Number.isFinite(n))patchElement({[key]:Math.max(min,Math.min(max,n))});}} /></label>)}
