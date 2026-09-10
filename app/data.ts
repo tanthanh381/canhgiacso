@@ -568,6 +568,17 @@ export type KnowledgeCard = {
   text: string;
 };
 
+export type NewsArticle = {
+  id: string;
+  title: string;
+  summary: string;
+  category: string;
+  publishedAt: string;
+  sourceName: string;
+  sourceUrl: string;
+  featured: boolean;
+};
+
 export type SiteCopy = {
   productName: string;
   departmentName: string;
@@ -577,6 +588,9 @@ export type SiteCopy = {
   knowledgeEyebrow: string;
   knowledgeTitle: string;
   knowledgeIntro: string;
+  newsEyebrow: string;
+  newsTitle: string;
+  newsIntro: string;
   dashboardEyebrow: string;
   dashboardTitle: string;
   dashboardIntro: string;
@@ -606,6 +620,7 @@ export type SiteContent = {
   certificateTemplate: CertificateTemplate;
   scenarios: Scenario[];
   knowledgeCards: KnowledgeCard[];
+  newsArticles: NewsArticle[];
 };
 
 export const knowledgeCards: KnowledgeCard[] = [
@@ -615,6 +630,79 @@ export const knowledgeCards: KnowledgeCard[] = [
   { icon: "▣", title: "Kiểm tra trước khi chuyển", text: "Đọc lại người nhận, số tiền và nội dung trên màn hình xác nhận cuối cùng." },
   { icon: "⚑", title: "Lưu bằng chứng", text: "Chụp màn hình, lưu số điện thoại, đường link và mã giao dịch trước khi báo cáo." },
   { icon: "☏", title: "Báo cáo đúng kênh", text: "Nếu đã chuyển tiền, liên hệ ngay ngân hàng qua kênh chính thức, lưu bằng chứng và trình báo cơ quan công an gần nhất." },
+];
+
+export const newsArticles: NewsArticle[] = [
+  {
+    id: "25-kich-ban-lua-dao-2026",
+    title: "Cảnh giác trước 25 kịch bản lừa đảo trên không gian mạng năm 2026",
+    summary: "Các thủ đoạn được chia thành 5 nhóm, nổi bật với giả mạo cơ quan, chiếm đoạt tài khoản và sử dụng AI, deepfake, deepvoice để tạo lòng tin. Không truy cập liên kết lạ, quét QR không rõ nguồn hoặc cung cấp OTP.",
+    category: "Cảnh báo lừa đảo",
+    publishedAt: "2026-09-08",
+    sourceName: "Bộ Công an",
+    sourceUrl: "https://www.bocongan.gov.vn/bai-viet/nang-cao-canh-giac-truoc-25-kich-ban-lua-dao-tren-khong-gian-mang-nam-2026-1788865614",
+    featured: true,
+  },
+  {
+    id: "cat-ghep-hinh-anh-cuong-doat",
+    title: "Cảnh báo thủ đoạn cắt ghép hình ảnh nhạy cảm để cưỡng đoạt tài sản",
+    summary: "Đối tượng thu thập ảnh và thông tin công khai, tạo hình ảnh giả rồi đe dọa phát tán để ép chuyển tiền. Người dùng nên hạn chế công khai dữ liệu cá nhân, lưu lại bằng chứng và trình báo cơ quan công an.",
+    category: "Cảnh báo lừa đảo",
+    publishedAt: "2026-09-07",
+    sourceName: "Bộ Công an",
+    sourceUrl: "https://www.bocongan.gov.vn/bai-viet/canh-bao-tinh-trang-quay-tro-lai-thu-doan-cat-ghep-hinh-anh-nhay-cam-nham-cuong-doat-tai-san-1788770637",
+    featured: false,
+  },
+  {
+    id: "lua-dao-mua-tuu-truong",
+    title: "Nhận diện lừa đảo nhắm vào học sinh, tân sinh viên mùa tựu trường",
+    summary: "Cần đề phòng tin cho thuê trọ giá rẻ yêu cầu đặt cọc gấp và thông báo giả mạo nhà trường về học phí, học bổng. Luôn xác minh qua website, số điện thoại hoặc đơn vị chức năng chính thức của trường.",
+    category: "Cảnh báo lừa đảo",
+    publishedAt: "2026-08-25",
+    sourceName: "Bộ Công an",
+    sourceUrl: "https://bocongan.gov.vn/bai-viet/catp-hai-phong-canh-bao-cac-thu-doan-lua-dao-bua-vay-hoc-sinh-tan-sinh-vien-mua-tuu-truong-1787629964",
+    featured: false,
+  },
+  {
+    id: "lua-dao-hop-dong-ky-nghi",
+    title: "Khoảng 2.500 đơn tố giác liên quan lừa đảo hợp đồng kỳ nghỉ",
+    summary: "Cơ quan chức năng cảnh báo các lời mời sở hữu kỳ nghỉ, ưu đãi du lịch và cam kết sinh lời thiếu minh bạch. Hãy đọc kỹ điều khoản, kiểm tra pháp nhân và không chuyển tiền khi bị thúc ép ký nhanh.",
+    category: "Cảnh báo lừa đảo",
+    publishedAt: "2026-07-04",
+    sourceName: "Bộ Công an",
+    sourceUrl: "https://bocongan.gov.vn/bai-viet/lua-dao-hop-dong-ky-nghi-tiep-nhan-2-500-don-to-giac-so-tien-chiem-doat-khoang-2-600-ty-dong-1783146602",
+    featured: false,
+  },
+  {
+    id: "viec-nhe-luong-cao-xuat-canh",
+    title: "Tránh bẫy “việc nhẹ lương cao” và dịch vụ xuất cảnh nhanh",
+    summary: "Các tài khoản ẩn danh quảng cáo việc làm thu nhập cao, làm visa nhanh rồi yêu cầu chuyển tiền qua tài khoản trung gian. Chỉ làm việc với tổ chức được cấp phép và tự kiểm tra thông tin qua kênh chính thống.",
+    category: "An toàn số",
+    publishedAt: "2026-06-19",
+    sourceName: "Bộ Công an",
+    sourceUrl: "https://bocongan.gov.vn/chinh-sach-phap-luat/bai-viet/tranh-tro-thanh-nan-nhan-cua-hoat-dong-to-chuc-cho-nguoi-khac-xuat-nhap-canh-di-cu-trai-phep-1781854747",
+    featured: false,
+  },
+  {
+    id: "bao-ve-du-lieu-ca-nhan",
+    title: "Cảnh báo nguy cơ lộ, lọt dữ liệu cá nhân trên không gian mạng",
+    summary: "Dữ liệu cá nhân có thể bị thu thập, trao đổi trong các nhóm kín và dùng cho lừa đảo. Nên hạn chế cấp quyền cho ứng dụng lạ, dùng mật khẩu mạnh, bật xác thực đa yếu tố và cập nhật phần mềm thường xuyên.",
+    category: "Bảo vệ dữ liệu",
+    publishedAt: "2026-06-10",
+    sourceName: "Bộ Công an",
+    sourceUrl: "https://www.bocongan.gov.vn/bai-viet/canh-bao-nguy-co-lo-lot-du-lieu-ca-nhan-tren-khong-gian-mang-1781085500",
+    featured: false,
+  },
+  {
+    id: "bao-cao-an-ninh-mang-2025",
+    title: "Báo cáo an ninh mạng 2025: tổ chức, doanh nghiệp tiếp tục là mục tiêu lớn",
+    summary: "Báo cáo ghi nhận khoảng 552.000 cuộc tấn công, 52,30% tổ chức bị ảnh hưởng và 47,72% đơn vị chưa có nhân sự chuyên trách. Năng lực con người, quản trị dữ liệu và ứng phó với AI là các ưu tiên cần củng cố.",
+    category: "An toàn thông tin",
+    publishedAt: "2026-01-20",
+    sourceName: "Hiệp hội An ninh mạng Quốc gia",
+    sourceUrl: "https://www.nca.org.vn/news/detail/bao-cao-tong-ket-an-ninh-mang-nam-2025-khu-vuc-to-chuc-doanh-nghiep--1769392766125?l=vi",
+    featured: false,
+  },
 ];
 
 export const defaultSiteContent: SiteContent = {
@@ -628,6 +716,9 @@ export const defaultSiteContent: SiteContent = {
     knowledgeEyebrow: "HDBANK · IT SECURITY",
     knowledgeTitle: "Sáu thói quen nhỏ, một lớp giáp lớn.",
     knowledgeIntro: "Cẩm nang an toàn số giúp bạn nhận ra áp lực, kiểm tra danh tính và giữ quyền kiểm soát trước mọi giao dịch.",
+    newsEyebrow: "CẬP NHẬT AN TOÀN SỐ",
+    newsTitle: "Tin tức và cảnh báo mới nhất.",
+    newsIntro: "Thông tin được tóm tắt từ các nguồn chính thống để giúp bạn nhận diện sớm rủi ro an toàn thông tin và lừa đảo trên không gian mạng.",
     dashboardEyebrow: "HDBANK · IT SECURITY",
     dashboardTitle: "Dashboard rủi ro nhận thức",
     dashboardIntro: "Tổng hợp mức độ tham gia, kết quả mô phỏng và nhóm cần ưu tiên đào tạo lại để hỗ trợ báo cáo an toàn thông tin.",
@@ -651,6 +742,7 @@ export const defaultSiteContent: SiteContent = {
   },
   scenarios,
   knowledgeCards,
+  newsArticles,
 };
 
 const difficultyValues: Difficulty[] = ["Dễ", "Trung bình", "Khó", "Rất khó"];
@@ -715,6 +807,9 @@ export function normalizeSiteContent(value: unknown): SiteContent | null {
   if (!Array.isArray(candidate.knowledgeCards) || candidate.knowledgeCards.length < 1 || candidate.knowledgeCards.length > 24) return null;
   if (!candidate.knowledgeCards.every((card) => isText(card.icon, 12) && isText(card.title, 160) && isText(card.text, 1200))) return null;
   const normalizedCopy = { ...copy } as SiteCopy;
+  normalizedCopy.newsEyebrow = isText(copy.newsEyebrow, 180) ? copy.newsEyebrow : defaultSiteContent.copy.newsEyebrow;
+  normalizedCopy.newsTitle = isText(copy.newsTitle, 180) ? copy.newsTitle : defaultSiteContent.copy.newsTitle;
+  normalizedCopy.newsIntro = isText(copy.newsIntro, 1000) ? copy.newsIntro : defaultSiteContent.copy.newsIntro;
   if (normalizedCopy.dashboardTitle === "Dashboard nhận thức an toàn") {
     normalizedCopy.dashboardTitle = "Dashboard rủi ro nhận thức";
   }
@@ -730,11 +825,32 @@ export function normalizeSiteContent(value: unknown): SiteContent | null {
   const normalizedKnowledgeCards = (candidate.knowledgeCards as KnowledgeCard[]).map((card) => card.title === "Kênh trợ giúp"
     ? { ...card, title: "Báo cáo đúng kênh", text: "Nếu đã chuyển tiền, liên hệ ngay ngân hàng qua kênh chính thức, lưu bằng chứng và trình báo cơ quan công an gần nhất." }
     : card);
+  const candidateNews = candidate.newsArticles === undefined ? defaultSiteContent.newsArticles : candidate.newsArticles;
+  if (!Array.isArray(candidateNews) || candidateNews.length > 60) return null;
+  const newsIds = new Set<string>();
+  const validNews = candidateNews.every((article) => {
+    if (!article || typeof article !== "object") return false;
+    if (!isText(article.id, 100) || !/^[a-z0-9-]+$/.test(article.id) || newsIds.has(article.id)) return false;
+    newsIds.add(article.id);
+    let sourceUrl: URL;
+    try { sourceUrl = new URL(article.sourceUrl); } catch { return false; }
+    return isText(article.title, 240)
+      && isText(article.summary, 1500)
+      && isText(article.category, 80)
+      && /^\d{4}-\d{2}-\d{2}$/.test(article.publishedAt)
+      && !Number.isNaN(Date.parse(`${article.publishedAt}T00:00:00Z`))
+      && isText(article.sourceName, 120)
+      && isText(article.sourceUrl, 1000)
+      && sourceUrl.protocol === "https:"
+      && typeof article.featured === "boolean";
+  });
+  if (!validNews) return null;
   return {
     version: 1,
     copy: normalizedCopy,
     certificateTemplate: normalizedCertificateTemplate,
     scenarios: normalizedScenarios,
     knowledgeCards: normalizedKnowledgeCards,
+    newsArticles: candidateNews as NewsArticle[],
   };
 }

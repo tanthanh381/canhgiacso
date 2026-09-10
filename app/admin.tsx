@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { CertificateTemplate, Difficulty, KnowledgeCard, Scenario, SiteContent, normalizeSiteContent } from "./data";
+import { CertificateTemplate, Difficulty, KnowledgeCard, NewsArticle, Scenario, SiteContent, normalizeSiteContent } from "./data";
 import { CertificateEditor, CertificateThumbnail } from "./certificate-editor";
 import { supabase } from "./supabase";
 
@@ -10,7 +10,7 @@ type AdminState = "checking" | "ready" | "forbidden" | "error";
 type ContentRole = "admin" | "editor";
 type ManagedRole = ContentRole | "member";
 type ManagedUser = { id: string; email: string; username: string; displayName: string; createdAt: string; role: ManagedRole };
-type AdminTab = "general" | "certificate" | "scenarios" | "knowledge" | "users";
+type AdminTab = "general" | "certificate" | "scenarios" | "knowledge" | "news" | "users";
 
 const difficultyOptions: Difficulty[] = ["Dễ", "Trung bình", "Khó", "Rất khó"];
 
@@ -198,6 +198,44 @@ export function AdminPage({
     setDraft((current) => ({ ...current, knowledgeCards: current.knowledgeCards.filter((_, cardIndex) => cardIndex !== index) }));
   }
 
+  function changeNews(index: number, patch: Partial<NewsArticle>) {
+    setDraft((current) => ({
+      ...current,
+      newsArticles: current.newsArticles.map((article, articleIndex) => articleIndex === index ? { ...article, ...patch } : article),
+    }));
+  }
+
+  function featureNews(index: number) {
+    setDraft((current) => ({
+      ...current,
+      newsArticles: current.newsArticles.map((article, articleIndex) => ({ ...article, featured: articleIndex === index })),
+    }));
+  }
+
+  function addNews() {
+    if (draft.newsArticles.length >= 60) {
+      setStatus("Đã đạt giới hạn 60 bài tin.");
+      return;
+    }
+    const article: NewsArticle = {
+      id: `tin-${Date.now()}`,
+      title: "Tin tức mới",
+      summary: "Nhập phần tóm tắt ngắn gọn, chính xác và không sao chép nguyên văn bài nguồn.",
+      category: "Cảnh báo lừa đảo",
+      publishedAt: new Date().toISOString().slice(0, 10),
+      sourceName: "Nguồn chính thống",
+      sourceUrl: "https://",
+      featured: draft.newsArticles.length === 0,
+    };
+    setDraft((current) => ({ ...current, newsArticles: [article, ...current.newsArticles] }));
+  }
+
+  function removeNews(index: number) {
+    const article = draft.newsArticles[index];
+    if (!article || !window.confirm(`Xóa tin “${article.title}” khỏi bản nháp?`)) return;
+    setDraft((current) => ({ ...current, newsArticles: current.newsArticles.filter((_, articleIndex) => articleIndex !== index) }));
+  }
+
   async function save(target: "draft" | "publish") {
     if (!account) return;
     if (target === "publish" && role !== "admin") {
@@ -206,7 +244,7 @@ export function AdminPage({
     }
     const normalized = normalizeSiteContent(draft);
     if (!normalized) {
-      setStatus("Nội dung chưa hợp lệ. Mỗi tình huống cần đúng 3 lựa chọn và chỉ 1 đáp án đúng.");
+      setStatus("Nội dung chưa hợp lệ. Kiểm tra tình huống, ngày đăng và URL nguồn HTTPS của mục Tin tức.");
       return;
     }
     if (target === "publish" && !window.confirm("Xác nhận xuất bản? Hãy bảo đảm nội dung đã được kiểm tra nguồn, không chứa dữ liệu cá nhân và mỗi tình huống chỉ có một đáp án an toàn.")) return;
@@ -317,6 +355,7 @@ export function AdminPage({
         <button role="tab" aria-selected={tab === "certificate"} className={tab === "certificate" ? "active" : ""} onClick={() => setTab("certificate")}>Chứng nhận</button>
         <button role="tab" aria-selected={tab === "scenarios"} className={tab === "scenarios" ? "active" : ""} onClick={() => setTab("scenarios")}>Tình huống ({draft.scenarios.length})</button>
         <button role="tab" aria-selected={tab === "knowledge"} className={tab === "knowledge" ? "active" : ""} onClick={() => setTab("knowledge")}>Cẩm nang ({draft.knowledgeCards.length})</button>
+        <button role="tab" aria-selected={tab === "news"} className={tab === "news" ? "active" : ""} onClick={() => setTab("news")}>Tin tức ({draft.newsArticles.length})</button>
         {role === "admin" && <button role="tab" aria-selected={tab === "users"} className={tab === "users" ? "active" : ""} onClick={() => setTab("users")}>Phân quyền ({managedUsers.length})</button>}
       </div>
 
@@ -325,6 +364,7 @@ export function AdminPage({
           ["productName", "Tên sản phẩm"], ["departmentName", "Tên đơn vị"], ["libraryEyebrow", "Nhãn thư viện"],
           ["libraryTitle", "Tiêu đề thư viện"], ["coachEyebrow", "Nhãn thẻ ghi nhớ"], ["knowledgeEyebrow", "Nhãn cẩm nang"],
           ["knowledgeTitle", "Tiêu đề cẩm nang"], ["knowledgeIntro", "Giới thiệu cẩm nang"], ["dashboardEyebrow", "Nhãn Dashboard"],
+          ["newsEyebrow", "Nhãn Tin tức"], ["newsTitle", "Tiêu đề Tin tức"], ["newsIntro", "Giới thiệu Tin tức"],
           ["dashboardTitle", "Tiêu đề Dashboard"], ["dashboardIntro", "Giới thiệu Dashboard"], ["footerTagline", "Dòng giới thiệu chân trang"],
           ["footerNotice", "Thông báo chân trang"],
         ] as Array<[keyof SiteContent["copy"], string]>).map(([key, label]) => <label key={key} className={key.endsWith("Intro") || key === "footerNotice" ? "admin-wide" : ""}><span>{label}</span>{key.endsWith("Intro") || key === "footerNotice" ? <textarea value={draft.copy[key]} onChange={(event) => changeCopy(key, event.target.value)} /> : <input value={draft.copy[key]} onChange={(event) => changeCopy(key, event.target.value)} />}</label>)}
@@ -374,6 +414,8 @@ export function AdminPage({
       </div>}
 
       {tab === "knowledge" && <div className="knowledge-admin"><div className="admin-section-title"><div><span className="eyebrow">CẨM NANG AN TOÀN</span><h2>Thẻ kiến thức</h2></div><button className="admin-secondary" onClick={addKnowledge}>+ Thêm thẻ</button></div><div className="knowledge-admin-grid">{draft.knowledgeCards.map((card, index) => <article key={index}><div className="knowledge-admin-head"><b>{String(index + 1).padStart(2, "0")}</b><button onClick={() => removeKnowledge(index)} aria-label={`Xóa ${card.title}`}>×</button></div><label><span>Biểu tượng</span><input value={card.icon} maxLength={12} onChange={(event) => changeKnowledge(index, { icon: event.target.value })} /></label><label><span>Tiêu đề</span><input value={card.title} onChange={(event) => changeKnowledge(index, { title: event.target.value })} /></label><label><span>Nội dung</span><textarea rows={5} value={card.text} onChange={(event) => changeKnowledge(index, { text: event.target.value })} /></label></article>)}</div></div>}
+
+      {tab === "news" && <div className="news-admin"><div className="admin-section-title"><div><span className="eyebrow">TIN TỨC AN TOÀN SỐ</span><h2>Quản lý bài tin</h2><p>Tóm tắt nội dung từ nguồn chính thống, ghi đúng ngày công bố và dùng liên kết HTTPS.</p></div><button className="admin-secondary" onClick={addNews}>+ Thêm tin</button></div>{draft.newsArticles.length ? <div className="news-admin-grid">{draft.newsArticles.map((article, index) => <article key={article.id}><div className="news-admin-head"><label><input type="radio" name="featured-news" checked={article.featured} onChange={() => featureNews(index)} /> Tin nổi bật</label><button onClick={() => removeNews(index)} aria-label={`Xóa ${article.title}`}>×</button></div><div className="news-admin-row"><label><span>Chủ đề</span><input value={article.category} onChange={(event) => changeNews(index, { category: event.target.value })} /></label><label><span>Ngày đăng</span><input type="date" value={article.publishedAt} onChange={(event) => changeNews(index, { publishedAt: event.target.value })} /></label></div><label><span>Tiêu đề</span><input value={article.title} onChange={(event) => changeNews(index, { title: event.target.value })} /></label><label><span>Tóm tắt</span><textarea rows={5} value={article.summary} onChange={(event) => changeNews(index, { summary: event.target.value })} /></label><div className="news-admin-row"><label><span>Tên nguồn</span><input value={article.sourceName} onChange={(event) => changeNews(index, { sourceName: event.target.value })} /></label><label><span>URL nguồn (HTTPS)</span><input type="url" value={article.sourceUrl} onChange={(event) => changeNews(index, { sourceUrl: event.target.value })} /></label></div></article>)}</div> : <div className="news-admin-empty">Chưa có bài tin. Chọn “Thêm tin” để bắt đầu.</div>}</div>}
 
       {tab === "users" && role === "admin" && <div className="role-management">
         <div className="admin-section-title"><div><span className="eyebrow">PHÂN QUYỀN HỆ THỐNG</span><h2>Tài khoản và nhóm quyền</h2><p>Quản trị viên có toàn quyền; Biên tập viên chỉ soạn và lưu bản nháp.</p></div></div>

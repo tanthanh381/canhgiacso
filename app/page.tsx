@@ -13,7 +13,7 @@ type Result = { scenarioId: number; correct: boolean; choiceIndex: number };
 type GameHistory = { runId: string; finishedAt: string; balance: number; completed: number; correct: number };
 type GameState = { run_id: string; balance: number; awareness: number; results: Result[]; history: GameHistory[] };
 type PendingChoice = { userId: string; runId: string; scenario: SiteContent["scenarios"][number]; snapshot: SiteContent["scenarios"][number]; index: number };
-type View = "game" | "knowledge" | "quiz" | "stats" | "evidence" | "dashboard" | "admin";
+type View = "game" | "knowledge" | "news" | "quiz" | "stats" | "evidence" | "dashboard" | "admin";
 type StoredProgress = {
   balance: number;
   awareness: number;
@@ -217,6 +217,8 @@ export default function Home() {
   const [selectedId, setSelectedId] = useState(1);
   const [difficulty, setDifficulty] = useState<"Tất cả" | Difficulty>("Tất cả");
   const [query, setQuery] = useState("");
+  const [newsQuery, setNewsQuery] = useState("");
+  const [newsCategory, setNewsCategory] = useState("Tất cả");
   const [balance, setBalance] = useState(300_000_000);
   const [awareness, setAwareness] = useState(100);
   const [results, setResults] = useState<Result[]>([]);
@@ -258,6 +260,7 @@ export default function Home() {
   const publishedScenarios = useRef<SiteContent["scenarios"]>([]);
   const scenarios = siteContent.scenarios;
   const knowledgeCards = siteContent.knowledgeCards;
+  const newsArticles = siteContent.newsArticles;
 
   useEffect(() => {
     const syncHash = () => {
@@ -411,6 +414,15 @@ export default function Home() {
     const matchesQuery = !needle || `${item.title} ${item.category} ${item.channel}`.toLowerCase().includes(needle);
     return matchesDifficulty && matchesQuery;
   }), [difficulty, query, scenarios]);
+
+  const newsCategories = useMemo(() => ["Tất cả", ...Array.from(new Set(newsArticles.map((article) => article.category)))], [newsArticles]);
+  const visibleNews = useMemo(() => {
+    const needle = newsQuery.trim().toLocaleLowerCase("vi");
+    return [...newsArticles]
+      .filter((article) => (newsCategory === "Tất cả" || article.category === newsCategory)
+        && (!needle || `${article.title} ${article.summary} ${article.sourceName}`.toLocaleLowerCase("vi").includes(needle)))
+      .sort((a, b) => Number(b.featured) - Number(a.featured) || b.publishedAt.localeCompare(a.publishedAt));
+  }, [newsArticles, newsCategory, newsQuery]);
 
   const streak = useMemo(() => {
     let current = 0;
@@ -947,6 +959,7 @@ export default function Home() {
         <nav aria-label="Điều hướng chính">
           <button aria-current={view === "game" ? "page" : undefined} className={view === "game" ? "active" : ""} onClick={() => navigateTo("game")}>Mô phỏng</button>
           <button aria-current={view === "knowledge" ? "page" : undefined} className={view === "knowledge" ? "active" : ""} onClick={() => navigateTo("knowledge")}>Cẩm nang</button>
+          <button aria-current={view === "news" ? "page" : undefined} className={view === "news" ? "active" : ""} onClick={() => navigateTo("news")}>Tin tức</button>
           <button aria-current={view === "quiz" ? "page" : undefined} className={view === "quiz" ? "active" : ""} onClick={() => navigateTo("quiz")}>Thực hành tương tác</button>
           <button aria-current={view === "stats" ? "page" : undefined} className={view === "stats" ? "active" : ""} onClick={() => navigateTo("stats")}>Thành tích</button>
           <button aria-current={view === "dashboard" ? "page" : undefined} className={view === "dashboard" ? "active" : ""} onClick={() => navigateTo("dashboard")}>Dashboard</button>
@@ -1086,6 +1099,31 @@ export default function Home() {
             <p>Các nguyên tắc ngắn gọn để nhận diện, xác minh và xử lý tình huống có dấu hiệu lừa đảo.</p>
           </div>
           <div className="knowledge-grid">{knowledgeCards.map((card, index) => <article key={card.title}><span>{String(index + 1).padStart(2, "0")}</span><BadgeIcon>{card.icon}</BadgeIcon><h2>{card.title}</h2><p>{card.text}</p></article>)}</div>
+        </section>
+      )}
+
+      {view === "news" && (
+        <section className="content-page news-page">
+          <div className="page-hero news-hero">
+            <div><span className="eyebrow">{siteContent.copy.newsEyebrow}</span><h1>{siteContent.copy.newsTitle}</h1></div>
+            <p>{siteContent.copy.newsIntro}</p>
+          </div>
+          <div className="news-tools" aria-label="Tìm và lọc tin tức">
+            <label className="news-search"><span aria-hidden="true">⌕</span><input value={newsQuery} onChange={(event) => setNewsQuery(event.target.value)} placeholder="Tìm theo tiêu đề, nội dung, nguồn…" aria-label="Tìm tin tức" /></label>
+            <div className="news-filters" aria-label="Lọc theo chủ đề">{newsCategories.map((category) => <button key={category} className={newsCategory === category ? "active" : ""} aria-pressed={newsCategory === category} onClick={() => setNewsCategory(category)}>{category}</button>)}</div>
+          </div>
+          <div className="news-grid">
+            {visibleNews.map((article, index) => (
+              <article key={article.id} className={article.featured && index === 0 ? "news-card featured" : "news-card"}>
+                <div className="news-meta"><span>{article.category}</span><time dateTime={article.publishedAt}>{new Date(`${article.publishedAt}T00:00:00Z`).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC" })}</time></div>
+                <h2>{article.title}</h2>
+                <p>{article.summary}</p>
+                <div className="news-source"><span>Nguồn: <strong>{article.sourceName}</strong></span><a href={article.sourceUrl} target="_blank" rel="noopener noreferrer">Đọc tại nguồn <span aria-hidden="true">↗</span></a></div>
+              </article>
+            ))}
+          </div>
+          {!visibleNews.length && <div className="news-empty"><strong>Không tìm thấy tin phù hợp.</strong><button onClick={() => { setNewsQuery(""); setNewsCategory("Tất cả"); }}>Xóa bộ lọc</button></div>}
+          <p className="news-disclaimer">Cảnh Giác Số chỉ tóm tắt nội dung nhằm mục đích nâng cao nhận thức. Thông tin đầy đủ và cập nhật nhất nằm tại liên kết nguồn của từng bài.</p>
         </section>
       )}
 
