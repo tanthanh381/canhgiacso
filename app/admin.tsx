@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { CertificateTemplate, Difficulty, KnowledgeCard, NewsArticle, Scenario, SiteContent, normalizeSiteContent } from "./data";
+import { CertificateTemplate, Difficulty, KnowledgeCard, NewsArticle, Scenario, SiteContent, normalizeManagedSiteContent } from "./data";
 import { CertificateEditor, CertificateThumbnail } from "./certificate-editor";
 import { supabase } from "./supabase";
 
@@ -80,20 +80,17 @@ export function AdminPage({
       }
       setRole(context.role);
       setManagedUsers(context.users);
-      const { data, error } = await supabase
-        .from("site_content")
-        .select("slug, content, updated_at")
-        .in("slug", ["main", "main-draft"]);
+      const { data, error } = await supabase.rpc("get_managed_site_content");
       if (!active) return;
       if (error) {
         setAccess("error");
         return;
       }
-      const rows = data ?? [];
+      const rows = Array.isArray(data) ? data as Array<{ slug: string; content: unknown; updated_at: string }> : [];
       const publishedRow = rows.find((row) => row.slug === "main");
       const draftRow = rows.find((row) => row.slug === "main-draft");
-      const normalizedPublished = normalizeSiteContent(publishedRow?.content) ?? publishedContent;
-      const normalizedDraft = normalizeSiteContent(draftRow?.content) ?? normalizedPublished;
+      const normalizedPublished = normalizeManagedSiteContent(publishedRow?.content) ?? publishedContent;
+      const normalizedDraft = normalizeManagedSiteContent(draftRow?.content) ?? normalizedPublished;
       setPublished(cloneContent(normalizedPublished));
       setDraft(cloneContent(normalizedDraft));
       setSelectedScenarioId(normalizedDraft.scenarios[0]?.id ?? 1);
@@ -242,7 +239,7 @@ export function AdminPage({
       setStatus("Biên tập viên chỉ có thể lưu bản nháp. Hãy gửi nội dung cho Quản trị viên để xuất bản.");
       return;
     }
-    const normalized = normalizeSiteContent(draft);
+    const normalized = normalizeManagedSiteContent(draft);
     if (!normalized) {
       setStatus("Nội dung chưa hợp lệ. Kiểm tra tình huống, ngày đăng và URL nguồn HTTPS của mục Tin tức.");
       return;
@@ -251,26 +248,20 @@ export function AdminPage({
     setBusy(true);
     setStatus(target === "publish" ? "Đang xuất bản…" : "Đang lưu bản nháp…");
     const now = new Date().toISOString();
-    const draftResult = await supabase.from("site_content").upsert({
-      slug: "main-draft",
-      content: normalized,
-      published: false,
-      updated_by: account.id,
-      updated_at: now,
-    }, { onConflict: "slug" });
+    const draftResult = await supabase.rpc("save_managed_site_content", {
+      target_slug: "main-draft",
+      target_content: normalized,
+    });
     if (draftResult.error) {
       setBusy(false);
       setStatus("Không thể lưu. Vui lòng kiểm tra quyền quản trị và cấu hình cơ sở dữ liệu.");
       return;
     }
     if (target === "publish") {
-      const publishResult = await supabase.from("site_content").upsert({
-        slug: "main",
-        content: normalized,
-        published: true,
-        updated_by: account.id,
-        updated_at: now,
-      }, { onConflict: "slug" });
+      const publishResult = await supabase.rpc("save_managed_site_content", {
+        target_slug: "main",
+        target_content: normalized,
+      });
       if (publishResult.error) {
         setBusy(false);
         setStatus("Bản nháp đã lưu nhưng chưa thể xuất bản.");

@@ -8,7 +8,7 @@ export function CertificateThumbnail({template}:{template:CertificateTemplate}) 
  const [image,setImage]=useState('');const [error,setError]=useState('');
  const dialog=useRef<HTMLDialogElement>(null);
  useEffect(()=>{let active=true;const timer=window.setTimeout(()=>{void renderCertificateCanvas(sample,template).then(canvas=>{if(active){setImage(canvas.toDataURL('image/jpeg',.9));setError('');}}).catch(()=>{if(active)setError('Chưa tải được mẫu. Vui lòng tải lại trang.');});},120);return()=>{active=false;window.clearTimeout(timer);};},[template]);
- return <aside className="certificate-thumbnail"><h3>Xem trước chứng nhận</h3><p>Cập nhật theo nội dung đang chỉnh sửa · Dữ liệu minh họa</p>{error&&<p role="alert">{error}</p>}{image?<button type="button" className="certificate-thumbnail-button" onClick={()=>dialog.current?.showModal()} aria-label="Phóng to mẫu chứng nhận"><img src={image} alt="Thumbnail chứng nhận với tên Nguyễn Văn A và dữ liệu minh họa" /></button>:<p>Đang tạo bản xem trước…</p>}<small>Bấm vào mẫu để phóng to. Bản PDF sử dụng cùng bố cục này.</small><dialog ref={dialog} className="certificate-preview-dialog"><button type="button" autoFocus onClick={()=>dialog.current?.close()}>Đóng bản xem trước</button>{image&&<img src={image} alt="Chứng nhận mẫu phóng to" />}</dialog></aside>;
+ return <aside className="certificate-thumbnail"><h3>Xem trước chứng nhận</h3><p>Cập nhật theo nội dung đang chỉnh sửa · Dữ liệu minh họa</p>{error&&<p role="alert">{error}</p>}{image?<button type="button" className="certificate-thumbnail-button" onClick={()=>dialog.current?.showModal()} aria-label="Phóng to mẫu chứng nhận"><img src={image} alt="Thumbnail chứng nhận với tên Nguyễn Văn A và dữ liệu minh họa" /></button>:<p>Đang tạo bản xem trước…</p>}<small>Bấm vào mẫu để phóng to. Bản PDF sử dụng cùng bố cục này.</small><dialog ref={dialog} className="certificate-preview-dialog"><button type="button" onClick={()=>dialog.current?.close()}>Đóng bản xem trước</button>{image&&<img src={image} alt="Chứng nhận mẫu phóng to" />}</dialog></aside>;
 }
 const editableCertificateParts=certificateParts.filter((id):id is CertificatePart=>id!=='hdbankLogo');
 export function CertificateEditor({template,onChange}:{template:CertificateTemplate;onChange:(value:CertificateTemplate)=>void}) {
@@ -20,7 +20,8 @@ export function CertificateEditor({template,onChange}:{template:CertificateTempl
  const stage=useRef<HTMLDivElement>(null);
  const drag=useRef<{id:CertificatePart;x:number;y:number;startX:number;startY:number;width:number;height:number;scaleX:number;scaleY:number}|null>(null);
  const uploadVersion=useRef(0);
- const current=useRef(template);current.current=template;
+ const current=useRef(template);
+ useEffect(()=>{current.current=template;},[template]);
  const active=design.elements[selected];
  const imageSelected=selected==='logo';
  function patchElement(patch:Partial<CertificateElement>) {

@@ -1,0 +1,5 @@
+Contact: https://github.com/tanthanh381/canhgiacso/security/policy
+Canonical: https://canhgiacso.com/.well-known/security.txt
+Policy: https://github.com/tanthanh381/canhgiacso/security/policy
+Preferred-Languages: vi, en
+Expires: 2027-09-11T00:00:00Z

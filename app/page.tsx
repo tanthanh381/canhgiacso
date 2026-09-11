@@ -11,8 +11,9 @@ const AdminPage = lazy(() => import("./admin").then((module) => ({ default: modu
 
 type Result = { scenarioId: number; correct: boolean; choiceIndex: number };
 type GameHistory = { runId: string; finishedAt: string; balance: number; completed: number; correct: number };
-type GameState = { run_id: string; balance: number; awareness: number; results: Result[]; history: GameHistory[] };
-type PendingChoice = { userId: string; runId: string; scenario: SiteContent["scenarios"][number]; snapshot: SiteContent["scenarios"][number]; index: number };
+type ChoiceOutcome = { scenarioId: number; choiceIndex: number; correct: boolean; moneyDelta: number; awarenessDelta: number; feedback: string };
+type GameState = { run_id: string; balance: number; awareness: number; results: Result[]; history: GameHistory[]; outcome?: ChoiceOutcome };
+type PendingChoice = { userId: string; runId: string; scenario: SiteContent["scenarios"][number]; index: number };
 type View = "game" | "knowledge" | "news" | "quiz" | "stats" | "evidence" | "dashboard" | "admin";
 type StoredProgress = {
   balance: number;
@@ -65,7 +66,6 @@ type DefenseBadge = {
 const LEGACY_PROGRESS_KEY = "khien-so-progress";
 const THEME_KEY = "khien-so-theme";
 const GUEST_CERTIFICATE_KEY = "canh-giac-so-guest-certificate";
-const PUBLIC_SITE_URL = "https://canhgiacso.com/";
 const PHISHING_QUIZ_URL = "https://phishingquiz.withgoogle.com/?hl=vi";
 const USERNAME_PATTERN = /^[a-z0-9._-]{3,24}$/;
 const PASSWORD_PATTERN = /^(?=.{8,72}$)(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d])\S+$/;
@@ -214,6 +214,7 @@ function Modal({
 export default function Home() {
   const [view, setView] = useState<View>("game");
   const [siteContent, setSiteContent] = useState<SiteContent>(defaultSiteContent);
+  const [contentReady, setContentReady] = useState(false);
   const [selectedId, setSelectedId] = useState(1);
   const [difficulty, setDifficulty] = useState<"Tất cả" | Difficulty>("Tất cả");
   const [query, setQuery] = useState("");
@@ -223,6 +224,7 @@ export default function Home() {
   const [awareness, setAwareness] = useState(100);
   const [results, setResults] = useState<Result[]>([]);
   const [answer, setAnswer] = useState<number | null>(null);
+  const [answerOutcome, setAnswerOutcome] = useState<ChoiceOutcome | null>(null);
   const [dark, setDark] = useState(false);
   const [guide, setGuide] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -257,7 +259,6 @@ export default function Home() {
   const saveLock = useRef(false);
   const accountEpoch = useRef(0);
   const activeUser = useRef<string | null>(null);
-  const publishedScenarios = useRef<SiteContent["scenarios"]>([]);
   const scenarios = siteContent.scenarios;
   const knowledgeCards = siteContent.knowledgeCards;
   const newsArticles = siteContent.newsArticles;
@@ -274,17 +275,14 @@ export default function Home() {
   useEffect(() => {
     let active = true;
     void (async () => {
-      const { data } = await supabase
-        .from("site_content")
-        .select("content")
-        .eq("slug", "main")
-        .eq("published", true)
-        .maybeSingle();
+      const { data, error } = await supabase.rpc("get_public_site_content");
       if (!active) return;
-      const normalized = normalizeSiteContent(data?.content);
+      const normalized = normalizeSiteContent(data);
       if (normalized) {
-        publishedScenarios.current = data.content.scenarios;
         setSiteContent(normalized);
+        setContentReady(true);
+      } else if (error) {
+        setDataStatus("Chưa tải được thư viện tình huống an toàn. Vui lòng tải lại trang.");
       }
     })();
     return () => { active = false; };
@@ -468,6 +466,7 @@ export default function Home() {
     setDark(localStorage.getItem(THEME_KEY) === "dark" || progress.dark);
     setPlayerName(displayName || "Người chơi ẩn danh");
     setAnswer(null);
+    setAnswerOutcome(null);
     setLossNotice(null);
     setSelectedId(1);
     setDifficulty("Tất cả");
@@ -574,6 +573,7 @@ export default function Home() {
     }
     setSelectedId(id);
     setAnswer(null);
+    setAnswerOutcome(null);
     navigateTo("game");
     if (window.innerWidth < 1050) document.querySelector(".stage")?.scrollIntoView({ behavior: "smooth" });
   }
@@ -585,23 +585,29 @@ export default function Home() {
   }
 
   async function submitChoice(index: number) {
-    if (!hydrated || resetBusy || saveLock.current || pendingChoice || answer !== null || completedIds.has(selected.id)) return;
+    if (!hydrated || !contentReady || resetBusy || saveLock.current || pendingChoice || answer !== null || completedIds.has(selected.id)) return;
     if (activeUser.current) {
       if (!sessionAccount || !runId) { setDataStatus("Vui lòng chờ tải xong dữ liệu tài khoản."); return; }
-      const snapshot = publishedScenarios.current.find((item) => item.id === selected.id);
-      if (!snapshot) { setDataStatus("Chưa tải được nội dung đã xuất bản. Vui lòng tải lại trang."); return; }
-      const pending = { userId: sessionAccount.id, runId, scenario: selected, snapshot, index };
+      const pending = { userId: sessionAccount.id, runId, scenario: selected, index };
       try { localStorage.setItem(`khien-so-pending:${sessionAccount.id}`, JSON.stringify(pending)); }
       catch { setDataStatus("Không thể lưu tạm câu trả lời trên thiết bị. Hãy cho phép lưu trữ và thử lại."); return; }
       setPendingChoice(pending);
       await syncChoice(pending);
       return;
     }
-    const choice = selected.choices[index];
-    const nextBalance = Math.max(0, balance + choice.moneyDelta);
-    const nextAwareness = Math.max(0, Math.min(100, awareness + choice.awarenessDelta));
-    const nextResults = [...results, { scenarioId: selected.id, correct: choice.correct, choiceIndex: index }];
+    setSavingChoice(true);
+    const { data, error } = await supabase.rpc("evaluate_guest_choice", { scenario_id: selected.id, choice_index: index });
+    setSavingChoice(false);
+    if (error || !data) {
+      setDataStatus("Chưa chấm được lựa chọn. Vui lòng kiểm tra kết nối và thử lại.");
+      return;
+    }
+    const outcome = data as ChoiceOutcome;
+    const nextBalance = Math.max(0, balance + outcome.moneyDelta);
+    const nextAwareness = Math.max(0, Math.min(100, awareness + outcome.awarenessDelta));
+    const nextResults = [...results, { scenarioId: selected.id, correct: outcome.correct, choiceIndex: index }];
     setAnswer(index);
+    setAnswerOutcome(outcome);
     setBalance(nextBalance);
     setAwareness(nextAwareness);
     setResults(nextResults);
@@ -610,11 +616,11 @@ export default function Home() {
       setCompletionCertificate(guestCertificate);
       setDataStatus("Bạn đã hoàn thành khóa đào tạo. Bản ghi nhận PDF đã sẵn sàng.");
     }
-    if (!choice.correct) {
+    if (!outcome.correct) {
       setLossNotice({
         scenarioTitle: selected.title,
-        amountLost: Math.max(0, -choice.moneyDelta),
-        awarenessLost: Math.max(0, -choice.awarenessDelta),
+        amountLost: Math.max(0, -outcome.moneyDelta),
+        awarenessLost: Math.max(0, -outcome.awarenessDelta),
         balanceAfter: nextBalance,
       });
     }
@@ -629,7 +635,7 @@ export default function Home() {
     try {
       const { data, error } = await supabase.rpc("submit_game_choice", {
         expected_run: pending.runId, scenario_id: pending.scenario.id,
-        choice_index: pending.index, scenario_snapshot: pending.snapshot,
+        choice_index: pending.index,
       });
       if (epoch !== accountEpoch.current) return;
       if (error || !data) {
@@ -645,8 +651,9 @@ export default function Home() {
       applyGameState(state);
       setSelectedId(pending.scenario.id);
       setAnswer(result?.choiceIndex ?? null);
+      setAnswerOutcome(state.outcome ?? null);
       if (result && !result.correct) setLossNotice({ scenarioTitle: pending.scenario.title,
-        amountLost: Math.max(0, balance - state.balance), awarenessLost: Math.max(0, awareness - state.awareness), balanceAfter: state.balance });
+        amountLost: Math.max(0, -(state.outcome?.moneyDelta ?? 0)), awarenessLost: Math.max(0, -(state.outcome?.awarenessDelta ?? 0)), balanceAfter: state.balance });
       localStorage.removeItem(`khien-so-pending:${pending.userId}`);
       setPendingChoice(null);
       if (state.results.length >= scenarios.length) await refreshCertificates(pending.runId);
@@ -669,7 +676,7 @@ export default function Home() {
         return;
       }
       applyGameState(data as GameState);
-      setAnswer(null); setLossNotice(null); setSelectedId(scenarios[0].id); setView("game");
+      setAnswer(null); setAnswerOutcome(null); setLossNotice(null); setSelectedId(scenarios[0].id); setView("game");
       setResetBusy(false); setResetConfirmOpen(false);
       setDataStatus("Đã mở lượt chơi mới. Lịch sử lượt trước được giữ lại.");
       return;
@@ -680,6 +687,7 @@ export default function Home() {
     setCompletionCertificate(null);
     try { localStorage.removeItem(GUEST_CERTIFICATE_KEY); } catch { /* ignore storage restrictions */ }
     setAnswer(null);
+    setAnswerOutcome(null);
     setLossNotice(null);
     setSelectedId(1);
     setView("game");
@@ -946,6 +954,13 @@ export default function Home() {
   const latestCertificate = currentCertificate ?? certificates[0] ?? null;
   const previousResult = results.find((result) => result.scenarioId === selected.id);
   const selectedAnswer = answer ?? previousResult?.choiceIndex ?? null;
+  const selectedOutcome = selectedAnswer === null ? null
+    : answerOutcome?.scenarioId === selected.id && answerOutcome.choiceIndex === selectedAnswer
+      ? answerOutcome
+      : previousResult
+        ? { scenarioId: selected.id, choiceIndex: previousResult.choiceIndex, correct: previousResult.correct, moneyDelta: 0, awarenessDelta: 0,
+            feedback: previousResult.correct ? "Lựa chọn này đã được máy chủ xác nhận là an toàn." : "Lựa chọn này đã được máy chủ xác nhận là có rủi ro." }
+        : null;
   const visibleDashboardStatus: DashboardStatus = sessionAccount ? dashboardStatus : "forbidden";
 
   return (
@@ -1052,15 +1067,15 @@ export default function Home() {
                 <div className="choice-list">
                   {selected.choices.map((choice, index) => {
                     const isChosen = selectedAnswer === index;
-                    const state = selectedAnswer === null ? "" : isChosen ? (choice.correct ? "correct" : "wrong") : "disabled";
-                    return <button key={choice.text} className={`choice ${state}`} onClick={() => submitChoice(index)} disabled={!hydrated || savingChoice || !!pendingChoice || resetBusy || selectedAnswer !== null}>
-                      <span className="choice-letter">{String.fromCharCode(65 + index)}</span><span>{choice.text}</span>{isChosen && <b>{choice.correct ? "✓" : "×"}</b>}
+                    const state = selectedAnswer === null ? "" : isChosen ? (selectedOutcome?.correct ? "correct" : "wrong") : "disabled";
+                    return <button key={choice.text} className={`choice ${state}`} onClick={() => submitChoice(index)} disabled={!hydrated || !contentReady || savingChoice || !!pendingChoice || resetBusy || selectedAnswer !== null}>
+                      <span className="choice-letter">{String.fromCharCode(65 + index)}</span><span>{choice.text}</span>{isChosen && <b>{selectedOutcome?.correct ? "✓" : "×"}</b>}
                     </button>;
                   })}
                 </div>
-                {selectedAnswer !== null && (
-                  <div role="status" aria-live="polite" className={`feedback ${selected.choices[selectedAnswer].correct ? "success" : "danger"}`}>
-                    <div><strong>{selected.choices[selectedAnswer].correct ? "Lựa chọn an toàn" : "Bạn đã mắc bẫy"}</strong><p>{selected.choices[selectedAnswer].feedback}</p><small>Mẹo ghi nhớ: {selected.tip}</small></div>
+                {selectedAnswer !== null && selectedOutcome && (
+                  <div role="status" aria-live="polite" className={`feedback ${selectedOutcome.correct ? "success" : "danger"}`}>
+                    <div><strong>{selectedOutcome.correct ? "Lựa chọn an toàn" : "Bạn đã mắc bẫy"}</strong><p>{selectedOutcome.feedback}</p><small>Mẹo ghi nhớ: {selected.tip}</small></div>
                     <button onClick={nextScenario}>{results.length >= scenarios.length ? "Xem chứng nhận PDF →" : "Kịch bản tiếp theo →"}</button>
                   </div>
                 )}
@@ -1232,8 +1247,8 @@ export default function Home() {
           publishedContent={siteContent}
           onLogin={() => openAuth("login")}
           onPublished={(content) => {
-            publishedScenarios.current = content.scenarios;
             setSiteContent(content);
+            setContentReady(true);
             setDataStatus("Nội dung website đã được xuất bản.");
             window.setTimeout(() => setDataStatus(""), 2600);
           }}

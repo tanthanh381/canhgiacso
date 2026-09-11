@@ -21,7 +21,7 @@ test("server renders the Cảnh Giác Số experience", async () => {
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
   const html = await response.text();
-  assert.match(html, /Cảnh Giác Số \| HDBank - IT Security/);
+  assert.match(html, /Cảnh Giác Số: Nhận diện lừa đảo trực tuyến/);
   assert.match(html, /HDBANK · IT SECURITY/);
   assert.match(html, /THƯ VIỆN TÌNH HUỐNG/);
   assert.match(html, /Cuộc gọi ‘điều tra khẩn cấp’/);
@@ -46,7 +46,7 @@ test("ships product metadata and social artwork", async () => {
   ]);
 
   assert.match(layout, /og\.png/);
-  assert.match(layout, /HDBank - IT Security/);
+  assert.match(layout, /Cảnh Giác Số: Nhận diện lừa đảo trực tuyến/);
   assert.match(layout, /lang="vi"/);
   assert.match(page, /localStorage/);
   assert.match(page, /CẢNH GIÁC SỐ/);
@@ -58,7 +58,7 @@ test("ships product metadata and social artwork", async () => {
   assert.match(page, /role="status"/);
   assert.match(page, /readStoredProgress/);
   assert.match(page, /supabase\.auth\.signUp/);
-  assert.match(page, /emailRedirectTo: PUBLIC_SITE_URL/);
+  assert.match(page, /data: \{ username, display_name: displayName \}/);
   assert.match(page, /USERNAME_PATTERN/);
   assert.match(page, /PASSWORD_PATTERN/);
   assert.match(page, /Mật khẩu cần 8–72 ký tự/);
@@ -87,7 +87,7 @@ test("ships product metadata and social artwork", async () => {
   assert.match(admin, /Kiểm soát trước khi xuất bản/);
   assert.match(data, /Website được quản lý và vận hành bởi: IT Security Team - HDBank/);
   assert.match(data, /nâng cao nhận thức cộng đồng về phòng chống tội phạm lừa đảo trực tuyến/);
-  assert.match(page, /site_content/);
+  assert.match(page, /get_public_site_content/);
   assert.match(page, /#\/admin/);
   assert.match(page, /AdminPage/);
   assert.match(admin, /Lưu bản nháp/);
@@ -102,7 +102,7 @@ test("ships product metadata and social artwork", async () => {
   assert.match(admin, /Cấp quyền/);
   assert.match(admin, /Người dùng cần đăng ký và xác nhận email/);
   assert.match(data, /normalizeSiteContent/);
-  assert.match(data, /ANSWER_POSITION_PATTERN/);
+  assert.doesNotMatch(data.slice(data.indexOf("const scenarioDefinitions"), data.indexOf("export const scenarios")), /correct:\s*(?:true|false)|moneyDelta:|awarenessDelta:|feedback:/);
   const scenarioIds = [...data.matchAll(/\bid:\s*(\d+),/g)].map((match) => Number(match[1]));
   assert.equal(new Set(scenarioIds).size, 42);
   assert.equal(Math.max(...scenarioIds), 42);
