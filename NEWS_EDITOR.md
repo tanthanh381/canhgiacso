@@ -25,6 +25,8 @@ Các trường mới đều tùy chọn: `slug`, `status`, `thumbnail`, `thumbna
 
 Ảnh được lưu cùng JSON nội dung theo cách ảnh chứng nhận hiện có. Không cần thiết lập bucket hoặc quyền Storage mới. Kho nội dung có giới hạn máy chủ 1 MB; phía giao diện chặn trên 850 KB UTF-8 để chừa khoảng an toàn. Với nhiều bài nhiều ảnh, nên sử dụng URL ảnh HTTPS từ kho ảnh hiện có. Thư viện ảnh chỉ tổng hợp ảnh trong các bài đang được quản trị, chưa phải một DAM/kho media độc lập.
 
+Giờ xuất bản tùy chọn `publishedTime` (HH:mm, GMT+7) bổ sung cho ngày cũ, không thay đổi `publishedAt`. Chú thích ảnh đại diện (`thumbnailCaption`) và ảnh nội dung (`attrs.caption`) tối đa 500 ký tự, hiển thị trong preview và trang đọc bằng `figcaption`.
+
 Chủ đề được hỗ trợ theo trường `category` sẵn có. Không thêm tags vì cấu trúc hiện tại chưa có tags. Ngày xuất bản chỉ là ngày hiển thị, chưa có hẹn giờ đăng. SEO title/meta description cập nhật khi đọc bài trong trình duyệt; đường dẫn `/#/news/<slug>` chưa cung cấp trang HTML riêng cho crawler, canonical/sitemap từng bài hoặc social metadata phía máy chủ.
 
 ## File thay đổi
@@ -45,7 +47,7 @@ Chủ đề được hỗ trợ theo trường `category` sẵn có. Không thê
 
 - `pnpm run build`: đạt.
 - `pnpm run build:pages`: đạt.
-- `node --test tests/*.test.mjs`: 35/35 đạt.
+- `node --test tests/*.test.mjs`: 36/36 đạt.
 - `pnpm run lint`: không lỗi; còn 8 cảnh báo khuyến nghị dùng `next/image` thay `<img>` (dự án xuất bản tĩnh và đã nén ảnh tải lên).
 - `pnpm audit --prod --audit-level low`: không có lỗ hổng đã biết.
 - TypeScript cho toàn bộ thư mục `app`: đạt. `tsc --noEmit` toàn dự án vẫn bị chặn bởi khai báo kiểu Cloudflare có sẵn còn thiếu: `cloudflare:workers`, `Fetcher`, `D1Database` ở `db/index.ts`, `worker/index.ts`.
@@ -53,3 +55,15 @@ Chủ đề được hỗ trợ theo trường `category` sẵn có. Không thê
 - Trang Tin tức công khai mở đúng khi khởi tạo và tải lại đường dẫn. Dữ liệu công khai nhận được trong lúc kiểm tra không có bài tin, nên chưa xác minh mở/lưu/xuất bản một bài thật bằng tài khoản quản trị trên hệ thống sản xuất.
 
 Các file fixture/kiểm tra tạm không nằm trong bản giao. CI hiện có sẽ tự build thư mục `docs` khi mã nguồn được đưa lên nhánh triển khai; không cần sửa thủ công các file build.
+
+
+## Hoàn thiện trong tác vụ hiện tại
+
+- Giữ React/TypeScript, Tiptap và design system hiện có; không thêm dependency hoặc migration.
+- Thêm trường chú thích khi upload/chọn/sửa ảnh đại diện và ảnh nội dung; render chú thích ở trang đọc và preview.
+- Thêm giờ xuất bản tùy chọn theo GMT+7; đây là thời gian hiển thị, không hẹn giờ tự đăng.
+- Bài mới tự tạo slug; sửa tiêu đề bài hiện có giữ nguyên slug. Có thể nhập slug thủ công hoặc yêu cầu tạo lại.
+- Kiểm tra mới: build vinext và build GitHub Pages đạt; 36/36 tests đạt; lint không lỗi, 8 cảnh báo ảnh như trước. TypeScript toàn dự án còn lỗi khai báo Cloudflare có sẵn, không có lỗi ở phần app.
+- Chrome với dữ liệu mẫu cục bộ: sửa bài có sẵn, tạo bài mới, slug, nhập rich text, chèn ảnh/alt/chú thích, upload PNG từ máy thành WebP cho ảnh đại diện, giờ xuất bản, preview, chuyển qua lại bài giữ dữ liệu, màn hình 390 px không tràn ngang đều đạt.
+- Chưa xác minh lưu/xuất bản với tài khoản quản trị thật trên Supabase; chưa push/deploy và không ghi dữ liệu sản xuất.
+- File sửa trong lần này: `app/news-editor.tsx`, `app/news-content.ts`, `app/news-article.tsx`, `app/data.ts`, `app/globals.css`, `tests/news-content.test.mjs`, `NEWS_EDITOR.md`.

@@ -25,12 +25,11 @@ function renderNode(node: RichNode, key: number): ReactNode {
   }
   if (node.type === "image")
     return safeImage(node.attrs?.src) ? (
-      <img
-        key={key}
+      <figure key={key}><img
         src={node.attrs.src}
         alt={String(node.attrs?.alt ?? "")}
         loading="lazy"
-      />
+      />{typeof node.attrs?.caption === "string" && node.attrs.caption && <figcaption>{node.attrs.caption}</figcaption>}</figure>
     ) : null;
   const tag = (
     {
@@ -63,16 +62,16 @@ export function NewsArticleView({ article }: { article: NewsArticle }) {
     <article className="news-reading">
       <div className="news-meta">
         <span>{article.category}</span>
-        <time dateTime={article.publishedAt}>{article.publishedAt}</time>
+        <time dateTime={article.publishedTime ? `${article.publishedAt}T${article.publishedTime}:00+07:00` : article.publishedAt}>{article.publishedAt}{article.publishedTime ? ` · ${article.publishedTime} (GMT+7)` : ""}</time>
       </div>
       <h1>{article.title}</h1>
       <p className="news-lead">{article.summary}</p>
       {article.thumbnail && safeImage(article.thumbnail) && (
-        <img
+        <figure><img
           className="news-cover"
           src={article.thumbnail}
           alt={article.thumbnailAlt || ""}
-        />
+        />{article.thumbnailCaption && <figcaption>{article.thumbnailCaption}</figcaption>}</figure>
       )}
       {article.body && (
         <div className="news-rich">{renderNode(article.body, 0)}</div>

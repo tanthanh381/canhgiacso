@@ -15,17 +15,31 @@ import {
 } from "./news-content";
 import { NewsArticleView } from "./news-article";
 
+const CaptionImage = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      caption: {
+        default: "",
+        parseHTML: (element) => element.getAttribute("data-caption") || "",
+        renderHTML: (attributes) => ({ "data-caption": attributes.caption }),
+      },
+    };
+  },
+});
+
 function ImagePicker({
   images,
   initial,
   onUse,
 }: {
   images: string[];
-  initial?: { src: string; alt: string };
-  onUse: (src: string, alt: string) => void;
+  initial?: { src: string; alt: string; caption?: string };
+  onUse: (src: string, alt: string, caption: string) => void;
 }) {
   const [src, setSrc] = useState(initial?.src ?? "");
   const [alt, setAlt] = useState(initial?.alt ?? "");
+  const [caption, setCaption] = useState(initial?.caption ?? "");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const version = useRef(0);
@@ -140,12 +154,13 @@ function ImagePicker({
           placeholder="Mô tả nội dung ảnh cho người không nhìn thấy ảnh"
         />
       </label>
+      <label>Chú thích ảnh<input value={caption} maxLength={500} onChange={(e) => setCaption(e.target.value)} placeholder="Chú thích hiển thị dưới ảnh (không bắt buộc)" /></label>
       {error && <p role="alert">{error}</p>}
       <button
         type="button"
         className="admin-secondary"
         disabled={busy || !safeImage(src) || !alt.trim()}
-        onClick={() => onUse(src, alt.trim())}
+        onClick={() => onUse(src, alt.trim(), caption.trim())}
       >
         {busy ? "Đang xử lý ảnh…" : "Sử dụng ảnh"}
       </button>
@@ -167,6 +182,7 @@ function ArticleEditor({
   disabled?: boolean;
 }) {
   const [imageTarget, setImageTarget] = useState<"cover" | "body" | null>(null);
+  const [autoSlug, setAutoSlug] = useState(article.slug === article.id && article.status === "draft");
   const [showLink, setShowLink] = useState(false);
   const [link, setLink] = useState("");
   const dialog = useRef<HTMLDialogElement>(null);
@@ -182,7 +198,7 @@ function ArticleEditor({
           isAllowedUri: safeLink,
         },
       }),
-      Image.configure({ allowBase64: true }),
+      CaptionImage.configure({ allowBase64: true }),
       TextAlign.configure({
         types: ["heading", "paragraph"],
         alignments: ["left", "center", "right"],
@@ -247,8 +263,7 @@ function ArticleEditor({
             onChange={(e) =>
               onChange({
                 title: e.target.value,
-                ...(article.slug === article.id ||
-                article.slug === newsSlug(article.title)
+                ...(autoSlug
                   ? { slug: newsSlug(e.target.value) }
                   : {}),
               })
@@ -419,17 +434,17 @@ function ArticleEditor({
             images={images}
             initial={
               selectedImage
-                ? { src: selectedImage.src, alt: selectedImage.alt }
+                ? { src: selectedImage.src, alt: selectedImage.alt, caption: selectedImage.caption }
                 : undefined
             }
-            onUse={(src, alt) => {
+            onUse={(src, alt, caption) => {
               if (selectedImage)
                 editor
                   ?.chain()
                   .focus()
-                  .updateAttributes("image", { src, alt })
+                  .updateAttributes("image", { src, alt, caption })
                   .run();
-              else editor?.chain().focus().setImage({ src, alt }).run();
+              else editor?.chain().focus().insertContent({ type: "image", attrs: { src, alt, caption } }).run();
               setImageTarget(null);
             }}
           />
@@ -492,7 +507,8 @@ function ArticleEditor({
               onChange={(e) => onChange({ publishedAt: e.target.value })}
             />
           </label>
-          <small>Ngày hiển thị trên bài, không phải hẹn giờ đăng.</small>
+          <label>Giờ xuất bản (giờ Việt Nam)<input type="time" value={article.publishedTime ?? ""} onChange={(e) => onChange({ publishedTime: e.target.value })} /></label>
+          <small>Ngày giờ hiển thị trên bài, không phải hẹn giờ đăng.</small>
           <label>
             Chủ đề *
             <input
@@ -534,9 +550,10 @@ function ArticleEditor({
                   onChange={(e) => onChange({ thumbnailAlt: e.target.value })}
                 />
               </label>
+              <label>Chú thích ảnh<textarea rows={2} value={article.thumbnailCaption ?? ""} maxLength={500} onChange={(e) => onChange({ thumbnailCaption: e.target.value })} /></label>
               <button
                 type="button"
-                onClick={() => onChange({ thumbnail: "", thumbnailAlt: "" })}
+                onClick={() => onChange({ thumbnail: "", thumbnailAlt: "", thumbnailCaption: "" })}
               >
                 Xóa ảnh đại diện
               </button>
@@ -558,9 +575,10 @@ function ArticleEditor({
               initial={{
                 src: article.thumbnail ?? "",
                 alt: article.thumbnailAlt ?? "",
+                caption: article.thumbnailCaption ?? "",
               }}
-              onUse={(thumbnail, thumbnailAlt) => {
-                onChange({ thumbnail, thumbnailAlt });
+              onUse={(thumbnail, thumbnailAlt, thumbnailCaption) => {
+                onChange({ thumbnail, thumbnailAlt, thumbnailCaption });
                 setImageTarget(null);
               }}
             />
@@ -573,12 +591,12 @@ function ArticleEditor({
             <input
               value={article.slug ?? article.id}
               maxLength={100}
-              onChange={(e) => onChange({ slug: e.target.value })}
+              onChange={(e) => { setAutoSlug(false); onChange({ slug: e.target.value }); }}
             />
           </label>
           <button
             type="button"
-            onClick={() => onChange({ slug: newsSlug(article.title) })}
+            onClick={() => { setAutoSlug(true); onChange({ slug: newsSlug(article.title) }); }}
           >
             Tạo slug từ tiêu đề
           </button>

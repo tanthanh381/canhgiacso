@@ -79,6 +79,8 @@ export function validDocument(value: unknown): value is RichNode {
         n.attrs.alt.length > 240)
     )
       return false;
+    if (n.type === "image" && n.attrs?.caption !== undefined &&
+      (typeof n.attrs.caption !== "string" || n.attrs.caption.length > 500)) return false;
     if (n.type === "heading" && ![2, 3].includes(Number(n.attrs?.level)))
       return false;
     if (
@@ -147,6 +149,12 @@ export function newsErrors(
       article.publishedAt
   )
     errors.push("Ngày xuất bản không hợp lệ.");
+  if (article.publishedTime !== undefined && article.publishedTime !== "" &&
+    !/^([01]\d|2[0-3]):[0-5]\d$/.test(article.publishedTime))
+    errors.push("Giờ xuất bản không hợp lệ (HH:mm).");
+  if (article.thumbnailCaption !== undefined &&
+    (typeof article.thumbnailCaption !== "string" || article.thumbnailCaption.length > 500))
+    errors.push("Chú thích ảnh tối đa 500 ký tự.");
   if (
     (article.sourceUrl && !safeLink(article.sourceUrl)) ||
     article.sourceName.length > 120 ||

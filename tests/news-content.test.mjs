@@ -220,3 +220,19 @@ test("round trip giữ nội dung rich text và metadata của bài mới và b�
     content.newsArticles,
   );
 });
+
+
+test("giữ chú thích và giờ khi tạo/lưu/sửa bài; từ chối dữ liệu không hợp lệ", () => {
+  const content = managedContent();
+  const article = { ...newArticle(), publishedTime: "09:30", thumbnailCaption: "Ảnh minh họa",
+    body: { type: "doc", content: [{ type: "image", attrs: { src: "https://example.com/a.png", alt: "Cảnh báo", caption: "Nguồn ảnh" } }] } };
+  content.newsArticles.push(article);
+  const saved = normalizeManagedSiteContent(JSON.parse(JSON.stringify(content)));
+  assert.deepEqual(saved.newsArticles.at(-1), article);
+  saved.newsArticles.at(-1).title = "Tiêu đề đã sửa";
+  assert.equal(normalizeManagedSiteContent(saved).newsArticles.at(-1).slug, "bai-moi");
+  for (const publishedTime of ["24:00", "12:60", "9:30"]) assert.ok(newsErrors({ ...article, publishedTime }, [article]).length);
+  assert.ok(newsErrors({ ...article, thumbnailCaption: "x".repeat(501) }, [article]).length);
+  article.body.content[0].attrs.caption = 123;
+  assert.equal(validDocument(article.body), false);
+});

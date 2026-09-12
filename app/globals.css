@@ -594,3 +594,5 @@ footer { font-size: 12px; }.footer-brand small { font-size: 12px; }
 @media(max-width:760px){.news-workspace{grid-template-columns:minmax(0,1fr)}.news-article-list{position:static;max-height:230px}.news-compose-side{grid-template-columns:minmax(0,1fr)}.news-toolbar{gap:4px}.news-toolbar button{padding:8px}.news-reading{padding:18px}.news-editor-surface .tiptap{padding:16px}.news-selected-actions{flex-wrap:wrap}}
 
 .news-selected-actions label{display:flex;align-items:center;gap:8px;font-size:.875rem}.news-selected-actions input[type=checkbox]{width:18px;height:18px;padding:0}.news-compose button{cursor:pointer}.news-compose button:disabled{cursor:default}
+
+.news-reading figure{margin:20px 0}.news-reading figcaption{font-size:.875rem;color:var(--muted);text-align:center;line-height:1.5;margin-top:8px;white-space:pre-wrap}

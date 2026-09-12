@@ -564,6 +564,8 @@ export type NewsArticle = {
   status?: "draft" | "published";
   thumbnail?: string;
   thumbnailAlt?: string;
+  thumbnailCaption?: string;
+  publishedTime?: string;
   body?: RichNode;
   seoTitle?: string;
   metaDescription?: string;
