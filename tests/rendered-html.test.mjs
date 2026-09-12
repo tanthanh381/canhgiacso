@@ -33,6 +33,15 @@ test("server renders the Cảnh Giác Số experience", async () => {
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/i);
 });
 
+test("primary game navigation uses the Thử thách label without changing its route", async () => {
+  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const gameNavigation = /onClick=\{\(\) => navigateTo\("game"\)\}>([^<]+)<\/button>/g;
+  const labels = [...page.matchAll(gameNavigation)].map((match) => match[1]);
+
+  assert.ok(labels.includes("Thử thách"));
+  assert.ok(!labels.includes("Mô phỏng"));
+});
+
 test("ships product metadata and social artwork", async () => {
   const [layout, page, admin, data, schema, contentRoles, packageJson, styles] = await Promise.all([
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
