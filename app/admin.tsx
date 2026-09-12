@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { CertificateTemplate, Difficulty, KnowledgeCard, NewsArticle, Scenario, SiteContent, normalizeManagedSiteContent } from "./data";
+import { CertificateTemplate, Difficulty, KnowledgeCard, Scenario, SiteContent, normalizeManagedSiteContent } from "./data";
 import { CertificateEditor, CertificateThumbnail } from "./certificate-editor";
+import { NewsEditor } from './news-editor';
+import { newsErrors, publicNews } from './news-content';
 import { supabase } from "./supabase";
 
 type AdminAccount = { id: string; displayName: string; email: string };
@@ -28,7 +30,7 @@ function parseManagementContext(value: unknown): { role: ContentRole; users: Man
     if (typeof user.id !== "string" || typeof user.email !== "string" || typeof user.username !== "string"
       || typeof user.display_name !== "string" || typeof user.created_at !== "string"
       || (user.role !== "admin" && user.role !== "editor" && user.role !== "member")) return [];
-    return [{ id: user.id, email: user.email, username: user.username, displayName: user.display_name, createdAt: user.created_at, role: user.role }];
+    return [{ id: user.id, email: user.email, username: user.username, displayName: user.display_name, createdAt: user.created_at, role: user.role as ManagedRole }];
   }) : [];
   return { role: record.role, users };
 }
@@ -50,6 +52,7 @@ export function AdminPage({
   const [tab, setTab] = useState<AdminTab>("general");
   const [selectedScenarioId, setSelectedScenarioId] = useState(publishedContent.scenarios[0]?.id ?? 1);
   const [status, setStatus] = useState("");
+  const [savedSnapshot, setSavedSnapshot] = useState(JSON.stringify(publishedContent));
   const [busy, setBusy] = useState(false);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const [role, setRole] = useState<ContentRole | null>(null);
@@ -93,12 +96,23 @@ export function AdminPage({
       const normalizedDraft = normalizeManagedSiteContent(draftRow?.content) ?? normalizedPublished;
       setPublished(cloneContent(normalizedPublished));
       setDraft(cloneContent(normalizedDraft));
+      setSavedSnapshot(JSON.stringify(normalizedDraft));
       setSelectedScenarioId(normalizedDraft.scenarios[0]?.id ?? 1);
       setUpdatedAt(draftRow?.updated_at ?? publishedRow?.updated_at ?? null);
       setAccess("ready");
     })();
     return () => { active = false; };
   }, [account, publishedContent]);
+
+  const dirty = access === 'ready' && JSON.stringify(draft) !== savedSnapshot;
+  useEffect(() => {
+    if (!dirty) return;
+    const beforeUnload = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ''; };
+    const beforeNavigate = (event: Event) => { if (!window.confirm('Bạn có thay đổi chưa lưu. Rời trang và bỏ các thay đổi này?')) event.preventDefault(); };
+    window.addEventListener('beforeunload', beforeUnload);
+    window.addEventListener('admin-before-leave', beforeNavigate);
+    return () => { window.removeEventListener('beforeunload', beforeUnload); window.removeEventListener('admin-before-leave', beforeNavigate); };
+  }, [dirty]);
 
   const selectedScenario = useMemo(
     () => draft.scenarios.find((scenario) => scenario.id === selectedScenarioId) ?? draft.scenarios[0],
@@ -195,50 +209,15 @@ export function AdminPage({
     setDraft((current) => ({ ...current, knowledgeCards: current.knowledgeCards.filter((_, cardIndex) => cardIndex !== index) }));
   }
 
-  function changeNews(index: number, patch: Partial<NewsArticle>) {
-    setDraft((current) => ({
-      ...current,
-      newsArticles: current.newsArticles.map((article, articleIndex) => articleIndex === index ? { ...article, ...patch } : article),
-    }));
-  }
-
-  function featureNews(index: number) {
-    setDraft((current) => ({
-      ...current,
-      newsArticles: current.newsArticles.map((article, articleIndex) => ({ ...article, featured: articleIndex === index })),
-    }));
-  }
-
-  function addNews() {
-    if (draft.newsArticles.length >= 60) {
-      setStatus("Đã đạt giới hạn 60 bài tin.");
-      return;
-    }
-    const article: NewsArticle = {
-      id: `tin-${Date.now()}`,
-      title: "Tin tức mới",
-      summary: "Nhập phần tóm tắt ngắn gọn, chính xác và không sao chép nguyên văn bài nguồn.",
-      category: "Cảnh báo lừa đảo",
-      publishedAt: new Date().toISOString().slice(0, 10),
-      sourceName: "Nguồn chính thống",
-      sourceUrl: "https://",
-      featured: draft.newsArticles.length === 0,
-    };
-    setDraft((current) => ({ ...current, newsArticles: [article, ...current.newsArticles] }));
-  }
-
-  function removeNews(index: number) {
-    const article = draft.newsArticles[index];
-    if (!article || !window.confirm(`Xóa tin “${article.title}” khỏi bản nháp?`)) return;
-    setDraft((current) => ({ ...current, newsArticles: current.newsArticles.filter((_, articleIndex) => articleIndex !== index) }));
-  }
-
   async function save(target: "draft" | "publish") {
     if (!account) return;
     if (target === "publish" && role !== "admin") {
       setStatus("Biên tập viên chỉ có thể lưu bản nháp. Hãy gửi nội dung cho Quản trị viên để xuất bản.");
       return;
     }
+    const newsIssues = draft.newsArticles.flatMap(article => newsErrors(article, draft.newsArticles, target === 'publish' && article.status !== 'draft').map(error => `${article.title}: ${error}`));
+    if (newsIssues.length) { setStatus(newsIssues.join(' ')); setTab('news'); return; }
+    if (new TextEncoder().encode(JSON.stringify(draft)).length > 850000) { setStatus('Kho nội dung quá lớn. Hãy dùng URL HTTPS cho một số ảnh hoặc giảm số ảnh trước khi lưu (giới hạn an toàn 850 KB).'); return; }
     const normalized = normalizeManagedSiteContent(draft);
     if (!normalized) {
       setStatus("Nội dung chưa hợp lệ. Kiểm tra tình huống, ngày đăng và URL nguồn HTTPS của mục Tin tức.");
@@ -248,6 +227,7 @@ export function AdminPage({
     setBusy(true);
     setStatus(target === "publish" ? "Đang xuất bản…" : "Đang lưu bản nháp…");
     const now = new Date().toISOString();
+    try {
     const draftResult = await supabase.rpc("save_managed_site_content", {
       target_slug: "main-draft",
       target_content: normalized,
@@ -257,24 +237,27 @@ export function AdminPage({
       setStatus("Không thể lưu. Vui lòng kiểm tra quyền quản trị và cấu hình cơ sở dữ liệu.");
       return;
     }
+    setSavedSnapshot(JSON.stringify(normalized));
     if (target === "publish") {
+      const publicContent = { ...normalized, newsArticles: publicNews(normalized.newsArticles) };
       const publishResult = await supabase.rpc("save_managed_site_content", {
         target_slug: "main",
-        target_content: normalized,
+        target_content: publicContent,
       });
       if (publishResult.error) {
         setBusy(false);
         setStatus("Bản nháp đã lưu nhưng chưa thể xuất bản.");
         return;
       }
-      setPublished(cloneContent(normalized));
-      onPublished(normalized);
+      setPublished(cloneContent(publicContent));
+      onPublished(publicContent);
       setStatus("Đã xuất bản nội dung mới. Người dùng tải lại trang sẽ thấy thay đổi.");
     } else {
       setStatus("Đã lưu bản nháp. Nội dung công khai chưa thay đổi.");
     }
     setUpdatedAt(now);
-    setBusy(false);
+    } catch { setStatus('Mất kết nối khi lưu. Nội dung đang sửa vẫn còn; hãy thử lưu lại.'); }
+    finally { setBusy(false); }
   }
 
   async function changeUserRole(user: ManagedUser, nextRole: ManagedRole) {
@@ -335,12 +318,14 @@ export function AdminPage({
     <section className="content-page admin-page">
       <div className="admin-heading">
         <div><span className="eyebrow">CẢNH GIÁC SỐ · QUẢN TRỊ NỘI DUNG</span><h1>Trung tâm nội dung</h1><p>Chỉnh sửa bản nháp, rà soát và xuất bản nội dung cho toàn bộ website.</p></div>
-        <div className="admin-actions"><button className="admin-secondary" disabled={busy} onClick={() => { setDraft(cloneContent(published)); setStatus("Đã khôi phục bản nháp từ nội dung đang xuất bản."); }}>Khôi phục bản đã đăng</button><button className="admin-secondary" disabled={busy} onClick={() => void save("draft")}>Lưu bản nháp</button>{role === "admin" && <button className="primary-button" disabled={busy} onClick={() => void save("publish")}>Xuất bản</button>}</div>
+        <div className="admin-actions"><button className="admin-secondary" disabled={busy} onClick={() => { if (!window.confirm("Thay toàn bộ bản nháp bằng nội dung đang đăng? Các bài Draft sẽ bị bỏ khỏi bản nháp đang sửa.")) return; setDraft(cloneContent(published)); setStatus("Đã khôi phục bản nháp từ nội dung đang xuất bản."); }}>Khôi phục bản đã đăng</button><button className="admin-secondary" disabled={busy} onClick={() => void save("draft")}>Lưu bản nháp</button>{role === "admin" && <button className="primary-button" disabled={busy} onClick={() => void save("publish")}>Xuất bản</button>}</div>
       </div>
       <div className="admin-meta"><span><b>{role === "admin" ? "Quản trị viên" : "Biên tập viên"}:</b> {account.displayName} · {account.email}</span><span><b>Cập nhật gần nhất:</b> {updatedAt ? new Date(updatedAt).toLocaleString("vi-VN") : "Chưa có"}</span></div>
       <div className="publishing-guardrail" role="note"><strong>Kiểm soát trước khi xuất bản</strong><span>Kiểm tra nguồn khuyến cáo · Không đưa dữ liệu cá nhân vào kịch bản · Chỉ một đáp án an toàn · Diễn đạt trung lập, không gây hoang mang</span></div>
       {role === "editor" && <div className="admin-role-note" role="note"><strong>Quyền Biên tập viên</strong><span>Bạn có thể chỉnh sửa và lưu bản nháp. Chỉ Quản trị viên mới được xuất bản nội dung.</span></div>}
       {status && <div className="admin-status" role="status" aria-live="polite">{status}</div>}
+      <p className="news-save-state" role="status">{JSON.stringify(draft) === savedSnapshot ? "Đã lưu bản nháp" : "Có thay đổi chưa lưu"}</p>
+      <fieldset className="admin-edit-fieldset" disabled={busy}>
       <div className="admin-tabs" role="tablist" aria-label="Nhóm nội dung">
         <button role="tab" aria-selected={tab === "general"} className={tab === "general" ? "active" : ""} onClick={() => setTab("general")}>Nội dung chung</button>
         <button role="tab" aria-selected={tab === "certificate"} className={tab === "certificate" ? "active" : ""} onClick={() => setTab("certificate")}>Chứng nhận</button>
@@ -406,7 +391,7 @@ export function AdminPage({
 
       {tab === "knowledge" && <div className="knowledge-admin"><div className="admin-section-title"><div><span className="eyebrow">CẨM NANG AN TOÀN</span><h2>Thẻ kiến thức</h2></div><button className="admin-secondary" onClick={addKnowledge}>+ Thêm thẻ</button></div><div className="knowledge-admin-grid">{draft.knowledgeCards.map((card, index) => <article key={index}><div className="knowledge-admin-head"><b>{String(index + 1).padStart(2, "0")}</b><button onClick={() => removeKnowledge(index)} aria-label={`Xóa ${card.title}`}>×</button></div><label><span>Biểu tượng</span><input value={card.icon} maxLength={12} onChange={(event) => changeKnowledge(index, { icon: event.target.value })} /></label><label><span>Tiêu đề</span><input value={card.title} onChange={(event) => changeKnowledge(index, { title: event.target.value })} /></label><label><span>Nội dung</span><textarea rows={5} value={card.text} onChange={(event) => changeKnowledge(index, { text: event.target.value })} /></label></article>)}</div></div>}
 
-      {tab === "news" && <div className="news-admin"><div className="admin-section-title"><div><span className="eyebrow">TIN TỨC AN TOÀN SỐ</span><h2>Quản lý bài tin</h2><p>Tóm tắt nội dung từ nguồn chính thống, ghi đúng ngày công bố và dùng liên kết HTTPS.</p></div><button className="admin-secondary" onClick={addNews}>+ Thêm tin</button></div>{draft.newsArticles.length ? <div className="news-admin-grid">{draft.newsArticles.map((article, index) => <article key={article.id}><div className="news-admin-head"><label><input type="radio" name="featured-news" checked={article.featured} onChange={() => featureNews(index)} /> Tin nổi bật</label><button onClick={() => removeNews(index)} aria-label={`Xóa ${article.title}`}>×</button></div><div className="news-admin-row"><label><span>Chủ đề</span><input value={article.category} onChange={(event) => changeNews(index, { category: event.target.value })} /></label><label><span>Ngày đăng</span><input type="date" value={article.publishedAt} onChange={(event) => changeNews(index, { publishedAt: event.target.value })} /></label></div><label><span>Tiêu đề</span><input value={article.title} onChange={(event) => changeNews(index, { title: event.target.value })} /></label><label><span>Tóm tắt</span><textarea rows={5} value={article.summary} onChange={(event) => changeNews(index, { summary: event.target.value })} /></label><div className="news-admin-row"><label><span>Tên nguồn</span><input value={article.sourceName} onChange={(event) => changeNews(index, { sourceName: event.target.value })} /></label><label><span>URL nguồn (HTTPS)</span><input type="url" value={article.sourceUrl} onChange={(event) => changeNews(index, { sourceUrl: event.target.value })} /></label></div></article>)}</div> : <div className="news-admin-empty">Chưa có bài tin. Chọn “Thêm tin” để bắt đầu.</div>}</div>}
+      {tab === "news" && <NewsEditor disabled={busy} articles={draft.newsArticles} canPublish={role === 'admin'} onChange={newsArticles => setDraft(current => ({ ...current, newsArticles }))} />}
 
       {tab === "users" && role === "admin" && <div className="role-management">
         <div className="admin-section-title"><div><span className="eyebrow">PHÂN QUYỀN HỆ THỐNG</span><h2>Tài khoản và nhóm quyền</h2><p>Quản trị viên có toàn quyền; Biên tập viên chỉ soạn và lưu bản nháp.</p></div></div>
@@ -418,6 +403,7 @@ export function AdminPage({
         <p className="role-grant-help">Chỉ tài khoản đã đăng ký và xác nhận email mới có thể được cấp quyền. Có thể thu hồi quyền về “Thành viên” trong danh sách bên dưới.</p>
         <div className="role-table-wrap"><table><thead><tr><th>Tài khoản</th><th>Ngày đăng ký</th><th>Nhóm quyền</th></tr></thead><tbody>{managedUsers.map((user) => <tr key={user.id}><td><strong>{user.displayName}</strong><small>@{user.username} · {user.email}</small></td><td>{new Date(user.createdAt).toLocaleDateString("vi-VN")}</td><td><select aria-label={`Nhóm quyền của ${user.displayName}`} value={user.role} disabled={user.id === account.id || changingUserId === user.id} onChange={(event) => void changeUserRole(user, event.target.value as ManagedRole)}><option value="member">Thành viên</option><option value="editor">Biên tập viên</option><option value="admin">Quản trị</option></select>{user.id === account.id && <small className="self-role-note">Tài khoản hiện tại</small>}</td></tr>)}</tbody></table></div>
       </div>}
+      </fieldset>
     </section>
   );
 }

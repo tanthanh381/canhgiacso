@@ -2,6 +2,8 @@
 
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { defaultSiteContent, Difficulty, normalizeSiteContent, SiteContent } from "./data";
+import { NewsArticleView } from './news-article';
+import { publicNews, safeImage } from './news-content';
 import { supabase } from "./supabase";
 import { difficultyOrder, getLevelProgress, getUnlockedDifficulties } from "./progression";
 import { downloadTrainingCertificatePdf, TrainingCertificate } from "./certificate";
@@ -261,11 +263,31 @@ export default function Home() {
   const activeUser = useRef<string | null>(null);
   const scenarios = siteContent.scenarios;
   const knowledgeCards = siteContent.knowledgeCards;
-  const newsArticles = siteContent.newsArticles;
+  const newsArticles = useMemo(() => publicNews(siteContent.newsArticles), [siteContent.newsArticles]);
+  const [newsSlug, setNewsSlug] = useState('');
+  const readingArticle = newsArticles.find(article => (article.slug || article.id) === newsSlug);
+  useEffect(() => {
+    if (!readingArticle) return;
+    const oldTitle = document.title;
+    const meta = document.querySelector('meta[name="description"]');
+    const oldDescription = meta?.getAttribute('content') ?? '';
+    document.title = readingArticle.seoTitle || readingArticle.title;
+    meta?.setAttribute('content', readingArticle.metaDescription || readingArticle.summary);
+    return () => { document.title = oldTitle; meta?.setAttribute('content', oldDescription); };
+  }, [readingArticle]);
 
   useEffect(() => {
+    let previousHash = window.location.hash;
     const syncHash = () => {
+      if (previousHash === '#/admin' && window.location.hash !== previousHash && !window.dispatchEvent(new Event('admin-before-leave', { cancelable: true }))) {
+        window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}${previousHash}`);
+        return;
+      }
+      previousHash = window.location.hash;
       if (window.location.hash === "#/admin") setView("admin");
+      else if (window.location.hash.startsWith('#/news/')) { setNewsSlug(window.location.hash.slice(7)); setView('news'); }
+      else if (window.location.hash === '#/news') { setNewsSlug(''); setView('news'); }
+      else { setNewsSlug(''); setView('game'); }
     };
     syncHash();
     window.addEventListener("hashchange", syncHash);
@@ -471,7 +493,7 @@ export default function Home() {
     setSelectedId(1);
     setDifficulty("Tất cả");
     setQuery("");
-    if (window.location.hash !== "#/admin") setView("game");
+    if (window.location.hash !== "#/admin" && !window.location.hash.startsWith("#/news")) setView("game");
   }
 
   function loadGuestProgress() {
@@ -579,6 +601,10 @@ export default function Home() {
   }
 
   function navigateTo(nextView: View) {
+    if (view === 'admin' && nextView !== 'admin' && !window.dispatchEvent(new Event('admin-before-leave', { cancelable: true }))) return;
+    setNewsSlug('');
+    if (nextView === 'news') window.location.hash = '/news';
+    else if (window.location.hash.startsWith('#/news')) window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
     if (nextView === "admin") window.location.hash = "/admin";
     else if (window.location.hash === "#/admin") window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
     setView(nextView);
@@ -814,6 +840,7 @@ export default function Home() {
   }
 
   async function logout() {
+    if (view === "admin" && !window.dispatchEvent(new Event("admin-before-leave", { cancelable: true }))) return;
     await supabase.auth.signOut({ scope: "local" });
     setSessionAccount(null);
     setCertificates([]);
@@ -1123,6 +1150,7 @@ export default function Home() {
             <div><span className="eyebrow">{siteContent.copy.newsEyebrow}</span><h1>{siteContent.copy.newsTitle}</h1></div>
             <p>{siteContent.copy.newsIntro}</p>
           </div>
+          {newsSlug ? <><button className="admin-secondary" onClick={() => { window.location.hash = '/news'; setNewsSlug(''); }}>← Tất cả tin tức</button>{readingArticle ? <NewsArticleView article={readingArticle} /> : <p>Không tìm thấy bài viết hoặc bài chưa được xuất bản.</p>}</> : <>
           <div className="news-tools" aria-label="Tìm và lọc tin tức">
             <label className="news-search"><span aria-hidden="true">⌕</span><input value={newsQuery} onChange={(event) => setNewsQuery(event.target.value)} placeholder="Tìm theo tiêu đề, nội dung, nguồn…" aria-label="Tìm tin tức" /></label>
             <div className="news-filters" aria-label="Lọc theo chủ đề">{newsCategories.map((category) => <button key={category} className={newsCategory === category ? "active" : ""} aria-pressed={newsCategory === category} onClick={() => setNewsCategory(category)}>{category}</button>)}</div>
@@ -1130,15 +1158,16 @@ export default function Home() {
           <div className="news-grid">
             {visibleNews.map((article, index) => (
               <article key={article.id} className={article.featured && index === 0 ? "news-card featured" : "news-card"}>
+                {article.thumbnail && safeImage(article.thumbnail) && <img className="news-card-thumbnail" src={article.thumbnail} alt={article.thumbnailAlt || ''} loading="lazy" />}
                 <div className="news-meta"><span>{article.category}</span><time dateTime={article.publishedAt}>{new Date(`${article.publishedAt}T00:00:00Z`).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC" })}</time></div>
-                <h2>{article.title}</h2>
+                <h2><a href={`#/news/${article.slug || article.id}`}>{article.title}</a></h2>
                 <p>{article.summary}</p>
-                <div className="news-source"><span>Nguồn: <strong>{article.sourceName}</strong></span><a href={article.sourceUrl} target="_blank" rel="noopener noreferrer">Đọc tại nguồn <span aria-hidden="true">↗</span></a></div>
+                <div className="news-source"><a href={`#/news/${article.slug || article.id}`}>Đọc bài</a>{article.sourceUrl && <><span>Nguồn: <strong>{article.sourceName}</strong></span><a href={article.sourceUrl} target="_blank" rel="noopener noreferrer">Đọc tại nguồn <span aria-hidden="true">↗</span></a></>}</div>
               </article>
             ))}
           </div>
           {!visibleNews.length && <div className="news-empty"><strong>Không tìm thấy tin phù hợp.</strong><button onClick={() => { setNewsQuery(""); setNewsCategory("Tất cả"); }}>Xóa bộ lọc</button></div>}
-          <p className="news-disclaimer">Cảnh Giác Số chỉ tóm tắt nội dung nhằm mục đích nâng cao nhận thức. Thông tin đầy đủ và cập nhật nhất nằm tại liên kết nguồn của từng bài.</p>
+          <p className="news-disclaimer">Cảnh Giác Số chỉ tóm tắt nội dung nhằm mục đích nâng cao nhận thức. Thông tin đầy đủ và cập nhật nhất nằm tại liên kết nguồn của từng bài.</p></>}
         </section>
       )}
 
