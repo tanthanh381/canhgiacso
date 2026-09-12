@@ -158,7 +158,7 @@ test("slug tiếng Việt, trùng slug và ngày không tồn tại", () => {
   );
 });
 
-test("rich text chỉ cho phép cấu trúc an toàn, từ chối script và ảnh SVG", () => {
+test("rich text chỉ cho phép cấu trúc an toàn và từ chối script, SVG, blob URL", () => {
   assert.ok(
     validDocument({
       type: "doc",
@@ -176,13 +176,21 @@ test("rich text chỉ cho phép cấu trúc an toàn, từ chối script và ả
       ],
     }),
   );
+  assert.ok(
+    validDocument({
+      type: "doc",
+      content: [
+        { type: "image", attrs: { src: "https://example.com/photo.png", alt: "" } },
+      ],
+    }),
+  );
   for (const child of [
     { type: "script" },
     {
       type: "image",
       attrs: { src: "data:image/svg+xml;base64,AAAA", alt: "x" },
     },
-    { type: "image", attrs: { src: "https://example.com/photo.png", alt: "" } },
+    { type: "image", attrs: { src: "blob:https://example.com/abc", alt: "x" } },
     {
       type: "text",
       text: "x",
@@ -191,6 +199,20 @@ test("rich text chỉ cho phép cấu trúc an toàn, từ chối script và ả
     { type: "text", text: "x", marks: [null] },
   ])
     assert.equal(validDocument({ type: "doc", content: [child] }), false);
+});
+
+test("ảnh nội dung chấp nhận data URI PNG, JPG, JPEG và WebP hợp lệ", () => {
+  for (const src of [
+    "data:image/png;base64,AAAA",
+    "data:image/jpg;base64,AAAA",
+    "data:image/jpeg;base64,AAAA",
+    "data:image/webp;base64,AAAA",
+  ]) {
+    assert.equal(
+      validDocument({ type: "doc", content: [{ type: "image", attrs: { src, alt: "Ảnh" } }] }),
+      true,
+    );
+  }
 });
 
 test("round trip giữ nội dung rich text và metadata của bài mới và bài cũ", () => {
