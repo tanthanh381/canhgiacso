@@ -12,7 +12,7 @@ export default defineConfig({
     rolldownOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes("/react/") || id.includes("/react-dom/")) return "react";
+          if (id.includes("/node_modules/react/") || id.includes("/node_modules/react-dom/")) return "react";
           if (id.includes("/@supabase/")) return "supabase";
         },
       },

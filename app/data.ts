@@ -1,3 +1,4 @@
+import { newsErrors, type RichNode } from './news-content';
 import { defaultCertificateDesign, normalizeCertificateDesign, type CertificateDesign } from "./certificate-design";
 export type Difficulty = "Dễ" | "Trung bình" | "Khó" | "Rất khó";
 
@@ -559,6 +560,13 @@ export type KnowledgeCard = {
 };
 
 export type NewsArticle = {
+  slug?: string;
+  status?: "draft" | "published";
+  thumbnail?: string;
+  thumbnailAlt?: string;
+  body?: RichNode;
+  seoTitle?: string;
+  metaDescription?: string;
   id: string;
   title: string;
   summary: string;
@@ -827,17 +835,11 @@ export function normalizeSiteContent(value: unknown, requireAnswerKeys = false):
     if (!article || typeof article !== "object") return false;
     if (!isText(article.id, 100) || !/^[a-z0-9-]+$/.test(article.id) || newsIds.has(article.id)) return false;
     newsIds.add(article.id);
-    let sourceUrl: URL;
-    try { sourceUrl = new URL(article.sourceUrl); } catch { return false; }
-    return isText(article.title, 240)
-      && isText(article.summary, 1500)
-      && isText(article.category, 80)
-      && /^\d{4}-\d{2}-\d{2}$/.test(article.publishedAt)
-      && !Number.isNaN(Date.parse(`${article.publishedAt}T00:00:00Z`))
-      && isText(article.sourceName, 120)
-      && isText(article.sourceUrl, 1000)
-      && sourceUrl.protocol === "https:"
-      && typeof article.featured === "boolean";
+    return typeof article.title === 'string' && typeof article.summary === 'string'
+      && typeof article.category === 'string' && typeof article.sourceName === 'string'
+      && typeof article.sourceUrl === 'string' && typeof article.featured === 'boolean'
+      && [article.slug, article.thumbnail, article.thumbnailAlt, article.seoTitle, article.metaDescription].every(value => value === undefined || typeof value === 'string')
+      && newsErrors(article as NewsArticle, candidateNews as NewsArticle[]).length === 0;
   });
   if (!validNews) return null;
   return {

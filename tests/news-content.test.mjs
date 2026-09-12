@@ -10,11 +10,21 @@ const modules = new Map();
 
 function load(name) {
   if (modules.has(name)) return modules.get(name);
-  const source = readFileSync(new URL(`../app/${name}.ts`, import.meta.url), "utf8");
+  const source = readFileSync(
+    new URL(`../app/${name}.ts`, import.meta.url),
+    "utf8",
+  );
   const exports = {};
-  new Function("exports", "require", ts.transpileModule(source, {
-    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
-  }).outputText)(exports, (path) => load(path.replace("./", "")));
+  new Function(
+    "exports",
+    "require",
+    ts.transpileModule(source, {
+      compilerOptions: {
+        module: ts.ModuleKind.CommonJS,
+        target: ts.ScriptTarget.ES2022,
+      },
+    }).outputText,
+  )(exports, (path) => load(path.replace("./", "")));
   modules.set(name, exports);
   return exports;
 }
@@ -23,7 +33,11 @@ const { defaultSiteContent, normalizeSiteContent } = load("data");
 
 test("nội dung mặc định có tin từ nguồn HTTPS và một bài nổi bật", () => {
   assert.ok(defaultSiteContent.newsArticles.length >= 6);
-  assert.equal(defaultSiteContent.newsArticles.filter((article) => article.featured).length, 1);
+  assert.equal(
+    defaultSiteContent.newsArticles.filter((article) => article.featured)
+      .length,
+    1,
+  );
   for (const article of defaultSiteContent.newsArticles) {
     assert.equal(new URL(article.sourceUrl).protocol, "https:");
     assert.match(article.publishedAt, /^\d{4}-\d{2}-\d{2}$/);
@@ -51,14 +65,158 @@ test("từ chối URL nguồn không an toàn và ID trùng", () => {
 });
 
 test("giao diện có menu, bộ lọc, liên kết nguồn và khu vực quản trị Tin tức", async () => {
-  const [page, admin] = await Promise.all([
+  const [page, admin, editor] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/admin.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/news-editor.tsx", import.meta.url), "utf8"),
   ]);
   assert.match(page, />Tin tức<\/button>/);
   assert.match(page, /aria-label="Tìm tin tức"/);
   assert.match(page, /rel="noopener noreferrer"/);
-  assert.match(admin, /Quản lý bài tin/);
-  assert.match(admin, /URL nguồn \(HTTPS\)/);
+  assert.match(editor, /Quản lý bài tin/);
+  assert.match(editor, /URL nguồn \(HTTPS\)/);
   assert.match(admin, /Lưu bản nháp/);
+});
+
+const { newsErrors, newsSlug, publicNews, validDocument, emptyDocument } =
+  load("news-content");
+const { normalizeManagedSiteContent } = load("data");
+function managedContent() {
+  const value = structuredClone(defaultSiteContent);
+  value.scenarios.forEach((s) =>
+    s.choices.forEach((c, i) =>
+      Object.assign(c, {
+        correct: i === 0,
+        moneyDelta: 0,
+        awarenessDelta: 0,
+        feedback: "Test feedback",
+      }),
+    ),
+  );
+  return value;
+}
+function newArticle() {
+  return {
+    id: "new-story",
+    title: "Bài mới",
+    slug: "bai-moi",
+    summary: "",
+    category: "Cảnh báo",
+    publishedAt: "2026-09-12",
+    sourceName: "",
+    sourceUrl: "",
+    featured: false,
+    status: "draft",
+    body: structuredClone(emptyDocument),
+  };
+}
+
+test("bản nháp chưa viết xong lưu được, xuất bản phải có mô tả và nội dung", () => {
+  const article = newArticle();
+  const content = managedContent();
+  content.newsArticles.push(article);
+  assert.ok(normalizeManagedSiteContent(content));
+  assert.equal(newsErrors(article, [article]).length, 0);
+  assert.ok(
+    newsErrors(article, [article], true).some((error) =>
+      error.includes("mô tả"),
+    ),
+  );
+  assert.ok(
+    newsErrors(article, [article], true).some((error) =>
+      error.includes("nội dung"),
+    ),
+  );
+});
+
+test("loại Draft khỏi bản công khai, bảo toàn bài cũ và bản nháp quản trị", () => {
+  const articles = [
+    ...structuredClone(defaultSiteContent.newsArticles),
+    newArticle(),
+  ];
+  const snapshot = JSON.stringify(articles);
+  const published = publicNews(articles);
+  assert.deepEqual(published, defaultSiteContent.newsArticles);
+  assert.equal(JSON.stringify(articles), snapshot);
+});
+
+test("slug tiếng Việt, trùng slug và ngày không tồn tại", () => {
+  assert.equal(
+    newsSlug("Cảnh giác: Đừng bấm link lạ!"),
+    "canh-giac-dung-bam-link-la",
+  );
+  const a = newArticle();
+  assert.ok(
+    newsErrors(a, [a, { ...a, id: "other" }]).some((error) =>
+      error.includes("đã được"),
+    ),
+  );
+  assert.ok(
+    newsErrors({ ...a, publishedAt: "2026-02-31" }, [a]).some((error) =>
+      error.includes("Ngày"),
+    ),
+  );
+});
+
+test("rich text chỉ cho phép cấu trúc an toàn, từ chối script và ảnh SVG", () => {
+  assert.ok(
+    validDocument({
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "<script>alert(1)</script>",
+              marks: [{ type: "bold" }],
+            },
+          ],
+        },
+      ],
+    }),
+  );
+  for (const child of [
+    { type: "script" },
+    {
+      type: "image",
+      attrs: { src: "data:image/svg+xml;base64,AAAA", alt: "x" },
+    },
+    { type: "image", attrs: { src: "https://example.com/photo.png", alt: "" } },
+    {
+      type: "text",
+      text: "x",
+      marks: [{ type: "link", attrs: { href: "javascript:alert(1)" } }],
+    },
+    { type: "text", text: "x", marks: [null] },
+  ])
+    assert.equal(validDocument({ type: "doc", content: [child] }), false);
+});
+
+test("round trip giữ nội dung rich text và metadata của bài mới và bài cũ", () => {
+  const content = managedContent();
+  const article = {
+    ...newArticle(),
+    summary: "Mô tả bài viết",
+    seoTitle: "Tiêu đề SEO",
+    metaDescription: "Mô tả SEO",
+    thumbnail: "https://example.com/photo.webp",
+    thumbnailAlt: "Ảnh cảnh báo",
+    body: {
+      type: "doc",
+      content: [
+        {
+          type: "heading",
+          attrs: { level: 2, textAlign: "center" },
+          content: [{ type: "text", text: "Nội dung" }],
+        },
+      ],
+    },
+  };
+  content.newsArticles.push(article);
+  assert.deepEqual(
+    normalizeManagedSiteContent(JSON.parse(JSON.stringify(content)))
+      .newsArticles,
+    content.newsArticles,
+  );
 });
