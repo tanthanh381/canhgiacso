@@ -28,6 +28,40 @@ const CaptionImage = Image.extend({
   },
 });
 
+const supportedImageTypes = ["image/jpeg", "image/png", "image/webp"];
+const maxImageDataLength = 130000;
+
+async function compressImage(file: File): Promise<string> {
+  if (!supportedImageTypes.includes(file.type) || file.size > 8 * 1024 * 1024)
+    throw new Error("Chọn hoặc dán ảnh JPG, PNG, WebP tối đa 8 MB.");
+
+  const bitmap = await createImageBitmap(file);
+  try {
+    const canvas = document.createElement("canvas");
+    const initialScale = Math.min(1, 1200 / Math.max(bitmap.width, bitmap.height));
+    let width = Math.max(1, Math.round(bitmap.width * initialScale));
+    let height = Math.max(1, Math.round(bitmap.height * initialScale));
+
+    for (let attempt = 0; attempt < 8; attempt++) {
+      canvas.width = width;
+      canvas.height = height;
+      canvas.getContext("2d")!.drawImage(bitmap, 0, 0, width, height);
+      for (const quality of [0.82, 0.68, 0.52, 0.4]) {
+        const data = canvas.toDataURL("image/webp", quality);
+        if (data.length <= maxImageDataLength) return data;
+      }
+      width = Math.max(320, Math.round(width * 0.8));
+      height = Math.max(180, Math.round(height * 0.8));
+    }
+  } finally {
+    bitmap.close();
+  }
+
+  throw new Error(
+    "Ảnh còn quá lớn sau nén. Chọn ảnh nhỏ hơn hoặc dùng URL HTTPS.",
+  );
+}
+
 function ImagePicker({
   images,
   initial,
@@ -54,29 +88,15 @@ function ImagePicker({
     const current = ++version.current;
     setError("");
     if (
-      !["image/jpeg", "image/png", "image/webp"].includes(file.type) ||
-      file.size > 5 * 1024 * 1024
+      !supportedImageTypes.includes(file.type) ||
+      file.size > 8 * 1024 * 1024
     ) {
-      setError("Chọn JPG, PNG hoặc WebP tối đa 5 MB.");
+      setError("Chọn JPG, PNG hoặc WebP tối đa 8 MB.");
       return;
     }
     setBusy(true);
     try {
-      const bitmap = await createImageBitmap(file);
-      const canvas = document.createElement("canvas");
-      const scale = Math.min(1, 1200 / Math.max(bitmap.width, bitmap.height));
-      canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-      canvas.height = Math.max(1, Math.round(bitmap.height * scale));
-      canvas
-        .getContext("2d")!
-        .drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-      bitmap.close();
-      let data = canvas.toDataURL("image/webp", 0.8);
-      if (data.length > 130000) data = canvas.toDataURL("image/webp", 0.5);
-      if (data.length > 130000)
-        throw new Error(
-          "Ảnh còn quá lớn sau nén. Chọn ảnh nhỏ hơn hoặc dùng URL HTTPS.",
-        );
+      const data = await compressImage(file);
       if (version.current === current) setSrc(data);
     } catch (cause) {
       if (version.current === current)
@@ -102,7 +122,7 @@ function ImagePicker({
         />
       </label>
       <small>
-        JPG, PNG, WebP ≤ 5 MB. Ảnh được nén; toàn bộ kho nội dung tối đa 1 MB.
+        JPG, PNG, WebP ≤ 8 MB. Ảnh được nén; toàn bộ kho nội dung tối đa 1 MB.
       </small>
       <label>
         Hoặc URL ảnh HTTPS
@@ -185,6 +205,7 @@ function ArticleEditor({
   const [autoSlug, setAutoSlug] = useState(article.slug === article.id && article.status === "draft");
   const [showLink, setShowLink] = useState(false);
   const [link, setLink] = useState("");
+  const [pasteError, setPasteError] = useState("");
   const dialog = useRef<HTMLDialogElement>(null);
   const editor = useEditor({
     extensions: [
@@ -212,6 +233,31 @@ function ArticleEditor({
         "aria-label": "Nội dung bài viết",
         role: "textbox",
         "aria-multiline": "true",
+      },
+      handlePaste: (view, event) => {
+        const image = Array.from(event.clipboardData?.files ?? []).find((file) =>
+          supportedImageTypes.includes(file.type),
+        );
+        if (!image) return false;
+        setPasteError("");
+        void compressImage(image)
+          .then((src) => {
+            if (view.isDestroyed) return;
+            const node = view.state.schema.nodes.image.create({
+              src,
+              alt: "Ảnh chụp màn hình",
+              caption: "",
+            });
+            view.dispatch(
+              view.state.tr.replaceSelectionWith(node).scrollIntoView(),
+            );
+          })
+          .catch((cause) =>
+            setPasteError(
+              cause instanceof Error ? cause.message : "Không đọc được ảnh đã dán.",
+            ),
+          );
+        return true;
       },
     },
     onUpdate: ({ editor: current }) => onChange({ body: current.getJSON() }),
@@ -453,9 +499,10 @@ function ArticleEditor({
           editor={editor}
           className="news-rich news-editor-surface"
         />
+        {pasteError && <p role="alert">{pasteError}</p>}
         <small>
-          Chọn ảnh trong bài để sửa alt text hoặc nhấn Delete để xóa. Có thể dán
-          nội dung đã định dạng.
+          Có thể dán trực tiếp ảnh chụp màn hình; ảnh sẽ được tự động nén. Chọn
+          ảnh trong bài để sửa alt text hoặc nhấn Delete để xóa.
         </small>
         <details className="news-source-settings">
           <summary>Nguồn tham khảo</summary>

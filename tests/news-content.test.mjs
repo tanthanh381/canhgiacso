@@ -75,6 +75,9 @@ test("giao diện có menu, bộ lọc, liên kết nguồn và khu vực quản
   assert.match(page, /rel="noopener noreferrer"/);
   assert.match(editor, /Quản lý bài tin/);
   assert.match(editor, /URL nguồn \(HTTPS\)/);
+  assert.match(editor, /handlePaste/);
+  assert.match(editor, /compressImage\(image\)/);
+  assert.match(editor, /Có thể dán trực tiếp ảnh chụp màn hình/);
   assert.match(admin, /Lưu bản nháp/);
 });
 
