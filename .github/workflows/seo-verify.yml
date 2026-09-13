@@ -45,9 +45,15 @@ jobs:
           test -f docs/sitemap.xml
           test -f docs/kien-thuc/index.html
           test -f docs/kien-thuc/nhan-dien-lua-dao-truc-tuyen/index.html
+          test -f docs/kien-thuc/lua-dao-qua-dien-thoai/index.html
+          test -f docs/kien-thuc/kiem-tra-link-lua-dao/index.html
           test -f docs/kien-thuc/nhan-dien-email-phishing/index.html
           test -f docs/kien-thuc/xu-ly-khi-bi-lua-dao-chuyen-tien/index.html
           grep -q 'Sitemap: https://canhgiacso.com/sitemap.xml' docs/robots.txt
           grep -q '<loc>https://canhgiacso.com/</loc>' docs/sitemap.xml
+          grep -q '<loc>https://canhgiacso.com/kien-thuc/lua-dao-qua-dien-thoai/</loc>' docs/sitemap.xml
+          grep -q '<loc>https://canhgiacso.com/kien-thuc/kiem-tra-link-lua-dao/</loc>' docs/sitemap.xml
           grep -q 'rel="canonical" href="https://canhgiacso.com/"' docs/index.html
           grep -q 'application/ld+json' docs/index.html
+          grep -q 'FAQPage' docs/kien-thuc/lua-dao-qua-dien-thoai/index.html
+          grep -q 'FAQPage' docs/kien-thuc/kiem-tra-link-lua-dao/index.html
