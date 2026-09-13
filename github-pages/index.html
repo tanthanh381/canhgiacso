@@ -1,19 +1,22 @@
 <!doctype html>
-<html lang="vi">
+<html lang="vi-VN">
   <head>
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://goietwyapiywrtibpkwo.supabase.co wss://goietwyapiywrtibpkwo.supabase.co; frame-src https://phishingquiz.withgoogle.com; media-src 'none'; worker-src 'none'; object-src 'none'; base-uri 'none'; form-action 'self'; manifest-src 'self'; upgrade-insecure-requests" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
     <meta charset="UTF-8" />
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#be1128" />
     <title>Cảnh Giác Số: Nhận diện lừa đảo trực tuyến | HDBank</title>
-    <meta name="description" content="Học cách nhận diện lừa đảo trực tuyến, phishing và giả mạo qua các tình huống mô phỏng tương tác. Rèn phản xạ an toàn số cùng Cảnh Giác Số." />
+    <meta name="description" content="Học cách nhận diện lừa đảo trực tuyến, phishing và giả mạo qua các tình huống tương tác. Rèn phản xạ an toàn số và kỹ năng phòng chống lừa đảo cùng Cảnh Giác Số." />
+    <meta name="keywords" content="lừa đảo trực tuyến, phishing, giả mạo, an toàn thông tin, an toàn số, phòng chống lừa đảo, Cảnh Giác Số" />
+    <meta name="author" content="Cảnh Giác Số" />
     <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
     <link rel="canonical" href="https://canhgiacso.com/" />
+    <link rel="alternate" hreflang="vi-VN" href="https://canhgiacso.com/" />
+    <link rel="alternate" hreflang="x-default" href="https://canhgiacso.com/" />
     <link rel="icon" type="image/png" href="/khien-so-logo.png" />
+    <link rel="apple-touch-icon" href="/khien-so-logo.png" />
+    <link rel="preload" href="/khien-so-logo.png" as="image" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="vi_VN" />
     <meta property="og:site_name" content="Cảnh Giác Số" />
@@ -21,15 +24,29 @@
     <meta property="og:description" content="Rèn phản xạ nhận diện lừa đảo, phishing và giả mạo qua các tình huống tương tác." />
     <meta property="og:url" content="https://canhgiacso.com/" />
     <meta property="og:image" content="https://canhgiacso.com/og.png" />
+    <meta property="og:image:width" content="1731" />
+    <meta property="og:image:height" content="909" />
+    <meta property="og:image:type" content="image/png" />
     <meta property="og:image:alt" content="Cảnh Giác Số — học để không thành con mồi" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Cảnh Giác Số: Nhận diện lừa đảo trực tuyến" />
     <meta name="twitter:description" content="Rèn phản xạ nhận diện lừa đảo, phishing và giả mạo qua các tình huống tương tác." />
     <meta name="twitter:image" content="https://canhgiacso.com/og.png" />
+    <meta name="twitter:image:alt" content="Cảnh Giác Số — học để không thành con mồi" />
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://canhgiacso.com/#organization",
+          "name": "Cảnh Giác Số",
+          "url": "https://canhgiacso.com/",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://canhgiacso.com/khien-so-logo.png"
+          }
+        },
         {
           "@type": "WebSite",
           "@id": "https://canhgiacso.com/#website",
@@ -37,18 +54,30 @@
           "name": "Cảnh Giác Số",
           "alternateName": "Cảnh giác số",
           "description": "Nền tảng mô phỏng tương tác giúp nhận diện và xử lý các tình huống lừa đảo trực tuyến.",
-          "inLanguage": "vi-VN"
+          "inLanguage": "vi-VN",
+          "publisher": {"@id":"https://canhgiacso.com/#organization"}
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://canhgiacso.com/#webpage",
+          "url": "https://canhgiacso.com/",
+          "name": "Cảnh Giác Số: Nhận diện lừa đảo trực tuyến",
+          "description": "Học cách nhận diện lừa đảo trực tuyến, phishing và giả mạo qua các tình huống tương tác.",
+          "inLanguage": "vi-VN",
+          "isPartOf": {"@id":"https://canhgiacso.com/#website"},
+          "about": {"@id":"https://canhgiacso.com/#learning-resource"}
         },
         {
           "@type": "LearningResource",
           "@id": "https://canhgiacso.com/#learning-resource",
           "url": "https://canhgiacso.com/",
-          "name": "Cảnh Giác Số — mô phỏng nhận diện lừa đảo trực tuyến",
-          "description": "Các tình huống mô phỏng giúp người dùng luyện phản xạ trước phishing, giả mạo, chiếm đoạt tài khoản và lừa đảo chuyển tiền.",
+          "name": "Cảnh Giác Số — thử thách nhận diện lừa đảo trực tuyến",
+          "description": "Các tình huống tương tác giúp người dùng luyện phản xạ trước phishing, giả mạo, chiếm đoạt tài khoản và lừa đảo chuyển tiền.",
           "educationalUse": "training",
           "learningResourceType": "interactive simulation",
           "inLanguage": "vi-VN",
           "isAccessibleForFree": true,
+          "provider": {"@id":"https://canhgiacso.com/#organization"},
           "isPartOf": {"@id":"https://canhgiacso.com/#website"}
         }
       ]
@@ -56,7 +85,28 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <main aria-label="Cảnh Giác Số">
+        <section>
+          <p>CẢNH GIÁC SỐ · AN TOÀN THÔNG TIN</p>
+          <h1>Nhận diện lừa đảo trực tuyến trước khi mất tiền hoặc tài khoản</h1>
+          <p>Cảnh Giác Số là nền tảng giáo dục an toàn số giúp người dùng luyện phản xạ qua các thử thách về phishing, giả mạo, chiếm đoạt tài khoản, lừa đảo chuyển tiền và thao túng tâm lý.</p>
+          <p><a href="/kien-thuc/">Đọc cẩm nang phòng chống lừa đảo</a></p>
+        </section>
+        <section aria-labelledby="seo-topics">
+          <h2 id="seo-topics">Kiến thức an toàn số nổi bật</h2>
+          <ul>
+            <li><a href="/kien-thuc/nhan-dien-lua-dao-truc-tuyen/">10 dấu hiệu nhận diện lừa đảo trực tuyến</a></li>
+            <li><a href="/kien-thuc/nhan-dien-email-phishing/">Cách nhận diện email phishing và trang đăng nhập giả</a></li>
+            <li><a href="/kien-thuc/xu-ly-khi-bi-lua-dao-chuyen-tien/">Bị lừa chuyển tiền phải làm gì ngay?</a></li>
+          </ul>
+        </section>
+        <section aria-labelledby="seo-principles">
+          <h2 id="seo-principles">Nguyên tắc phòng chống lừa đảo</h2>
+          <p>Dừng lại khi bị thúc ép, tự kiểm tra qua kênh chính thức và tuyệt đối không chia sẻ OTP, mật khẩu, mã PIN hoặc mã khôi phục. Với yêu cầu chuyển tiền bất thường, hãy xác minh người yêu cầu bằng một kênh độc lập trước khi giao dịch.</p>
+        </section>
+      </main>
+    </div>
     <script type="module" src="/main.tsx"></script>
   </body>
 </html>
