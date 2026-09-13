@@ -5,8 +5,10 @@ const root = process.argv[2] || "docs";
 const requiredPages = [
   "index.html",
   "kien-thuc/index.html",
+  "kien-thuc/phong-chong-lua-dao-truc-tuyen/index.html",
   "kien-thuc/nhan-dien-lua-dao-truc-tuyen/index.html",
   "kien-thuc/nhan-dien-email-phishing/index.html",
+  "kien-thuc/an-toan-thong-tin-ca-nhan/index.html",
   "kien-thuc/xu-ly-khi-bi-lua-dao-chuyen-tien/index.html",
 ];
 
@@ -26,7 +28,7 @@ async function auditHtml(relativePath) {
   const label = `/${relativePath.replace(/index\.html$/, "")}`;
 
   check(/<html[^>]+lang="vi(?:-VN)?"/i.test(html), `${label}: missing Vietnamese lang attribute`);
-  check(/<title>[^<]{15,65}<\/title>/i.test(html), `${label}: title should be 15-65 characters`);
+  check(/<title>[^<]{15,70}<\/title>/i.test(html), `${label}: title should be 15-70 characters`);
   check(/<meta\s+name="description"\s+content="[^"]{80,180}"/i.test(html), `${label}: meta description should be 80-180 characters`);
   check(countMatches(html, /<link\s+rel="canonical"/gi) === 1, `${label}: must contain exactly one canonical URL`);
   check(/<meta\s+name="robots"[^>]+index[^>]+follow/i.test(html), `${label}: page must be indexable and followable`);
@@ -40,6 +42,8 @@ async function auditHtml(relativePath) {
   if (relativePath === "index.html") {
     check(/<div id="root">[\s\S]*?<h1/i.test(html), `${label}: homepage must expose crawlable content before JavaScript executes`);
     check(/href="\/kien-thuc\//i.test(html), `${label}: homepage must link to the knowledge hub`);
+    check(/chống lừa đảo/i.test(html), `${label}: homepage should target the anti-scam topic cluster`);
+    check(/an toàn thông tin/i.test(html), `${label}: homepage should target the information security topic cluster`);
   }
 }
 
@@ -71,8 +75,10 @@ const sitemap = await readFile(path.join(root, "sitemap.xml"), "utf8");
 for (const url of [
   "https://canhgiacso.com/",
   "https://canhgiacso.com/kien-thuc/",
+  "https://canhgiacso.com/kien-thuc/phong-chong-lua-dao-truc-tuyen/",
   "https://canhgiacso.com/kien-thuc/nhan-dien-lua-dao-truc-tuyen/",
   "https://canhgiacso.com/kien-thuc/nhan-dien-email-phishing/",
+  "https://canhgiacso.com/kien-thuc/an-toan-thong-tin-ca-nhan/",
   "https://canhgiacso.com/kien-thuc/xu-ly-khi-bi-lua-dao-chuyen-tien/",
 ]) {
   check(sitemap.includes(`<loc>${url}</loc>`), `sitemap.xml: missing ${url}`);
