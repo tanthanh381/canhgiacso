@@ -223,7 +223,7 @@ export function AdminPage({
       setStatus("Nội dung chưa hợp lệ. Kiểm tra tình huống, ngày đăng và URL nguồn HTTPS của mục Tin tức.");
       return;
     }
-    if (target === "publish" && !window.confirm("Xác nhận xuất bản? Hãy bảo đảm nội dung đã được kiểm tra nguồn, không chứa dữ liệu cá nhân và mỗi tình huống chỉ có một đáp án an toàn.")) return;
+    if (target === "publish" && !window.confirm("Xác nhận xuất bản nội dung")) return;
     setBusy(true);
     setStatus(target === "publish" ? "Đang xuất bản…" : "Đang lưu bản nháp…");
     const now = new Date().toISOString();
