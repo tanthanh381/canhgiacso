@@ -36,7 +36,7 @@ export function safeImage(value: unknown): value is string {
     safeLink(value) ||
     (typeof value === "string" &&
       value.length <= 130000 &&
-      /^data:image\/(webp|png|jpeg);base64,[A-Za-z0-9+/]+=*$/.test(value))
+      /^data:image\/(webp|png|jpe?g);base64,[A-Za-z0-9+/]+=*$/.test(value))
   );
 }
 export function richText(node?: RichNode): string {
@@ -71,14 +71,15 @@ export function validDocument(value: unknown): value is RichNode {
       (typeof n.text !== "string" || n.text.length > 80000)
     )
       return false;
-    if (
-      n.type === "image" &&
-      (!safeImage(n.attrs?.src) ||
-        typeof n.attrs?.alt !== "string" ||
-        !n.attrs.alt.trim() ||
-        n.attrs.alt.length > 240)
-    )
-      return false;
+    if (n.type === "image") {
+      const alt = n.attrs?.alt;
+      if (
+        !safeImage(n.attrs?.src) ||
+        (alt !== undefined && typeof alt !== "string") ||
+        (typeof alt === "string" && alt.length > 240)
+      )
+        return false;
+    }
     if (n.type === "image" && n.attrs?.caption !== undefined &&
       (typeof n.attrs.caption !== "string" || n.attrs.caption.length > 500)) return false;
     if (n.type === "heading" && ![2, 3].includes(Number(n.attrs?.level)))

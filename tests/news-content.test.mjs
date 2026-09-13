@@ -182,7 +182,9 @@ test("rich text chỉ cho phép cấu trúc an toàn, từ chối script và ả
       type: "image",
       attrs: { src: "data:image/svg+xml;base64,AAAA", alt: "x" },
     },
-    { type: "image", attrs: { src: "https://example.com/photo.png", alt: "" } },
+    { type: "image", attrs: { src: "blob:https://example.com/photo", alt: "x" } },
+    { type: "image", attrs: { src: "https://example.com/photo.png", alt: 123 } },
+    { type: "image", attrs: { src: "https://example.com/photo.png", alt: "x".repeat(241) } },
     {
       type: "text",
       text: "x",
@@ -191,6 +193,19 @@ test("rich text chỉ cho phép cấu trúc an toàn, từ chối script và ả
     { type: "text", text: "x", marks: [null] },
   ])
     assert.equal(validDocument({ type: "doc", content: [child] }), false);
+});
+
+test("ảnh nội dung chấp nhận alt rỗng hoặc thiếu và dữ liệu JPG hợp lệ", () => {
+  for (const attrs of [
+    { src: "https://example.com/photo.png", alt: "" },
+    { src: "https://example.com/photo.png" },
+    { src: "data:image/jpg;base64,AAAA", alt: "" },
+    { src: "data:image/jpeg;base64,AAAA", alt: "Ảnh minh họa" },
+  ])
+    assert.equal(
+      validDocument({ type: "doc", content: [{ type: "image", attrs }] }),
+      true,
+    );
 });
 
 test("round trip giữ nội dung rich text và metadata của bài mới và bài cũ", () => {
