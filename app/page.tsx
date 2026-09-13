@@ -17,6 +17,7 @@ type ChoiceOutcome = { scenarioId: number; choiceIndex: number; correct: boolean
 type GameState = { run_id: string; balance: number; awareness: number; results: Result[]; history: GameHistory[]; outcome?: ChoiceOutcome };
 type PendingChoice = { userId: string; runId: string; scenario: SiteContent["scenarios"][number]; index: number };
 type View = "game" | "knowledge" | "news" | "quiz" | "stats" | "evidence" | "dashboard" | "admin";
+const SIMULATION_BANNER_VIEWS: ReadonlySet<View> = new Set(["game", "quiz"]);
 type StoredProgress = {
   balance: number;
   awareness: number;
@@ -1020,10 +1021,10 @@ export default function Home() {
           )}
         </div>
       </header>
-      <div className="security-awareness-banner" role="note">
+      {SIMULATION_BANNER_VIEWS.has(view) && <div className="security-awareness-banner" role="note">
         <strong>Môi trường mô phỏng</strong>
         <span>Không nhập mật khẩu ngân hàng, OTP, số thẻ hoặc dữ liệu thật. Mọi số tiền chỉ dùng cho đào tạo.</span>
-      </div>
+      </div>}
       {dataStatus && <div className="sync-status" role="status" aria-live="polite">{dataStatus}</div>}
       {pendingChoice && <div className="sync-status"><button className="admin-secondary" disabled={savingChoice} onClick={() => void syncChoice(pendingChoice)}>{savingChoice ? "Đang lưu…" : "Thử lưu lại"}</button></div>}
 
