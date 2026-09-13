@@ -65,13 +65,98 @@ type DefenseBadge = {
   progress: number;
   unlocked: boolean;
 };
+type SecurityChecklistGroup = {
+  id: string;
+  icon: string;
+  title: string;
+  description: string;
+  items: Array<{ id: string; title: string; description: string }>;
+};
 
 const LEGACY_PROGRESS_KEY = "khien-so-progress";
 const THEME_KEY = "khien-so-theme";
 const GUEST_CERTIFICATE_KEY = "canh-giac-so-guest-certificate";
+const SECURITY_CHECKLIST_KEY = "canh-giac-so-security-checklist";
 const PHISHING_QUIZ_URL = "https://phishingquiz.withgoogle.com/?hl=vi";
 const USERNAME_PATTERN = /^[a-z0-9._-]{3,24}$/;
 const PASSWORD_PATTERN = /^(?=.{8,72}$)(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d])\S+$/;
+
+const securityChecklistGroups: SecurityChecklistGroup[] = [
+  {
+    id: "account",
+    icon: "◇",
+    title: "Tài khoản & xác thực",
+    description: "Giảm nguy cơ bị chiếm tài khoản ngay cả khi mật khẩu bị lộ.",
+    items: [
+      { id: "account-unique-password", title: "Dùng mật khẩu riêng cho từng tài khoản", description: "Ưu tiên cụm mật khẩu dài hoặc trình quản lý mật khẩu; không dùng lại mật khẩu email cho ngân hàng và mạng xã hội." },
+      { id: "account-mfa", title: "Bật xác thực hai lớp", description: "Dùng ứng dụng xác thực, passkey hoặc khóa bảo mật nếu dịch vụ hỗ trợ; tuyệt đối không chuyển mã xác thực cho người khác." },
+      { id: "account-recovery", title: "Bảo vệ phương thức khôi phục", description: "Kiểm tra email, số điện thoại khôi phục và cất mã dự phòng ở nơi riêng biệt, an toàn." },
+      { id: "account-sessions", title: "Rà soát thiết bị đang đăng nhập", description: "Đăng xuất thiết bị lạ và bật cảnh báo khi có đăng nhập mới hoặc thay đổi thông tin bảo mật." },
+    ],
+  },
+  {
+    id: "finance",
+    icon: "₫",
+    title: "Tài chính & giao dịch",
+    description: "Tạo thêm điểm dừng trước khi tiền rời khỏi tài khoản.",
+    items: [
+      { id: "finance-beneficiary", title: "Đọc lại người nhận trước khi chuyển", description: "Đối chiếu tên, số tài khoản, ngân hàng và nội dung giao dịch trên màn hình xác nhận cuối cùng." },
+      { id: "finance-independent-check", title: "Xác minh yêu cầu tiền qua kênh khác", description: "Tự gọi số quen thuộc hoặc gặp trực tiếp; không xác minh bằng số điện thoại hay đường link do người yêu cầu cung cấp." },
+      { id: "finance-alerts", title: "Bật thông báo biến động số dư", description: "Theo dõi giao dịch ngay khi phát sinh và liên hệ ngân hàng qua kênh chính thức nếu thấy bất thường." },
+      { id: "finance-limits", title: "Đặt hạn mức phù hợp", description: "Giữ hạn mức chuyển tiền hằng ngày ở mức cần thiết và chỉ nâng tạm thời khi chính bạn chủ động giao dịch." },
+    ],
+  },
+  {
+    id: "contact",
+    icon: "☎",
+    title: "Cuộc gọi & tin nhắn",
+    description: "Nhận diện thao túng tâm lý trước khi làm theo chỉ dẫn.",
+    items: [
+      { id: "contact-pause", title: "Dừng lại khi bị thúc ép", description: "Cúp máy hoặc ngừng nhắn tin nếu đối phương đe dọa, yêu cầu giữ bí mật hay ép xử lý trong vài phút." },
+      { id: "contact-identity", title: "Tự tìm kênh liên hệ chính thức", description: "Tra cứu số tổng đài trên website hoặc ứng dụng chính thức thay vì gọi lại số mà người lạ đọc cho bạn." },
+      { id: "contact-no-install", title: "Không cài ứng dụng theo hướng dẫn từ xa", description: "Không chia sẻ màn hình, cấp quyền trợ năng hoặc cài tệp APK do người tự xưng là cơ quan, ngân hàng hay shipper gửi." },
+      { id: "contact-report", title: "Chặn và lưu bằng chứng", description: "Lưu số điện thoại, nội dung tin nhắn, đường link và thời gian liên hệ trước khi chặn hoặc báo cáo." },
+    ],
+  },
+  {
+    id: "links",
+    icon: "⌁",
+    title: "Đường link & mã QR",
+    description: "Kiểm tra điểm đến trước khi đăng nhập, thanh toán hoặc tải tệp.",
+    items: [
+      { id: "links-domain", title: "Đọc kỹ tên miền", description: "Kiểm tra lỗi chính tả, ký tự thay thế và phần tên miền thật ngay trước dấu gạch chéo đầu tiên." },
+      { id: "links-official-entry", title: "Tự mở ứng dụng hoặc gõ địa chỉ", description: "Với ngân hàng và dịch vụ quan trọng, không đăng nhập từ link trong SMS, email, quảng cáo tìm kiếm hoặc tin nhắn." },
+      { id: "links-https", title: "Không xem biểu tượng ổ khóa là đủ", description: "HTTPS chỉ mã hóa kết nối; website giả vẫn có thể sở hữu chứng chỉ và giao diện giống trang thật." },
+      { id: "links-qr", title: "Xem trước địa chỉ sau mã QR", description: "Không quét mã bị dán đè; đọc tên miền hiển thị trước khi tiếp tục hoặc nhập thông tin." },
+    ],
+  },
+  {
+    id: "social",
+    icon: "◎",
+    title: "Mạng xã hội & quyền riêng tư",
+    description: "Hạn chế dữ liệu mà kẻ gian có thể dùng để tạo câu chuyện đáng tin.",
+    items: [
+      { id: "social-visibility", title: "Giới hạn thông tin công khai", description: "Ẩn ngày sinh, số điện thoại, địa chỉ, lịch trình và thông tin người thân khỏi người không quen biết." },
+      { id: "social-requests", title: "Kiểm tra tài khoản kết bạn", description: "Xem lịch sử hoạt động, bạn chung và xác minh ngoài nền tảng trước khi tin một tài khoản mới hoặc tài khoản sao chép." },
+      { id: "social-video", title: "Có mật hiệu xác minh với người thân", description: "Khi nhận cuộc gọi vay tiền bất thường, đặt câu hỏi riêng hoặc gọi lại để phòng video và giọng nói giả mạo." },
+      { id: "social-permissions", title: "Rà soát ứng dụng đã liên kết", description: "Gỡ trò chơi, tiện ích và ứng dụng không còn dùng khỏi tài khoản Google, Apple, Facebook hoặc Microsoft." },
+    ],
+  },
+  {
+    id: "devices",
+    icon: "▣",
+    title: "Thiết bị & dữ liệu",
+    description: "Giữ thiết bị đủ an toàn để các lớp bảo vệ khác phát huy tác dụng.",
+    items: [
+      { id: "devices-updates", title: "Bật cập nhật tự động", description: "Cập nhật hệ điều hành, trình duyệt và ứng dụng để vá các lỗ hổng đã được công bố." },
+      { id: "devices-lock", title: "Khóa màn hình và bật tìm thiết bị", description: "Dùng mã khóa mạnh hoặc sinh trắc học, bật tính năng định vị và xóa từ xa khi thiết bị thất lạc." },
+      { id: "devices-store", title: "Chỉ cài ứng dụng từ nguồn chính thức", description: "Kiểm tra đúng nhà phát hành và quyền truy cập; không cài tệp gửi qua chat hoặc website lạ." },
+      { id: "devices-backup", title: "Duy trì bản sao lưu quan trọng", description: "Sao lưu ảnh, tài liệu và dữ liệu thiết yếu định kỳ; kiểm tra rằng bản sao có thể khôi phục được." },
+    ],
+  },
+];
+
+const securityChecklistItemIds = new Set(securityChecklistGroups.flatMap((group) => group.items.map((item) => item.id)));
 
 function progressKey(username: string | null) {
   return `khien-so-progress:${username ?? "guest"}`;
@@ -230,6 +315,8 @@ export default function Home() {
   const [answerOutcome, setAnswerOutcome] = useState<ChoiceOutcome | null>(null);
   const [dark, setDark] = useState(false);
   const [guide, setGuide] = useState(false);
+  const [completedChecklistIds, setCompletedChecklistIds] = useState<string[]>([]);
+  const [checklistReady, setChecklistReady] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>("login");
@@ -267,6 +354,9 @@ export default function Home() {
   const newsArticles = useMemo(() => publicNews(siteContent.newsArticles), [siteContent.newsArticles]);
   const [newsSlug, setNewsSlug] = useState('');
   const readingArticle = newsArticles.find(article => (article.slug || article.id) === newsSlug);
+  const checklistCompleted = completedChecklistIds.length;
+  const checklistTotal = securityChecklistItemIds.size;
+  const checklistProgress = Math.round((checklistCompleted / checklistTotal) * 100);
   useEffect(() => {
     if (!readingArticle) return;
     const oldTitle = document.title;
@@ -276,6 +366,28 @@ export default function Home() {
     meta?.setAttribute('content', readingArticle.metaDescription || readingArticle.summary);
     return () => { document.title = oldTitle; meta?.setAttribute('content', oldDescription); };
   }, [readingArticle]);
+
+  useEffect(() => {
+    const loadFrame = window.requestAnimationFrame(() => {
+      try {
+        const saved = JSON.parse(localStorage.getItem(SECURITY_CHECKLIST_KEY) ?? "[]");
+        if (Array.isArray(saved)) {
+          const validIds = saved.filter((id): id is string => typeof id === "string" && securityChecklistItemIds.has(id));
+          setCompletedChecklistIds([...new Set(validIds)]);
+        }
+      } catch {
+        setCompletedChecklistIds([]);
+      } finally {
+        setChecklistReady(true);
+      }
+    });
+    return () => window.cancelAnimationFrame(loadFrame);
+  }, []);
+
+  useEffect(() => {
+    if (!checklistReady) return;
+    localStorage.setItem(SECURITY_CHECKLIST_KEY, JSON.stringify(completedChecklistIds));
+  }, [checklistReady, completedChecklistIds]);
 
   useEffect(() => {
     let previousHash = window.location.hash;
@@ -609,6 +721,12 @@ export default function Home() {
     if (nextView === "admin") window.location.hash = "/admin";
     else if (window.location.hash === "#/admin") window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
     setView(nextView);
+  }
+
+  function toggleChecklistItem(id: string) {
+    setCompletedChecklistIds((current) => current.includes(id)
+      ? current.filter((item) => item !== id)
+      : [...current, id]);
   }
 
   async function submitChoice(index: number) {
@@ -1142,6 +1260,38 @@ export default function Home() {
             <p>Các nguyên tắc ngắn gọn để nhận diện, xác minh và xử lý tình huống có dấu hiệu lừa đảo.</p>
           </div>
           <div className="knowledge-grid">{knowledgeCards.map((card, index) => <article key={card.title}><span>{String(index + 1).padStart(2, "0")}</span><BadgeIcon>{card.icon}</BadgeIcon><h2>{card.title}</h2><p>{card.text}</p></article>)}</div>
+
+          <section className="security-checklist" aria-labelledby="security-checklist-title">
+            <div className="checklist-heading">
+              <div><span className="eyebrow">TỰ KIỂM TRA AN TOÀN SỐ</span><h2 id="security-checklist-title">Danh sách kiểm tra</h2><p>Đánh dấu những biện pháp bạn đã thực hiện. Tiến độ được lưu riêng trên thiết bị này.</p></div>
+              <div className="checklist-overall" aria-label={`Đã hoàn thành ${checklistCompleted} trên ${checklistTotal} mục`}>
+                <strong>{checklistProgress}%</strong><span>{checklistCompleted}/{checklistTotal} hoàn thành</span>
+                <div className="checklist-progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={checklistProgress}><i style={{ width: `${checklistProgress}%` }} /></div>
+              </div>
+            </div>
+            <div className="checklist-groups">
+              {securityChecklistGroups.map((group) => {
+                const completed = group.items.filter((item) => completedChecklistIds.includes(item.id)).length;
+                const progress = Math.round((completed / group.items.length) * 100);
+                return <details className="checklist-group" key={group.id}>
+                  <summary>
+                    <span className="checklist-icon" aria-hidden="true">{group.icon}</span>
+                    <span className="checklist-group-copy"><strong>{group.title}</strong><small>{group.description}</small></span>
+                    <span className="checklist-group-progress"><b>{progress}%</b><small>{completed}/{group.items.length} mục</small></span>
+                  </summary>
+                  <div className="checklist-items">
+                    {group.items.map((item) => {
+                      const checked = completedChecklistIds.includes(item.id);
+                      return <label aria-label={item.title} className={checked ? "completed" : ""} htmlFor={`security-check-${item.id}`} key={item.id}>
+                        <input id={`security-check-${item.id}`} type="checkbox" checked={checked} onChange={() => toggleChecklistItem(item.id)} />
+                        <span><strong>{item.title}</strong><small>{item.description}</small></span>
+                      </label>;
+                    })}
+                  </div>
+                </details>;
+              })}
+            </div>
+          </section>
         </section>
       )}
 
