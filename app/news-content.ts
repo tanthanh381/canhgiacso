@@ -75,7 +75,7 @@ export function validDocument(value: unknown): value is RichNode {
       const alt = n.attrs?.alt;
       if (
         !safeImage(n.attrs?.src) ||
-        (alt !== undefined && typeof alt !== "string") ||
+        (alt != null && typeof alt !== "string") ||
         (typeof alt === "string" && alt.length > 240)
       )
         return false;

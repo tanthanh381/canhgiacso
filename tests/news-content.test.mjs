@@ -195,9 +195,10 @@ test("rich text chỉ cho phép cấu trúc an toàn, từ chối script và ả
     assert.equal(validDocument({ type: "doc", content: [child] }), false);
 });
 
-test("ảnh nội dung chấp nhận alt rỗng hoặc thiếu và dữ liệu JPG hợp lệ", () => {
+test("ảnh nội dung chấp nhận alt rỗng, null hoặc thiếu và dữ liệu JPG hợp lệ", () => {
   for (const attrs of [
     { src: "https://example.com/photo.png", alt: "" },
+    { src: "https://example.com/photo.png", alt: null },
     { src: "https://example.com/photo.png" },
     { src: "data:image/jpg;base64,AAAA", alt: "" },
     { src: "data:image/jpeg;base64,AAAA", alt: "Ảnh minh họa" },
