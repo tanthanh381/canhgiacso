@@ -7,6 +7,8 @@ on:
       - 'github-pages/**'
       - 'public/**'
       - 'app/layout.tsx'
+      - 'scripts/seo-audit.mjs'
+      - 'package.json'
       - 'vite.github-pages.config.ts'
       - '.github/workflows/seo-verify.yml'
   push:
@@ -15,6 +17,8 @@ on:
       - 'github-pages/**'
       - 'public/**'
       - 'app/layout.tsx'
+      - 'scripts/seo-audit.mjs'
+      - 'package.json'
       - 'vite.github-pages.config.ts'
 
 permissions:
@@ -39,6 +43,8 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build GitHub Pages production target
         run: pnpm run build:pages
+      - name: Run full SEO audit
+        run: pnpm run seo:audit
       - name: Verify crawlable SEO assets
         run: |
           test -f docs/robots.txt
@@ -51,3 +57,4 @@ jobs:
           grep -q '<loc>https://canhgiacso.com/</loc>' docs/sitemap.xml
           grep -q 'rel="canonical" href="https://canhgiacso.com/"' docs/index.html
           grep -q 'application/ld+json' docs/index.html
+          grep -q '<h1>Nhận diện lừa đảo trực tuyến' docs/index.html
