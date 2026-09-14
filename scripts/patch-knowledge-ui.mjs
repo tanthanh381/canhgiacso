@@ -21,15 +21,31 @@ let changed = 0;
 for (const file of files) {
   let html = await readFile(file, "utf8");
   const before = html;
+
   html = html
-    .replaceAll('src="/khien-so-logo.png" alt="Logo Cảnh Giác Số"', 'src="/canh-giac-so-mark.svg" alt="Logo Cảnh Giác Số"')
-    .replaceAll('alt="Logo Cảnh Giác Số" width="42" height="42"', 'alt="Logo Cảnh Giác Số" width="54" height="54"')
+    .replaceAll(
+      '<img src="/khien-so-logo.png" alt="Logo Cảnh Giác Số" width="42" height="42" /><span>Cảnh Giác Số</span>',
+      '<span class="seo-brand-logo" aria-hidden="true"></span><span class="seo-brand-lockup">Cảnh Giác Số</span>',
+    )
+    .replaceAll(
+      '<img src="/khien-so-logo.png" alt="Logo Cảnh Giác Số" width="54" height="54" /><span>Cảnh Giác Số</span>',
+      '<span class="seo-brand-logo" aria-hidden="true"></span><span class="seo-brand-lockup">Cảnh Giác Số</span>',
+    )
+    .replaceAll(
+      '<img src="/canh-giac-so-mark.svg" alt="Logo Cảnh Giác Số" width="42" height="42" /><span>Cảnh Giác Số</span>',
+      '<span class="seo-brand-logo" aria-hidden="true"></span><span class="seo-brand-lockup">Cảnh Giác Số</span>',
+    )
+    .replaceAll(
+      '<img src="/canh-giac-so-mark.svg" alt="Logo Cảnh Giác Số" width="54" height="54" /><span>Cảnh Giác Số</span>',
+      '<span class="seo-brand-logo" aria-hidden="true"></span><span class="seo-brand-lockup">Cảnh Giác Số</span>',
+    )
     .replaceAll('<a href="/kien-thuc/">Kiến thức</a></nav>', '<a href="/kien-thuc/" aria-current="page">Cẩm nang</a></nav>')
     .replaceAll('› <a href="/kien-thuc/">Kiến thức</a> ›', '› <a href="/kien-thuc/">Cẩm nang</a> ›');
+
   if (html !== before) {
     await writeFile(file, html, "utf8");
     changed += 1;
   }
 }
 
-console.log(`Normalized branded shell for ${changed}/${files.length} knowledge pages.`);
+console.log(`Normalized homepage BrandMark shell for ${changed}/${files.length} knowledge pages.`);
