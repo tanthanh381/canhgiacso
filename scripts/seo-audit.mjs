@@ -1,93 +1,90 @@
-import { readFile, readdir, stat } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 
-const root = process.argv[2] || "docs";
-const requiredPages = [
-  "index.html",
-  "kien-thuc/index.html",
-  "kien-thuc/phong-chong-lua-dao-truc-tuyen/index.html",
-  "kien-thuc/nhan-dien-lua-dao-truc-tuyen/index.html",
-  "kien-thuc/nhan-dien-email-phishing/index.html",
-  "kien-thuc/an-toan-thong-tin-ca-nhan/index.html",
-  "kien-thuc/xu-ly-khi-bi-lua-dao-chuyen-tien/index.html",
-];
+const outDir = process.argv[2] || "docs";
+const root = path.resolve(outDir);
+const site = "https://canhgiacso.com";
 
-const errors = [];
-
-function check(condition, message) {
-  if (!condition) errors.push(message);
-}
-
-function countMatches(text, regex) {
-  return [...text.matchAll(regex)].length;
-}
-
-async function auditHtml(relativePath) {
-  const fullPath = path.join(root, relativePath);
-  const html = await readFile(fullPath, "utf8");
-  const label = `/${relativePath.replace(/index\.html$/, "")}`;
-
-  check(/<html[^>]+lang="vi(?:-VN)?"/i.test(html), `${label}: missing Vietnamese lang attribute`);
-  check(/<title>[^<]{15,70}<\/title>/i.test(html), `${label}: title should be 15-70 characters`);
-  check(/<meta\s+name="description"\s+content="[^"]{80,180}"/i.test(html), `${label}: meta description should be 80-180 characters`);
-  check(countMatches(html, /<link\s+rel="canonical"/gi) === 1, `${label}: must contain exactly one canonical URL`);
-  check(/<meta\s+name="robots"[^>]+index[^>]+follow/i.test(html), `${label}: page must be indexable and followable`);
-  check(/property="og:title"/i.test(html), `${label}: missing Open Graph title`);
-  check(/property="og:description"/i.test(html), `${label}: missing Open Graph description`);
-  check(/property="og:image"/i.test(html), `${label}: missing Open Graph image`);
-  check(/application\/ld\+json/i.test(html), `${label}: missing JSON-LD structured data`);
-  check(/<h1(?:\s[^>]*)?>[\s\S]*?<\/h1>/i.test(html), `${label}: missing H1`);
-  check(countMatches(html, /<h1(?:\s[^>]*)?>/gi) === 1, `${label}: should contain exactly one H1`);
-
-  if (relativePath === "index.html") {
-    check(/<div id="root">[\s\S]*?<h1/i.test(html), `${label}: homepage must expose crawlable content before JavaScript executes`);
-    check(/href="\/kien-thuc\//i.test(html), `${label}: homepage must link to the knowledge hub`);
-    check(/chống lừa đảo/i.test(html), `${label}: homepage should target the anti-scam topic cluster`);
-    check(/an toàn thông tin/i.test(html), `${label}: homepage should target the information security topic cluster`);
-  }
-}
-
-async function walk(dir) {
-  const entries = await readdir(dir);
-  for (const entry of entries) {
-    const full = path.join(dir, entry);
-    const info = await stat(full);
-    if (info.isDirectory()) await walk(full);
-  }
-}
-
-await walk(root);
-
-for (const page of requiredPages) {
+const fail = (message) => {
+  console.error(`SEO AUDIT FAIL: ${message}`);
+  process.exitCode = 1;
+};
+const ok = (message) => console.log(`✓ ${message}`);
+const exists = async (p) => {
   try {
-    await auditHtml(page);
-  } catch (error) {
-    errors.push(`/${page}: ${error instanceof Error ? error.message : String(error)}`);
+    await stat(p);
+    return true;
+  } catch {
+    return false;
+  }
+};
+const stripTags = (value) =>
+  value
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+const extract = (html, regex) => html.match(regex)?.[1]?.trim() || "";
+
+const sitemapPath = path.join(root, "sitemap.xml");
+if (!(await exists(sitemapPath))) {
+  fail("Missing sitemap.xml");
+  process.exit(1);
+}
+const sitemap = await readFile(sitemapPath, "utf8");
+const urls = [...sitemap.matchAll(/<loc>(https:\/\/canhgiacso\.com\/[^<]*)<\/loc>/g)].map((m) => m[1]);
+if (urls.length < 15) fail(`Expected at least 15 indexable URLs, found ${urls.length}`);
+else ok(`Sitemap contains ${urls.length} URLs`);
+
+const localPathFor = (url) => {
+  const pathname = new URL(url).pathname;
+  if (pathname === "/") return path.join(root, "index.html");
+  return path.join(root, pathname.replace(/^\/|\/$/g, ""), "index.html");
+};
+
+for (const url of urls) {
+  const file = localPathFor(url);
+  if (!(await exists(file))) {
+    fail(`${url}: missing generated HTML at ${path.relative(root, file)}`);
+    continue;
+  }
+  const html = await readFile(file, "utf8");
+  const title = extract(html, /<title>([\s\S]*?)<\/title>/i);
+  const description = extract(html, /<meta\s+name=["']description["']\s+content=["']([^"']*)["']/i);
+  const canonical = extract(html, /<link\s+rel=["']canonical["']\s+href=["']([^"']*)["']/i);
+  const h1Count = (html.match(/<h1\b/gi) || []).length;
+  const wordCount = stripTags(html.split("<body")[1] || html).split(/\s+/).filter(Boolean).length;
+
+  if (title.length < 15 || title.length > 70) fail(`${url}: title length ${title.length}`);
+  if (description.length < 90 || description.length > 160) fail(`${url}: meta description length ${description.length}`);
+  if (canonical !== url) fail(`${url}: canonical mismatch (${canonical})`);
+  if (h1Count !== 1) fail(`${url}: expected exactly one H1, found ${h1Count}`);
+  if (!/name=["']robots["'][^>]*index,follow/i.test(html)) fail(`${url}: missing index,follow robots`);
+  if (!/rel=["']alternate["'][^>]*hreflang=["']vi-VN["']/i.test(html)) fail(`${url}: missing vi-VN hreflang`);
+  if (!/rel=["']alternate["'][^>]*hreflang=["']x-default["']/i.test(html)) fail(`${url}: missing x-default hreflang`);
+  if (!/rel=["']icon["']/i.test(html)) fail(`${url}: missing favicon`);
+  if (!/property=["']og:title["']/i.test(html)) fail(`${url}: missing Open Graph title`);
+  if (!/name=["']twitter:card["']/i.test(html)) fail(`${url}: missing Twitter card`);
+
+  if (url.includes("/kien-thuc/") && url !== `${site}/kien-thuc/`) {
+    if (!/"@type":"Article"/.test(html)) fail(`${url}: missing Article schema`);
+    if (!/"@type":"BreadcrumbList"/.test(html)) fail(`${url}: missing BreadcrumbList schema`);
+    if (!/"image":/.test(html)) fail(`${url}: Article schema missing image`);
+    if (!/"logo":/.test(html)) fail(`${url}: Organization schema missing logo`);
+    if (wordCount < 300) fail(`${url}: thin article (${wordCount} words)`);
   }
 }
 
 const robots = await readFile(path.join(root, "robots.txt"), "utf8");
-check(/User-agent:\s*\*/i.test(robots), "robots.txt: missing default user-agent");
-check(/Allow:\s*\//i.test(robots), "robots.txt: site is not explicitly crawlable");
-check(/Sitemap:\s*https:\/\/canhgiacso\.com\/sitemap\.xml/i.test(robots), "robots.txt: missing production sitemap URL");
+if (!robots.includes("Sitemap: https://canhgiacso.com/sitemap.xml")) fail("robots.txt does not advertise sitemap");
+else ok("robots.txt advertises sitemap");
 
-const sitemap = await readFile(path.join(root, "sitemap.xml"), "utf8");
-for (const url of [
-  "https://canhgiacso.com/",
-  "https://canhgiacso.com/kien-thuc/",
-  "https://canhgiacso.com/kien-thuc/phong-chong-lua-dao-truc-tuyen/",
-  "https://canhgiacso.com/kien-thuc/nhan-dien-lua-dao-truc-tuyen/",
-  "https://canhgiacso.com/kien-thuc/nhan-dien-email-phishing/",
-  "https://canhgiacso.com/kien-thuc/an-toan-thong-tin-ca-nhan/",
-  "https://canhgiacso.com/kien-thuc/xu-ly-khi-bi-lua-dao-chuyen-tien/",
-]) {
-  check(sitemap.includes(`<loc>${url}</loc>`), `sitemap.xml: missing ${url}`);
-}
+const home = await readFile(path.join(root, "index.html"), "utf8");
+const homeWords = stripTags(home.split("<body")[1] || home).split(/\s+/).filter(Boolean).length;
+if (homeWords < 450) fail(`Homepage crawlable content is thin (${homeWords} words)`);
+else ok(`Homepage has ${homeWords} crawlable words`);
+if (!home.includes("/kien-thuc/phong-chong-lua-dao-truc-tuyen/")) fail("Homepage missing anti-scam pillar link");
+if (!home.includes("/kien-thuc/an-toan-thong-tin-ca-nhan/")) fail("Homepage missing information-security pillar link");
 
-if (errors.length) {
-  console.error(`SEO audit failed with ${errors.length} issue(s):`);
-  for (const error of errors) console.error(`- ${error}`);
-  process.exit(1);
-}
-
-console.log(`SEO audit passed for ${requiredPages.length} indexable pages.`);
+if (!process.exitCode) console.log("SEO audit passed.");
