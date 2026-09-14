@@ -7,8 +7,8 @@ const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
 test("Cẩm nang includes an interactive security checklist", async () => {
   const [page, styles] = await Promise.all([read("../app/page.tsx"), read("../app/globals.css")]);
   const checklist = page.slice(page.indexOf("const securityChecklistGroups"), page.indexOf("const securityChecklistItemIds"));
-  const groupIds = [...checklist.matchAll(/^    id: "([a-z-]+)",$/gm)].map((match) => match[1]);
-  const itemIds = [...checklist.matchAll(/^      \{ id: "([a-z]+-[a-z-]+)"/gm)].map((match) => match[1]);
+  const groupIds = [...checklist.matchAll(/^ {4}id: "([a-z-]+)",$/gm)].map((match) => match[1]);
+  const itemIds = [...checklist.matchAll(/^ {6}\{ id: "([a-z]+-[a-z-]+)"/gm)].map((match) => match[1]);
 
   assert.equal(groupIds.length, 12);
   assert.equal(new Set(groupIds).size, 12);
