@@ -99,13 +99,14 @@ export function AdminTrafficAnalytics() {
   }, [windowKey]);
 
   useEffect(() => {
-    void load();
+    const initialTimer = window.setTimeout(() => void load(), 0);
     const timer = window.setInterval(() => {
       if (document.visibilityState === "visible") void load();
     }, 10_000);
     const onVisibility = () => { if (document.visibilityState === "visible") void load(); };
     document.addEventListener("visibilitychange", onVisibility);
     return () => {
+      window.clearTimeout(initialTimer);
       window.clearInterval(timer);
       document.removeEventListener("visibilitychange", onVisibility);
     };
