@@ -22,6 +22,7 @@ for (const file of files) {
   let html = await readFile(file, "utf8");
   const before = html;
   html = html
+    .replaceAll('src="/khien-so-logo.png" alt="Logo Cảnh Giác Số"', 'src="/canh-giac-so-mark.svg" alt="Logo Cảnh Giác Số"')
     .replaceAll('alt="Logo Cảnh Giác Số" width="42" height="42"', 'alt="Logo Cảnh Giác Số" width="54" height="54"')
     .replaceAll('<a href="/kien-thuc/">Kiến thức</a></nav>', '<a href="/kien-thuc/" aria-current="page">Cẩm nang</a></nav>')
     .replaceAll('› <a href="/kien-thuc/">Kiến thức</a> ›', '› <a href="/kien-thuc/">Cẩm nang</a> ›');
