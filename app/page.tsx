@@ -1367,7 +1367,6 @@ export default function Home() {
                 </details>;
               })}
             </div>
-            <p className="checklist-source">Tham khảo khung chủ đề từ <a href="https://github.com/lissy93/personal-security-checklist" target="_blank" rel="noreferrer">Personal Security Checklist</a> (MIT); nội dung được biên soạn lại cho bối cảnh người dùng Việt Nam.</p>
           </section>
         </section>
       )}
