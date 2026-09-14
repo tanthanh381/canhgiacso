@@ -80,8 +80,7 @@ export function AdminTrafficAnalytics() {
   const [state, setState] = useState<LoadState>("loading");
   const [message, setMessage] = useState("");
 
-  const load = useCallback(async (silent = false) => {
-    if (!silent) setState("loading");
+  const load = useCallback(async () => {
     const result = await supabase.rpc("get_web_analytics_dashboard", { p_window: windowKey });
     if (result.error) {
       setState("error");
@@ -102,9 +101,9 @@ export function AdminTrafficAnalytics() {
   useEffect(() => {
     void load();
     const timer = window.setInterval(() => {
-      if (document.visibilityState === "visible") void load(true);
+      if (document.visibilityState === "visible") void load();
     }, 10_000);
-    const onVisibility = () => { if (document.visibilityState === "visible") void load(true); };
+    const onVisibility = () => { if (document.visibilityState === "visible") void load(); };
     document.addEventListener("visibilitychange", onVisibility);
     return () => {
       window.clearInterval(timer);
