@@ -3,7 +3,8 @@ import "./globals.css";
 
 const siteUrl = "https://canhgiacso.com";
 const siteTitle = "Cảnh Giác Số: Chống lừa đảo & An toàn thông tin";
-const siteDescription = "Cảnh Giác Số giúp nhận diện và chống lừa đảo trực tuyến, nâng cao cảnh giác, bảo vệ tài khoản và rèn kỹ năng an toàn thông tin qua tình huống thực tế.";
+const siteDescription =
+  "Cảnh Giác Số giúp nhận diện và chống lừa đảo trực tuyến, nâng cao cảnh giác, bảo vệ tài khoản và rèn kỹ năng an toàn thông tin qua tình huống thực tế.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -13,22 +14,6 @@ export const metadata: Metadata = {
     template: "%s | Cảnh Giác Số",
   },
   description: siteDescription,
-  keywords: [
-    "chống lừa đảo",
-    "lừa đảo",
-    "cảnh giác",
-    "an toàn thông tin",
-    "lừa đảo trực tuyến",
-    "phòng chống lừa đảo",
-    "lừa đảo qua mạng",
-    "an toàn số",
-    "phishing",
-    "giả mạo ngân hàng",
-    "website giả mạo",
-    "OTP",
-    "deepfake",
-    "Cảnh Giác Số",
-  ],
   authors: [{ name: "Cảnh Giác Số", url: siteUrl }],
   creator: "Cảnh Giác Số",
   publisher: "Cảnh Giác Số",
@@ -58,7 +43,8 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: siteTitle,
-    description: "Nâng cao cảnh giác, nhận diện lừa đảo và rèn kỹ năng an toàn thông tin qua các tình huống tương tác thực tế.",
+    description:
+      "Nâng cao cảnh giác, nhận diện lừa đảo và rèn kỹ năng an toàn thông tin qua các tình huống tương tác thực tế.",
     type: "website",
     siteName: "Cảnh Giác Số",
     locale: "vi_VN",
@@ -76,7 +62,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: siteTitle,
-    description: "Nâng cao cảnh giác, nhận diện lừa đảo và rèn kỹ năng an toàn thông tin qua các tình huống tương tác thực tế.",
+    description:
+      "Nâng cao cảnh giác, nhận diện lừa đảo và rèn kỹ năng an toàn thông tin qua các tình huống tương tác thực tế.",
     images: ["/og.png"],
   },
 };
