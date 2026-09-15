@@ -41,6 +41,29 @@ async function patchAdmin() {
   }
 }
 
+async function patchCountryAnalytics() {
+  const file = path.join(ROOT, "app", "admin-traffic-analytics.tsx");
+  let source = await readFile(file, "utf8");
+  const before = source;
+
+  if (!source.includes('from "./admin-country-analytics"')) {
+    source = source.replace(
+      'import "./admin-google-traffic.css";',
+      'import "./admin-google-traffic.css";\nimport { AdminCountryAnalytics } from "./admin-country-analytics";',
+    );
+  }
+
+  if (!source.includes('<AdminCountryAnalytics windowKey={windowKey} />')) {
+    const marker = '      <section className="traffic-panel traffic-chart-panel">';
+    source = source.replace(marker, `      <AdminCountryAnalytics windowKey={windowKey} />\n\n${marker}`);
+  }
+
+  if (source !== before) {
+    await writeFile(file, source, "utf8");
+    console.log("Patched country analytics panel.");
+  }
+}
+
 function patchCsp(html) {
   if (html.includes(SUPABASE_ORIGINS)) return html;
   return html.replace(/connect-src 'self'([^;]*);/g, (_match, rest) => `connect-src 'self' ${SUPABASE_ORIGINS}${rest};`);
@@ -71,6 +94,7 @@ async function htmlFiles(dir) {
 }
 
 await patchAdmin();
+await patchCountryAnalytics();
 let htmlChanged = 0;
 for (const relativeRoot of ["public", "github-pages"]) {
   const root = path.join(ROOT, relativeRoot);
