@@ -3,7 +3,7 @@
 
   const PROJECT_URL = 'https://goietwyapiywrtibpkwo.supabase.co';
   const PUBLISHABLE_KEY = 'sb_publishable_ghj-H14bq2n1tSsH4u-adA_LoBtWKO4';
-  const RPC_URL = `${PROJECT_URL}/rest/v1/rpc/record_web_analytics_event_v3`;
+  const RPC_URL = `${PROJECT_URL}/rest/v1/rpc/record_web_analytics_event_v4`;
   const SESSION_KEY = 'canhgiacso-analytics-session-v2';
   const VISITOR_KEY = 'canhgiacso-analytics-visitor-v1';
   const SESSION_TIMEOUT_MS = 30 * 60 * 1000;
@@ -35,15 +35,63 @@
     return typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
   }
 
-  function writeSharedSession(id, lastActivity) {
+  function normalizedPath() {
+    const path = window.location.pathname || '/';
+    return path.startsWith('/') ? path.slice(0, 512) : '/';
+  }
+
+  function externalReferrerHost() {
+    if (!document.referrer) return null;
     try {
-      window.localStorage.setItem(SESSION_KEY, JSON.stringify({ id, lastActivity }));
+      const host = new URL(document.referrer).hostname.toLowerCase();
+      return ALLOWED_HOSTS.has(host) ? null : host.slice(0, 255);
+    } catch {
+      return null;
+    }
+  }
+
+  function cleanCampaignValue(value, maxLength) {
+    if (!value) return null;
+    const cleaned = String(value).replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, maxLength);
+    return cleaned || null;
+  }
+
+  function campaignParams() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      return {
+        utmSource: cleanCampaignValue(params.get('utm_source'), 80)?.toLowerCase() || null,
+        utmMedium: cleanCampaignValue(params.get('utm_medium'), 80)?.toLowerCase() || null,
+        utmCampaign: cleanCampaignValue(params.get('utm_campaign'), 120),
+      };
+    } catch {
+      return { utmSource: null, utmMedium: null, utmCampaign: null };
+    }
+  }
+
+  function currentAcquisition() {
+    return { referrerHost: externalReferrerHost(), ...campaignParams() };
+  }
+
+  function normalizedAcquisition(value) {
+    const item = value && typeof value === 'object' ? value : {};
+    return {
+      referrerHost: typeof item.referrerHost === 'string' ? item.referrerHost.slice(0, 255) : null,
+      utmSource: typeof item.utmSource === 'string' ? item.utmSource.slice(0, 80) : null,
+      utmMedium: typeof item.utmMedium === 'string' ? item.utmMedium.slice(0, 80) : null,
+      utmCampaign: typeof item.utmCampaign === 'string' ? item.utmCampaign.slice(0, 120) : null,
+    };
+  }
+
+  function writeSharedSession(id, lastActivity, acquisition) {
+    try {
+      window.localStorage.setItem(SESSION_KEY, JSON.stringify({ id, lastActivity, acquisition }));
     } catch {
       // Storage can be blocked. In that case the in-memory fallback below is used.
     }
   }
 
-  let fallbackSession = { id: crypto.randomUUID(), lastActivity: Date.now() };
+  let fallbackSession = { id: crypto.randomUUID(), lastActivity: Date.now(), acquisition: currentAcquisition() };
 
   function activeSession() {
     const now = Date.now();
@@ -52,22 +100,24 @@
       if (raw) {
         const stored = JSON.parse(raw);
         if (validUuid(stored?.id) && Number.isFinite(stored?.lastActivity) && now - stored.lastActivity < SESSION_TIMEOUT_MS) {
-          writeSharedSession(stored.id, now);
-          fallbackSession = { id: stored.id, lastActivity: now };
-          return { id: stored.id, isNew: false };
+          const acquisition = stored?.acquisition ? normalizedAcquisition(stored.acquisition) : currentAcquisition();
+          writeSharedSession(stored.id, now, acquisition);
+          fallbackSession = { id: stored.id, lastActivity: now, acquisition };
+          return { id: stored.id, isNew: false, acquisition };
         }
       }
       const id = crypto.randomUUID();
-      writeSharedSession(id, now);
-      fallbackSession = { id, lastActivity: now };
-      return { id, isNew: true };
+      const acquisition = currentAcquisition();
+      writeSharedSession(id, now, acquisition);
+      fallbackSession = { id, lastActivity: now, acquisition };
+      return { id, isNew: true, acquisition };
     } catch {
       if (now - fallbackSession.lastActivity >= SESSION_TIMEOUT_MS) {
-        fallbackSession = { id: crypto.randomUUID(), lastActivity: now };
-        return { id: fallbackSession.id, isNew: true };
+        fallbackSession = { id: crypto.randomUUID(), lastActivity: now, acquisition: currentAcquisition() };
+        return { id: fallbackSession.id, isNew: true, acquisition: fallbackSession.acquisition };
       }
       fallbackSession.lastActivity = now;
-      return { id: fallbackSession.id, isNew: false };
+      return { id: fallbackSession.id, isNew: false, acquisition: fallbackSession.acquisition };
     }
   }
 
@@ -160,21 +210,6 @@
   let lastPath = '';
   let heartbeatTimer = 0;
 
-  function normalizedPath() {
-    const path = window.location.pathname || '/';
-    return path.startsWith('/') ? path.slice(0, 512) : '/';
-  }
-
-  function externalReferrerHost() {
-    if (!document.referrer) return null;
-    try {
-      const host = new URL(document.referrer).hostname.toLowerCase();
-      return ALLOWED_HOSTS.has(host) ? null : host.slice(0, 255);
-    } catch {
-      return null;
-    }
-  }
-
   async function send(eventType) {
     if (document.visibilityState === 'hidden' && eventType === 'heartbeat') return;
     const session = activeSession();
@@ -183,11 +218,14 @@
       p_session_id: session.id,
       p_visitor_id: visitor,
       p_path: normalizedPath(),
-      p_referrer_host: externalReferrerHost(),
+      p_referrer_host: session.acquisition.referrerHost,
       p_browser: dimensions.browser,
       p_operating_system: dimensions.operatingSystem,
       p_device_type: dimensions.deviceType,
       p_country_code: countryCode,
+      p_utm_source: session.acquisition.utmSource,
+      p_utm_medium: session.acquisition.utmMedium,
+      p_utm_campaign: session.acquisition.utmCampaign,
       p_event_type: effectiveEventType,
     };
     try {
