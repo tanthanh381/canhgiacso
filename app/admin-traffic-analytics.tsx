@@ -5,24 +5,29 @@ import { supabase } from "./supabase";
 import "./admin-traffic-analytics.css";
 
 type WindowKey = "24h" | "7d" | "30d" | "90d";
-type SeriesPoint = { bucket: string; views: number; visitors: number; users: number };
-type TopPage = { path: string; views: number; visitors: number; users: number };
-type TrafficSource = { source: string; visitors: number; sessions: number; users: number };
-type LivePage = { path: string; active_visitors: number; active_users: number };
+type SeriesPoint = { bucket: string; views: number; visitors: number; users: number; legacy_sessions: number };
+type TopPage = { path: string; views: number; visitors: number; users: number; legacy_sessions: number };
+type TrafficSource = { source: string; visitors: number; sessions: number; users: number; legacy_sessions: number };
+type LivePage = { path: string; active_visitors: number; active_users: number; legacy_sessions: number };
 type DimensionRow = { name: string; users: number; sessions: number; views: number };
 type AnalyticsDashboard = {
   generatedAt: string;
   window: WindowKey;
   onlineNow: number;
   onlineUsers: number;
+  onlineLegacySessions: number;
   pageviewsToday: number;
-  uniqueVisitorsToday: number;
   uniqueUsersToday: number;
   sessionsToday: number;
+  identifiedSessionsToday: number;
+  legacySessionsToday: number;
   pageviewsWindow: number;
-  uniqueVisitorsWindow: number;
   uniqueUsersWindow: number;
   sessionsWindow: number;
+  identifiedSessionsWindow: number;
+  legacySessionsWindow: number;
+  identifiedPageviewsWindow: number;
+  legacyPageviewsWindow: number;
   newUsersWindow: number;
   returningUsersWindow: number;
   series: SeriesPoint[];
@@ -58,19 +63,25 @@ function parseDashboard(value: unknown): AnalyticsDashboard | null {
     sessions: number(row.sessions),
     views: number(row.views),
   }));
+
   return {
     generatedAt: typeof item.generatedAt === "string" ? item.generatedAt : new Date().toISOString(),
     window,
     onlineNow: number(item.onlineNow),
     onlineUsers: number(item.onlineUsers),
+    onlineLegacySessions: number(item.onlineLegacySessions),
     pageviewsToday: number(item.pageviewsToday),
-    uniqueVisitorsToday: number(item.uniqueVisitorsToday),
     uniqueUsersToday: number(item.uniqueUsersToday),
     sessionsToday: number(item.sessionsToday),
+    identifiedSessionsToday: number(item.identifiedSessionsToday),
+    legacySessionsToday: number(item.legacySessionsToday),
     pageviewsWindow: number(item.pageviewsWindow),
-    uniqueVisitorsWindow: number(item.uniqueVisitorsWindow),
     uniqueUsersWindow: number(item.uniqueUsersWindow),
     sessionsWindow: number(item.sessionsWindow),
+    identifiedSessionsWindow: number(item.identifiedSessionsWindow),
+    legacySessionsWindow: number(item.legacySessionsWindow),
+    identifiedPageviewsWindow: number(item.identifiedPageviewsWindow),
+    legacyPageviewsWindow: number(item.legacyPageviewsWindow),
     newUsersWindow: number(item.newUsersWindow),
     returningUsersWindow: number(item.returningUsersWindow),
     series: rows("series").map((row) => ({
@@ -78,23 +89,27 @@ function parseDashboard(value: unknown): AnalyticsDashboard | null {
       views: number(row.views),
       visitors: number(row.visitors),
       users: number(row.users),
+      legacy_sessions: number(row.legacy_sessions),
     })),
     topPages: rows("topPages").map((row) => ({
       path: String(row.path ?? "/"),
       views: number(row.views),
       visitors: number(row.visitors),
       users: number(row.users),
+      legacy_sessions: number(row.legacy_sessions),
     })),
     sources: rows("sources").map((row) => ({
       source: String(row.source ?? "Trực tiếp / không xác định"),
       visitors: number(row.visitors),
       sessions: number(row.sessions),
       users: number(row.users),
+      legacy_sessions: number(row.legacy_sessions),
     })),
     livePages: rows("livePages").map((row) => ({
       path: String(row.path ?? "/"),
       active_visitors: number(row.active_visitors),
       active_users: number(row.active_users),
+      legacy_sessions: number(row.legacy_sessions),
     })),
     browsers: dimensions("browsers"),
     operatingSystems: dimensions("operatingSystems"),
@@ -106,11 +121,12 @@ function compact(value: number) {
   return new Intl.NumberFormat("vi-VN", { notation: value >= 10_000 ? "compact" : "standard", maximumFractionDigits: 1 }).format(value);
 }
 
+function percent(part: number, total: number) {
+  return total > 0 ? `${Math.round(part / total * 100)}%` : "0%";
+}
+
 function bucketLabel(bucket: string, window: WindowKey) {
-  if (window === "24h") {
-    const hour = bucket.split(" ")[1];
-    return hour ?? bucket;
-  }
+  if (window === "24h") return bucket.split(" ")[1] ?? bucket;
   const parts = bucket.split("-");
   return parts.length === 3 ? `${parts[2]}/${parts[1]}` : bucket;
 }
@@ -118,11 +134,6 @@ function bucketLabel(bucket: string, window: WindowKey) {
 function pathLabel(path: string) {
   if (path === "/") return "Trang chủ";
   return decodeURIComponent(path).replace(/^\//, "").replace(/\/$/, "") || "Trang chủ";
-}
-
-function percent(part: number, total: number) {
-  if (total <= 0) return "0%";
-  return `${Math.round(part / total * 100)}%`;
 }
 
 function DimensionPanel({ title, description, rows }: { title: string; description: string; rows: DimensionRow[] }) {
@@ -133,7 +144,7 @@ function DimensionPanel({ title, description, rows }: { title: string; descripti
       <div className="traffic-dimension-head"><strong>{row.name}</strong><span>{compact(row.users)} người dùng</span></div>
       <div className="traffic-dimension-track"><i style={{ width: `${Math.max(3, row.users / max * 100)}%` }} /></div>
       <small>{compact(row.sessions)} phiên · {compact(row.views)} lượt xem</small>
-    </div>)}</div> : <div className="traffic-empty compact">Chưa có dữ liệu cho chiều thống kê này.</div>}
+    </div>)}</div> : <div className="traffic-empty compact">Chưa có dữ liệu đã nhận diện cho chiều thống kê này.</div>}
   </section>;
 }
 
@@ -176,14 +187,14 @@ export function AdminTrafficAnalytics() {
   }, [load]);
 
   const chartMax = useMemo(() => Math.max(1, ...(data?.series.map((point) => point.views) ?? [1])), [data]);
-  const sourceMax = useMemo(() => Math.max(1, ...(data?.sources.map((source) => source.users) ?? [1])), [data]);
+  const sourceMax = useMemo(() => Math.max(1, ...(data?.sources.map((source) => source.sessions) ?? [1])), [data]);
 
   return <div className="traffic-admin">
     <div className="traffic-admin-head">
       <div>
         <span className="eyebrow">THỐNG KÊ TRUY CẬP · GẦN THỜI GIAN THỰC</span>
         <h2>Lượt truy cập website</h2>
-        <p>Theo dõi người dùng ẩn danh, phiên, trình duyệt, hệ điều hành, thiết bị và nguồn truy cập. Tự động cập nhật mỗi 10 giây.</p>
+        <p>Session dùng chung giữa các tab và tự tạo mới sau 30 phút không hoạt động. Người dùng chỉ được tính khi có visitor ID ẩn danh.</p>
       </div>
       <div className="traffic-window" role="group" aria-label="Khoảng thời gian thống kê">
         {(Object.keys(WINDOW_LABELS) as WindowKey[]).map((key) => <button key={key} type="button" className={windowKey === key ? "active" : ""} onClick={() => setWindowKey(key)}>{WINDOW_LABELS[key]}</button>)}
@@ -195,30 +206,41 @@ export function AdminTrafficAnalytics() {
 
     {data && <>
       <div className="traffic-live-line"><span className="traffic-live-dot" aria-hidden="true" /> Đang cập nhật tự động <span>·</span> Lần cuối: {new Date(data.generatedAt).toLocaleTimeString("vi-VN")}</div>
+
       <div className="traffic-kpis">
-        <article className="traffic-kpi live"><span>Đang online</span><strong>{compact(data.onlineUsers)}</strong><small>{compact(data.onlineNow)} phiên hoạt động ≤ 5 phút</small></article>
-        <article className="traffic-kpi"><span>Người dùng hôm nay</span><strong>{compact(data.uniqueUsersToday)}</strong><small>visitor ẩn danh duy nhất</small></article>
-        <article className="traffic-kpi"><span>Phiên hôm nay</span><strong>{compact(data.sessionsToday)}</strong><small>browser sessions</small></article>
-        <article className="traffic-kpi"><span>Lượt xem hôm nay</span><strong>{compact(data.pageviewsToday)}</strong><small>pageviews</small></article>
-        <article className="traffic-kpi"><span>Người dùng · {WINDOW_LABELS[windowKey]}</span><strong>{compact(data.uniqueUsersWindow)}</strong><small>{compact(data.sessionsWindow)} phiên</small></article>
-        <article className="traffic-kpi"><span>Lượt xem · {WINDOW_LABELS[windowKey]}</span><strong>{compact(data.pageviewsWindow)}</strong><small>{data.uniqueUsersWindow ? (data.pageviewsWindow / data.uniqueUsersWindow).toFixed(1) : "0"} lượt/người dùng</small></article>
+        <article className="traffic-kpi live"><span>Đang online</span><strong>{compact(data.onlineUsers)}</strong><small>{compact(data.onlineNow)} phiên · {compact(data.onlineLegacySessions)} legacy</small></article>
+        <article className="traffic-kpi"><span>Người dùng đã nhận diện hôm nay</span><strong>{compact(data.uniqueUsersToday)}</strong><small>{compact(data.identifiedSessionsToday)} phiên có visitor ID</small></article>
+        <article className="traffic-kpi"><span>Phiên hôm nay</span><strong>{compact(data.sessionsToday)}</strong><small>{compact(data.legacySessionsToday)} phiên legacy</small></article>
+        <article className="traffic-kpi"><span>Lượt xem hôm nay</span><strong>{compact(data.pageviewsToday)}</strong><small>pageviews đã kiểm tra nhất quán</small></article>
+        <article className="traffic-kpi"><span>Người dùng · {WINDOW_LABELS[windowKey]}</span><strong>{compact(data.uniqueUsersWindow)}</strong><small>không quy đổi session legacy thành user</small></article>
+        <article className="traffic-kpi"><span>Lượt xem · {WINDOW_LABELS[windowKey]}</span><strong>{compact(data.pageviewsWindow)}</strong><small>{compact(data.sessionsWindow)} phiên</small></article>
       </div>
 
       <section className="traffic-panel traffic-user-panel">
-        <div className="traffic-panel-title"><div><h3>Người dùng</h3><p>Visitor ID ẩn danh first-party, tự xoay vòng sau 90 ngày; không phải tài khoản đăng nhập.</p></div></div>
+        <div className="traffic-panel-title"><div><h3>Độ tin cậy dữ liệu người dùng</h3><p>Dữ liệu trước collector v2 được giữ lại nhưng không được suy đoán thành người dùng.</p></div></div>
+        <div className="traffic-user-metrics">
+          <div><span>Người dùng đã nhận diện</span><strong>{compact(data.uniqueUsersWindow)}</strong><small>{WINDOW_LABELS[windowKey]}</small></div>
+          <div><span>Độ phủ pageview</span><strong>{percent(data.identifiedPageviewsWindow, data.pageviewsWindow)}</strong><small>{compact(data.identifiedPageviewsWindow)}/{compact(data.pageviewsWindow)} lượt xem</small></div>
+          <div><span>Phiên đã nhận diện</span><strong>{compact(data.identifiedSessionsWindow)}</strong><small>{percent(data.identifiedSessionsWindow, data.sessionsWindow)} tổng phiên</small></div>
+          <div><span>Phiên legacy</span><strong>{compact(data.legacySessionsWindow)}</strong><small>không dùng để tính người dùng</small></div>
+        </div>
+        <p className="traffic-data-note">Khi dữ liệu legacy ra khỏi cửa sổ thời gian đã chọn, độ phủ sẽ tiến dần về 100%. Chỉ số “Người dùng” hiện là số visitor ID thực sự ghi nhận, không còn fallback từ session ID.</p>
+      </section>
+
+      <section className="traffic-panel traffic-user-panel">
+        <div className="traffic-panel-title"><div><h3>Người dùng đã nhận diện</h3><p>Visitor UUID first-party tự xoay vòng sau 90 ngày; không phải tài khoản đăng nhập.</p></div></div>
         <div className="traffic-user-metrics">
           <div><span>Tổng người dùng</span><strong>{compact(data.uniqueUsersWindow)}</strong><small>{WINDOW_LABELS[windowKey]}</small></div>
-          <div><span>Người dùng mới</span><strong>{compact(data.newUsersWindow)}</strong><small>{percent(data.newUsersWindow, data.uniqueUsersWindow)} tổng người dùng</small></div>
-          <div><span>Quay lại</span><strong>{compact(data.returningUsersWindow)}</strong><small>{percent(data.returningUsersWindow, data.uniqueUsersWindow)} tổng người dùng</small></div>
-          <div><span>Phiên/người dùng</span><strong>{data.uniqueUsersWindow ? (data.sessionsWindow / data.uniqueUsersWindow).toFixed(1) : "0"}</strong><small>{compact(data.sessionsWindow)} phiên</small></div>
+          <div><span>Người dùng mới</span><strong>{compact(data.newUsersWindow)}</strong><small>{percent(data.newUsersWindow, data.uniqueUsersWindow)} user đã nhận diện</small></div>
+          <div><span>Quay lại</span><strong>{compact(data.returningUsersWindow)}</strong><small>{percent(data.returningUsersWindow, data.uniqueUsersWindow)} user đã nhận diện</small></div>
+          <div><span>Phiên/người dùng</span><strong>{data.uniqueUsersWindow ? (data.identifiedSessionsWindow / data.uniqueUsersWindow).toFixed(1) : "0"}</strong><small>chỉ tính phiên có visitor ID</small></div>
         </div>
-        <p className="traffic-data-note">Phân loại người dùng mới/quay lại bắt đầu chính xác từ phiên bản analytics này; dữ liệu phiên cũ không có visitor ID được giữ nguyên và quy về dữ liệu lịch sử.</p>
       </section>
 
       <section className="traffic-panel traffic-chart-panel">
-        <div className="traffic-panel-title"><div><h3>Xu hướng truy cập</h3><p>Lượt xem, người dùng và phiên theo {windowKey === "24h" ? "giờ" : "ngày"}.</p></div></div>
+        <div className="traffic-panel-title"><div><h3>Xu hướng truy cập</h3><p>Lượt xem, phiên và người dùng đã nhận diện theo {windowKey === "24h" ? "giờ" : "ngày"}.</p></div></div>
         {data.series.length ? <div className="traffic-chart" role="img" aria-label="Biểu đồ lượt xem theo thời gian">
-          {data.series.map((point) => <div className="traffic-bar-column" key={point.bucket} title={`${point.bucket}: ${point.views} lượt xem · ${point.users} người dùng · ${point.visitors} phiên`}>
+          {data.series.map((point) => <div className="traffic-bar-column" key={point.bucket} title={`${point.bucket}: ${point.views} lượt xem · ${point.visitors} phiên · ${point.users} người dùng · ${point.legacy_sessions} phiên legacy`}>
             <div className="traffic-bar-value">{point.views}</div>
             <div className="traffic-bar-track"><span style={{ height: `${Math.max(5, point.views / chartMax * 100)}%` }} /></div>
             <small>{bucketLabel(point.bucket, windowKey)}</small>
@@ -227,7 +249,7 @@ export function AdminTrafficAnalytics() {
       </section>
 
       <div className="traffic-dimension-grid">
-        <DimensionPanel title="Trình duyệt" description="Phân loại cục bộ; không gửi raw user-agent." rows={data.browsers} />
+        <DimensionPanel title="Trình duyệt" description="Chỉ thống kê phiên có visitor ID; không gửi raw user-agent." rows={data.browsers} />
         <DimensionPanel title="Hệ điều hành" description="Windows, macOS, iOS, Android, Linux…" rows={data.operatingSystems} />
         <DimensionPanel title="Thiết bị" description="Desktop, Mobile hoặc Tablet." rows={data.devices} />
       </div>
@@ -235,21 +257,21 @@ export function AdminTrafficAnalytics() {
       <div className="traffic-two-column">
         <section className="traffic-panel">
           <div className="traffic-panel-title"><div><h3>Trang được xem nhiều</h3><p>Top URL trong {WINDOW_LABELS[windowKey]}.</p></div></div>
-          {data.topPages.length ? <div className="traffic-table-wrap"><table><thead><tr><th>Trang</th><th>Lượt xem</th><th>Người dùng</th><th>Phiên</th></tr></thead><tbody>{data.topPages.map((page) => <tr key={page.path}><td title={page.path}><strong>{pathLabel(page.path)}</strong><small>{page.path}</small></td><td>{compact(page.views)}</td><td>{compact(page.users)}</td><td>{compact(page.visitors)}</td></tr>)}</tbody></table></div> : <div className="traffic-empty compact">Chưa có dữ liệu trang.</div>}
+          {data.topPages.length ? <div className="traffic-table-wrap"><table><thead><tr><th>Trang</th><th>Lượt xem</th><th>User</th><th>Phiên</th><th>Legacy</th></tr></thead><tbody>{data.topPages.map((page) => <tr key={page.path}><td title={page.path}><strong>{pathLabel(page.path)}</strong><small>{page.path}</small></td><td>{compact(page.views)}</td><td>{compact(page.users)}</td><td>{compact(page.visitors)}</td><td>{compact(page.legacy_sessions)}</td></tr>)}</tbody></table></div> : <div className="traffic-empty compact">Chưa có dữ liệu trang.</div>}
         </section>
 
         <section className="traffic-panel">
           <div className="traffic-panel-title"><div><h3>Đang được xem</h3><p>Hoạt động trong 5 phút gần nhất.</p></div></div>
-          {data.livePages.length ? <div className="traffic-live-pages">{data.livePages.map((page) => <div key={page.path}><span className="traffic-live-dot" /><span><strong>{pathLabel(page.path)}</strong><small>{page.path}</small></span><b>{page.active_users}<small>{page.active_visitors} phiên</small></b></div>)}</div> : <div className="traffic-empty compact">Hiện chưa ghi nhận người dùng đang hoạt động.</div>}
+          {data.livePages.length ? <div className="traffic-live-pages">{data.livePages.map((page) => <div key={page.path}><span className="traffic-live-dot" /><span><strong>{pathLabel(page.path)}</strong><small>{page.path}</small></span><b>{page.active_users}<small>{page.active_visitors} phiên{page.legacy_sessions ? ` · ${page.legacy_sessions} legacy` : ""}</small></b></div>)}</div> : <div className="traffic-empty compact">Hiện chưa ghi nhận phiên đang hoạt động.</div>}
         </section>
       </div>
 
       <section className="traffic-panel">
-        <div className="traffic-panel-title"><div><h3>Nguồn truy cập</h3><p>Chỉ lưu hostname nguồn giới thiệu; không lưu URL đầy đủ hay query string.</p></div></div>
-        {data.sources.length ? <div className="traffic-sources">{data.sources.map((source) => <div key={source.source}><span className="traffic-source-name">{source.source}</span><span className="traffic-source-track"><i style={{ width: `${Math.max(3, source.users / sourceMax * 100)}%` }} /></span><strong>{compact(source.users)}</strong><small>{compact(source.sessions)} phiên</small></div>)}</div> : <div className="traffic-empty compact">Chưa có dữ liệu nguồn truy cập.</div>}
+        <div className="traffic-panel-title"><div><h3>Nguồn truy cập</h3><p>Thanh tỷ lệ theo số phiên; user chỉ tính visitor ID thực sự.</p></div></div>
+        {data.sources.length ? <div className="traffic-sources">{data.sources.map((source) => <div key={source.source}><span className="traffic-source-name">{source.source}</span><span className="traffic-source-track"><i style={{ width: `${Math.max(3, source.sessions / sourceMax * 100)}%` }} /></span><strong>{compact(source.users)} user</strong><small>{compact(source.sessions)} phiên{source.legacy_sessions ? ` · ${compact(source.legacy_sessions)} legacy` : ""}</small></div>)}</div> : <div className="traffic-empty compact">Chưa có dữ liệu nguồn truy cập.</div>}
       </section>
 
-      <div className="traffic-privacy-note"><strong>Riêng tư theo thiết kế</strong><span>Không lưu IP, raw user-agent, email, tài khoản đăng nhập, query string hay dữ liệu biểu mẫu. Chỉ lưu visitor UUID ẩn danh tối đa 90 ngày và các nhãn tổng quát: trình duyệt, hệ điều hành, loại thiết bị.</span></div>
+      <div className="traffic-privacy-note"><strong>Định nghĩa chuẩn hóa</strong><span>Session dùng chung giữa các tab và hết hạn sau 30 phút không hoạt động. Visitor ID ẩn danh lưu first-party tối đa 90 ngày. Không lưu IP, raw user-agent, email, account ID, query string hay dữ liệu biểu mẫu.</span></div>
     </>}
   </div>;
 }

@@ -4,29 +4,33 @@ import test from "node:test";
 
 const read = (file) => readFile(new URL(`../${file}`, import.meta.url), "utf8");
 
-test("public tracker is privacy constrained", async () => {
+test("public tracker is privacy constrained and uses shared 30 minute sessions", async () => {
   const tracker = await read("public/web-analytics.js");
   assert.match(tracker, /record_web_analytics_event_v2/);
-  assert.match(tracker, /sessionStorage/);
   assert.match(tracker, /localStorage/);
+  assert.match(tracker, /SESSION_TIMEOUT_MS/);
+  assert.match(tracker, /30 \* 60 \* 1000/);
   assert.match(tracker, /VISITOR_TTL_MS/);
   assert.match(tracker, /90 \* 24 \* 60 \* 60 \* 1000/);
+  assert.match(tracker, /event\.key === SESSION_KEY/);
   assert.match(tracker, /document\.visibilityState/);
   assert.match(tracker, /p_browser/);
   assert.match(tracker, /p_operating_system/);
   assert.match(tracker, /p_device_type/);
+  assert.doesNotMatch(tracker, /sessionStorage/);
   assert.doesNotMatch(tracker, /navigator\.userAgent\b/);
   assert.doesNotMatch(tracker, /location\.search/);
   assert.doesNotMatch(tracker, /document\.cookie/);
 });
 
-test("admin analytics dashboard includes user and client dimensions", async () => {
+test("admin analytics dashboard separates identified users from legacy sessions", async () => {
   const component = await read("app/admin-traffic-analytics.tsx");
   assert.match(component, /get_web_analytics_dashboard/);
   assert.match(component, /10_000/);
-  assert.match(component, /Người dùng hôm nay/);
-  assert.match(component, /Người dùng mới/);
-  assert.match(component, /Quay lại/);
+  assert.match(component, /Người dùng đã nhận diện hôm nay/);
+  assert.match(component, /Độ tin cậy dữ liệu người dùng/);
+  assert.match(component, /Phiên legacy/);
+  assert.match(component, /không quy đổi session legacy thành user/);
   assert.match(component, /Trình duyệt/);
   assert.match(component, /Hệ điều hành/);
   assert.match(component, /Thiết bị/);
@@ -41,16 +45,21 @@ test("build patch adds analytics tab and tracker", async () => {
   assert.match(patch, /connect-src/);
 });
 
-test("database analytics remains private and dashboard admin-only", async () => {
+test("database analytics remains private and never converts legacy sessions into users", async () => {
   const baseSql = await read("supabase/migrations/20260914142826_realtime_web_analytics.sql");
   const dimensionSql = await read("supabase/migrations/20260915043500_analytics_user_browser_dimensions.sql");
+  const accuracySql = await read("supabase/migrations/20260915073000_analytics_session_accuracy.sql");
   assert.match(baseSql, /private\.web_analytics_sessions/);
   assert.match(baseSql, /private\.web_analytics_pageviews/);
   assert.match(baseSql, /private\.user_is_app_admin\(\)/);
   assert.match(baseSql, /revoke all on private\.web_analytics_sessions/);
   assert.match(dimensionSql, /visitor_id uuid/);
   assert.match(dimensionSql, /record_web_analytics_event_v2/);
-  assert.match(dimensionSql, /private\.user_is_app_admin\(\)/);
-  assert.match(dimensionSql, /grant execute on function public\.record_web_analytics_event_v2.*to anon, authenticated/s);
-  assert.match(dimensionSql, /revoke all on function public\.get_web_analytics_dashboard.*from public, anon/s);
+  assert.match(accuracySql, /count\(distinct s\.visitor_id\)/);
+  assert.match(accuracySql, /s\.visitor_id is null/);
+  assert.match(accuracySql, /legacySessionsWindow/);
+  assert.match(accuracySql, /identifiedPageviewsWindow/);
+  assert.doesNotMatch(accuracySql, /coalesce\(s\.visitor_id::text, s\.session_id::text\)/);
+  assert.match(accuracySql, /private\.user_is_app_admin\(\)/);
+  assert.match(accuracySql, /revoke all on function public\.get_web_analytics_dashboard.*from public, anon/s);
 });

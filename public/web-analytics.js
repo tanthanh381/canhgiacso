@@ -4,8 +4,9 @@
   const PROJECT_URL = 'https://goietwyapiywrtibpkwo.supabase.co';
   const PUBLISHABLE_KEY = 'sb_publishable_ghj-H14bq2n1tSsH4u-adA_LoBtWKO4';
   const RPC_URL = `${PROJECT_URL}/rest/v1/rpc/record_web_analytics_event_v2`;
-  const SESSION_KEY = 'canhgiacso-analytics-session';
+  const SESSION_KEY = 'canhgiacso-analytics-session-v2';
   const VISITOR_KEY = 'canhgiacso-analytics-visitor-v1';
+  const SESSION_TIMEOUT_MS = 30 * 60 * 1000;
   const VISITOR_TTL_MS = 90 * 24 * 60 * 60 * 1000;
   const HEARTBEAT_MS = 60_000;
   const ALLOWED_HOSTS = new Set(['canhgiacso.com', 'www.canhgiacso.com']);
@@ -17,16 +18,39 @@
     return typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
   }
 
-  function sessionId() {
+  function writeSharedSession(id, lastActivity) {
     try {
-      let value = window.sessionStorage.getItem(SESSION_KEY);
-      if (!validUuid(value)) {
-        value = crypto.randomUUID();
-        window.sessionStorage.setItem(SESSION_KEY, value);
-      }
-      return value;
+      window.localStorage.setItem(SESSION_KEY, JSON.stringify({ id, lastActivity }));
     } catch {
-      return crypto.randomUUID();
+      // Storage can be blocked. In that case the in-memory fallback below is used.
+    }
+  }
+
+  let fallbackSession = { id: crypto.randomUUID(), lastActivity: Date.now() };
+
+  function activeSession() {
+    const now = Date.now();
+    try {
+      const raw = window.localStorage.getItem(SESSION_KEY);
+      if (raw) {
+        const stored = JSON.parse(raw);
+        if (validUuid(stored?.id) && Number.isFinite(stored?.lastActivity) && now - stored.lastActivity < SESSION_TIMEOUT_MS) {
+          writeSharedSession(stored.id, now);
+          fallbackSession = { id: stored.id, lastActivity: now };
+          return { id: stored.id, isNew: false };
+        }
+      }
+      const id = crypto.randomUUID();
+      writeSharedSession(id, now);
+      fallbackSession = { id, lastActivity: now };
+      return { id, isNew: true };
+    } catch {
+      if (now - fallbackSession.lastActivity >= SESSION_TIMEOUT_MS) {
+        fallbackSession = { id: crypto.randomUUID(), lastActivity: now };
+        return { id: fallbackSession.id, isNew: true };
+      }
+      fallbackSession.lastActivity = now;
+      return { id: fallbackSession.id, isNew: false };
     }
   }
 
@@ -44,7 +68,7 @@
       window.localStorage.setItem(VISITOR_KEY, JSON.stringify({ id, createdAt: now }));
       return id;
     } catch {
-      return sessionId();
+      return crypto.randomUUID();
     }
   }
 
@@ -83,7 +107,6 @@
     return { browser, operatingSystem, deviceType };
   }
 
-  const session = sessionId();
   const visitor = visitorId();
   const dimensions = clientDimensions();
   let lastPath = '';
@@ -106,22 +129,24 @@
 
   async function send(eventType) {
     if (document.visibilityState === 'hidden' && eventType === 'heartbeat') return;
+    const session = activeSession();
+    const effectiveEventType = eventType === 'heartbeat' && session.isNew ? 'pageview' : eventType;
     const payload = {
-      p_session_id: session,
+      p_session_id: session.id,
       p_visitor_id: visitor,
       p_path: normalizedPath(),
       p_referrer_host: externalReferrerHost(),
       p_browser: dimensions.browser,
       p_operating_system: dimensions.operatingSystem,
       p_device_type: dimensions.deviceType,
-      p_event_type: eventType,
+      p_event_type: effectiveEventType,
     };
     try {
       await fetch(RPC_URL, {
         method: 'POST',
         mode: 'cors',
         credentials: 'omit',
-        keepalive: eventType === 'pageview',
+        keepalive: effectiveEventType === 'pageview',
         headers: {
           apikey: PUBLISHABLE_KEY,
           Authorization: `Bearer ${PUBLISHABLE_KEY}`,
@@ -157,6 +182,9 @@
     queueMicrotask(() => pageview());
   };
   window.addEventListener('popstate', () => pageview());
+  window.addEventListener('storage', (event) => {
+    if (event.key === SESSION_KEY && document.visibilityState === 'visible') void send('heartbeat');
+  });
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') void send('heartbeat');
   });
