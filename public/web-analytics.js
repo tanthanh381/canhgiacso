@@ -3,13 +3,30 @@
 
   const PROJECT_URL = 'https://goietwyapiywrtibpkwo.supabase.co';
   const PUBLISHABLE_KEY = 'sb_publishable_ghj-H14bq2n1tSsH4u-adA_LoBtWKO4';
-  const RPC_URL = `${PROJECT_URL}/rest/v1/rpc/record_web_analytics_event_v2`;
+  const RPC_URL = `${PROJECT_URL}/rest/v1/rpc/record_web_analytics_event_v3`;
   const SESSION_KEY = 'canhgiacso-analytics-session-v2';
   const VISITOR_KEY = 'canhgiacso-analytics-visitor-v1';
   const SESSION_TIMEOUT_MS = 30 * 60 * 1000;
   const VISITOR_TTL_MS = 90 * 24 * 60 * 60 * 1000;
   const HEARTBEAT_MS = 60_000;
   const ALLOWED_HOSTS = new Set(['canhgiacso.com', 'www.canhgiacso.com']);
+
+  const TIMEZONE_COUNTRY = new Map([
+    ['Asia/Ho_Chi_Minh', 'VN'], ['Asia/Saigon', 'VN'],
+    ['Asia/Bangkok', 'TH'], ['Asia/Singapore', 'SG'], ['Asia/Kuala_Lumpur', 'MY'],
+    ['Asia/Jakarta', 'ID'], ['Asia/Makassar', 'ID'], ['Asia/Jayapura', 'ID'], ['Asia/Pontianak', 'ID'],
+    ['Asia/Manila', 'PH'], ['Asia/Tokyo', 'JP'], ['Asia/Seoul', 'KR'],
+    ['Asia/Shanghai', 'CN'], ['Asia/Hong_Kong', 'HK'], ['Asia/Taipei', 'TW'],
+    ['Asia/Kolkata', 'IN'], ['Asia/Calcutta', 'IN'], ['Asia/Dubai', 'AE'],
+    ['Europe/London', 'GB'], ['Europe/Paris', 'FR'], ['Europe/Berlin', 'DE'],
+    ['Europe/Madrid', 'ES'], ['Europe/Rome', 'IT'], ['Europe/Amsterdam', 'NL'],
+    ['Europe/Brussels', 'BE'], ['Europe/Zurich', 'CH'], ['Europe/Moscow', 'RU'],
+    ['America/New_York', 'US'], ['America/Chicago', 'US'], ['America/Denver', 'US'],
+    ['America/Los_Angeles', 'US'], ['America/Phoenix', 'US'], ['America/Anchorage', 'US'],
+    ['Pacific/Honolulu', 'US'], ['America/Toronto', 'CA'], ['America/Vancouver', 'CA'],
+    ['America/Mexico_City', 'MX'], ['America/Sao_Paulo', 'BR'],
+    ['Pacific/Auckland', 'NZ'], ['Africa/Johannesburg', 'ZA'], ['Africa/Cairo', 'EG'],
+  ]);
 
   if (!ALLOWED_HOSTS.has(window.location.hostname)) return;
   if (navigator.doNotTrack === '1' || window.doNotTrack === '1') return;
@@ -107,8 +124,39 @@
     return { browser, operatingSystem, deviceType };
   }
 
+  function estimatedCountryCode() {
+    let timezone = '';
+    try {
+      timezone = String(Intl.DateTimeFormat().resolvedOptions().timeZone || '');
+    } catch {
+      timezone = '';
+    }
+
+    if (TIMEZONE_COUNTRY.has(timezone)) return TIMEZONE_COUNTRY.get(timezone);
+    if (timezone.startsWith('Australia/')) return 'AU';
+    if (timezone.startsWith('America/Argentina/')) return 'AR';
+    if (timezone.startsWith('America/Indiana/') || timezone.startsWith('America/Kentucky/')) return 'US';
+
+    const languages = Array.isArray(navigator.languages) && navigator.languages.length
+      ? navigator.languages
+      : [navigator.language];
+
+    for (const language of languages) {
+      if (!language) continue;
+      try {
+        const region = new Intl.Locale(String(language)).region;
+        if (region && /^[A-Z]{2}$/.test(region)) return region;
+      } catch {
+        const match = String(language).match(/[-_]([A-Za-z]{2})(?:$|[-_])/);
+        if (match) return match[1].toUpperCase();
+      }
+    }
+    return null;
+  }
+
   const visitor = visitorId();
   const dimensions = clientDimensions();
+  const countryCode = estimatedCountryCode();
   let lastPath = '';
   let heartbeatTimer = 0;
 
@@ -139,6 +187,7 @@
       p_browser: dimensions.browser,
       p_operating_system: dimensions.operatingSystem,
       p_device_type: dimensions.deviceType,
+      p_country_code: countryCode,
       p_event_type: effectiveEventType,
     };
     try {
