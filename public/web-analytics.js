@@ -3,18 +3,24 @@
 
   const PROJECT_URL = 'https://goietwyapiywrtibpkwo.supabase.co';
   const PUBLISHABLE_KEY = 'sb_publishable_ghj-H14bq2n1tSsH4u-adA_LoBtWKO4';
-  const RPC_URL = `${PROJECT_URL}/rest/v1/rpc/record_web_analytics_event`;
+  const RPC_URL = `${PROJECT_URL}/rest/v1/rpc/record_web_analytics_event_v2`;
   const SESSION_KEY = 'canhgiacso-analytics-session';
+  const VISITOR_KEY = 'canhgiacso-analytics-visitor-v1';
+  const VISITOR_TTL_MS = 90 * 24 * 60 * 60 * 1000;
   const HEARTBEAT_MS = 60_000;
   const ALLOWED_HOSTS = new Set(['canhgiacso.com', 'www.canhgiacso.com']);
 
   if (!ALLOWED_HOSTS.has(window.location.hostname)) return;
   if (navigator.doNotTrack === '1' || window.doNotTrack === '1') return;
 
+  function validUuid(value) {
+    return typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+  }
+
   function sessionId() {
     try {
       let value = window.sessionStorage.getItem(SESSION_KEY);
-      if (!value || !/^[0-9a-f-]{36}$/i.test(value)) {
+      if (!validUuid(value)) {
         value = crypto.randomUUID();
         window.sessionStorage.setItem(SESSION_KEY, value);
       }
@@ -24,7 +30,62 @@
     }
   }
 
-  const id = sessionId();
+  function visitorId() {
+    const now = Date.now();
+    try {
+      const raw = window.localStorage.getItem(VISITOR_KEY);
+      if (raw) {
+        const stored = JSON.parse(raw);
+        if (validUuid(stored?.id) && Number.isFinite(stored?.createdAt) && now - stored.createdAt < VISITOR_TTL_MS) {
+          return stored.id;
+        }
+      }
+      const id = crypto.randomUUID();
+      window.localStorage.setItem(VISITOR_KEY, JSON.stringify({ id, createdAt: now }));
+      return id;
+    } catch {
+      return sessionId();
+    }
+  }
+
+  function clientDimensions() {
+    const nav = navigator;
+    const hints = nav['userAgentData'];
+    const brands = Array.isArray(hints?.brands) ? hints.brands.map((item) => String(item?.brand || '')) : [];
+    const platform = String(hints?.platform || nav.platform || '');
+    const hasBrand = (text) => brands.some((brand) => brand.toLowerCase().includes(text.toLowerCase()));
+
+    let browser = 'Không xác định';
+    if (nav.brave) browser = 'Brave';
+    else if (hasBrand('Microsoft Edge')) browser = 'Edge';
+    else if (hasBrand('Samsung Internet')) browser = 'Samsung Internet';
+    else if (hasBrand('Opera')) browser = 'Opera';
+    else if (hasBrand('Google Chrome')) browser = 'Chrome';
+    else if (hasBrand('Chromium')) browser = 'Chromium';
+    else if (nav.vendor === 'Apple Computer, Inc.') browser = 'Safari';
+    else if (typeof window.InstallTrigger !== 'undefined') browser = 'Firefox';
+    else if (window.chrome) browser = 'Chromium';
+
+    let operatingSystem = 'Không xác định';
+    if (/android/i.test(platform)) operatingSystem = 'Android';
+    else if (/iphone|ipad|ipod/i.test(platform)) operatingSystem = 'iOS';
+    else if (/mac/i.test(platform)) operatingSystem = nav.maxTouchPoints > 1 ? 'iOS' : 'macOS';
+    else if (/win/i.test(platform)) operatingSystem = 'Windows';
+    else if (/cros/i.test(platform)) operatingSystem = 'ChromeOS';
+    else if (/linux/i.test(platform)) operatingSystem = 'Linux';
+
+    const shortestSide = Math.min(window.screen?.width || 0, window.screen?.height || 0);
+    const touchTablet = nav.maxTouchPoints > 1 && shortestSide >= 600;
+    let deviceType = 'Desktop';
+    if (touchTablet) deviceType = 'Tablet';
+    else if (hints?.mobile === true || (nav.maxTouchPoints > 0 && shortestSide > 0 && shortestSide < 600)) deviceType = 'Mobile';
+
+    return { browser, operatingSystem, deviceType };
+  }
+
+  const session = sessionId();
+  const visitor = visitorId();
+  const dimensions = clientDimensions();
   let lastPath = '';
   let heartbeatTimer = 0;
 
@@ -46,9 +107,13 @@
   async function send(eventType) {
     if (document.visibilityState === 'hidden' && eventType === 'heartbeat') return;
     const payload = {
-      p_session_id: id,
+      p_session_id: session,
+      p_visitor_id: visitor,
       p_path: normalizedPath(),
       p_referrer_host: externalReferrerHost(),
+      p_browser: dimensions.browser,
+      p_operating_system: dimensions.operatingSystem,
+      p_device_type: dimensions.deviceType,
       p_event_type: eventType,
     };
     try {
