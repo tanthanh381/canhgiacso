@@ -93,7 +93,10 @@ test("GitHub Pages metadata and deployment target are consistent", async () => {
     read("../.github/workflows/pages.yml"),
   ]);
   assert.match(html, /Content-Security-Policy/);
-  assert.doesNotMatch(html, /googletagmanager|gtag\(/);
+  const gaTags = html.match(/https:\/\/www\.googletagmanager\.com\/gtag\/js\?id=G-HH04Q7FYHM/g) ?? [];
+  assert.equal(gaTags.length, 1);
+  assert.match(html, /\/google-analytics-init\.js/);
+  assert.match(html, /https:\/\/www\.google-analytics\.com/);
   assert.match(html, /\/khien-so-logo\.png/);
   assert.match(config, /base:\s*"\/"/);
   assert.match(html, /https:\/\/canhgiacso\.com\/og\.png/);
