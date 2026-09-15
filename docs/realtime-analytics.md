@@ -6,13 +6,22 @@ Hệ thống analytics first-party của Cảnh Giác Số dùng Supabase để 
 
 - **Đang online**: người dùng/phiên có heartbeat hoặc pageview trong 5 phút gần nhất.
 - **Lượt xem (pageview)**: một lần tải/chuyển sang URL path khác; lượt trùng cùng session + path trong 2 giây được bỏ qua.
-- **Phiên**: UUID ngẫu nhiên được giữ trong `sessionStorage`; UUID thay đổi khi phiên trình duyệt kết thúc.
+- **Phiên**: UUID ngẫu nhiên first-party được giữ trong `localStorage`, dùng chung giữa các tab của cùng trình duyệt và tự tạo mới sau **30 phút không hoạt động**. Đây là định nghĩa session của hệ thống analytics, không phải tài khoản đăng nhập.
 - **Người dùng**: visitor UUID first-party ẩn danh được giữ trong `localStorage`, tự xoay vòng sau tối đa 90 ngày. Đây không phải user ID tài khoản và không thể hiện danh tính thật.
-- **Người dùng mới / quay lại**: dựa trên lần đầu visitor UUID được ghi nhận trong dữ liệu analytics.
+- **Người dùng mới / quay lại**: chỉ tính trên visitor UUID thực sự đã ghi nhận; session legacy không được quy đổi thành người dùng.
+- **Dữ liệu legacy**: các session thu thập trước Analytics v2 không có visitor ID vẫn được giữ để bảo toàn pageview/session lịch sử, nhưng không được dùng để suy đoán số người dùng.
 - **Trình duyệt / hệ điều hành / thiết bị**: chỉ lưu nhãn phân loại tổng quát do trình duyệt tự xác định cục bộ, ví dụ Chrome, Safari, Windows, iOS, Desktop, Mobile. Không gửi raw user-agent lên server.
 - **Nguồn truy cập**: chỉ hostname của referrer bên ngoài, không lưu URL đầy đủ.
 - Dashboard tự làm mới mỗi 10 giây; tracker heartbeat mỗi 60 giây khi tab đang hiển thị.
 - Tracker tôn trọng `Do Not Track` và không ghi sự kiện khi DNT được bật.
+
+## Cách đọc dashboard
+
+- **Lượt xem** và **Phiên** bao gồm dữ liệu lịch sử hợp lệ.
+- **Người dùng đã nhận diện** chỉ bao gồm các phiên có visitor ID; không fallback từ session ID.
+- **Độ phủ pageview** = số pageview thuộc session có visitor ID / tổng pageview trong cửa sổ thời gian đã chọn.
+- **Phiên legacy** được hiển thị riêng. Khi các phiên cũ dần ra khỏi cửa sổ 24h/7d/30d/90d, độ phủ dữ liệu nhận diện sẽ tăng dần.
+- Browser/OS/device chỉ thống kê trên dữ liệu có visitor ID để tránh biến dữ liệu legacy thành số liệu nhân khẩu kỹ thuật giả.
 
 ## Bảo mật và riêng tư
 
@@ -20,4 +29,4 @@ Hệ thống analytics first-party của Cảnh Giác Số dùng Supabase để 
 - Trình duyệt public chỉ gọi RPC ghi sự kiện với validation origin + input normalization + whitelist cho các nhãn browser/OS/device.
 - RPC đọc dashboard kiểm tra `private.user_is_app_admin()` và chỉ được cấp EXECUTE cho `authenticated`.
 - Publishable key trong tracker là browser-safe; không có service-role key ở frontend.
-- Dữ liệu cũ trước Analytics v2 không có visitor/browser/OS/device sẽ được giữ nguyên và hiển thị là dữ liệu lịch sử hoặc “Không xác định”.
+- Không backfill visitor ID cho dữ liệu cũ vì không có căn cứ kỹ thuật đáng tin cậy để suy ra một session cũ thuộc người dùng nào.
