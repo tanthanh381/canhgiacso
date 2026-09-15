@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "./supabase";
 import "./admin-traffic-analytics.css";
+import "./admin-google-traffic.css";
 
 type WindowKey = "24h" | "7d" | "30d" | "90d";
 type SeriesPoint = { bucket: string; views: number; visitors: number; users: number; legacy_sessions: number };
@@ -10,6 +11,9 @@ type TopPage = { path: string; views: number; visitors: number; users: number; l
 type TrafficSource = { source: string; visitors: number; sessions: number; users: number; legacy_sessions: number };
 type LivePage = { path: string; active_visitors: number; active_users: number; legacy_sessions: number };
 type DimensionRow = { name: string; users: number; sessions: number; views: number };
+type GoogleTrafficPoint = { bucket: string; views: number; sessions: number; users: number };
+type GoogleLandingPage = { path: string; views: number; sessions: number; users: number; legacy_sessions: number };
+
 type AnalyticsDashboard = {
   generatedAt: string;
   window: WindowKey;
@@ -39,6 +43,22 @@ type AnalyticsDashboard = {
   devices: DimensionRow[];
 };
 
+type GoogleTrafficDashboard = {
+  generatedAt: string;
+  window: WindowKey;
+  googleUsers: number;
+  googleSessions: number;
+  googlePageviews: number;
+  googleLegacySessions: number;
+  googleNewUsers: number;
+  googleReturningUsers: number;
+  googleSeries: GoogleTrafficPoint[];
+  googleLandingPages: GoogleLandingPage[];
+  googleBrowsers: DimensionRow[];
+  googleOperatingSystems: DimensionRow[];
+  googleDevices: DimensionRow[];
+};
+
 type LoadState = "loading" | "ready" | "error";
 
 const WINDOW_LABELS: Record<WindowKey, string> = {
@@ -52,10 +72,13 @@ function number(value: unknown) {
   return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
 
+function normalizedWindow(value: unknown): WindowKey {
+  return value === "7d" || value === "30d" || value === "90d" ? value : "24h";
+}
+
 function parseDashboard(value: unknown): AnalyticsDashboard | null {
   if (!value || typeof value !== "object") return null;
   const item = value as Record<string, unknown>;
-  const window = item.window === "7d" || item.window === "30d" || item.window === "90d" ? item.window : "24h";
   const rows = (key: string) => Array.isArray(item[key]) ? item[key] as Array<Record<string, unknown>> : [];
   const dimensions = (key: string) => rows(key).map((row) => ({
     name: String(row.name ?? "Không xác định"),
@@ -66,7 +89,7 @@ function parseDashboard(value: unknown): AnalyticsDashboard | null {
 
   return {
     generatedAt: typeof item.generatedAt === "string" ? item.generatedAt : new Date().toISOString(),
-    window,
+    window: normalizedWindow(item.window),
     onlineNow: number(item.onlineNow),
     onlineUsers: number(item.onlineUsers),
     onlineLegacySessions: number(item.onlineLegacySessions),
@@ -117,6 +140,45 @@ function parseDashboard(value: unknown): AnalyticsDashboard | null {
   };
 }
 
+function parseGoogleDashboard(value: unknown): GoogleTrafficDashboard | null {
+  if (!value || typeof value !== "object") return null;
+  const item = value as Record<string, unknown>;
+  const rows = (key: string) => Array.isArray(item[key]) ? item[key] as Array<Record<string, unknown>> : [];
+  const dimensions = (key: string) => rows(key).map((row) => ({
+    name: String(row.name ?? "Không xác định"),
+    users: number(row.users),
+    sessions: number(row.sessions),
+    views: number(row.views),
+  }));
+
+  return {
+    generatedAt: typeof item.generatedAt === "string" ? item.generatedAt : new Date().toISOString(),
+    window: normalizedWindow(item.window),
+    googleUsers: number(item.googleUsers),
+    googleSessions: number(item.googleSessions),
+    googlePageviews: number(item.googlePageviews),
+    googleLegacySessions: number(item.googleLegacySessions),
+    googleNewUsers: number(item.googleNewUsers),
+    googleReturningUsers: number(item.googleReturningUsers),
+    googleSeries: rows("googleSeries").map((row) => ({
+      bucket: String(row.bucket ?? ""),
+      views: number(row.views),
+      sessions: number(row.sessions),
+      users: number(row.users),
+    })),
+    googleLandingPages: rows("googleLandingPages").map((row) => ({
+      path: String(row.path ?? "/"),
+      views: number(row.views),
+      sessions: number(row.sessions),
+      users: number(row.users),
+      legacy_sessions: number(row.legacy_sessions),
+    })),
+    googleBrowsers: dimensions("googleBrowsers"),
+    googleOperatingSystems: dimensions("googleOperatingSystems"),
+    googleDevices: dimensions("googleDevices"),
+  };
+}
+
 function compact(value: number) {
   return new Intl.NumberFormat("vi-VN", { notation: value >= 10_000 ? "compact" : "standard", maximumFractionDigits: 1 }).format(value);
 }
@@ -151,25 +213,42 @@ function DimensionPanel({ title, description, rows }: { title: string; descripti
 export function AdminTrafficAnalytics() {
   const [windowKey, setWindowKey] = useState<WindowKey>("24h");
   const [data, setData] = useState<AnalyticsDashboard | null>(null);
+  const [googleData, setGoogleData] = useState<GoogleTrafficDashboard | null>(null);
+  const [googleMessage, setGoogleMessage] = useState("");
   const [state, setState] = useState<LoadState>("loading");
   const [message, setMessage] = useState("");
 
   const load = useCallback(async () => {
-    const result = await supabase.rpc("get_web_analytics_dashboard", { p_window: windowKey });
+    const [result, googleResult] = await Promise.all([
+      supabase.rpc("get_web_analytics_dashboard", { p_window: windowKey }),
+      supabase.rpc("get_google_traffic_dashboard", { p_window: windowKey }),
+    ]);
+
     if (result.error) {
       setState("error");
       setMessage(result.error.code === "42501" ? "Chỉ Quản trị viên được xem số liệu truy cập." : "Không thể tải thống kê truy cập. Hãy thử lại sau.");
       return;
     }
+
     const parsed = parseDashboard(result.data);
     if (!parsed) {
       setState("error");
       setMessage("Dữ liệu thống kê trả về chưa đúng định dạng.");
       return;
     }
+
     setData(parsed);
     setState("ready");
     setMessage("");
+
+    if (googleResult.error) {
+      setGoogleData(null);
+      setGoogleMessage("Không thể tải thống kê Google ở thời điểm này.");
+    } else {
+      const parsedGoogle = parseGoogleDashboard(googleResult.data);
+      setGoogleData(parsedGoogle);
+      setGoogleMessage(parsedGoogle ? "" : "Dữ liệu Google trả về chưa đúng định dạng.");
+    }
   }, [windowKey]);
 
   useEffect(() => {
@@ -188,6 +267,7 @@ export function AdminTrafficAnalytics() {
 
   const chartMax = useMemo(() => Math.max(1, ...(data?.series.map((point) => point.views) ?? [1])), [data]);
   const sourceMax = useMemo(() => Math.max(1, ...(data?.sources.map((source) => source.sessions) ?? [1])), [data]);
+  const googleChartMax = useMemo(() => Math.max(1, ...(googleData?.googleSeries.map((point) => point.views) ?? [1])), [googleData]);
 
   return <div className="traffic-admin">
     <div className="traffic-admin-head">
@@ -236,6 +316,52 @@ export function AdminTrafficAnalytics() {
           <div><span>Phiên/người dùng</span><strong>{data.uniqueUsersWindow ? (data.identifiedSessionsWindow / data.uniqueUsersWindow).toFixed(1) : "0"}</strong><small>chỉ tính phiên có visitor ID</small></div>
         </div>
       </section>
+
+      <section className="traffic-panel traffic-google-panel">
+        <div className="traffic-google-heading">
+          <div><span className="traffic-google-badge">GOOGLE REFERRER</span><h3>Traffic từ Google</h3><p>Nhận diện phiên có referrer từ các hostname Google như google.com, google.com.vn, google.co.uk…</p></div>
+          <small>{WINDOW_LABELS[windowKey]}</small>
+        </div>
+
+        {googleMessage && <div className="traffic-error compact" role="alert">{googleMessage}</div>}
+
+        {googleData && <>
+          <div className="traffic-user-metrics traffic-google-metrics">
+            <div><span>Người dùng từ Google</span><strong>{compact(googleData.googleUsers)}</strong><small>{compact(googleData.googleNewUsers)} mới · {compact(googleData.googleReturningUsers)} quay lại</small></div>
+            <div><span>Phiên từ Google</span><strong>{compact(googleData.googleSessions)}</strong><small>{compact(googleData.googleLegacySessions)} phiên legacy</small></div>
+            <div><span>Lượt xem từ Google</span><strong>{compact(googleData.googlePageviews)}</strong><small>{googleData.googleSessions ? (googleData.googlePageviews / googleData.googleSessions).toFixed(1) : "0"} lượt/phiên Google</small></div>
+            <div><span>Tỷ trọng Google</span><strong>{percent(googleData.googleSessions, data.sessionsWindow)}</strong><small>{compact(googleData.googleSessions)}/{compact(data.sessionsWindow)} tổng phiên</small></div>
+          </div>
+
+          <div className="traffic-google-grid">
+            <div className="traffic-google-subpanel">
+              <h4>Xu hướng Google traffic</h4>
+              <p>Lượt xem từ phiên có nguồn Google theo {windowKey === "24h" ? "giờ" : "ngày"}.</p>
+              {googleData.googleSeries.length ? <div className="traffic-chart traffic-google-chart" role="img" aria-label="Biểu đồ traffic từ Google">
+                {googleData.googleSeries.map((point) => <div className="traffic-bar-column" key={point.bucket} title={`${point.bucket}: ${point.views} lượt xem · ${point.sessions} phiên · ${point.users} người dùng`}>
+                  <div className="traffic-bar-value">{point.views}</div>
+                  <div className="traffic-bar-track"><span style={{ height: `${Math.max(5, point.views / googleChartMax * 100)}%` }} /></div>
+                  <small>{bucketLabel(point.bucket, windowKey)}</small>
+                </div>)}
+              </div> : <div className="traffic-empty compact">Chưa ghi nhận traffic có referrer Google trong khoảng thời gian này.</div>}
+            </div>
+
+            <div className="traffic-google-subpanel">
+              <h4>Landing page từ Google</h4>
+              <p>Trang đầu tiên của các phiên được Google giới thiệu.</p>
+              {googleData.googleLandingPages.length ? <div className="traffic-table-wrap"><table><thead><tr><th>Landing page</th><th>View</th><th>User</th><th>Phiên</th></tr></thead><tbody>{googleData.googleLandingPages.map((page) => <tr key={page.path}><td title={page.path}><strong>{pathLabel(page.path)}</strong><small>{page.path}</small></td><td>{compact(page.views)}</td><td>{compact(page.users)}</td><td>{compact(page.sessions)}</td></tr>)}</tbody></table></div> : <div className="traffic-empty compact">Chưa có landing page từ Google.</div>}
+            </div>
+          </div>
+
+          <p className="traffic-google-note">Google thường không gửi từ khóa tìm kiếm trong HTTP referrer. Block này đo hành vi sau khi người dùng vào website; truy vấn tìm kiếm, impression, CTR và vị trí vẫn được đo bằng Google Search Console.</p>
+        </>}
+      </section>
+
+      {googleData && <div className="traffic-dimension-grid traffic-google-dimensions">
+        <DimensionPanel title="Google · Trình duyệt" description="Người dùng đã nhận diện đến từ Google." rows={googleData.googleBrowsers} />
+        <DimensionPanel title="Google · Hệ điều hành" description="Hệ điều hành của nhóm traffic Google." rows={googleData.googleOperatingSystems} />
+        <DimensionPanel title="Google · Thiết bị" description="Desktop, Mobile hoặc Tablet của traffic Google." rows={googleData.googleDevices} />
+      </div>}
 
       <section className="traffic-panel traffic-chart-panel">
         <div className="traffic-panel-title"><div><h3>Xu hướng truy cập</h3><p>Lượt xem, phiên và người dùng đã nhận diện theo {windowKey === "24h" ? "giờ" : "ngày"}.</p></div></div>
