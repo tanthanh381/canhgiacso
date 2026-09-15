@@ -6,7 +6,7 @@ const read = (file) => readFile(new URL(`../${file}`, import.meta.url), "utf8");
 
 test("public tracker is privacy constrained and uses shared 30 minute sessions", async () => {
   const tracker = await read("public/web-analytics.js");
-  assert.match(tracker, /record_web_analytics_event_v2/);
+  assert.match(tracker, /record_web_analytics_event_v3/);
   assert.match(tracker, /localStorage/);
   assert.match(tracker, /SESSION_TIMEOUT_MS/);
   assert.match(tracker, /30 \* 60 \* 1000/);
@@ -17,6 +17,7 @@ test("public tracker is privacy constrained and uses shared 30 minute sessions",
   assert.match(tracker, /p_browser/);
   assert.match(tracker, /p_operating_system/);
   assert.match(tracker, /p_device_type/);
+  assert.match(tracker, /p_country_code/);
   assert.doesNotMatch(tracker, /sessionStorage/);
   assert.doesNotMatch(tracker, /navigator\.userAgent\b/);
   assert.doesNotMatch(tracker, /location\.search/);
