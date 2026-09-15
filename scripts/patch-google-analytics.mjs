@@ -33,7 +33,7 @@ function ensureCspOrigins(html) {
 }
 
 function tagMatches(html) {
-  return [...html.matchAll(/https:\/\/www\.googletagmanager\.com\/gtag\/js\?id=([^"'&<>\\s]+)/g)];
+  return [...html.matchAll(/https:\/\/www\.googletagmanager\.com\/gtag\/js\?id=([A-Za-z0-9_-]+)/g)];
 }
 
 function injectGoogleTag(html, file) {
