@@ -12,6 +12,7 @@ Hệ thống analytics first-party của Cảnh Giác Số dùng Supabase để 
 - **Dữ liệu legacy**: các session thu thập trước Analytics v2 không có visitor ID vẫn được giữ để bảo toàn pageview/session lịch sử, nhưng không được dùng để suy đoán số người dùng.
 - **Trình duyệt / hệ điều hành / thiết bị**: chỉ lưu nhãn phân loại tổng quát do trình duyệt tự xác định cục bộ, ví dụ Chrome, Safari, Windows, iOS, Desktop, Mobile. Không gửi raw user-agent lên server.
 - **Nguồn truy cập**: chỉ hostname của referrer bên ngoài, không lưu URL đầy đủ.
+- **Traffic từ Google**: phiên có hostname referrer khớp domain Google như `google.com`, `google.com.vn`, `google.co.uk` và các subdomain tương ứng. Các domain dịch vụ khác như `googleapis.com` hay `googleadservices.com` không được tính là Google referrer.
 - Dashboard tự làm mới mỗi 10 giây; tracker heartbeat mỗi 60 giây khi tab đang hiển thị.
 - Tracker tôn trọng `Do Not Track` và không ghi sự kiện khi DNT được bật.
 
@@ -22,11 +23,13 @@ Hệ thống analytics first-party của Cảnh Giác Số dùng Supabase để 
 - **Độ phủ pageview** = số pageview thuộc session có visitor ID / tổng pageview trong cửa sổ thời gian đã chọn.
 - **Phiên legacy** được hiển thị riêng. Khi các phiên cũ dần ra khỏi cửa sổ 24h/7d/30d/90d, độ phủ dữ liệu nhận diện sẽ tăng dần.
 - Browser/OS/device chỉ thống kê trên dữ liệu có visitor ID để tránh biến dữ liệu legacy thành số liệu nhân khẩu kỹ thuật giả.
+- **Traffic từ Google** hiển thị người dùng, phiên, pageview, tỷ trọng phiên, xu hướng theo thời gian, landing page và browser/OS/device của nhóm Google. Đây là attribution theo HTTP referrer nên một số trình duyệt hoặc ứng dụng chặn referrer có thể làm số liệu thấp hơn thực tế.
+- Google thường không truyền từ khóa tìm kiếm cụ thể trong referrer. Truy vấn tìm kiếm, impression, CTR và vị trí phải lấy từ Google Search Console; dashboard first-party dùng để đo hành vi sau khi người dùng đã vào website.
 
 ## Bảo mật và riêng tư
 
 - Bảng analytics nằm trong schema `private`, RLS bật và không cấp quyền đọc/ghi trực tiếp cho `anon` hoặc `authenticated`.
 - Trình duyệt public chỉ gọi RPC ghi sự kiện với validation origin + input normalization + whitelist cho các nhãn browser/OS/device.
-- RPC đọc dashboard kiểm tra `private.user_is_app_admin()` và chỉ được cấp EXECUTE cho `authenticated`.
+- Các RPC đọc dashboard kiểm tra `private.user_is_app_admin()` và chỉ được cấp EXECUTE cho `authenticated`.
 - Publishable key trong tracker là browser-safe; không có service-role key ở frontend.
 - Không backfill visitor ID cho dữ liệu cũ vì không có căn cứ kỹ thuật đáng tin cậy để suy ra một session cũ thuộc người dùng nào.
