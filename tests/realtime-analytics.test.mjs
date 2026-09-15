@@ -4,9 +4,9 @@ import test from "node:test";
 
 const read = (file) => readFile(new URL(`../${file}`, import.meta.url), "utf8");
 
-test("public tracker is privacy constrained and uses shared 30 minute sessions", async () => {
+test("public tracker is privacy constrained, session-correct and only captures allowlisted UTM fields", async () => {
   const tracker = await read("public/web-analytics.js");
-  assert.match(tracker, /record_web_analytics_event_v3/);
+  assert.match(tracker, /record_web_analytics_event_v4/);
   assert.match(tracker, /localStorage/);
   assert.match(tracker, /SESSION_TIMEOUT_MS/);
   assert.match(tracker, /30 \* 60 \* 1000/);
@@ -18,30 +18,39 @@ test("public tracker is privacy constrained and uses shared 30 minute sessions",
   assert.match(tracker, /p_operating_system/);
   assert.match(tracker, /p_device_type/);
   assert.match(tracker, /p_country_code/);
+  assert.match(tracker, /utm_source/);
+  assert.match(tracker, /utm_medium/);
+  assert.match(tracker, /utm_campaign/);
+  assert.match(tracker, /URLSearchParams\(window\.location\.search\)/);
+  assert.doesNotMatch(tracker, /utm_term|utm_content|gclid|fbclid/i);
   assert.doesNotMatch(tracker, /sessionStorage/);
   assert.doesNotMatch(tracker, /navigator\.userAgent\b/);
-  assert.doesNotMatch(tracker, /location\.search/);
   assert.doesNotMatch(tracker, /document\.cookie/);
 });
 
-test("admin analytics dashboard separates identified users from legacy sessions and tracks Google traffic", async () => {
+test("admin analytics dashboard is organized as a professional end-to-end analytics console", async () => {
   const component = await read("app/admin-traffic-analytics.tsx");
   assert.match(component, /get_web_analytics_dashboard/);
   assert.match(component, /get_google_traffic_dashboard/);
+  assert.match(component, /get_web_analytics_insights/);
   assert.match(component, /10_000/);
-  assert.match(component, /Người dùng đã nhận diện hôm nay/);
-  assert.match(component, /Độ tin cậy dữ liệu người dùng/);
-  assert.match(component, /Phiên legacy/);
-  assert.match(component, /không quy đổi session legacy thành user/);
+  assert.match(component, /TỔNG QUAN/);
+  assert.match(component, /THU HÚT/);
+  assert.match(component, /NỘI DUNG/);
+  assert.match(component, /ĐỐI TƯỢNG/);
+  assert.match(component, /CHẤT LƯỢNG DỮ LIỆU/);
+  assert.match(component, /Thời lượng phiên TB/);
+  assert.match(component, /Tỷ lệ tương tác/);
+  assert.match(component, /Channel group/);
+  assert.match(component, /Campaign UTM/);
+  assert.match(component, /Landing page/);
+  assert.match(component, /Exit page/);
   assert.match(component, /Traffic từ Google/);
-  assert.match(component, /Người dùng từ Google/);
-  assert.match(component, /Phiên từ Google/);
-  assert.match(component, /Landing page từ Google/);
   assert.match(component, /Google Search Console/);
+  assert.match(component, /AdminCountryAnalytics/);
   assert.match(component, /Trình duyệt/);
   assert.match(component, /Hệ điều hành/);
   assert.match(component, /Thiết bị/);
-  assert.match(component, /Nguồn truy cập/);
 });
 
 test("build patch adds analytics tab and tracker", async () => {
@@ -52,11 +61,12 @@ test("build patch adds analytics tab and tracker", async () => {
   assert.match(patch, /connect-src/);
 });
 
-test("database analytics remains private and never converts legacy sessions into users", async () => {
+test("database analytics remains private, separates legacy data and exposes professional insights", async () => {
   const baseSql = await read("supabase/migrations/20260914142826_realtime_web_analytics.sql");
   const dimensionSql = await read("supabase/migrations/20260915043500_analytics_user_browser_dimensions.sql");
   const accuracySql = await read("supabase/migrations/20260915073000_analytics_session_accuracy.sql");
   const googleSql = await read("supabase/migrations/20260915082000_google_traffic_dashboard.sql");
+  const professionalSql = await read("supabase/migrations/20260915153000_professional_analytics_dashboard.sql");
   assert.match(baseSql, /private\.web_analytics_sessions/);
   assert.match(baseSql, /private\.web_analytics_pageviews/);
   assert.match(baseSql, /private\.user_is_app_admin\(\)/);
@@ -68,14 +78,20 @@ test("database analytics remains private and never converts legacy sessions into
   assert.match(accuracySql, /legacySessionsWindow/);
   assert.match(accuracySql, /identifiedPageviewsWindow/);
   assert.doesNotMatch(accuracySql, /coalesce\(s\.visitor_id::text, s\.session_id::text\)/);
-  assert.match(accuracySql, /private\.user_is_app_admin\(\)/);
-  assert.match(accuracySql, /revoke all on function public\.get_web_analytics_dashboard.*from public, anon/s);
   assert.match(googleSql, /private\.is_google_referrer/);
   assert.match(googleSql, /get_google_traffic_dashboard/);
-  assert.match(googleSql, /googleSessions/);
-  assert.match(googleSql, /googleLandingPages/);
-  assert.match(googleSql, /googleBrowsers/);
-  assert.match(googleSql, /private\.user_is_app_admin\(\)/);
-  assert.match(googleSql, /revoke all on function public\.get_google_traffic_dashboard.*from public, anon/s);
   assert.doesNotMatch(googleSql, /googleadservices/);
+  assert.match(professionalSql, /record_web_analytics_event_v4/);
+  assert.match(professionalSql, /utm_source/);
+  assert.match(professionalSql, /utm_medium/);
+  assert.match(professionalSql, /utm_campaign/);
+  assert.match(professionalSql, /get_web_analytics_insights/);
+  assert.match(professionalSql, /pagesPerSession/);
+  assert.match(professionalSql, /avgSessionDurationSeconds/);
+  assert.match(professionalSql, /engagementRate/);
+  assert.match(professionalSql, /landingPages/);
+  assert.match(professionalSql, /exitPages/);
+  assert.match(professionalSql, /durationBuckets/);
+  assert.match(professionalSql, /private\.user_is_app_admin\(\)/);
+  assert.match(professionalSql, /revoke all on function public\.get_web_analytics_insights.*from public, anon/s);
 });
