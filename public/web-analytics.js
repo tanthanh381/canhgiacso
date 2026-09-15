@@ -52,7 +52,10 @@
 
   function cleanCampaignValue(value, maxLength) {
     if (!value) return null;
-    const cleaned = String(value).replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, maxLength);
+    const cleaned = Array.from(String(value), (character) => {
+      const code = character.charCodeAt(0);
+      return code < 32 || code === 127 ? '' : character;
+    }).join('').trim().slice(0, maxLength);
     return cleaned || null;
   }
 
