@@ -15,3 +15,13 @@ test('Cẩm nang exposes both the canonical knowledge hub and the interactive ch
   assert.ok(css.includes('/* Cẩm nang dropdown navigation */'));
   assert.ok(css.includes('.knowledge-submenu'));
 });
+
+test('Cẩm nang dropdown stays compact and visually aligned with the navbar', () => {
+  assert.ok(css.includes('width:232px'));
+  assert.ok(css.includes('top:calc(100% + 5px)'));
+  assert.ok(css.includes('box-shadow:0 12px 30px'));
+  assert.ok(css.includes('border-right:1.5px solid currentColor'));
+  assert.ok(css.includes('.topbar nav:has(.knowledge-menu[open]){overflow:visible}'));
+  assert.doesNotMatch(css, /bottom:16px/);
+  assert.doesNotMatch(css, /max-height:60vh/);
+});
