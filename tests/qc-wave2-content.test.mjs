@@ -39,7 +39,7 @@ test("QC Wave 2 runs after SEO content generation and before analytics injection
 });
 
 test("every public knowledge topic has a topic-specific source mapping", () => {
-  for (const slug of knowledgeSlugs) assert.ok(qcWave2.includes(`\"${slug}\"`), `missing QC source mapping for ${slug}`);
+  for (const slug of knowledgeSlugs) assert.ok(qcWave2.includes(`"${slug}"`), `missing QC source mapping for ${slug}`);
   assert.ok(qcWave2.includes("bocongan.gov.vn"));
   assert.ok(qcWave2.includes("sbv.gov.vn"));
   assert.ok(qcWave2.includes("ssc.gov.vn"));
