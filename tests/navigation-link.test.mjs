@@ -12,6 +12,7 @@ test('Cẩm nang exposes both the canonical knowledge hub and the interactive ch
   assert.ok(source.includes('>Danh sách kiểm tra</strong>'));
   assert.ok(source.includes('navigateTo("knowledge")'));
   assert.ok(source.includes('document.getElementById("security-checklist-title")?.scrollIntoView'));
+  assert.ok(source.includes('aria-current={view === "knowledge" ? "page" : undefined}'));
   assert.ok(css.includes('/* Cẩm nang dropdown navigation */'));
   assert.ok(css.includes('.knowledge-submenu'));
 });
@@ -24,4 +25,13 @@ test('Cẩm nang dropdown stays compact and visually aligned with the navbar', (
   assert.ok(css.includes('.topbar nav:has(.knowledge-menu[open]){overflow:visible}'));
   assert.doesNotMatch(css, /bottom:16px/);
   assert.doesNotMatch(css, /max-height:60vh/);
+});
+
+test('all top-level navigation controls share the same vertical rhythm', () => {
+  assert.ok(css.includes('.topbar nav{align-items:center}'));
+  assert.ok(css.includes('.topbar nav>button{display:inline-flex;align-items:center;justify-content:center;height:42px'));
+  assert.ok(css.includes('.knowledge-menu{position:relative;flex:0 0 auto;align-self:center;display:flex;align-items:center;height:42px}'));
+  assert.ok(css.includes('.knowledge-menu>summary{display:inline-flex;align-items:center;justify-content:center;height:42px'));
+  assert.ok(css.includes('.topbar nav>button,.knowledge-menu>summary{height:40px;padding:0 12px}'));
+  assert.ok(css.includes('.topbar nav>button,.knowledge-menu>summary{height:38px;padding:0 6px;font-size:12px}'));
 });
