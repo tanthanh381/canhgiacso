@@ -5,7 +5,7 @@ import { readFile } from "node:fs/promises";
 const packageJson = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
 const qcWave2 = await readFile(new URL("../scripts/patch-qc-wave2.mjs", import.meta.url), "utf8");
 const terminology = await readFile(new URL("../scripts/patch-qc-terminology.mjs", import.meta.url), "utf8");
-const dataSource = await readFile(new URL("../app/data.ts", import.meta.url), "utf8");
+const pageSource = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
 
 const knowledgeSlugs = [
   "phong-chong-lua-dao-truc-tuyen",
@@ -61,18 +61,23 @@ test("methodology documents source hierarchy, certainty levels and standard term
   ]) assert.ok(qcWave2.includes(phrase), `missing methodology phrase: ${phrase}`);
 });
 
-test("interactive content normalizes inconsistent category and channel labels", () => {
-  assert.ok(terminology.includes('scenario.category === "Deepfake"'));
+test("interactive content standardizes labels only at the presentation layer", () => {
+  assert.ok(terminology.includes('function scenarioCategoryLabel'));
+  assert.ok(terminology.includes('category === "Deepfake"'));
   assert.ok(terminology.includes('"Giả mạo bằng AI (deepfake)"'));
   assert.ok(terminology.includes('"Lừa đảo giả mạo (phishing)"'));
   assert.ok(terminology.includes('"SMS Brandname giả mạo"'));
-  assert.ok(terminology.includes('scenario.channel === "Video call"'));
+  assert.ok(terminology.includes('function scenarioChannelLabel'));
+  assert.ok(terminology.includes('channel === "Video call"'));
   assert.ok(terminology.includes('"Cuộc gọi video"'));
   assert.ok(terminology.includes('"Nhóm trò chuyện"'));
+  assert.ok(terminology.includes('without changing stored content'));
 
-  // `pnpm test` runs `pnpm build` first, so the idempotent terminology patch
-  // must already have been applied to app/data.ts by the time this assertion runs.
-  assert.ok(dataSource.includes('category: scenario.category === "Deepfake"'));
+  // `pnpm test` runs `pnpm build` first; the display patch must therefore be
+  // visible in page.tsx while Scenario data remains untouched for round trips.
+  assert.ok(pageSource.includes('function scenarioCategoryLabel'));
+  assert.ok(pageSource.includes('scenarioChannelLabel(item.channel)'));
+  assert.ok(pageSource.includes('scenarioCategoryLabel(selected.category)'));
 });
 
 test("QC patch removes old generic source boilerplate before adding topic sources", () => {
