@@ -45,8 +45,6 @@ export function PrivilegedMfaGate() {
 
     const roleResult = await supabase.rpc("get_content_management_role");
     if (roleResult.error) {
-      // During a rolling deployment the new RPC may not exist yet. The database
-      // remains the source of truth and continues to protect privileged calls.
       if (roleResult.error.code === "PGRST202" || roleResult.error.code === "42883") {
         setRole(null);
         setState("idle");
@@ -90,8 +88,6 @@ export function PrivilegedMfaGate() {
       return;
     }
 
-    // Remove abandoned, unverified enrollment attempts before creating a fresh
-    // TOTP secret. This prevents repeated visits from consuming the factor cap.
     for (const pending of factors.data.totp.filter((factor) => factor.status !== "verified")) {
       await supabase.auth.mfa.unenroll({ factorId: pending.id });
     }
@@ -146,8 +142,6 @@ export function PrivilegedMfaGate() {
       if (verified.error) throw verified.error;
       const refreshed = await supabase.auth.refreshSession();
       if (refreshed.error) throw refreshed.error;
-      // AdminPage may already have observed the pre-MFA 42501 response. A reload
-      // ensures the entire privileged view is reconstructed using the AAL2 JWT.
       window.location.reload();
     } catch {
       setError("Mã xác thực không hợp lệ hoặc đã hết hạn. Hãy thử mã mới.");
@@ -191,7 +185,6 @@ export function PrivilegedMfaGate() {
               maxLength={6}
               value={code}
               onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 6))}
-              autoFocus
             />
             <button type="submit" disabled={busy || code.length !== 6}>
               {busy ? "Đang xác minh…" : "Xác minh"}
