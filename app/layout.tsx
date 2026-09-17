@@ -65,10 +65,103 @@ export const metadata: Metadata = {
   },
 };
 
+const bootStyles = `
+  #refresh-shell { visibility: hidden; }
+  #refresh-loader {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483647;
+    display: grid;
+    place-items: center;
+    background: #f7f9fc;
+    color: #0f172a;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 140ms ease, visibility 0s linear 140ms;
+  }
+  #refresh-loader-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font: 700 20px/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    letter-spacing: -0.02em;
+  }
+  #refresh-loader-mark {
+    width: 22px;
+    height: 22px;
+    border: 2px solid rgba(15, 23, 42, 0.18);
+    border-top-color: #0f172a;
+    border-radius: 999px;
+    animation: refresh-loader-spin 700ms linear infinite;
+  }
+  body.refresh-ready #refresh-shell { visibility: visible; }
+  body.refresh-ready #refresh-loader {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  @keyframes refresh-loader-spin { to { transform: rotate(360deg); } }
+  @media (prefers-color-scheme: dark) {
+    #refresh-loader { background: #0b1220; color: #f8fafc; }
+    #refresh-loader-mark { border-color: rgba(248, 250, 252, 0.2); border-top-color: #f8fafc; }
+  }
+`;
+
+const bootScript = `
+  (function () {
+    var body = document.body;
+    var shell = document.getElementById('refresh-shell');
+    var observer;
+    var done = false;
+
+    function reveal() {
+      if (done) return;
+      done = true;
+      if (observer) observer.disconnect();
+      body.classList.add('refresh-ready');
+    }
+
+    function revealWhenReady() {
+      if (!shell) return reveal();
+      var choice = shell.querySelector('.choice-list .choice');
+      if (!choice || !choice.hasAttribute('disabled')) reveal();
+    }
+
+    if (shell && 'MutationObserver' in window) {
+      observer = new MutationObserver(revealWhenReady);
+      observer.observe(shell, {
+        subtree: true,
+        childList: true,
+        attributes: true,
+        attributeFilter: ['disabled', 'class']
+      });
+    }
+
+    requestAnimationFrame(function () {
+      requestAnimationFrame(revealWhenReady);
+    });
+
+    window.setTimeout(reveal, 2200);
+  })();
+`;
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="vi-VN">
-      <body>{children}</body>
+      <body className="refresh-boot">
+        <style>{bootStyles}</style>
+        <div id="refresh-loader" role="status" aria-label="Đang tải Cảnh giác số">
+          <div id="refresh-loader-inner">
+            <span id="refresh-loader-mark" aria-hidden="true" />
+            <span>Cảnh giác số</span>
+          </div>
+        </div>
+        <div id="refresh-shell">{children}</div>
+        <noscript>
+          <style>{`#refresh-shell{visibility:visible!important}#refresh-loader{display:none!important}`}</style>
+        </noscript>
+        <script dangerouslySetInnerHTML={{ __html: bootScript }} />
+      </body>
     </html>
   );
 }
