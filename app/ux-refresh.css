@@ -40,6 +40,8 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
 /* Two-column learning layout. The contextual insight panel becomes a drawer. */
 .game-shell { grid-template-columns: 290px minmax(0, 1fr); max-width: 1560px; margin: 0 auto; }
 .insight-panel {
+  display: flex;
+  flex-direction: column;
   position: fixed;
   z-index: 72;
   right: 0;
@@ -145,7 +147,7 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
 .ux-insight-close { right: min(315px, calc(92vw - 45px)); top: 91px; }
 .ux-scenario-close { display: none; }
 
-/* Mobile is a separate interaction model: bottom navigation + scenario drawer. */
+/* Mobile keeps the same content and actions as desktop, adapted into bottom navigation + drawers. */
 .ux-bottom-nav { display: none; }
 
 @media (max-width: 1180px) {
@@ -157,12 +159,24 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
 
 @media (max-width: 900px) {
   body { padding-bottom: 68px; }
-  .topbar { height: 64px; grid-template-columns: 1fr auto; padding: 0 14px; }
+  .topbar { height: 64px; grid-template-columns: minmax(0, 1fr) auto; padding: 0 14px; }
+  .brand { min-width: 0; }
   .brand-logo { width: 44px; height: 44px; background-size: 46px 46px; }
-  .product-lockup strong { font-size: 13px; }
+  .product-lockup { min-width: 0; overflow: hidden; }
+  .product-lockup strong { font-size: 13px; white-space: nowrap; }
   .topbar nav { display: none; }
-  .guest-badge, .login-button { display: none; }
-  .signup-button { padding: 8px 10px; }
+  .topbar .auth-actions { gap: 5px; }
+  .topbar .auth-actions .guest-badge { display: none; }
+  .topbar .auth-actions .login-button,
+  .topbar .auth-actions .signup-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 0 9px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
   .icon-button { width: 36px; height: 36px; }
   .profile-button { max-width: 118px; }
   .profile-button { font-size: 0; padding-right: 5px; }
@@ -204,7 +218,7 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
 
   .scenario-stage.card-surface { border-radius: 14px; }
   .scenario-title-row { align-items: flex-start; }
-  .scenario-hero-icon { display: none; }
+  .scenario-hero-icon { display: grid; width: 40px; height: 40px; font-size: 19px; flex: 0 0 auto; }
   .story-box { margin-top: 12px; }
   .red-flags > div { display: grid; }
   .choice { min-height: 62px; }
@@ -237,8 +251,9 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
 }
 
 @media (max-width: 560px) {
-  .top-actions { gap: 5px; }
-  .signup-button { font-size: 10px; }
+  .top-actions { gap: 4px; }
+  .topbar .auth-actions .login-button,
+  .topbar .auth-actions .signup-button { min-height: 34px; padding-inline: 7px; font-size: 10px; }
   .ux-utility-trigger { width: 34px; height: 34px; }
   .stage { padding-inline: 10px; }
   .status-card { min-width: 142px; }
@@ -246,5 +261,10 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
   .scenario-stage h2 { font-size: clamp(21px, 6vw, 27px); line-height: 1.18; }
   .choice { padding: 12px 10px; }
   .feedback { padding: 13px; }
+  .checklist-group-copy small { display: block; margin-top: 3px; }
   .ux-practice-cta { width: 100%; justify-content: center; }
+}
+
+@media (max-width: 390px) {
+  .product-lockup strong { display: none; }
 }
