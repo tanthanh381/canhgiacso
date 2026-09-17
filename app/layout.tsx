@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 const siteUrl = "https://canhgiacso.com";
-const siteTitle = "Cảnh Giác Số: Chống lừa đảo & An toàn thông tin";
+const siteTitle = "Cảnh Giác Số";
 const siteDescription =
   "Cảnh Giác Số giúp nhận diện và chống lừa đảo trực tuyến, nâng cao cảnh giác, bảo vệ tài khoản và rèn kỹ năng an toàn thông tin qua tình huống thực tế.";
 
