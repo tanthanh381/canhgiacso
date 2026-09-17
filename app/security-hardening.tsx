@@ -161,21 +161,17 @@ export function PrivilegedMfaGate() {
     <div className="security-mfa-layer" role="presentation">
       <section className="security-mfa-dialog" role="dialog" aria-modal="true" aria-labelledby="security-mfa-title">
         <div className="security-mfa-mark" aria-hidden="true">◉</div>
-        <p className="security-mfa-kicker">ASVS L2 · STEP-UP AUTHENTICATION</p>
-        <h2 id="security-mfa-title">Xác thực hai lớp bắt buộc</h2>
-        <p className="security-mfa-copy">
-          Tài khoản <strong>{role === "admin" ? "Quản trị viên" : "Biên tập viên"}</strong> phải đạt AAL2 trước khi truy cập chức năng quản trị.
-        </p>
+        <h2 id="security-mfa-title">Xác thực hai lớp</h2>
 
         {state === "checking" && <p className="security-mfa-status">Đang kiểm tra phiên đăng nhập…</p>}
 
         {state === "enroll" && enrollment && (
           <div className="security-mfa-enroll">
-            <p>1. Quét mã bằng ứng dụng Authenticator.</p>
+            <p>Quét mã bằng ứng dụng Authenticator.</p>
             <img className="security-mfa-qr" src={enrollment.qrCode} alt="Mã QR để đăng ký TOTP MFA" />
             <p className="security-mfa-secret-label">Hoặc nhập khóa thủ công:</p>
             <code className="security-mfa-secret">{enrollment.secret}</code>
-            <p>2. Nhập mã 6 số đang hiển thị trong ứng dụng.</p>
+            <p>Nhập mã 6 số đang hiển thị trong ứng dụng.</p>
           </div>
         )}
 
@@ -195,16 +191,16 @@ export function PrivilegedMfaGate() {
               maxLength={6}
               value={code}
               onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 6))}
+              autoFocus
             />
             <button type="submit" disabled={busy || code.length !== 6}>
-              {busy ? "Đang xác minh…" : "Xác minh và tiếp tục"}
+              {busy ? "Đang xác minh…" : "Xác minh"}
             </button>
           </form>
         )}
 
         {error && <p className="security-mfa-error" role="alert">{error}</p>}
         {state === "error" && <button className="security-mfa-retry" type="button" onClick={() => void inspect()}>Thử lại</button>}
-        <p className="security-mfa-note">MFA được kiểm tra lại tại database; bỏ qua giao diện này không cấp quyền quản trị.</p>
       </section>
     </div>
   );
