@@ -2,17 +2,14 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 const siteUrl = "https://canhgiacso.com";
-const siteTitle = "Cảnh Giác Số";
+const siteTitle = "Cảnh giác số";
 const siteDescription =
   "Cảnh Giác Số giúp nhận diện và chống lừa đảo trực tuyến, nâng cao cảnh giác, bảo vệ tài khoản và rèn kỹ năng an toàn thông tin qua tình huống thực tế.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   applicationName: "Cảnh Giác Số",
-  title: {
-    default: siteTitle,
-    template: "%s | Cảnh Giác Số",
-  },
+  title: siteTitle,
   description: siteDescription,
   authors: [{ name: "Cảnh Giác Số", url: siteUrl }],
   creator: "Cảnh Giác Số",
