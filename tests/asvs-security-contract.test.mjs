@@ -24,6 +24,14 @@ test('admin and editor UI implements TOTP enrollment and challenge', () => {
   assert.match(entry, /<PrivilegedMfaGate \/>/);
 });
 
+test('privileged MFA is enforced immediately after sign-in and is not admin-route gated', () => {
+  assert.match(mfa, /supabase\.auth\.getSession\(\)/);
+  assert.match(mfa, /supabase\.rpc\("get_content_management_role"\)/);
+  assert.match(mfa, /event === "SIGNED_IN"/);
+  assert.match(mfa, /roleResult\.data === "admin" \|\| roleResult\.data === "editor"/);
+  assert.doesNotMatch(mfa, /isAdminRoute|window\.location\.hash\s*===\s*["']#\/admin["']|!adminRoute/);
+});
+
 test('role discovery is read-only invoker RPC with narrow private-helper grant', () => {
   assert.match(migration, /create or replace function public\.get_content_management_role\(\)[\s\S]*?security invoker/);
   assert.match(migration, /revoke execute on function public\.get_content_management_role\(\) from public, anon/);
