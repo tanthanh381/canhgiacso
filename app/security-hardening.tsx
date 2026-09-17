@@ -7,12 +7,7 @@ type ManagementRole = "admin" | "editor";
 type GateState = "idle" | "checking" | "challenge" | "enroll" | "verified" | "error";
 type Enrollment = { factorId: string; qrCode: string; secret: string };
 
-function isAdminRoute() {
-  return typeof window !== "undefined" && window.location.hash === "#/admin";
-}
-
 export function PrivilegedMfaGate() {
-  const [adminRoute, setAdminRoute] = useState(isAdminRoute);
   const [role, setRole] = useState<ManagementRole | null>(null);
   const [state, setState] = useState<GateState>("idle");
   const [factorId, setFactorId] = useState("");
@@ -21,21 +16,10 @@ export function PrivilegedMfaGate() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
-  useEffect(() => {
-    const sync = () => setAdminRoute(isAdminRoute());
-    window.addEventListener("hashchange", sync);
-    return () => window.removeEventListener("hashchange", sync);
-  }, []);
-
   const inspect = useCallback(async () => {
-    if (!adminRoute) {
-      setRole(null);
-      setState("idle");
-      return;
-    }
-
     setState("checking");
     setError("");
+
     const { data: sessionData } = await supabase.auth.getSession();
     if (!sessionData.session) {
       setRole(null);
@@ -43,6 +27,8 @@ export function PrivilegedMfaGate() {
       return;
     }
 
+    // Resolve the management role immediately after authentication. Privileged
+    // accounts must complete MFA regardless of which page they are currently on.
     const roleResult = await supabase.rpc("get_content_management_role");
     if (roleResult.error) {
       if (roleResult.error.code === "PGRST202" || roleResult.error.code === "42883") {
@@ -84,6 +70,7 @@ export function PrivilegedMfaGate() {
     const verified = factors.data.totp.find((factor) => factor.status === "verified");
     if (verified) {
       setFactorId(verified.id);
+      setEnrollment(null);
       setState("challenge");
       return;
     }
@@ -107,7 +94,7 @@ export function PrivilegedMfaGate() {
       secret: enrolled.data.totp.secret,
     });
     setState("enroll");
-  }, [adminRoute]);
+  }, []);
 
   useEffect(() => {
     const initialCheck = window.setTimeout(() => void inspect(), 0);
@@ -149,7 +136,7 @@ export function PrivilegedMfaGate() {
     }
   }
 
-  if (!adminRoute || !role || state === "idle" || state === "verified") return null;
+  if (!role || state === "idle" || state === "verified") return null;
 
   return (
     <div className="security-mfa-layer" role="presentation">
