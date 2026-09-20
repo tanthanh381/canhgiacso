@@ -1,7 +1,10 @@
 <!doctype html>
 <html lang="vi-VN">
   <head>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://goietwyapiywrtibpkwo.supabase.co wss://goietwyapiywrtibpkwo.supabase.co; frame-src https://phishingquiz.withgoogle.com; media-src 'none'; worker-src 'none'; object-src 'none'; base-uri 'none'; form-action 'self'; manifest-src 'self'; upgrade-insecure-requests" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://www.google-analytics.com https://www.googletagmanager.com; font-src 'self' data:; connect-src 'self' https://goietwyapiywrtibpkwo.supabase.co wss://goietwyapiywrtibpkwo.supabase.co https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://www.googletagmanager.com; frame-src https://phishingquiz.withgoogle.com; media-src 'none'; worker-src 'none'; object-src 'none'; base-uri 'none'; form-action 'self'; manifest-src 'self'; upgrade-insecure-requests" />
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HH04Q7FYHM"></script>
+  <script src="/google-analytics-init.js"></script>
     <meta name="referrer" content="strict-origin-when-cross-origin" />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -16,6 +19,7 @@
     <link rel="icon" type="image/png" href="/khien-so-logo.png" />
     <link rel="apple-touch-icon" href="/khien-so-logo.png" />
     <link rel="preload" href="/khien-so-logo.png" as="image" />
+    <link rel="alternate" type="application/rss+xml" title="Cảnh Giác Số" href="/feed.xml" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="vi_VN" />
     <meta property="og:site_name" content="Cảnh Giác Số" />
@@ -107,6 +111,20 @@
             <li><a href="/kien-thuc/xu-ly-khi-bi-lua-dao-chuyen-tien/">Bị lừa chuyển tiền phải làm gì ngay?</a></li>
           </ul>
         </section>
+
+        <section aria-labelledby="seo-lookup">
+          <h2 id="seo-lookup">Tra cứu lừa đảo trước khi giao dịch</h2>
+          <p>Khi nhận cuộc gọi lạ, được yêu cầu chuyển khoản hoặc nhận một đường link đáng ngờ, hãy kiểm tra chéo trước khi hành động. Cảnh Giác Số có các hướng dẫn riêng cho từng loại thông tin để bạn tự xác minh bằng nhiều nguồn độc lập.</p>
+          <ul>
+            <li><a href="/kien-thuc/tra-cuu-lua-dao/">Tra cứu lừa đảo: số điện thoại, tài khoản và link giả mạo</a></li>
+            <li><a href="/kien-thuc/kiem-tra-so-dien-thoai-lua-dao/">Kiểm tra số điện thoại lừa đảo</a></li>
+            <li><a href="/kien-thuc/tra-cuu-so-tai-khoan-lua-dao/">Tra cứu số tài khoản lừa đảo trước khi chuyển tiền</a></li>
+            <li><a href="/kien-thuc/25-kich-ban-lua-dao-2026/">25 kịch bản lừa đảo năm 2026 cần cảnh giác</a></li>
+            <li><a href="/kien-thuc/lua-dao-vneid-gia-mao/">Lừa đảo VNeID giả mạo: cách nhận biết</a></li>
+            <li><a href="/kien-thuc/lua-dao-phat-nguoi-qua-sms/">Lừa đảo phạt nguội qua SMS</a></li>
+            <li><a href="/kien-thuc/lua-dao-hoan-tien-don-hang/">Lừa đảo hoàn tiền đơn hàng</a></li>
+          </ul>
+        </section>
         <section aria-labelledby="seo-purpose">
           <h2 id="seo-purpose">Học để xử lý đúng khi gặp tình huống thật</h2>
           <p>Cảnh Giác Số không yêu cầu bạn nhập mật khẩu, OTP, số thẻ hoặc dữ liệu ngân hàng thật vào bài thực hành. Các tình huống được thiết kế cho mục đích giáo dục và nâng cao nhận thức. Khi đã có thiệt hại thực tế, hãy ưu tiên liên hệ ngân hàng liên quan, bảo vệ tài khoản, lưu bằng chứng và trình báo cơ quan chức năng phù hợp.</p>
@@ -115,5 +133,6 @@
       </main>
     </div>
     <script type="module" src="/main.tsx"></script>
-  </body>
+    <script src="/web-analytics.js" defer></script>
+</body>
 </html>

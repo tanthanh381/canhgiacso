@@ -6,13 +6,14 @@ import { CertificateEditor, CertificateThumbnail } from "./certificate-editor";
 import { NewsEditor } from './news-editor';
 import { newsErrors, publicNews } from './news-content';
 import { supabase } from "./supabase";
+import { AdminTrafficAnalytics } from "./admin-traffic-analytics";
 
 type AdminAccount = { id: string; displayName: string; email: string };
 type AdminState = "checking" | "ready" | "forbidden" | "error";
 type ContentRole = "admin" | "editor";
 type ManagedRole = ContentRole | "member";
 type ManagedUser = { id: string; email: string; username: string; displayName: string; createdAt: string; role: ManagedRole };
-type AdminTab = "general" | "certificate" | "scenarios" | "knowledge" | "news" | "users";
+type AdminTab = "general" | "certificate" | "scenarios" | "knowledge" | "news" | "traffic" | "users";
 
 const difficultyOptions: Difficulty[] = ["Dễ", "Trung bình", "Khó", "Rất khó"];
 
@@ -332,6 +333,7 @@ export function AdminPage({
         <button role="tab" aria-selected={tab === "scenarios"} className={tab === "scenarios" ? "active" : ""} onClick={() => setTab("scenarios")}>Tình huống ({draft.scenarios.length})</button>
         <button role="tab" aria-selected={tab === "knowledge"} className={tab === "knowledge" ? "active" : ""} onClick={() => setTab("knowledge")}>Cẩm nang ({draft.knowledgeCards.length})</button>
         <button role="tab" aria-selected={tab === "news"} className={tab === "news" ? "active" : ""} onClick={() => setTab("news")}>Tin tức ({draft.newsArticles.length})</button>
+        {role === "admin" && <button role="tab" aria-selected={tab === "traffic"} className={tab === "traffic" ? "active" : ""} onClick={() => setTab("traffic")}>Thống kê truy cập</button>}
         {role === "admin" && <button role="tab" aria-selected={tab === "users"} className={tab === "users" ? "active" : ""} onClick={() => setTab("users")}>Phân quyền ({managedUsers.length})</button>}
       </div>
 
@@ -392,6 +394,8 @@ export function AdminPage({
       {tab === "knowledge" && <div className="knowledge-admin"><div className="admin-section-title"><div><span className="eyebrow">CẨM NANG AN TOÀN</span><h2>Thẻ kiến thức</h2></div><button className="admin-secondary" onClick={addKnowledge}>+ Thêm thẻ</button></div><div className="knowledge-admin-grid">{draft.knowledgeCards.map((card, index) => <article key={index}><div className="knowledge-admin-head"><b>{String(index + 1).padStart(2, "0")}</b><button onClick={() => removeKnowledge(index)} aria-label={`Xóa ${card.title}`}>×</button></div><label><span>Biểu tượng</span><input value={card.icon} maxLength={12} onChange={(event) => changeKnowledge(index, { icon: event.target.value })} /></label><label><span>Tiêu đề</span><input value={card.title} onChange={(event) => changeKnowledge(index, { title: event.target.value })} /></label><label><span>Nội dung</span><textarea rows={5} value={card.text} onChange={(event) => changeKnowledge(index, { text: event.target.value })} /></label></article>)}</div></div>}
 
       {tab === "news" && <NewsEditor disabled={busy} articles={draft.newsArticles} canPublish={role === 'admin'} onChange={newsArticles => setDraft(current => ({ ...current, newsArticles }))} />}
+
+      {tab === "traffic" && role === "admin" && <AdminTrafficAnalytics />}
 
       {tab === "users" && role === "admin" && <div className="role-management">
         <div className="admin-section-title"><div><span className="eyebrow">PHÂN QUYỀN HỆ THỐNG</span><h2>Tài khoản và nhóm quyền</h2><p>Quản trị viên có toàn quyền; Biên tập viên chỉ soạn và lưu bản nháp.</p></div></div>

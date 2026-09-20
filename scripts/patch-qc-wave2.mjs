@@ -76,6 +76,15 @@ const SOURCES = {
 };
 
 const topicSources = {
+  "bao-cao-lua-dao-truc-tuyen": ["bcaScenarios", "bcaCoordination"],
+  "cach-kiem-tra-link-lua-dao": ["microsoftPhishing", "googleSafety"],
+  "cach-nhan-biet-so-dien-thoai-lua-dao": ["bcaScenarios", "bcaPhatNguoi"],
+  "deepfake-lua-dao": ["bcaTinAI", "bcaScenarios"],
+  "gia-mao-cong-an": ["bcaPhatNguoi", "bcaScenarios"],
+  "lua-dao-ngan-hang": ["sbvAntiFraud", "bcaCoordination"],
+  "lua-dao-truc-tuyen-la-gi": ["bcaScenarios", "googleSafety"],
+  "lua-dao-viec-nhe-luong-cao": ["bcaJobs", "bcaScenarios"],
+  "otp-la-gi": ["sbvAntiFraud", "bcaScenarios"],
   "phong-chong-lua-dao-truc-tuyen": ["bcaScenarios", "bcaCoordination"],
   "nhan-dien-lua-dao-truc-tuyen": ["bcaScenarios", "googleSafety"],
   "nhan-dien-email-phishing": ["microsoftPhishing", "googleSafety"],
@@ -101,6 +110,15 @@ const topicSources = {
 };
 
 const actionBySlug = {
+  "bao-cao-lua-dao-truc-tuyen": "Dừng tương tác, lưu bằng chứng, liên hệ ngân hàng qua kênh chính thức và phản ánh cuộc gọi/tin nhắn lừa đảo theo hướng dẫn của cơ quan chức năng.",
+  "cach-kiem-tra-link-lua-dao": "Không đăng nhập từ link trong SMS, email hoặc tin nhắn. Tự mở ứng dụng/website chính thức, kiểm tra tên miền chính và cảnh giác với link rút gọn.",
+  "cach-nhan-biet-so-dien-thoai-lua-dao": "Không đánh giá chỉ dựa trên đầu số hoặc tên hiển thị. Hãy kiểm tra nội dung yêu cầu, áp lực thời gian và xác minh lại qua kênh chính thức.",
+  "deepfake-lua-dao": "Không xem hình ảnh, video hoặc giọng nói là bằng chứng đủ mạnh. Hãy ngắt cuộc gọi, gọi lại kênh quen thuộc và dùng câu hỏi riêng để xác minh.",
+  "gia-mao-cong-an": "Cơ quan chức năng không yêu cầu chuyển tiền vào tài khoản cá nhân để xác minh. Khi bị đe dọa qua điện thoại, hãy dừng cuộc gọi và tự liên hệ kênh công khai.",
+  "lua-dao-ngan-hang": "Không cung cấp OTP, PIN, CVV, mật khẩu; không cài ứng dụng hoặc chia sẻ màn hình theo hướng dẫn từ cuộc gọi/tin nhắn. Tự mở ứng dụng ngân hàng hoặc gọi hotline chính thức.",
+  "lua-dao-truc-tuyen-la-gi": "Hiểu mô típ thao túng trước khi xử lý: yêu cầu khẩn cấp, lợi ích bất thường, giữ bí mật, link/app lạ và đòi mã xác thực đều là tín hiệu cần dừng lại.",
+  "lua-dao-viec-nhe-luong-cao": "Dừng ngay khi công việc yêu cầu nạp tiền để mở nhiệm vụ, nâng cấp tài khoản hoặc rút hoa hồng. Không chuyển thêm tiền để gỡ khoản đã nạp.",
+  "otp-la-gi": "OTP là mã xác thực dùng một lần. Không đọc, chuyển tiếp hoặc nhập OTP vào trang được gửi bởi người lạ; nếu đã lộ, liên hệ ngay tổ chức cung cấp tài khoản.",
   "kiem-tra-link-gia-mao": "Không đăng nhập từ đường link nhận qua email, SMS hoặc tin nhắn. Tự mở ứng dụng/website chính thức và đối chiếu tên miền trước khi nhập thông tin.",
   "nhan-dien-email-phishing": "Không mở tệp hoặc link chỉ vì email dùng logo quen thuộc. Kiểm tra địa chỉ người gửi, tên miền đích và xác minh yêu cầu bằng kênh độc lập.",
   "gia-mao-ngan-hang": "Không cung cấp OTP, PIN, CVV, mật khẩu; không cài ứng dụng hoặc chia sẻ màn hình theo hướng dẫn từ cuộc gọi/tin nhắn. Tự mở ứng dụng ngân hàng hoặc gọi hotline chính thức.",

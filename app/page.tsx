@@ -78,6 +78,19 @@ const THEME_KEY = "khien-so-theme";
 const GUEST_CERTIFICATE_KEY = "canh-giac-so-guest-certificate";
 const SECURITY_CHECKLIST_KEY = "canh-giac-so-security-checklist";
 const PHISHING_QUIZ_URL = "https://phishingquiz.withgoogle.com/?hl=vi";
+
+function scenarioCategoryLabel(category: string) {
+  if (category === "Deepfake") return "Giả mạo bằng AI (deepfake)";
+  if (category === "Phishing") return "Lừa đảo giả mạo (phishing)";
+  if (category === "Brandname giả") return "SMS Brandname giả mạo";
+  return category;
+}
+
+function scenarioChannelLabel(channel: string) {
+  if (channel === "Video call") return "Cuộc gọi video";
+  if (channel === "Nhóm chat") return "Nhóm trò chuyện";
+  return channel;
+}
 const USERNAME_PATTERN = /^[a-z0-9._-]{3,24}$/;
 const PASSWORD_PATTERN = /^(?=.{8,72}$)(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d])\S+$/;
 
@@ -438,6 +451,12 @@ export default function Home() {
     meta?.setAttribute('content', readingArticle.metaDescription || readingArticle.summary);
     return () => { document.title = oldTitle; meta?.setAttribute('content', oldDescription); };
   }, [readingArticle]);
+
+  useEffect(() => {
+    if (dataStatus !== "Đã xác nhận và lưu kết quả.") return;
+    const timer = window.setTimeout(() => setDataStatus(""), 2400);
+    return () => window.clearTimeout(timer);
+  }, [dataStatus]);
 
   useEffect(() => {
     const loadFrame = window.requestAnimationFrame(() => {
@@ -1191,7 +1210,13 @@ export default function Home() {
         </button>
         <nav aria-label="Điều hướng chính">
           <button aria-current={view === "game" ? "page" : undefined} className={view === "game" ? "active" : ""} onClick={() => navigateTo("game")}>Thử thách</button>
-          <button aria-current={view === "knowledge" ? "page" : undefined} className={view === "knowledge" ? "active" : ""} onClick={() => navigateTo("knowledge")}>Cẩm nang</button>
+          <details className="knowledge-menu">
+            <summary aria-label="Mở menu Cẩm nang" aria-current={view === "knowledge" ? "page" : undefined} className={view === "knowledge" ? "active" : ""}>Cẩm nang</summary>
+            <div className="knowledge-submenu" role="menu" aria-label="Cẩm nang">
+              <button type="button" role="menuitem" onClick={() => window.location.assign("/kien-thuc/")}><strong>Bài viết kiến thức</strong><small>Hướng dẫn, cảnh báo và nội dung tra cứu</small></button>
+              <button type="button" role="menuitem" onClick={() => { document.querySelector<HTMLDetailsElement>(".knowledge-menu")?.removeAttribute("open"); navigateTo("knowledge"); window.setTimeout(() => document.getElementById("security-checklist-title")?.scrollIntoView({ behavior: "smooth", block: "start" }), 80); }}><strong>Danh sách kiểm tra</strong><small>Tự kiểm tra an toàn số và lưu tiến độ</small></button>
+            </div>
+          </details>
           <button aria-current={view === "news" ? "page" : undefined} className={view === "news" ? "active" : ""} onClick={() => navigateTo("news")}>Tin tức</button>
           <button aria-current={view === "quiz" ? "page" : undefined} className={view === "quiz" ? "active" : ""} onClick={() => navigateTo("quiz")}>Thực hành tương tác</button>
           <button aria-current={view === "stats" ? "page" : undefined} className={view === "stats" ? "active" : ""} onClick={() => navigateTo("stats")}>Thành tích</button>
@@ -1247,7 +1272,7 @@ export default function Home() {
                 return (
                   <button key={item.id} aria-pressed={selected.id === item.id} aria-disabled={!unlocked} disabled={!unlocked} onClick={() => chooseScenario(item.id)} className={`scenario-item ${selected.id === item.id ? "selected" : ""} ${!unlocked ? "locked" : ""}`}>
                     <span className={`scenario-number ${correct ? "done" : completed ? "attempted" : !unlocked ? "locked" : ""}`}>{correct ? "✓" : completed ? "•" : !unlocked ? "🔒" : String(item.id).padStart(2, "0")}</span>
-                    <span className="scenario-copy"><strong>{item.title}</strong><small>{unlocked ? `${item.channel} · ${item.category}` : `Cấp ${item.difficulty} · Hoàn thành cấp thấp hơn để mở khóa`}</small></span>
+                    <span className="scenario-copy"><strong>{item.title}</strong><small>{unlocked ? `${scenarioChannelLabel(item.channel)} · ${scenarioCategoryLabel(item.category)}` : `Cấp ${item.difficulty} · Hoàn thành cấp thấp hơn để mở khóa`}</small></span>
                     <span className={`difficulty-dot ${difficultyTone[item.difficulty]}`} title={unlocked ? item.difficulty : `${item.difficulty} · Đang khóa`}></span>
                   </button>
                 );
@@ -1277,7 +1302,7 @@ export default function Home() {
               </section>
             ) : (
               <section className="scenario-stage card-surface">
-                <div className="scenario-meta"><span className={`level-pill ${difficultyTone[selected.difficulty]}`}>{selected.difficulty}</span><span>{selected.channel}</span><span>{selected.category}</span></div>
+                <div className="scenario-meta"><span className={`level-pill ${difficultyTone[selected.difficulty]}`}>{selected.difficulty}</span><span>{scenarioChannelLabel(selected.channel)}</span><span>{scenarioCategoryLabel(selected.category)}</span></div>
                 <div className="scenario-title-row"><span className="scenario-hero-icon">{selected.icon}</span><div><span className="eyebrow">TÌNH HUỐNG {String(selected.id).padStart(2, "0")}</span><h2>{selected.title}</h2></div></div>
                 <div className="story-box"><span className="quote-mark">“</span><p>{selected.story}</p></div>
                 <div className="red-flags"><strong>Dấu hiệu cần quan sát</strong><div>{selected.redFlags.map((flag) => <span key={flag}>△ {flag}</span>)}</div></div>
@@ -1293,7 +1318,7 @@ export default function Home() {
                 </div>
                 {selectedAnswer !== null && selectedOutcome && (
                   <div role="status" aria-live="polite" className={`feedback ${selectedOutcome.correct ? "success" : "danger"}`}>
-                    <div><strong>{selectedOutcome.correct ? "Lựa chọn an toàn" : "Bạn đã mắc bẫy"}</strong><p>{selectedOutcome.feedback}</p><small>Mẹo ghi nhớ: {selected.tip}</small></div>
+                    <div><strong>Dấu hiệu cần lưu ý</strong><p>{selectedOutcome.feedback}</p><small>{selectedOutcome.correct ? "Lựa chọn an toàn." : "Lựa chọn có rủi ro."} Mẹo ghi nhớ: {selected.tip}</small></div>
                     <button onClick={nextScenario}>{results.length >= scenarios.length ? "Xem chứng nhận PDF →" : "Kịch bản tiếp theo →"}</button>
                   </div>
                 )}

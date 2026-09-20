@@ -381,7 +381,11 @@ export function AdminTrafficAnalytics() {
     </div>
 
     <nav className="traffic-section-nav" aria-label="Các nhóm thống kê">
-      <a href="#traffic-overview">Tổng quan</a><a href="#traffic-acquisition">Thu hút</a><a href="#traffic-content">Nội dung</a><a href="#traffic-audience">Đối tượng</a><a href="#traffic-quality">Chất lượng dữ liệu</a>
+      <button type="button" onClick={() => document.getElementById("traffic-overview")?.scrollIntoView({ behavior: "smooth", block: "start" })}>Tổng quan</button>
+      <button type="button" onClick={() => document.getElementById("traffic-acquisition")?.scrollIntoView({ behavior: "smooth", block: "start" })}>Thu hút</button>
+      <button type="button" onClick={() => document.getElementById("traffic-content")?.scrollIntoView({ behavior: "smooth", block: "start" })}>Nội dung</button>
+      <button type="button" onClick={() => document.getElementById("traffic-audience")?.scrollIntoView({ behavior: "smooth", block: "start" })}>Đối tượng</button>
+      <button type="button" onClick={() => document.getElementById("traffic-quality")?.scrollIntoView({ behavior: "smooth", block: "start" })}>Chất lượng dữ liệu</button>
     </nav>
 
     {state === "loading" && !data && <div className="traffic-empty">Đang tải thống kê truy cập…</div>}

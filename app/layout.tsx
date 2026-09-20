@@ -2,19 +2,32 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 const siteUrl = "https://canhgiacso.com";
-const siteTitle = "Cảnh giác số";
+const siteTitle = "Cảnh Giác Số: Nhận diện lừa đảo trực tuyến | HDBank";
 const siteDescription =
-  "Cảnh Giác Số giúp nhận diện và chống lừa đảo trực tuyến, nâng cao cảnh giác, bảo vệ tài khoản và rèn kỹ năng an toàn thông tin qua tình huống thực tế.";
+  "Học cách nhận diện lừa đảo trực tuyến, phishing và giả mạo qua các tình huống mô phỏng tương tác. Rèn phản xạ an toàn số cùng Cảnh Giác Số.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   applicationName: "Cảnh Giác Số",
   title: siteTitle,
   description: siteDescription,
-  authors: [{ name: "Cảnh Giác Số", url: siteUrl }],
-  creator: "Cảnh Giác Số",
-  publisher: "Cảnh Giác Số",
-  category: "Cybersecurity education",
+  keywords: [
+    "Cảnh Giác Số",
+    "lừa đảo trực tuyến",
+    "phòng chống lừa đảo",
+    "nhận diện phishing",
+    "kiểm tra link lừa đảo",
+    "báo cáo lừa đảo trực tuyến",
+    "số điện thoại lừa đảo",
+    "OTP là gì",
+    "an toàn thông tin",
+    "đào tạo nhận thức an toàn số",
+    "HDBank IT Security",
+  ],
+  authors: [{ name: "IT Security Team - HDBank", url: siteUrl }],
+  creator: "IT Security Team - HDBank",
+  publisher: "HDBank",
+  category: "Cybersecurity awareness",
   alternates: {
     canonical: "/",
     languages: {
@@ -39,9 +52,9 @@ export const metadata: Metadata = {
     apple: "/khien-so-logo.png",
   },
   openGraph: {
-    title: siteTitle,
+    title: "Cảnh Giác Số: Nhận diện lừa đảo trực tuyến",
     description:
-      "Nâng cao cảnh giác, nhận diện lừa đảo và rèn kỹ năng an toàn thông tin qua các tình huống tương tác thực tế.",
+      "Rèn phản xạ nhận diện lừa đảo, phishing và giả mạo qua các tình huống tương tác.",
     type: "website",
     siteName: "Cảnh Giác Số",
     locale: "vi_VN",
@@ -58,11 +71,64 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: siteTitle,
+    title: "Cảnh Giác Số: Nhận diện lừa đảo trực tuyến",
     description:
-      "Nâng cao cảnh giác, nhận diện lừa đảo và rèn kỹ năng an toàn thông tin qua các tình huống tương tác thực tế.",
+      "Rèn phản xạ nhận diện lừa đảo, phishing và giả mạo qua các tình huống tương tác.",
     images: ["/og.png"],
   },
+};
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${siteUrl}/#organization`,
+      name: "Cảnh Giác Số",
+      url: siteUrl,
+      logo: `${siteUrl}/khien-so-logo.png`,
+      parentOrganization: {
+        "@type": "Organization",
+        name: "HDBank",
+      },
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${siteUrl}/#website`,
+      name: "Cảnh Giác Số",
+      url: siteUrl,
+      inLanguage: "vi-VN",
+      publisher: { "@id": `${siteUrl}/#organization` },
+      potentialAction: [
+        {
+          "@type": "ReadAction",
+          target: [
+            `${siteUrl}/kien-thuc/`,
+            `${siteUrl}/kien-thuc/lua-dao-truc-tuyen-la-gi/`,
+            `${siteUrl}/kien-thuc/cach-kiem-tra-link-lua-dao/`,
+            `${siteUrl}/kien-thuc/bao-cao-lua-dao-truc-tuyen/`,
+            `${siteUrl}/tin-tuc/`,
+          ],
+        },
+      ],
+    },
+    {
+      "@type": "WebApplication",
+      "@id": `${siteUrl}/#webapp`,
+      name: "Cảnh Giác Số",
+      url: siteUrl,
+      applicationCategory: "EducationalApplication",
+      operatingSystem: "Web",
+      inLanguage: "vi-VN",
+      description: siteDescription,
+      publisher: { "@id": `${siteUrl}/#organization` },
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "VND",
+      },
+    },
+  ],
 };
 
 const bootStyles = `
@@ -149,6 +215,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="vi-VN">
       <body className="refresh-boot">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
         <style>{bootStyles}</style>
         <div id="refresh-loader" role="status" aria-label="Đang tải Cảnh giác số">
           <div id="refresh-loader-inner">
