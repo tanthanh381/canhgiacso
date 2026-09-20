@@ -109,5 +109,170 @@
       ["Lừa đảo mã QR", "/kien-thuc/lua-dao-ma-qr/"],
       ["Tra cứu số tài khoản lừa đảo", "/kien-thuc/tra-cuu-so-tai-khoan-lua-dao/"]
     ]
+  },
+  {
+    "slug": "lua-dao-tien-dien-gia-mao-evn",
+    "title": "Lừa đảo tiền điện, giả mạo EVN: Cách xác minh trước khi chuyển tiền",
+    "meta": "Nhận biết lừa đảo tiền điện, giả mạo nhân viên điện lực hoặc app EVN: thông báo nợ, dọa cắt điện, yêu cầu cài app, quét QR, chuyển khoản cá nhân.",
+    "eyebrow": "Tiền điện giả mạo",
+    "h1": "Lừa đảo tiền điện, giả mạo EVN: cách xác minh trước khi chuyển tiền",
+    "lead": "Thông báo nợ tiền điện là tình huống khiến nhiều người vội xử lý vì sợ bị cắt điện. Kẻ xấu lợi dụng tâm lý này để mạo danh nhân viên điện lực, gửi link thanh toán, yêu cầu cài ứng dụng giả hoặc chuyển tiền vào tài khoản cá nhân.",
+    "published": "2026-09-20",
+    "sections": [
+      [
+        "8 dấu hiệu yêu cầu thanh toán tiền điện có nguy cơ lừa đảo",
+        "<ol class=\"seo-checklist\"><li><strong>Người lạ gọi báo nợ tiền điện và yêu cầu xử lý ngay.</strong> Áp lực thời gian là dấu hiệu cần dừng lại để xác minh.</li><li><strong>Dọa cắt điện nếu không chuyển khoản trong vài phút.</strong> Thủ đoạn này khiến người nhận không kịp kiểm tra kênh chính thức.</li><li><strong>Yêu cầu chuyển tiền vào tài khoản cá nhân.</strong> Đây là tín hiệu rủi ro rất mạnh với mọi khoản thanh toán dịch vụ công ích.</li><li><strong>Gửi link hoặc QR để thanh toán ngoài ứng dụng/kênh quen thuộc.</strong> Link có thể dẫn đến trang giả hoặc luồng lấy thông tin ngân hàng.</li><li><strong>Yêu cầu cài “app điện lực mới”.</strong> Ứng dụng giả có thể xin quyền điều khiển thiết bị hoặc đọc dữ liệu nhạy cảm.</li><li><strong>Đề nghị kết bạn Zalo để hướng dẫn đóng tiền.</strong> Hãy tách khỏi cuộc chat và tự mở kênh chính thức.</li><li><strong>Biết một phần thông tin hóa đơn của bạn.</strong> Dữ liệu đúng một phần không chứng minh danh tính người gọi.</li><li><strong>Không cho bạn gọi lại tổng đài chăm sóc khách hàng.</strong> Người thật không cần ngăn bạn xác minh độc lập.</li></ol>"
+      ],
+      [
+        "Cách xác minh thông báo nợ tiền điện an toàn",
+        "<p>Không bấm link hoặc quét QR trong tin nhắn lạ. Tự mở ứng dụng chăm sóc khách hàng điện lực đã cài từ trước, website chính thức của tổng công ty điện lực khu vực hoặc gọi tổng đài được công bố công khai. Khi kiểm tra, hãy đối chiếu mã khách hàng, kỳ hóa đơn, số tiền, đơn vị thu và tên tài khoản nhận.</p><p>Nếu người gọi yêu cầu thanh toán vào tài khoản cá nhân, cài APK, bật quyền trợ năng, chia sẻ màn hình hoặc đọc OTP, hãy coi đây là tình huống rủi ro cao.</p>"
+      ],
+      [
+        "Nếu đã cài ứng dụng điện lực giả",
+        "<ol class=\"seo-checklist\"><li>Ngắt kết nối với người đang hướng dẫn và không mở ứng dụng ngân hàng trên thiết bị nghi nhiễm.</li><li>Dùng thiết bị đáng tin cậy khác để liên hệ ngân hàng, khóa hoặc giới hạn giao dịch nếu cần.</li><li>Kiểm tra quyền trợ năng, quyền điều khiển thiết bị, ứng dụng lạ và các phiên đăng nhập.</li><li>Lưu số điện thoại, link, QR, tên ứng dụng, hóa đơn giả và biên lai chuyển tiền.</li><li>Trình báo cơ quan chức năng nếu đã mất tiền hoặc bị chiếm quyền thiết bị.</li></ol>"
+      ],
+      [
+        "Câu hỏi người dùng thường tìm",
+        "<ul class=\"seo-checklist\"><li><strong>EVN có thu tiền qua tài khoản cá nhân không?</strong> Không nên thanh toán khi bên nhận là tài khoản cá nhân chưa được xác minh qua kênh điện lực chính thức.</li><li><strong>Có nên bấm link kiểm tra nợ điện trong SMS không?</strong> Không. Hãy tự mở kênh chính thức thay vì dùng link được gửi trong tin nhắn.</li><li><strong>Cài app điện lực từ link Zalo có an toàn không?</strong> Không nên. Chỉ cài ứng dụng từ kho ứng dụng chính thức hoặc theo hướng dẫn trên website chính thức.</li></ul>"
+      ]
+    ],
+    "related": [
+      ["Kiểm tra link giả mạo", "/kien-thuc/kiem-tra-link-gia-mao/"],
+      ["Lừa đảo mã QR", "/kien-thuc/lua-dao-ma-qr/"],
+      ["Giả mạo ngân hàng", "/kien-thuc/gia-mao-ngan-hang/"],
+      ["Bị lừa chuyển tiền phải làm gì?", "/kien-thuc/xu-ly-khi-bi-lua-dao-chuyen-tien/"]
+    ]
+  },
+  {
+    "slug": "lua-dao-bao-hiem-xa-hoi-vssid",
+    "title": "Lừa đảo bảo hiểm xã hội, VssID giả mạo: Dấu hiệu và cách xử lý",
+    "meta": "Cách nhận biết lừa đảo BHXH, VssID giả mạo: yêu cầu cập nhật dữ liệu, cài file APK, cung cấp OTP, mật khẩu, phí hồ sơ và kênh xác minh chính thức.",
+    "eyebrow": "BHXH/VssID giả mạo",
+    "h1": "Lừa đảo bảo hiểm xã hội, VssID giả mạo: dấu hiệu và cách xử lý",
+    "lead": "Các cuộc gọi mạo danh bảo hiểm xã hội thường dùng lý do cập nhật VssID, đồng bộ căn cước, nhận quyền lợi hoặc hoàn thiện hồ sơ. Mục tiêu là kéo người dùng vào link, ứng dụng hoặc cuộc chat do đối tượng kiểm soát.",
+    "published": "2026-09-20",
+    "sections": [
+      [
+        "7 dấu hiệu mạo danh BHXH/VssID",
+        "<ol class=\"seo-checklist\"><li><strong>Yêu cầu cập nhật VssID qua link lạ hoặc file APK.</strong> Đây là dấu hiệu rủi ro cao vì ứng dụng giả có thể chứa mã độc.</li><li><strong>Gọi điện thúc ép đồng bộ CCCD ngay.</strong> Thủ tục thật không cần bạn xử lý theo cuộc gọi bất ngờ.</li><li><strong>Đòi mật khẩu VssID, OTP, thông tin ngân hàng hoặc mã xác thực.</strong> Không cung cấp các dữ liệu này qua điện thoại, chat hoặc form lạ.</li><li><strong>Yêu cầu nộp phí hồ sơ, phí giải ngân, phí nhận trợ cấp.</strong> Không chuyển tiền khi chưa xác minh độc lập.</li><li><strong>Dẫn sang Zalo/Facebook cá nhân để hỗ trợ.</strong> Đây là cách tách nạn nhân khỏi kênh chính thức.</li><li><strong>Gửi văn bản, ảnh chụp hoặc logo giống thật.</strong> Tài liệu nhìn thật vẫn có thể bị giả mạo.</li><li><strong>Không cho bạn tự liên hệ tổng đài hoặc cơ quan BHXH địa phương.</strong> Người gọi càng gây áp lực, bạn càng cần dừng lại.</li></ol>"
+      ],
+      [
+        "Kênh xác minh an toàn",
+        "<p>Hãy tự truy cập Cổng thông tin điện tử BHXH Việt Nam, mở ứng dụng VssID đã cài từ trước hoặc liên hệ tổng đài/chuyên viên qua kênh được công bố chính thức. Không dùng đường link được gửi trong tin nhắn, email hoặc cuộc chat để đăng nhập.</p><p>Nếu cần cài lại ứng dụng, hãy tìm ứng dụng trên kho ứng dụng chính thức và kiểm tra đúng nhà phát triển. Không cài file APK do người lạ gửi.</p>"
+      ],
+      [
+        "Nếu đã cung cấp thông tin hoặc cài ứng dụng giả",
+        "<ol class=\"seo-checklist\"><li>Dừng cuộc gọi/cuộc chat và không thao tác tiếp trên thiết bị nghi nhiễm.</li><li>Đổi mật khẩu tài khoản quan trọng từ thiết bị đáng tin cậy.</li><li>Liên hệ ngân hàng nếu đã nhập thông tin tài chính hoặc OTP.</li><li>Lưu lại số điện thoại, link, nội dung chat, file cài đặt, giấy tờ giả và thời gian xảy ra sự việc.</li><li>Thông báo cơ quan BHXH hoặc cơ quan Công an khi có dấu hiệu chiếm đoạt tài sản.</li></ol>"
+      ],
+      [
+        "Câu hỏi người dùng thường tìm",
+        "<ul class=\"seo-checklist\"><li><strong>BHXH có yêu cầu cài VssID qua Zalo không?</strong> Không nên làm theo hướng dẫn từ link/chat cá nhân; hãy tự kiểm tra trên kênh chính thức.</li><li><strong>Có cần đọc OTP để cập nhật BHXH không?</strong> Không. OTP là mã xác thực riêng, không cung cấp cho bất kỳ ai.</li><li><strong>Văn bản có logo BHXH có chắc là thật không?</strong> Không. Cần đối chiếu số văn bản, kênh nhận và thông tin công bố chính thức.</li></ul>"
+      ]
+    ],
+    "related": [
+      ["Lừa đảo VNeID giả mạo", "/kien-thuc/lua-dao-vneid-gia-mao/"],
+      ["Lừa đảo OTP và chiếm đoạt tài khoản", "/kien-thuc/lua-dao-otp-chiem-doat-tai-khoan/"],
+      ["An toàn thông tin cá nhân", "/kien-thuc/an-toan-thong-tin-ca-nhan/"],
+      ["Giả mạo công an, cơ quan nhà nước", "/kien-thuc/gia-mao-cong-an-co-quan-nha-nuoc/"]
+    ]
+  },
+  {
+    "slug": "lua-dao-vay-tien-online",
+    "title": "Lừa đảo vay tiền online, app tín dụng đen: Dấu hiệu cần tránh",
+    "meta": "Nhận biết lừa đảo vay tiền online, app tín dụng đen: phí giải ngân, truy cập danh bạ, lãi 0 đồng, phạt cao, khủng bố người thân và cách xử lý.",
+    "eyebrow": "Vay tiền online",
+    "h1": "Lừa đảo vay tiền online, app tín dụng đen: dấu hiệu cần tránh",
+    "lead": "Vay tiền online đánh vào nhu cầu giải quyết khó khăn tài chính nhanh. Nhưng những lời mời “duyệt trong 5 phút”, “lãi 0 đồng”, “không cần gặp mặt” có thể che giấu phí cao, truy cập danh bạ, phạt chồng phạt và đòi nợ kiểu khủng bố.",
+    "published": "2026-09-20",
+    "sections": [
+      [
+        "9 dấu hiệu app vay tiền có rủi ro cao",
+        "<ol class=\"seo-checklist\"><li><strong>Quảng cáo giải ngân quá dễ.</strong> Duyệt vay không thẩm định, không hợp đồng rõ ràng là tín hiệu cần kiểm tra kỹ.</li><li><strong>Yêu cầu phí trước khi giải ngân.</strong> Các tên gọi thường gặp là phí hồ sơ, phí bảo hiểm, phí mở khóa, phí xác minh tài khoản.</li><li><strong>Số tiền thực nhận thấp hơn số vay.</strong> Khoản chênh lệch thường được ngụy trang thành phí dịch vụ hoặc lãi thu trước.</li><li><strong>Đòi quyền truy cập danh bạ, ảnh, tin nhắn hoặc vị trí.</strong> Những dữ liệu này có thể bị dùng để gây áp lực trả nợ.</li><li><strong>Hợp đồng điện tử khó đọc, thiếu pháp nhân hoặc lãi/phí không minh bạch.</strong> Đừng ký chỉ vì đang cần tiền gấp.</li><li><strong>Phạt quá hạn tăng rất nhanh.</strong> Một khoản vay nhỏ có thể thành khoản nợ lớn trong vài ngày.</li><li><strong>Nhân viên yêu cầu vay app khác để đảo nợ.</strong> Đây là vòng xoáy rủi ro.</li><li><strong>Dùng lời đe dọa, xúc phạm hoặc nhắn cho người thân.</strong> Lưu bằng chứng thay vì tiếp tục làm theo yêu cầu.</li><li><strong>Yêu cầu chuyển tiền để “xóa nợ trên hệ thống”.</strong> Hãy xác minh pháp nhân và hợp đồng trước mọi khoản thanh toán bổ sung.</li></ol>"
+      ],
+      [
+        "Cách kiểm tra trước khi vay",
+        "<p>Kiểm tra tên pháp nhân, giấy phép, địa chỉ, hợp đồng, tổng chi phí phải trả, quyền truy cập ứng dụng và kênh khiếu nại. So sánh khoản tiền thực nhận với tổng nghĩa vụ thanh toán. Nếu ứng dụng không minh bạch về pháp nhân, lãi, phí, ngày trả, phạt quá hạn hoặc quyền truy cập dữ liệu, hãy dừng lại.</p>"
+      ],
+      [
+        "Nếu đã vay qua app rủi ro",
+        "<ol class=\"seo-checklist\"><li>Không vay thêm app khác chỉ để trả khoản cũ nếu chưa có kế hoạch tài chính rõ ràng.</li><li>Lưu hợp đồng, lịch sử chuyển khoản, tin nhắn, cuộc gọi đe dọa và quyền ứng dụng đã cấp.</li><li>Thu hồi quyền truy cập danh bạ/ảnh/tin nhắn nếu có thể.</li><li>Trao đổi với người thân để giảm tác động khi bị gọi điện gây áp lực.</li><li>Tìm tư vấn pháp lý hoặc trình báo cơ quan chức năng khi có dấu hiệu cho vay nặng lãi, cưỡng ép, đe dọa hoặc chiếm đoạt.</li></ol>"
+      ],
+      [
+        "Câu hỏi người dùng thường tìm",
+        "<ul class=\"seo-checklist\"><li><strong>App vay lãi 0 đồng có an toàn không?</strong> Không thể kết luận chỉ từ quảng cáo; cần xem phí, phạt, số tiền thực nhận và pháp nhân.</li><li><strong>Có nên cấp quyền danh bạ cho app vay không?</strong> Không nên nếu không hiểu rõ mục đích và hậu quả; đây là dữ liệu rất nhạy cảm.</li><li><strong>Bị đòi nợ làm phiền người thân thì làm gì?</strong> Lưu bằng chứng, không phản ứng theo cảm xúc và tìm hỗ trợ từ cơ quan có thẩm quyền khi có dấu hiệu đe dọa.</li></ul>"
+      ]
+    ],
+    "related": [
+      ["Tra cứu số tài khoản lừa đảo", "/kien-thuc/tra-cuu-so-tai-khoan-lua-dao/"],
+      ["Bị lừa chuyển tiền phải làm gì?", "/kien-thuc/xu-ly-khi-bi-lua-dao-chuyen-tien/"],
+      ["An toàn thông tin cá nhân", "/kien-thuc/an-toan-thong-tin-ca-nhan/"],
+      ["10 dấu hiệu lừa đảo trực tuyến", "/kien-thuc/nhan-dien-lua-dao-truc-tuyen/"]
+    ]
+  },
+  {
+    "slug": "lua-dao-dat-phong-du-lich",
+    "title": "Lừa đảo đặt phòng, tour du lịch giá rẻ: Cách kiểm tra trước khi đặt cọc",
+    "meta": "Cách nhận biết lừa đảo đặt phòng khách sạn, tour du lịch, vé máy bay giá rẻ: fanpage giả, tích xanh mua lại, mã đặt phòng giả, yêu cầu cọc gấp.",
+    "eyebrow": "Du lịch giả mạo",
+    "h1": "Lừa đảo đặt phòng, tour du lịch giá rẻ: cách kiểm tra trước khi đặt cọc",
+    "lead": "Các trang giả mạo khách sạn, khu nghỉ dưỡng, đại lý vé máy bay hoặc combo du lịch thường xuất hiện đúng lúc nhu cầu đi lại tăng. Giá tốt không phải vấn đề; điều cần kiểm tra là danh tính người bán, kênh thanh toán và khả năng xác nhận mã đặt chỗ.",
+    "published": "2026-09-20",
+    "sections": [
+      [
+        "8 dấu hiệu đặt phòng hoặc tour du lịch có nguy cơ lừa đảo",
+        "<ol class=\"seo-checklist\"><li><strong>Giá rẻ bất thường so với thị trường.</strong> Ưu đãi quá sâu thường đi kèm áp lực đặt cọc nhanh.</li><li><strong>Fanpage mới đổi tên hoặc sao chép hình ảnh cơ sở thật.</strong> Hãy kiểm tra lịch sử trang, website chính thức và nhiều nguồn độc lập.</li><li><strong>Tích xanh hoặc nhiều lượt theo dõi nhưng thông tin liên hệ không nhất quán.</strong> Tài khoản có thể được mua lại hoặc đổi tên.</li><li><strong>Yêu cầu chuyển cọc 30-50% vào tài khoản cá nhân.</strong> Cần xác minh đơn vị nhận tiền trước khi chuyển.</li><li><strong>Cung cấp mã đặt phòng nhưng không cho xác minh trực tiếp với khách sạn/hãng.</strong> Mã giả thường chỉ dùng để tạo lòng tin.</li><li><strong>Hối thúc thanh toán đủ vì “chỉ còn vài phòng”.</strong> Áp lực thời gian làm giảm khả năng kiểm chứng.</li><li><strong>Chuyển toàn bộ trao đổi sang chat cá nhân.</strong> Điều này làm mất dấu vết giao dịch trên nền tảng.</li><li><strong>Không có hợp đồng, hóa đơn hoặc chính sách hoàn hủy rõ ràng.</strong> Đừng chuyển tiền khi điều kiện chưa minh bạch.</li></ol>"
+      ],
+      [
+        "Cách kiểm tra trước khi đặt cọc",
+        "<p>Tự tìm website chính thức, số điện thoại chính thức của khách sạn, hãng bay hoặc công ty lữ hành rồi gọi xác nhận. Đối chiếu tên tài khoản nhận tiền với pháp nhân/đơn vị bán. Nếu đặt qua đại lý, yêu cầu thông tin doanh nghiệp, hợp đồng, hóa đơn và điều kiện hoàn hủy. Sau khi có mã đặt chỗ, xác minh trực tiếp với hãng hoặc cơ sở lưu trú trước khi thanh toán phần còn lại.</p>"
+      ],
+      [
+        "Nếu đã chuyển cọc cho fanpage giả",
+        "<ol class=\"seo-checklist\"><li>Dừng chuyển thêm tiền kể cả khi đối tượng nói cần thanh toán đủ để giữ phòng.</li><li>Lưu link fanpage, bài đăng, tin nhắn, số tài khoản nhận, biên lai và ảnh mã đặt chỗ.</li><li>Liên hệ ngân hàng để hỏi khả năng hỗ trợ tra soát giao dịch.</li><li>Báo cáo fanpage/tài khoản giả trên nền tảng mạng xã hội.</li><li>Trình báo cơ quan Công an nếu có dấu hiệu chiếm đoạt tài sản.</li></ol>"
+      ],
+      [
+        "Câu hỏi người dùng thường tìm",
+        "<ul class=\"seo-checklist\"><li><strong>Fanpage có tích xanh có chắc là thật không?</strong> Không. Cần kiểm tra lịch sử trang, kênh chính thức và thông tin thanh toán.</li><li><strong>Có mã đặt phòng rồi có an toàn không?</strong> Chỉ an toàn hơn khi mã xác minh được trực tiếp với khách sạn/hãng.</li><li><strong>Đặt tour giá rẻ nên chuyển cọc bao nhiêu?</strong> Không có con số đảm bảo an toàn; quan trọng là pháp nhân, hợp đồng, hóa đơn và kênh thanh toán rõ ràng.</li></ul>"
+      ]
+    ],
+    "related": [
+      ["Lừa đảo hoàn tiền đơn hàng", "/kien-thuc/lua-dao-hoan-tien-don-hang/"],
+      ["Kiểm tra link giả mạo", "/kien-thuc/kiem-tra-link-gia-mao/"],
+      ["Tra cứu số tài khoản lừa đảo", "/kien-thuc/tra-cuu-so-tai-khoan-lua-dao/"],
+      ["Lừa đảo đầu tư online", "/kien-thuc/lua-dao-dau-tu-online/"]
+    ]
+  },
+  {
+    "slug": "lua-dao-tuyen-dung-online",
+    "title": "Lừa đảo tuyển dụng online: Nhận biết việc làm giả trước khi nộp phí",
+    "meta": "Nhận biết lừa đảo tuyển dụng online, phỏng vấn qua chat, việc nhẹ lương cao, yêu cầu đóng phí thiết bị, phí hồ sơ, nhiệm vụ thử và cách xác minh công ty.",
+    "eyebrow": "Tuyển dụng giả mạo",
+    "h1": "Lừa đảo tuyển dụng online: nhận biết việc làm giả trước khi nộp phí",
+    "lead": "Tin tuyển dụng giả thường đánh vào nhu cầu tìm việc nhanh, làm từ xa hoặc thu nhập cao. Một lời mời có logo công ty, mô tả hấp dẫn và người phỏng vấn nói chuyện chuyên nghiệp vẫn cần được xác minh trước khi bạn nộp phí, gửi giấy tờ hoặc làm nhiệm vụ thử.",
+    "published": "2026-09-20",
+    "sections": [
+      [
+        "8 dấu hiệu việc làm online có nguy cơ lừa đảo",
+        "<ol class=\"seo-checklist\"><li><strong>Lương cao bất thường nhưng mô tả công việc mơ hồ.</strong> Các cụm như “việc nhẹ lương cao”, “không cần kinh nghiệm”, “thu nhập chắc chắn” cần được kiểm tra kỹ.</li><li><strong>Yêu cầu nộp phí trước.</strong> Phí hồ sơ, phí đồng phục, phí thiết bị, phí mở tài khoản hoặc phí đào tạo là tín hiệu rủi ro.</li><li><strong>Phỏng vấn chỉ qua chat và né thông tin pháp nhân.</strong> Người thật có thể cung cấp email công ty, website và địa chỉ kiểm chứng được.</li><li><strong>Gửi link tải app làm việc hoặc yêu cầu tạo ví/tài khoản lạ.</strong> Ứng dụng có thể dùng để thu tiền hoặc lấy dữ liệu.</li><li><strong>Bắt làm nhiệm vụ thử bằng cách nạp tiền hoặc mua hàng.</strong> Đây là biến thể phổ biến của bẫy cộng tác viên.</li><li><strong>Cam kết hoàn phí sau khi nhận việc.</strong> Khi đã chuyển tiền, đối tượng thường tạo thêm lý do để thu tiếp.</li><li><strong>Yêu cầu ảnh giấy tờ, tài khoản ngân hàng, mã OTP quá sớm.</strong> Chỉ cung cấp dữ liệu khi đã xác minh công ty và quy trình tuyển dụng.</li><li><strong>Không cho bạn xác minh qua kênh nhân sự chính thức.</strong> Hãy dừng lại nếu họ thúc ép phải quyết định ngay.</li></ol>"
+      ],
+      [
+        "Cách xác minh tin tuyển dụng",
+        "<p>Tự tìm website chính thức của công ty, trang tuyển dụng đã công bố, email tên miền doanh nghiệp và hồ sơ pháp nhân. Liên hệ lại qua kênh công khai thay vì số điện thoại trong tin nhắn. Với việc làm từ xa, cần làm rõ hợp đồng, hình thức trả lương, người quản lý trực tiếp, quy trình bàn giao thiết bị và chính sách dữ liệu cá nhân.</p>"
+      ],
+      [
+        "Nếu đã nộp phí hoặc gửi giấy tờ",
+        "<ol class=\"seo-checklist\"><li>Dừng chuyển tiền dù đối tượng nói chỉ còn một bước để nhận việc.</li><li>Lưu tin tuyển dụng, cuộc chat, số tài khoản, biên lai và tên người liên hệ.</li><li>Nếu đã gửi giấy tờ tùy thân, theo dõi nguy cơ bị mạo danh mở tài khoản/dịch vụ.</li><li>Đổi mật khẩu nếu đã đăng nhập vào trang hoặc ứng dụng lạ.</li><li>Trình báo cơ quan chức năng khi có dấu hiệu chiếm đoạt tài sản hoặc sử dụng trái phép thông tin cá nhân.</li></ol>"
+      ],
+      [
+        "Câu hỏi người dùng thường tìm",
+        "<ul class=\"seo-checklist\"><li><strong>Công ty yêu cầu phí đồng phục có đáng tin không?</strong> Cần xác minh pháp nhân và kênh tuyển dụng chính thức; không chuyển tiền chỉ qua chat cá nhân.</li><li><strong>Việc làm online yêu cầu nạp tiền làm nhiệm vụ có phải lừa đảo không?</strong> Đây là tín hiệu rủi ro rất cao.</li><li><strong>Email tuyển dụng dùng Gmail có an toàn không?</strong> Không thể kết luận ngay, nhưng với công ty lớn nên kiểm tra lại qua website và kênh nhân sự chính thức.</li></ul>"
+      ]
+    ],
+    "related": [
+      ["Lừa đảo cộng tác viên, việc nhẹ lương cao", "/kien-thuc/lua-dao-cong-tac-vien-viec-nhe-luong-cao/"],
+      ["Lừa đảo việc nhẹ lương cao", "/kien-thuc/lua-dao-viec-nhe-luong-cao/"],
+      ["An toàn thông tin cá nhân", "/kien-thuc/an-toan-thong-tin-ca-nhan/"],
+      ["Lừa đảo OTP và chiếm đoạt tài khoản", "/kien-thuc/lua-dao-otp-chiem-doat-tai-khoan/"]
+    ]
   }
 ]

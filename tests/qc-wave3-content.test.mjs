@@ -14,7 +14,7 @@ test("QC Wave 3 runs immediately after Wave 2 in the Pages build", () => {
 
 test("QC Wave 3 enforces evidence traceability and trust floor", () => {
   for (const phrase of [
-    "EXPECTED_TOPIC_COUNT = 31",
+    "EXPECTED_TOPIC_COUNT = 36",
     "expected at least two topic-specific sources",
     "evidence floor not met",
     "data-source-tier",

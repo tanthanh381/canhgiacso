@@ -3,8 +3,8 @@
   "qcWave": 3,
   "generatedAt": "2026-09-17",
   "methodologyUrl": "https://canhgiacso.com/phuong-phap-kiem-chung/",
-  "governedTopicCount": 31,
-  "uniqueSourceCount": 13,
+  "governedTopicCount": 36,
+  "uniqueSourceCount": 20,
   "trustModel": {
     "tier1": "Cơ quan có thẩm quyền / cơ quan quản lý",
     "tier2": "Chủ thể vận hành dịch vụ hoặc nhà cung cấp công nghệ",
@@ -288,6 +288,29 @@
       ]
     },
     {
+      "slug": "lua-dao-bao-hiem-xa-hoi-vssid",
+      "url": "https://canhgiacso.com/kien-thuc/lua-dao-bao-hiem-xa-hoi-vssid/",
+      "reviewedAt": "2026-09-17",
+      "sourceCount": 2,
+      "trustFloor": "tier-1-present",
+      "sources": [
+        {
+          "url": "https://baohiemxahoi.gov.vn/tintuc/Pages/chuyen-doi-so.aspx?CateID=176&ItemID=26544",
+          "label": "Cấp 1 · nguồn có thẩm quyền",
+          "note": "Đối chiếu thủ đoạn giả mạo VssID, file APK chứa mã độc, chiếm quyền điều khiển thiết bị và đánh cắp thông tin/tài sản.",
+          "tier": 1,
+          "domain": "baohiemxahoi.gov.vn"
+        },
+        {
+          "url": "https://baohiemxahoi.gov.vn/tintuc/Pages/hoat-dong-he-thong-bao-hiem-xa-hoi.aspx?CateID=52&itemID=22957",
+          "label": "Cấp 1 · nguồn có thẩm quyền",
+          "note": "Đối chiếu kênh liên hệ chính thức, dấu hiệu mạo danh cán bộ BHXH, cập nhật VssID và yêu cầu cung cấp dữ liệu cá nhân.",
+          "tier": 1,
+          "domain": "baohiemxahoi.gov.vn"
+        }
+      ]
+    },
+    {
       "slug": "lua-dao-cong-tac-vien-viec-nhe-luong-cao",
       "url": "https://canhgiacso.com/kien-thuc/lua-dao-cong-tac-vien-viec-nhe-luong-cao/",
       "reviewedAt": "2026-09-17",
@@ -305,6 +328,29 @@
           "url": "https://www.bocongan.gov.vn/bai-viet/nang-cao-canh-giac-truoc-25-kich-ban-lua-dao-tren-khong-gian-mang-nam-2026-1788865614",
           "label": "Cấp 1 · nguồn có thẩm quyền",
           "note": "Đối chiếu mô típ mạo danh, AI/deepfake, đầu tư, việc làm, mua bán trực tuyến và chiếm quyền thiết bị.",
+          "tier": 1,
+          "domain": "bocongan.gov.vn"
+        }
+      ]
+    },
+    {
+      "slug": "lua-dao-dat-phong-du-lich",
+      "url": "https://canhgiacso.com/kien-thuc/lua-dao-dat-phong-du-lich/",
+      "reviewedAt": "2026-09-17",
+      "sourceCount": 2,
+      "trustFloor": "tier-1-present",
+      "sources": [
+        {
+          "url": "https://bocongan.gov.vn/bai-viet/canh-bao-thu-doan-lua-dao-mua-du-lich-d104-t45881",
+          "label": "Cấp 1 · nguồn có thẩm quyền",
+          "note": "Đối chiếu fanpage giả, đặt tour/phòng/ vé máy bay giá rẻ, yêu cầu chuyển cọc và mã đặt phòng giả.",
+          "tier": 1,
+          "domain": "bocongan.gov.vn"
+        },
+        {
+          "url": "https://www.bocongan.gov.vn/bai-viet/cong-an-ha-noi-khoi-to-21-vu-an-187-bi-can-lien-quan-den-lua-dao-mua-ban-goi-nghi-duong-du-lich-1781698389",
+          "label": "Cấp 1 · nguồn có thẩm quyền",
+          "note": "Bối cảnh thực tế về các vụ việc liên quan gói nghỉ dưỡng, du lịch và dấu hiệu chiếm đoạt tài sản.",
           "tier": 1,
           "domain": "bocongan.gov.vn"
         }
@@ -472,6 +518,36 @@
       ]
     },
     {
+      "slug": "lua-dao-tien-dien-gia-mao-evn",
+      "url": "https://canhgiacso.com/kien-thuc/lua-dao-tien-dien-gia-mao-evn/",
+      "reviewedAt": "2026-09-17",
+      "sourceCount": 3,
+      "trustFloor": "tier-1-present",
+      "sources": [
+        {
+          "url": "https://www.evn.com.vn/d/vi-VN/news/Nhan-thong-bao-no-tien-dien-xac-minh-the-nao-60-3569-509453",
+          "label": "Cấp 2 · nguồn vận hành/kỹ thuật",
+          "note": "Đối chiếu kịch bản mạo danh nhân viên điện lực, thông báo nợ tiền điện, yêu cầu cài ứng dụng giả và nguyên tắc xác minh qua kênh chính thức.",
+          "tier": 2,
+          "domain": "evn.com.vn"
+        },
+        {
+          "url": "https://evn.com.vn/d/vi-VN/news/Khuyen-cao-nguoi-dan-canh-giac-truoc-chieu-tro-lua-dao-cai-dat-ung-dung-dien-luc-moi-60-134-500858",
+          "label": "Cấp 2 · nguồn vận hành/kỹ thuật",
+          "note": "Đối chiếu rủi ro cài ứng dụng điện lực giả, cuộc gọi mạo danh và thao túng tâm lý để chiếm đoạt tiền trong tài khoản.",
+          "tier": 2,
+          "domain": "evn.com.vn"
+        },
+        {
+          "url": "https://www.bocongan.gov.vn/bai-viet/nang-cao-canh-giac-truoc-25-kich-ban-lua-dao-tren-khong-gian-mang-nam-2026-1788865614",
+          "label": "Cấp 1 · nguồn có thẩm quyền",
+          "note": "Đối chiếu mô típ mạo danh, AI/deepfake, đầu tư, việc làm, mua bán trực tuyến và chiếm quyền thiết bị.",
+          "tier": 1,
+          "domain": "bocongan.gov.vn"
+        }
+      ]
+    },
+    {
       "slug": "lua-dao-truc-tuyen-la-gi",
       "url": "https://canhgiacso.com/kien-thuc/lua-dao-truc-tuyen-la-gi/",
       "reviewedAt": "2026-09-17",
@@ -491,6 +567,52 @@
           "note": "Tham chiếu kiểm tra người gửi, tên miền gần giống, yêu cầu khẩn cấp và link lạ trước khi đăng nhập.",
           "tier": 2,
           "domain": "safety.google"
+        }
+      ]
+    },
+    {
+      "slug": "lua-dao-tuyen-dung-online",
+      "url": "https://canhgiacso.com/kien-thuc/lua-dao-tuyen-dung-online/",
+      "reviewedAt": "2026-09-17",
+      "sourceCount": 2,
+      "trustFloor": "tier-1-present",
+      "sources": [
+        {
+          "url": "https://www.bocongan.gov.vn/bai-viet/canh-giac-bay-viec-nhe-luong-cao-1787361157",
+          "label": "Cấp 1 · nguồn có thẩm quyền",
+          "note": "Đối chiếu thủ đoạn tuyển dụng qua mạng, dụ dỗ và tạo áp lực bằng lời mời việc làm hấp dẫn.",
+          "tier": 1,
+          "domain": "bocongan.gov.vn"
+        },
+        {
+          "url": "https://www.bocongan.gov.vn/bai-viet/nang-cao-canh-giac-truoc-25-kich-ban-lua-dao-tren-khong-gian-mang-nam-2026-1788865614",
+          "label": "Cấp 1 · nguồn có thẩm quyền",
+          "note": "Đối chiếu mô típ mạo danh, AI/deepfake, đầu tư, việc làm, mua bán trực tuyến và chiếm quyền thiết bị.",
+          "tier": 1,
+          "domain": "bocongan.gov.vn"
+        }
+      ]
+    },
+    {
+      "slug": "lua-dao-vay-tien-online",
+      "url": "https://canhgiacso.com/kien-thuc/lua-dao-vay-tien-online/",
+      "reviewedAt": "2026-09-17",
+      "sourceCount": 2,
+      "trustFloor": "tier-1-present",
+      "sources": [
+        {
+          "url": "https://cdcsnd1.bocongan.gov.vn/home/khoa-hoc-cong-nghe/tin-dung-den-truc-tuyen-voi-nhung-chieu-tro-moi-4859",
+          "label": "Cấp 1 · nguồn có thẩm quyền",
+          "note": "Đối chiếu rủi ro app vay tiền online, phí/lãi biến tướng, truy cập danh bạ và đòi nợ gây áp lực.",
+          "tier": 1,
+          "domain": "cdcsnd1.bocongan.gov.vn"
+        },
+        {
+          "url": "https://www.bocongan.gov.vn/bai-viet/nang-cao-canh-giac-truoc-25-kich-ban-lua-dao-tren-khong-gian-mang-nam-2026-1788865614",
+          "label": "Cấp 1 · nguồn có thẩm quyền",
+          "note": "Đối chiếu mô típ mạo danh, AI/deepfake, đầu tư, việc làm, mua bán trực tuyến và chiếm quyền thiết bị.",
+          "tier": 1,
+          "domain": "bocongan.gov.vn"
         }
       ]
     },

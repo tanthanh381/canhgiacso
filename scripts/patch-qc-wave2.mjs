@@ -73,6 +73,41 @@ const SOURCES = {
     url: "https://safety.google/safety/security-tips/",
     note: "Tham chiếu kiểm tra người gửi, tên miền gần giống, yêu cầu khẩn cấp và link lạ trước khi đăng nhập.",
   },
+  evnBillVerification: {
+    label: "EVN — Nhận thông báo nợ tiền điện, xác minh thế nào?",
+    url: "https://www.evn.com.vn/d/vi-VN/news/Nhan-thong-bao-no-tien-dien-xac-minh-the-nao-60-3569-509453",
+    note: "Đối chiếu kịch bản mạo danh nhân viên điện lực, thông báo nợ tiền điện, yêu cầu cài ứng dụng giả và nguyên tắc xác minh qua kênh chính thức.",
+  },
+  evnFakeApp: {
+    label: "EVN — Khuyến cáo cảnh giác chiêu trò cài đặt ứng dụng điện lực giả",
+    url: "https://evn.com.vn/d/vi-VN/news/Khuyen-cao-nguoi-dan-canh-giac-truoc-chieu-tro-lua-dao-cai-dat-ung-dung-dien-luc-moi-60-134-500858",
+    note: "Đối chiếu rủi ro cài ứng dụng điện lực giả, cuộc gọi mạo danh và thao túng tâm lý để chiếm đoạt tiền trong tài khoản.",
+  },
+  bhxhFakeVssid: {
+    label: "Bảo hiểm xã hội Việt Nam — Cảnh báo ứng dụng VssID giả mạo chứa mã độc",
+    url: "https://baohiemxahoi.gov.vn/tintuc/Pages/chuyen-doi-so.aspx?CateID=176&ItemID=26544",
+    note: "Đối chiếu thủ đoạn giả mạo VssID, file APK chứa mã độc, chiếm quyền điều khiển thiết bị và đánh cắp thông tin/tài sản.",
+  },
+  bhxhOfficialChannels: {
+    label: "Bảo hiểm xã hội Việt Nam — Cảnh giác thủ đoạn lừa đảo về BHXH, BHYT",
+    url: "https://baohiemxahoi.gov.vn/tintuc/Pages/hoat-dong-he-thong-bao-hiem-xa-hoi.aspx?CateID=52&itemID=22957",
+    note: "Đối chiếu kênh liên hệ chính thức, dấu hiệu mạo danh cán bộ BHXH, cập nhật VssID và yêu cầu cung cấp dữ liệu cá nhân.",
+  },
+  bcaOnlineLoan: {
+    label: "Bộ Công an — “Tín dụng đen” trực tuyến với những chiêu trò mới",
+    url: "https://cdcsnd1.bocongan.gov.vn/home/khoa-hoc-cong-nghe/tin-dung-den-truc-tuyen-voi-nhung-chieu-tro-moi-4859",
+    note: "Đối chiếu rủi ro app vay tiền online, phí/lãi biến tướng, truy cập danh bạ và đòi nợ gây áp lực.",
+  },
+  bcaTravelScam: {
+    label: "Bộ Công an — Cảnh báo thủ đoạn lừa đảo mùa du lịch",
+    url: "https://bocongan.gov.vn/bai-viet/canh-bao-thu-doan-lua-dao-mua-du-lich-d104-t45881",
+    note: "Đối chiếu fanpage giả, đặt tour/phòng/ vé máy bay giá rẻ, yêu cầu chuyển cọc và mã đặt phòng giả.",
+  },
+  bcaVacationCases: {
+    label: "Bộ Công an — Khởi tố các vụ án liên quan lừa đảo gói nghỉ dưỡng, du lịch",
+    url: "https://www.bocongan.gov.vn/bai-viet/cong-an-ha-noi-khoi-to-21-vu-an-187-bi-can-lien-quan-den-lua-dao-mua-ban-goi-nghi-duong-du-lich-1781698389",
+    note: "Bối cảnh thực tế về các vụ việc liên quan gói nghỉ dưỡng, du lịch và dấu hiệu chiếm đoạt tài sản.",
+  },
 };
 
 const topicSources = {
@@ -107,6 +142,11 @@ const topicSources = {
   "lua-dao-vneid-gia-mao": ["bcaVneid", "bcaScenarios"],
   "lua-dao-phat-nguoi-qua-sms": ["bcaPhatNguoi", "bcaVneid"],
   "lua-dao-hoan-tien-don-hang": ["bcaShipper", "bcaScenarios"],
+  "lua-dao-tien-dien-gia-mao-evn": ["evnBillVerification", "evnFakeApp", "bcaScenarios"],
+  "lua-dao-bao-hiem-xa-hoi-vssid": ["bhxhFakeVssid", "bhxhOfficialChannels"],
+  "lua-dao-vay-tien-online": ["bcaOnlineLoan", "bcaScenarios"],
+  "lua-dao-dat-phong-du-lich": ["bcaTravelScam", "bcaVacationCases"],
+  "lua-dao-tuyen-dung-online": ["bcaJobs", "bcaScenarios"],
 };
 
 const actionBySlug = {
@@ -127,6 +167,11 @@ const actionBySlug = {
   "gia-mao-cong-an-co-quan-nha-nuoc": "Kết thúc cuộc gọi gây áp lực, không chuyển tiền để “xác minh” và tự liên hệ cơ quan được nhắc tới qua số/địa chỉ công khai trên kênh chính thức.",
   "lua-dao-vneid-gia-mao": "Chỉ cài VNeID từ kho ứng dụng chính thức và kiểm tra đúng nhà phát triển. Không cài APK hoặc cấp quyền điều khiển thiết bị theo hướng dẫn qua điện thoại.",
   "lua-dao-phat-nguoi-qua-sms": "Không nộp phạt qua đường link trong SMS lạ. Tra cứu trên VNeID, VNeTraffic, Cục CSGT hoặc cổng dịch vụ công chính thức.",
+  "lua-dao-tien-dien-gia-mao-evn": "Không thanh toán tiền điện qua link, QR hoặc tài khoản cá nhân do người lạ gửi. Tự mở ứng dụng/website/tổng đài điện lực chính thức để xác minh mã khách hàng và hóa đơn.",
+  "lua-dao-bao-hiem-xa-hoi-vssid": "Không cài VssID từ file APK hoặc link chat, không cung cấp mật khẩu/OTP. Tự truy cập kênh BHXH chính thức hoặc liên hệ cơ quan BHXH địa phương để kiểm tra.",
+  "lua-dao-vay-tien-online": "Không nộp phí trước giải ngân, không cấp quyền danh bạ/ảnh/tin nhắn nếu không hiểu rõ mục đích. Kiểm tra pháp nhân, hợp đồng, tổng chi phí và dừng khi bị đe dọa.",
+  "lua-dao-dat-phong-du-lich": "Trước khi đặt cọc, tự gọi kênh chính thức của khách sạn, hãng bay hoặc công ty lữ hành để xác minh mã đặt chỗ, tài khoản nhận tiền và chính sách hoàn hủy.",
+  "lua-dao-tuyen-dung-online": "Không nộp phí tuyển dụng hoặc nạp tiền làm nhiệm vụ thử. Tự xác minh công ty qua website/email nhân sự chính thức trước khi gửi giấy tờ hoặc dữ liệu cá nhân.",
   "lua-dao-shipper-giao-hang": "Đối chiếu mã đơn, sản phẩm và trạng thái ngay trong ứng dụng mua hàng. Không chuyển khoản hoặc quét QR chỉ dựa trên cuộc gọi tự xưng là shipper.",
   "lua-dao-hoan-tien-don-hang": "Hoàn tiền hợp lệ phải kiểm tra được trong kênh chính thức của sàn/ngân hàng. Không nộp “phí mở khóa”, quét QR hay nhập thông tin ngân hàng từ link do người lạ gửi.",
   "lua-dao-cong-tac-vien-viec-nhe-luong-cao": "Dừng ngay khi công việc yêu cầu nạp tiền để mở nhiệm vụ, nâng cấp tài khoản hoặc rút hoa hồng. Không chuyển thêm tiền để “gỡ” khoản đã nạp.",

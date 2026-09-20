@@ -8,16 +8,19 @@ const METHODOLOGY_FILE = path.join(PUBLIC_ROOT, "phuong-phap-kiem-chung", "index
 const REVIEW_DATE = "2026-09-17";
 const REVIEW_DISPLAY = "17/09/2026";
 const SITE = "https://canhgiacso.com";
-const EXPECTED_TOPIC_COUNT = 31;
+const EXPECTED_TOPIC_COUNT = 36;
 
 const TIER_1_DOMAINS = new Set([
   "bocongan.gov.vn",
+  "cdcsnd1.bocongan.gov.vn",
+  "baohiemxahoi.gov.vn",
   "sbv.gov.vn",
   "ssc.gov.vn",
   "mic.gov.vn",
 ]);
 
 const TIER_2_DOMAINS = new Set([
+  "evn.com.vn",
   "support.microsoft.com",
   "safety.google",
 ]);
