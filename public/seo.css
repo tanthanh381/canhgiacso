@@ -88,7 +88,10 @@ a:hover { text-decoration-thickness: 2px; }
   width: 54px;
   height: 54px;
   flex: 0 0 auto;
-  background: url("/khien-so-logo.png") center / contain no-repeat;
+  background-image: url("/khien-so-logo.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 56px 56px;
 }
 .seo-brand img { object-fit: contain; }
 .seo-brand-lockup {
@@ -359,8 +362,9 @@ a:hover { text-decoration-thickness: 2px; }
   }
   .seo-brand img,
   .seo-brand-logo {
-    width: 46px;
-    height: 46px;
+    width: 48px;
+    height: 48px;
+    background-size: 50px 50px;
   }
   .seo-nav-links {
     width: 100%;
@@ -381,4 +385,14 @@ a:hover { text-decoration-thickness: 2px; }
   .seo-article p,
   .seo-article li { font-size: 16px; }
   .seo-article .lead { font-size: 18px; }
+}
+
+
+@media (max-width: 520px) {
+  .seo-brand img,
+  .seo-brand-logo {
+    width: 43px;
+    height: 43px;
+    background-size: 45px 45px;
+  }
 }
