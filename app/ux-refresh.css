@@ -161,7 +161,8 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
 }
 
 @media (max-width: 900px) {
-  html, body, .app { max-width: 100%; overflow-x: hidden; }
+  html, body { max-width: 100%; }
+  .app { max-width: 100%; overflow-x: clip; }
   body { padding-bottom: 0; }
   .topbar {
     height: 64px;
