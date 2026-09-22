@@ -59,7 +59,7 @@ test.describe("mobile interaction states", () => {
 
     const menu = page.locator("#ux-mobile-knowledge-menu");
     await expect(menu).toBeVisible();
-    await expect(menu.getByRole("menuitem")).toHaveCount(2);
+    await expect(menu.getByRole("button")).toHaveCount(2);
 
     const navBox = await page.locator(".ux-bottom-nav").boundingBox();
     const menuBox = await menu.boundingBox();
@@ -69,6 +69,16 @@ test.describe("mobile interaction states", () => {
 
     await page.keyboard.press("Escape");
     await expect(menu).toBeHidden();
+  });
+
+  test("Cẩm nang checklist opens the interactive checklist view", async ({ page }) => {
+    await waitForApp(page);
+    const handbook = page.locator(".ux-bottom-nav button", { hasText: "Cẩm nang" });
+    await handbook.click();
+    const menu = page.locator("#ux-mobile-knowledge-menu");
+    await menu.getByRole("button", { name: /Danh sách kiểm tra/ }).click();
+    await expect(page.locator("#security-checklist-title")).toBeVisible();
+    await expect(handbook).toHaveAttribute("aria-current", "page");
   });
 
   test("guest answer selection produces feedback without sync error", async ({ page }) => {
@@ -82,7 +92,8 @@ test.describe("mobile interaction states", () => {
 
   test("auth modal stays above mobile navigation", async ({ page }) => {
     await waitForApp(page);
-    await page.getByRole("button", { name: "Đăng nhập" }).click();
+    const login = page.getByRole("button", { name: "Đăng nhập" });
+    await login.click();
     const modalLayer = page.locator(".modal-layer");
     await expect(modalLayer).toBeVisible();
 
@@ -95,6 +106,15 @@ test.describe("mobile interaction states", () => {
       };
     });
     expect(order.modal).toBeGreaterThan(order.nav);
+
+    const focusInsideDialog = await page.evaluate(() => {
+      const dialog = document.querySelector('[role="dialog"]');
+      return Boolean(dialog && document.activeElement && dialog.contains(document.activeElement));
+    });
+    expect(focusInsideDialog).toBe(true);
+    await page.keyboard.press("Escape");
+    await expect(modalLayer).toBeHidden();
+    await expect(login).toBeFocused();
   });
 
   test("scenario and insight drawers cover navigation cleanly", async ({ page }) => {
@@ -139,6 +159,49 @@ test.describe("mobile interaction states", () => {
   });
 });
 
+
+test.describe("resilience and breakpoint boundaries", () => {
+  test("built-in scenarios remain playable when public content RPC is unavailable", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop-chromium", "single deterministic resilience run");
+    await page.route("**/rest/v1/rpc/get_public_site_content", (route) => route.abort());
+    await page.goto("/");
+    await expect(page.locator(".app")).toBeVisible({ timeout: 20_000 });
+    const choice = page.locator(".choice:not([disabled])").first();
+    await expect(choice).toBeVisible({ timeout: 20_000 });
+    await choice.click();
+    await expect(page.locator(".feedback")).toBeVisible();
+    await expect(page.getByText("đang dùng thư viện tích hợp sẵn", { exact: false })).toBeVisible();
+  });
+
+  test("responsive breakpoint matrix has no horizontal overflow", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop-chromium", "boundary matrix runs once");
+    await waitForApp(page);
+    const widths = [320, 360, 390, 520, 560, 760, 820, 900, 901, 1024, 1180, 1181, 1366, 1440, 1920];
+    for (const width of widths) {
+      await page.setViewportSize({ width, height: width <= 560 ? 740 : 900 });
+      await page.waitForTimeout(40);
+      await expectNoHorizontalOverflow(page);
+      if (width <= 900) {
+        await expect(page.locator(".ux-bottom-nav")).toBeVisible();
+        await expect(page.locator(".ux-bottom-nav > button")).toHaveCount(5);
+      } else {
+        await expect(page.locator(".topbar nav")).toBeVisible();
+        await expect(page.locator(".ux-bottom-nav")).toBeHidden();
+      }
+    }
+  });
+
+  test("desktop Cẩm nang closes when another primary destination is selected", async ({ page }, testInfo) => {
+    test.skip(!testInfo.project.name.startsWith("desktop-"), "desktop navigation only");
+    await waitForApp(page);
+    const details = page.locator(".knowledge-menu");
+    await details.locator("summary").click();
+    await expect(details).toHaveAttribute("open", "");
+    await page.getByRole("button", { name: "Tin tức", exact: true }).click();
+    await expect(details).not.toHaveAttribute("open", "");
+  });
+});
+
 test.describe("public static content", () => {
   for (const path of ["/kien-thuc/", "/tin-tuc/"]) {
     test(`${path} has responsive layout without horizontal overflow`, async ({ page }) => {
@@ -146,6 +209,13 @@ test.describe("public static content", () => {
       await page.waitForLoadState("domcontentloaded");
       await expect(page.locator("body")).toBeVisible();
       await expectNoHorizontalOverflow(page);
+      const header = page.locator(".seo-header");
+      if (await header.count()) {
+        await page.evaluate(() => window.scrollTo(0, Math.min(900, document.body.scrollHeight)));
+        const box = await header.boundingBox();
+        expect(box).not.toBeNull();
+        expect(Math.abs(box!.y)).toBeLessThanOrEqual(2);
+      }
     });
   }
 });
