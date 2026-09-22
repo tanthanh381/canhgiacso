@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
-type PrimaryView = "Thử thách" | "Cẩm nang" | "Tin tức" | "Thành tích" | "Thực hành";
+type PrimaryView = "Thử thách" | "Cẩm nang" | "Tin tức" | "Thành tích";
 
-const PRIMARY_VIEWS: PrimaryView[] = ["Thử thách", "Cẩm nang", "Tin tức", "Thành tích", "Thực hành"];
+const PRIMARY_VIEWS: PrimaryView[] = ["Thử thách", "Cẩm nang", "Tin tức", "Thành tích"];
 const BANNER_KEY = "canhgiacso:simulation-banner-dismissed";
 
 function navButton(label: string) {
@@ -37,8 +37,7 @@ export function UxRefresh() {
     const sync = () => {
       pending = false;
       const label = document.querySelector<HTMLElement>(".topbar nav [aria-current='page']")?.textContent?.trim();
-      const mobileLabel = label === "Thực hành tương tác" ? "Thực hành" : label;
-      setActive(PRIMARY_VIEWS.includes(mobileLabel as PrimaryView) ? mobileLabel as PrimaryView : null);
+      setActive(PRIMARY_VIEWS.includes(label as PrimaryView) ? label as PrimaryView : null);
       setVersion((value) => value + 1);
     };
     const schedule = () => {
@@ -63,6 +62,25 @@ export function UxRefresh() {
     return () => {
       observer.disconnect();
       root.removeEventListener("click", closeScenarioDrawer);
+    };
+  }, []);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setUtilityOpen(false);
+      setMobileKnowledgeOpen(false);
+      setInsightOpen(false);
+      setScenariosOpen(false);
+    };
+    const onResize = () => {
+      if (window.innerWidth > 900) setMobileKnowledgeOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("resize", onResize);
     };
   }, []);
 
@@ -92,10 +110,6 @@ export function UxRefresh() {
     setScenariosOpen(false);
     setUtilityOpen(false);
     setMobileKnowledgeOpen(false);
-    if (label === "Thực hành") {
-      activate("Thực hành tương tác");
-      return;
-    }
     activate(label);
   };
 
@@ -138,7 +152,7 @@ export function UxRefresh() {
   return <>
     {topActions && createPortal(<>
       {bannerDismissed && <button className="ux-simulation-chip" onClick={restoreBanner}><span aria-hidden="true">🛡</span> Mô phỏng</button>}
-      {signedIn && <div className="ux-utility-menu"><button className="ux-utility-trigger" aria-expanded={utilityOpen} aria-label="Mở chức năng quản lý" onClick={() => { setMobileKnowledgeOpen(false); setUtilityOpen((value) => !value); }}>•••</button>{utilityOpen && <div className="ux-utility-popover" role="menu"><button role="menuitem" onClick={() => navigate("Dashboard")}>Dashboard</button>{hasAdmin && <button role="menuitem" onClick={() => navigate("Quản trị")}>Quản trị</button>}</div>}</div>}
+      {signedIn && <div className="ux-utility-menu"><button className="ux-utility-trigger" aria-expanded={utilityOpen} aria-controls="ux-utility-popover" aria-label="Mở chức năng quản lý" onClick={() => { setMobileKnowledgeOpen(false); setUtilityOpen((value) => !value); }}>•••</button></div>}
     </>, topActions)}
 
     {banner && !bannerDismissed && createPortal(<button className="ux-banner-close" aria-label="Ẩn lưu ý môi trường mô phỏng" onClick={dismissBanner}>×</button>, banner)}
@@ -160,28 +174,30 @@ export function UxRefresh() {
           className={active === item ? "active" : ""}
           aria-current={active === item ? "page" : undefined}
           aria-expanded={item === "Cẩm nang" ? mobileKnowledgeOpen : undefined}
+          aria-controls={item === "Cẩm nang" ? "ux-mobile-knowledge-menu" : undefined}
           onClick={() => item === "Cẩm nang" ? (setUtilityOpen(false), setMobileKnowledgeOpen((value) => !value)) : navigate(item)}
         >
-          <span aria-hidden="true">{{ "Thử thách": "◇", "Cẩm nang": "▤", "Tin tức": "◫", "Thành tích": "★", "Thực hành": "▶" }[item]}</span>
+          <span aria-hidden="true">{{ "Thử thách": "◇", "Cẩm nang": "▤", "Tin tức": "◫", "Thành tích": "★" }[item]}</span>
           <small>{item}</small>
         </button>
       ))}
-      {mobileKnowledgeOpen && (
-        <div className="ux-mobile-knowledge-menu" role="menu" aria-label="Cẩm nang">
-          <button type="button" role="menuitem" onClick={openKnowledgeArticles}>
-            <strong>Bài viết kiến thức</strong>
-            <small>Hướng dẫn, cảnh báo và nội dung tra cứu</small>
-          </button>
-          <button type="button" role="menuitem" onClick={openKnowledgeChecklist}>
-            <strong>Danh sách kiểm tra</strong>
-            <small>Tự kiểm tra an toàn số và lưu tiến độ</small>
-          </button>
-        </div>
-      )}
     </nav>
 
     {utilityOpen && <button className="ux-utility-backdrop" aria-label="Đóng menu quản lý" onClick={() => setUtilityOpen(false)} />}
     {mobileKnowledgeOpen && <button className="ux-mobile-menu-backdrop" aria-label="Đóng menu Cẩm nang" onClick={() => setMobileKnowledgeOpen(false)} />}
+    {utilityOpen && signedIn && <div id="ux-utility-popover" className="ux-utility-popover" role="menu" aria-label="Chức năng quản lý"><button role="menuitem" onClick={() => navigate("Dashboard")}>Dashboard</button>{hasAdmin && <button role="menuitem" onClick={() => navigate("Quản trị")}>Quản trị</button>}</div>}
+    {mobileKnowledgeOpen && (
+      <div id="ux-mobile-knowledge-menu" className="ux-mobile-knowledge-menu" role="menu" aria-label="Cẩm nang">
+        <button type="button" role="menuitem" onClick={openKnowledgeArticles}>
+          <strong>Bài viết kiến thức</strong>
+          <small>Hướng dẫn, cảnh báo và nội dung tra cứu</small>
+        </button>
+        <button type="button" role="menuitem" onClick={openKnowledgeChecklist}>
+          <strong>Danh sách kiểm tra</strong>
+          <small>Tự kiểm tra an toàn số và lưu tiến độ</small>
+        </button>
+      </div>
+    )}
 
     {scenariosOpen && <><button className="ux-drawer-backdrop" aria-label="Đóng danh sách tình huống" onClick={() => setScenariosOpen(false)} /><button className="ux-drawer-close ux-scenario-close" aria-label="Đóng danh sách tình huống" onClick={() => setScenariosOpen(false)}>×</button></>}
     {insightOpen && <><button className="ux-drawer-backdrop ux-insight-backdrop" aria-label="Đóng bảng mẹo và tiến trình" onClick={() => setInsightOpen(false)} /><button className="ux-drawer-close ux-insight-close" aria-label="Đóng bảng mẹo và tiến trình" onClick={() => setInsightOpen(false)}>×</button></>}
