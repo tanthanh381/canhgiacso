@@ -44,6 +44,14 @@ test("mobile menu state is mutually exclusive and dismissible", () => {
   assert.match(uxSource, /setUtilityOpen\(false\);[\s\S]*?setMobileKnowledgeOpen\(false\);[\s\S]*?setInsightOpen\(false\);[\s\S]*?setScenariosOpen\(false\);/);
 });
 
+test("drawers always sit above mobile navigation and popup layers", () => {
+  assert.match(uxCss, /\.ux-drawer-backdrop\s*\{[\s\S]*?z-index:\s*100;/);
+  assert.match(uxCss, /\.ux-drawer-close\s*\{[\s\S]*?z-index:\s*108;/);
+  assert.match(uxCss, /\.scenario-panel\s*\{[\s\S]*?z-index:\s*104;/);
+  assert.match(uxCss, /\.insight-panel\s*\{[\s\S]*?z-index:\s*104;/);
+  assert.match(uxCss, /html, body, \.app\s*\{\s*max-width:\s*100%;\s*overflow-x:\s*hidden;/);
+});
+
 test("small mobile screens retain readable labels and safe touch targets", () => {
   assert.match(visualCss, /\.ux-bottom-nav button\s*\{\s*min-height:\s*48px;/);
   assert.match(uxCss, /\.ux-utility-popover-mobile button\s*\{[\s\S]*?min-height:\s*44px;/);
