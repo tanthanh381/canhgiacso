@@ -14,6 +14,12 @@ function navButton(label: string) {
     .find((button) => button.textContent?.trim() === label) ?? null;
 }
 
+function knowledgeSubmenuButton(label: string) {
+  if (typeof document === "undefined") return null;
+  return Array.from(document.querySelectorAll<HTMLButtonElement>(".knowledge-submenu button"))
+    .find((button) => button.textContent?.includes(label)) ?? null;
+}
+
 function activate(label: string) {
   navButton(label)?.click();
 }
@@ -45,9 +51,19 @@ export function UxRefresh() {
       pending = true;
       requestAnimationFrame(sync);
     };
-    const closeScenarioDrawer = (event: Event) => {
+    const handleRootClick = (event: Event) => {
       const target = event.target;
-      if (target instanceof Element && target.closest(".scenario-item")) setScenariosOpen(false);
+      if (!(target instanceof Element)) return;
+      if (target.closest(".scenario-item")) setScenariosOpen(false);
+      if (target.closest(".topbar nav > button")) {
+        document.querySelector<HTMLDetailsElement>(".knowledge-menu")?.removeAttribute("open");
+      }
+      if (!target.closest(".ux-utility-menu") && !target.closest(".ux-utility-popover-mobile")) {
+        setUtilityOpen(false);
+      }
+      if (!target.closest("[aria-controls='ux-mobile-knowledge-menu']") && !target.closest("#ux-mobile-knowledge-menu")) {
+        setMobileKnowledgeOpen(false);
+      }
     };
     const observer = new MutationObserver(schedule);
     observer.observe(root, {
@@ -57,11 +73,11 @@ export function UxRefresh() {
       attributes: true,
       attributeFilter: ["aria-current"],
     });
-    root.addEventListener("click", closeScenarioDrawer);
+    root.addEventListener("click", handleRootClick);
     requestAnimationFrame(sync);
     return () => {
       observer.disconnect();
-      root.removeEventListener("click", closeScenarioDrawer);
+      root.removeEventListener("click", handleRootClick);
     };
   }, []);
 
@@ -120,8 +136,7 @@ export function UxRefresh() {
 
   const openKnowledgeChecklist = () => {
     setMobileKnowledgeOpen(false);
-    activate("Cẩm nang");
-    window.setTimeout(() => document.getElementById("security-checklist-title")?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
+    knowledgeSubmenuButton("Danh sách kiểm tra")?.click();
   };
   const dismissBanner = () => {
     setBannerDismissed(true);
@@ -152,7 +167,7 @@ export function UxRefresh() {
   return <>
     {topActions && createPortal(<>
       {bannerDismissed && <button className="ux-simulation-chip" onClick={restoreBanner}><span aria-hidden="true">🛡</span> Mô phỏng</button>}
-      {signedIn && <div className="ux-utility-menu"><button className="ux-utility-trigger" aria-expanded={utilityOpen} aria-controls="ux-utility-popover" aria-label="Mở chức năng quản lý" onClick={() => { setMobileKnowledgeOpen(false); setUtilityOpen((value) => !value); }}>•••</button>{utilityOpen && <div className="ux-utility-popover ux-utility-popover-desktop" role="menu" aria-label="Chức năng quản lý"><button role="menuitem" onClick={() => navigate("Dashboard")}>Dashboard</button>{hasAdmin && <button role="menuitem" onClick={() => navigate("Quản trị")}>Quản trị</button>}</div>}</div>}
+      {signedIn && <div className="ux-utility-menu"><button className="ux-utility-trigger" aria-expanded={utilityOpen} aria-haspopup="true" aria-label="Mở chức năng quản lý" onClick={() => { setMobileKnowledgeOpen(false); setUtilityOpen((value) => !value); }}>•••</button>{utilityOpen && <div className="ux-utility-popover ux-utility-popover-desktop" aria-label="Chức năng quản lý"><button onClick={() => navigate("Dashboard")}>Dashboard</button>{hasAdmin && <button onClick={() => navigate("Quản trị")}>Quản trị</button>}</div>}</div>}
     </>, topActions)}
 
     {banner && !bannerDismissed && createPortal(<button className="ux-banner-close" aria-label="Ẩn lưu ý môi trường mô phỏng" onClick={dismissBanner}>×</button>, banner)}
@@ -185,14 +200,14 @@ export function UxRefresh() {
 
     {utilityOpen && <button className="ux-utility-backdrop" aria-label="Đóng menu quản lý" onClick={() => setUtilityOpen(false)} />}
     {mobileKnowledgeOpen && <button className="ux-mobile-menu-backdrop" aria-label="Đóng menu Cẩm nang" onClick={() => setMobileKnowledgeOpen(false)} />}
-    {utilityOpen && signedIn && <div id="ux-utility-popover" className="ux-utility-popover ux-utility-popover-mobile" role="menu" aria-label="Chức năng quản lý"><button role="menuitem" onClick={() => navigate("Dashboard")}>Dashboard</button>{hasAdmin && <button role="menuitem" onClick={() => navigate("Quản trị")}>Quản trị</button>}</div>}
+    {utilityOpen && signedIn && <div className="ux-utility-popover ux-utility-popover-mobile" aria-label="Chức năng quản lý"><button onClick={() => navigate("Dashboard")}>Dashboard</button>{hasAdmin && <button onClick={() => navigate("Quản trị")}>Quản trị</button>}</div>}
     {mobileKnowledgeOpen && (
-      <div id="ux-mobile-knowledge-menu" className="ux-mobile-knowledge-menu" role="menu" aria-label="Cẩm nang">
-        <button type="button" role="menuitem" onClick={openKnowledgeArticles}>
+      <div id="ux-mobile-knowledge-menu" className="ux-mobile-knowledge-menu" role="group" aria-label="Cẩm nang">
+        <button type="button" onClick={openKnowledgeArticles}>
           <strong>Bài viết kiến thức</strong>
           <small>Hướng dẫn, cảnh báo và nội dung tra cứu</small>
         </button>
-        <button type="button" role="menuitem" onClick={openKnowledgeChecklist}>
+        <button type="button" onClick={openKnowledgeChecklist}>
           <strong>Danh sách kiểm tra</strong>
           <small>Tự kiểm tra an toàn số và lưu tiến độ</small>
         </button>
