@@ -40,3 +40,13 @@ test("SEO pages avoid root overflow scroll containers that can break sticky head
   assert.match(seo, /body\s*\{[\s\S]*?overflow-x:\s*clip;/);
   assert.doesNotMatch(seo, /html\s*\{[\s\S]*?overflow-x:\s*hidden;/);
 });
+
+
+test("guest progress tolerates browsers that restrict localStorage", () => {
+  assert.match(page, /function safeStorageGet\(key: string\)/);
+  assert.match(page, /function safeStorageSet\(key: string, value: string\)/);
+  assert.match(page, /safeStorageSet\(SECURITY_CHECKLIST_KEY/);
+  assert.match(page, /safeStorageSet\(THEME_KEY/);
+  assert.match(page, /safeStorageSet\(progressKey\(null\)/);
+  assert.match(page, /safeStorageGet\(THEME_KEY\) === "dark"/);
+});
