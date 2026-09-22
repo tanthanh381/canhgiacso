@@ -13,6 +13,14 @@ const client = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   },
 });
 
+const guestClient = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+    detectSessionInUrl: false,
+  },
+});
+
 const delay = (milliseconds: number) => new Promise<void>((resolve) => {
   window.setTimeout(resolve, milliseconds);
 });
@@ -82,3 +90,4 @@ client.auth.onAuthStateChange = ((callback: Parameters<typeof originalOnAuthStat
   })) as typeof client.auth.onAuthStateChange;
 
 export const supabase = client;
+export const guestSupabase = guestClient;
