@@ -507,10 +507,10 @@ export default function Home() {
       const normalized = normalizeSiteContent(data);
       if (normalized) {
         setSiteContent(normalized);
-        setContentReady(true);
       } else if (error) {
-        setDataStatus("Chưa tải được thư viện tình huống an toàn. Vui lòng tải lại trang.");
+        setDataStatus("Không tải được nội dung cập nhật; đang dùng thư viện tích hợp sẵn.");
       }
+      setContentReady(true);
     })();
     return () => { active = false; };
   }, []);
@@ -1234,9 +1234,9 @@ export default function Home() {
           <button aria-current={view === "game" ? "page" : undefined} className={view === "game" ? "active" : ""} onClick={() => navigateTo("game")}>Thử thách</button>
           <details className="knowledge-menu">
             <summary aria-label="Mở menu Cẩm nang" aria-current={view === "knowledge" ? "page" : undefined} className={view === "knowledge" ? "active" : ""}>Cẩm nang</summary>
-            <div className="knowledge-submenu" role="menu" aria-label="Cẩm nang">
-              <button type="button" role="menuitem" onClick={() => window.location.assign("/kien-thuc/")}><strong>Bài viết kiến thức</strong><small>Hướng dẫn, cảnh báo và nội dung tra cứu</small></button>
-              <button type="button" role="menuitem" onClick={() => { document.querySelector<HTMLDetailsElement>(".knowledge-menu")?.removeAttribute("open"); navigateTo("knowledge"); window.setTimeout(() => document.getElementById("security-checklist-title")?.scrollIntoView({ behavior: "smooth", block: "start" }), 80); }}><strong>Danh sách kiểm tra</strong><small>Tự kiểm tra an toàn số và lưu tiến độ</small></button>
+            <div className="knowledge-submenu" role="group" aria-label="Cẩm nang">
+              <button type="button" onClick={() => window.location.assign("/kien-thuc/")}><strong>Bài viết kiến thức</strong><small>Hướng dẫn, cảnh báo và nội dung tra cứu</small></button>
+              <button type="button" onClick={() => { document.querySelector<HTMLDetailsElement>(".knowledge-menu")?.removeAttribute("open"); navigateTo("knowledge"); window.setTimeout(() => document.getElementById("security-checklist-title")?.scrollIntoView({ behavior: "smooth", block: "start" }), 80); }}><strong>Danh sách kiểm tra</strong><small>Tự kiểm tra an toàn số và lưu tiến độ</small></button>
             </div>
           </details>
           <button aria-current={view === "news" ? "page" : undefined} className={view === "news" ? "active" : ""} onClick={() => navigateTo("news")}>Tin tức</button>
@@ -1262,8 +1262,10 @@ export default function Home() {
         <strong>Môi trường mô phỏng</strong>
         <span>Không nhập mật khẩu ngân hàng, OTP, số thẻ hoặc dữ liệu thật. Mọi số tiền chỉ dùng cho đào tạo.</span>
       </div>}
-      {dataStatus && <div className="sync-status" role="status" aria-live="polite">{dataStatus}</div>}
-      {pendingChoice && <div className="sync-status"><button className="admin-secondary" disabled={savingChoice} onClick={() => void syncChoice(pendingChoice)}>{savingChoice ? "Đang lưu…" : "Thử lưu lại"}</button></div>}
+      {(dataStatus || pendingChoice) && <div className="sync-status">
+        {dataStatus && <span role="status" aria-live="polite">{dataStatus}</span>}
+        {pendingChoice && <button className="admin-secondary" disabled={savingChoice} onClick={() => void syncChoice(pendingChoice)}>{savingChoice ? "Đang lưu…" : "Thử lưu lại"}</button>}
+      </div>}
 
       {view === "game" && (
         <div className="game-shell">
@@ -1559,7 +1561,7 @@ export default function Home() {
 
       <footer><div className="footer-brand" aria-label="Cảnh Giác Số"><BrandMark /><span><b>{siteContent.copy.departmentName}</b><small>{siteContent.copy.footerTagline}</small></span></div><FooterNotice notice={siteContent.copy.footerNotice}/><button onClick={() => setGuide(true)}>Hướng dẫn & trợ giúp</button></footer>
 
-      {completionCertificate && <Modal open onClose={() => setCompletionCertificate(null)} labelledBy="certificate-complete-title" className="certificate-complete-modal">
+      {completionCertificate && !lossNotice && <Modal open onClose={() => setCompletionCertificate(null)} labelledBy="certificate-complete-title" className="certificate-complete-modal">
         <button className="modal-close" aria-label="Đóng thông báo chứng nhận" onClick={() => setCompletionCertificate(null)}>×</button>
         <span className="certificate-complete-symbol" aria-hidden="true">✓</span>
         <span className="eyebrow">HOÀN THÀNH KHÓA ĐÀO TẠO</span>
