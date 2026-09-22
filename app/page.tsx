@@ -404,7 +404,7 @@ export default function Home() {
   const [checklistReady, setChecklistReady] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
-  const [guestLimitOpen, setGuestLimitOpen] = useState(false);
+  const [guestLimitOpen, setGuestLimitOpen] = useState(true);
   const [authMode, setAuthMode] = useState<AuthMode>("login");
   const [authEmail, setAuthEmail] = useState("");
   const [authUsername, setAuthUsername] = useState("");
@@ -435,7 +435,6 @@ export default function Home() {
   const saveLock = useRef(false);
   const accountEpoch = useRef(0);
   const activeUser = useRef<string | null>(null);
-  const guestLimitDismissed = useRef(false);
   const scenarios = siteContent.scenarios;
   const knowledgeCards = siteContent.knowledgeCards;
   const newsArticles = useMemo(() => publicNews(siteContent.newsArticles), [siteContent.newsArticles]);
@@ -459,15 +458,6 @@ export default function Home() {
     const timer = window.setTimeout(() => setDataStatus(""), 2400);
     return () => window.clearTimeout(timer);
   }, [dataStatus]);
-
-  useEffect(() => {
-    if (!hydrated || sessionAccount || authOpen) return;
-    const frame = window.requestAnimationFrame(() => {
-      if (guestLimitDismissed.current) return;
-      setGuestLimitOpen(true);
-    });
-    return () => window.cancelAnimationFrame(frame);
-  }, [hydrated, sessionAccount, authOpen]);
 
   useEffect(() => {
     const loadFrame = window.requestAnimationFrame(() => {
@@ -975,7 +965,6 @@ export default function Home() {
   }
 
   function dismissGuestLimitNotice() {
-    guestLimitDismissed.current = true;
     setGuestLimitOpen(false);
   }
 

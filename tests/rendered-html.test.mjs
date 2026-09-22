@@ -75,7 +75,7 @@ test("ships product metadata and social artwork", async () => {
   assert.match(page, /supabase\.auth\.signOut\(\{ scope: "local" \}\)/);
   assert.match(page, /continueAsGuest/);
   assert.match(page, /Tiếp tục với tư cách khách/);
-  assert.match(page, /guestLimitDismissed/);
+  assert.match(page, /guestLimitOpen, setGuestLimitOpen\] = useState\(true\)/);
   assert.match(page, /guest-badge-button/);
   assert.match(page, /Bạn đang sử dụng với tính năng giới hạn/);
   assert.match(page, /Đồng bộ tiến trình, lưu lịch sử lượt chơi/);
