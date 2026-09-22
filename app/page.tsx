@@ -4,7 +4,7 @@ import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { defaultSiteContent, Difficulty, normalizeSiteContent, SiteContent } from "./data";
 import { NewsArticleView } from './news-article';
 import { publicNews, safeImage } from './news-content';
-import { supabase } from "./supabase";
+import { guestSupabase, supabase } from "./supabase";
 import { difficultyOrder, getLevelProgress, getUnlockedDifficulties } from "./progression";
 import { downloadTrainingCertificatePdf, TrainingCertificate } from "./certificate";
 import { authErrorMessage } from "./auth-error";
@@ -832,7 +832,7 @@ export default function Home() {
       return;
     }
     setSavingChoice(true);
-    const { data, error } = await supabase.rpc("evaluate_guest_choice", { scenario_id: selected.id, choice_index: index });
+    const { data, error } = await guestSupabase.rpc("evaluate_guest_choice", { scenario_id: selected.id, choice_index: index });
     setSavingChoice(false);
     if (error || !data) {
       setDataStatus("Chưa chấm được lựa chọn. Vui lòng kiểm tra kết nối và thử lại.");
