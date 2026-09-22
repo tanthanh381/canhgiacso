@@ -53,6 +53,10 @@ test("drawers always sit above mobile navigation and popup layers", () => {
   assert.match(uxCss, /html, body, \.app\s*\{\s*max-width:\s*100%;\s*overflow-x:\s*hidden;/);
 });
 
+test("mobile runtime status stays below navigation without being obscured", () => {
+  assert.match(uxCss, /\.sync-status\s*\{\s*top:\s*130px;\s*z-index:\s*80;/);
+});
+
 test("application modals always stay above mobile navigation and drawers", () => {
   assert.match(globalsCss, /\.modal-layer\s*\{[\s\S]*?z-index:\s*200;/);
 });
