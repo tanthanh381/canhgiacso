@@ -4,7 +4,7 @@ import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { defaultSiteContent, Difficulty, normalizeSiteContent, SiteContent } from "./data";
 import { NewsArticleView } from './news-article';
 import { publicNews, safeImage } from './news-content';
-import { guestSupabase, supabase } from "./supabase";
+import { supabase } from "./supabase";
 import { difficultyOrder, getLevelProgress, getUnlockedDifficulties } from "./progression";
 import { downloadTrainingCertificatePdf, TrainingCertificate } from "./certificate";
 import { authErrorMessage } from "./auth-error";
@@ -831,14 +831,23 @@ export default function Home() {
       await syncChoice(pending);
       return;
     }
-    setSavingChoice(true);
-    const { data, error } = await guestSupabase.rpc("evaluate_guest_choice", { scenario_id: selected.id, choice_index: index });
-    setSavingChoice(false);
-    if (error || !data) {
-      setDataStatus("Chưa chấm được lựa chọn. Vui lòng kiểm tra kết nối và thử lại.");
+    // Guest gameplay is intentionally local. The published scenario payload
+    // already contains the scoring deltas used to render the exercise, so an
+    // anonymous learner should not depend on a network RPC just to select an
+    // answer. Authenticated attempts continue to use submit_game_choice so
+    // server-side progress and certificates remain authoritative.
+    const choice = selected.choices[index];
+    if (!choice) {
+      setDataStatus("Không tìm thấy lựa chọn này. Vui lòng tải lại trang và thử lại.");
       return;
     }
-    const outcome = data as ChoiceOutcome;
+    const outcome: ChoiceOutcome = {
+      scenarioId: selected.id,
+      choiceIndex: index,
+      correct: choice.correct,
+      moneyDelta: choice.moneyDelta,
+      awarenessDelta: choice.awarenessDelta,
+    };
     const nextBalance = Math.max(0, balance + outcome.moneyDelta);
     const nextAwareness = Math.max(0, Math.min(100, awareness + outcome.awarenessDelta));
     const nextResults = [...results, { scenarioId: selected.id, correct: outcome.correct, choiceIndex: index }];
