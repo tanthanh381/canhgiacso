@@ -20,7 +20,7 @@ test("Cẩm nang includes an interactive security checklist", async () => {
   assert.match(page, /role="progressbar"/);
   assert.match(page, /type="checkbox"/);
   assert.match(page, /SECURITY_CHECKLIST_KEY/);
-  assert.match(page, /localStorage\.setItem\(SECURITY_CHECKLIST_KEY/);
+  assert.match(page, /safeStorageSet\(SECURITY_CHECKLIST_KEY/);
   assert.match(styles, /\.checklist-items/);
   assert.match(styles, /\.checklist-priority/);
   assert.match(styles, /@media \(max-width: 820px\)/);
