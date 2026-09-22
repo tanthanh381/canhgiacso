@@ -54,8 +54,14 @@ test("drawers always sit above mobile navigation and popup layers", () => {
   assert.match(uxCss, /\.app\s*\{\s*max-width:\s*100%;\s*overflow-x:\s*clip;/);
 });
 
-test("mobile runtime status stays below navigation without being obscured", () => {
-  assert.match(uxCss, /\.sync-status\s*\{\s*top:\s*130px;\s*z-index:\s*80;/);
+test("mobile runtime status stays in document flow below the fixed navigation", () => {
+  assert.match(uxCss, /\.sync-status\s*\{[\s\S]*?position:\s*relative;[\s\S]*?top:\s*auto;[\s\S]*?transform:\s*none;/);
+  assert.doesNotMatch(uxCss, /\.sync-status\s*\{\s*top:\s*130px;/);
+});
+
+test("mobile checklist action delegates to the real desktop checklist control", () => {
+  assert.match(uxSource, /function knowledgeSubmenuButton\(label: string\)/);
+  assert.match(uxSource, /knowledgeSubmenuButton\("Danh sách kiểm tra"\)\?\.click\(\)/);
 });
 
 test("application modals always stay above mobile navigation and drawers", () => {
