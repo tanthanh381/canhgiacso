@@ -5,6 +5,7 @@ import test from "node:test";
 const read = (path) => readFileSync(path, "utf8");
 const uxSource = read("app/ux-refresh.tsx");
 const uxCss = read("app/ux-refresh.css");
+const globalsCss = read("app/globals.css");
 const practiceSource = read("app/interactive-practice-nav.tsx");
 const practiceCss = read("app/interactive-practice-nav.css");
 const visualCss = read("app/visual-refresh.css");
@@ -50,6 +51,10 @@ test("drawers always sit above mobile navigation and popup layers", () => {
   assert.match(uxCss, /\.scenario-panel\s*\{[\s\S]*?z-index:\s*104;/);
   assert.match(uxCss, /\.insight-panel\s*\{[\s\S]*?z-index:\s*104;/);
   assert.match(uxCss, /html, body, \.app\s*\{\s*max-width:\s*100%;\s*overflow-x:\s*hidden;/);
+});
+
+test("application modals always stay above mobile navigation and drawers", () => {
+  assert.match(globalsCss, /\.modal-layer\s*\{[\s\S]*?z-index:\s*200;/);
 });
 
 test("small mobile screens retain readable labels and safe touch targets", () => {
