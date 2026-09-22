@@ -50,7 +50,8 @@ test("drawers always sit above mobile navigation and popup layers", () => {
   assert.match(uxCss, /\.ux-drawer-close\s*\{[\s\S]*?z-index:\s*108;/);
   assert.match(uxCss, /\.scenario-panel\s*\{[\s\S]*?z-index:\s*104;/);
   assert.match(uxCss, /\.insight-panel\s*\{[\s\S]*?z-index:\s*104;/);
-  assert.match(uxCss, /html, body, \.app\s*\{\s*max-width:\s*100%;\s*overflow-x:\s*hidden;/);
+  assert.match(uxCss, /html, body\s*\{\s*max-width:\s*100%;\s*\}/);
+  assert.match(uxCss, /\.app\s*\{\s*max-width:\s*100%;\s*overflow-x:\s*clip;/);
 });
 
 test("mobile runtime status stays below navigation without being obscured", () => {
