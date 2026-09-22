@@ -161,7 +161,6 @@ revoke all on function private.evaluate_choice(integer, integer) from public, an
 create or replace function public.evaluate_guest_choice(scenario_id integer, choice_index integer)
 returns jsonb
 language sql
-stable
 security definer
 set search_path = ''
 as $$ select private.evaluate_choice(scenario_id, choice_index) $$;

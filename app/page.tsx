@@ -404,6 +404,7 @@ export default function Home() {
   const [checklistReady, setChecklistReady] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
+  const [guestLimitOpen, setGuestLimitOpen] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>("login");
   const [authEmail, setAuthEmail] = useState("");
   const [authUsername, setAuthUsername] = useState("");
@@ -434,6 +435,7 @@ export default function Home() {
   const saveLock = useRef(false);
   const accountEpoch = useRef(0);
   const activeUser = useRef<string | null>(null);
+  const guestLimitDismissed = useRef(false);
   const scenarios = siteContent.scenarios;
   const knowledgeCards = siteContent.knowledgeCards;
   const newsArticles = useMemo(() => publicNews(siteContent.newsArticles), [siteContent.newsArticles]);
@@ -457,6 +459,15 @@ export default function Home() {
     const timer = window.setTimeout(() => setDataStatus(""), 2400);
     return () => window.clearTimeout(timer);
   }, [dataStatus]);
+
+  useEffect(() => {
+    if (!hydrated || sessionAccount || authOpen) return;
+    const frame = window.requestAnimationFrame(() => {
+      if (guestLimitDismissed.current) return;
+      setGuestLimitOpen(true);
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [hydrated, sessionAccount, authOpen]);
 
   useEffect(() => {
     const loadFrame = window.requestAnimationFrame(() => {
@@ -844,9 +855,10 @@ export default function Home() {
     const outcome: ChoiceOutcome = {
       scenarioId: selected.id,
       choiceIndex: index,
-      correct: choice.correct,
-      moneyDelta: choice.moneyDelta,
-      awarenessDelta: choice.awarenessDelta,
+      correct: choice.correct === true,
+      moneyDelta: typeof choice.moneyDelta === "number" ? choice.moneyDelta : 0,
+      awarenessDelta: typeof choice.awarenessDelta === "number" ? choice.awarenessDelta : 0,
+      feedback: choice.feedback ?? selected.tip,
     };
     const nextBalance = Math.max(0, balance + outcome.moneyDelta);
     const nextAwareness = Math.max(0, Math.min(100, awareness + outcome.awarenessDelta));
@@ -962,6 +974,16 @@ export default function Home() {
     setAuthOpen(true);
   }
 
+  function dismissGuestLimitNotice() {
+    guestLimitDismissed.current = true;
+    setGuestLimitOpen(false);
+  }
+
+  function openAuthFromGuestNotice(mode: AuthMode) {
+    dismissGuestLimitNotice();
+    openAuth(mode);
+  }
+
   function switchAuthMode(mode: AuthMode) {
     resetAuthForm();
     setAuthMode(mode);
@@ -971,6 +993,7 @@ export default function Home() {
     await supabase.auth.signOut({ scope: "local" });
     setSessionAccount(null);
     loadGuestProgress();
+    dismissGuestLimitNotice();
     closeAuth();
   }
 
@@ -1208,6 +1231,7 @@ export default function Home() {
             feedback: previousResult.correct ? "Lựa chọn này đã được máy chủ xác nhận là an toàn." : "Lựa chọn này đã được máy chủ xác nhận là có rủi ro." }
         : null;
   const visibleDashboardStatus: DashboardStatus = sessionAccount ? dashboardStatus : "forbidden";
+  const showGuestLimitNotice = guestLimitOpen && hydrated && !sessionAccount && !authOpen;
 
   return (
     <main className={dark ? "app dark" : "app"}>
@@ -1238,7 +1262,7 @@ export default function Home() {
             <button className="profile-button" onClick={() => setProfileOpen(true)} aria-label={`Mở tài khoản của ${playerName}`}><span>{playerName.trim().slice(0, 1).toUpperCase() || "N"}</span>{playerName}</button>
           ) : (
             <div className="auth-actions">
-              <span className="guest-badge">Khách</span>
+              <button className="guest-badge guest-badge-button" type="button" onClick={() => setGuestLimitOpen(true)}>Khách</button>
               <button className="login-button" onClick={() => openAuth("login")}>Đăng nhập</button>
               <button className="signup-button" onClick={() => openAuth("register")}>Đăng ký</button>
             </div>
@@ -1572,6 +1596,23 @@ export default function Home() {
       </Modal>}
 
       <Modal open={guide} onClose={() => setGuide(false)} labelledBy="guide-title" className="response-guide-modal"><button className="modal-close" aria-label="Đóng hướng dẫn" onClick={() => setGuide(false)}>×</button><span className="modal-symbol">H</span><span className="eyebrow">HDBANK · IT SECURITY</span><h2 id="guide-title">Dừng — Khóa — Báo</h2><ol><li><b>01</b><div><strong>Dừng tương tác</strong><p>Không chuyển thêm tiền, không cài ứng dụng, không chia sẻ màn hình, mật khẩu hoặc OTP.</p></div></li><li><b>02</b><div><strong>Chặn tổn thất</strong><p>Nếu đã chuyển tiền hoặc lộ thông tin, tự mở ứng dụng hoặc liên hệ ngân hàng qua kênh chính thức để yêu cầu hỗ trợ, khóa dịch vụ cần thiết.</p></div></li><li><b>03</b><div><strong>Lưu bằng chứng và báo cáo</strong><p>Lưu số điện thoại, liên kết, tin nhắn và mã giao dịch; trình báo cơ quan công an gần nhất. Cuộc gọi có dấu hiệu lừa đảo có thể phản ánh tới 156 hoặc 5656.</p></div></li></ol><p className="guide-disclaimer">Không tin dịch vụ “thu hồi tiền” yêu cầu nộp phí trước. Hướng dẫn này phục vụ đào tạo và không thay thế quy trình xử lý sự cố của tổ chức.</p><button className="primary-button" onClick={() => setGuide(false)}>Tôi đã hiểu</button></Modal>
+
+      <Modal open={showGuestLimitNotice} onClose={dismissGuestLimitNotice} labelledBy="guest-limit-title" className="guest-limit-modal">
+        <button className="modal-close" aria-label="Đóng thông báo chế độ khách" onClick={dismissGuestLimitNotice}>×</button>
+        <span className="modal-symbol">K</span>
+        <span className="eyebrow">CHẾ ĐỘ KHÁCH</span>
+        <h2 id="guest-limit-title">Bạn đang sử dụng với tính năng giới hạn</h2>
+        <p className="guest-limit-intro">Bạn vẫn có thể làm thử thách ngay, nhưng kết quả chỉ lưu trên thiết bị hiện tại và có thể mất khi xóa dữ liệu trình duyệt.</p>
+        <div className="guest-limit-grid" aria-label="So sánh chế độ khách và tài khoản">
+          <article><strong>Khách</strong><span>Lưu tiến trình cục bộ, nhận bản ghi nhận PDF cục bộ và không đồng bộ giữa các thiết bị.</span></article>
+          <article><strong>Tài khoản</strong><span>Đồng bộ tiến trình, lưu lịch sử lượt chơi, dùng chứng nhận đã xác minh và mở đầy đủ tính năng theo quyền được cấp.</span></article>
+        </div>
+        <div className="guest-limit-actions">
+          <button className="primary-button" onClick={() => openAuthFromGuestNotice("register")}>Tạo tài khoản</button>
+          <button className="admin-secondary" onClick={() => openAuthFromGuestNotice("login")}>Đăng nhập</button>
+          <button className="guest-continue" type="button" onClick={dismissGuestLimitNotice}>Tiếp tục với tư cách khách</button>
+        </div>
+      </Modal>
 
       <Modal open={authOpen} onClose={closeAuth} labelledBy="auth-title" className="auth-modal">
         <button className="modal-close" aria-label="Đóng đăng nhập" onClick={closeAuth}>×</button>

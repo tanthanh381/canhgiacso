@@ -75,6 +75,10 @@ test("ships product metadata and social artwork", async () => {
   assert.match(page, /supabase\.auth\.signOut\(\{ scope: "local" \}\)/);
   assert.match(page, /continueAsGuest/);
   assert.match(page, /Tiếp tục với tư cách khách/);
+  assert.match(page, /guestLimitDismissed/);
+  assert.match(page, /guest-badge-button/);
+  assert.match(page, /Bạn đang sử dụng với tính năng giới hạn/);
+  assert.match(page, /Đồng bộ tiến trình, lưu lịch sử lượt chơi/);
   assert.match(page, /supabase\.rpc\("submit_game_choice"/);
   assert.match(page, /supabase\.rpc\("get_game_state"/);
   assert.match(page, /get_ciso_dashboard/);

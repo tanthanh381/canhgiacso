@@ -32,8 +32,10 @@ test("browser bundle contains no server secret and keeps auth validation", async
   assert.match(page, /PASSWORD_PATTERN/);
   assert.match(page, /USERNAME_PATTERN/);
   assert.match(page, /signOut\(\{ scope: "local" \}\)/);
+  assert.match(client, /guestSupabase = guestClient/);
   assert.match(page, /get_public_site_content/);
-  assert.match(page, /evaluate_guest_choice/);
+  assert.match(page, /Guest gameplay is intentionally local/);
+  assert.doesNotMatch(page, /supabase\.rpc\("evaluate_guest_choice"/);
   assert.doesNotMatch(page, /scenario_snapshot/);
   assert.doesNotMatch(page, /persistFullProgress|khien-so-migrated/);
   assert.match(page, /progressKey\(null\)/);
@@ -50,10 +52,20 @@ test("answer keys are redacted and content management uses protected RPCs", asyn
   assert.match(migration, /choice_item - array\['correct', 'moneyDelta', 'awarenessDelta', 'feedback'\]/);
   assert.match(migration, /public\.get_managed_site_content/);
   assert.match(migration, /public\.save_managed_site_content/);
-  assert.match(page, /evaluate_guest_choice/);
+  assert.match(page, /Guest gameplay is intentionally local/);
+  assert.doesNotMatch(page, /supabase\.rpc\("evaluate_guest_choice"/);
   assert.match(admin, /save_managed_site_content/);
   const definitions = data.slice(data.indexOf("const scenarioDefinitions"), data.indexOf("export const scenarios"));
   assert.doesNotMatch(definitions, /correct:\s*(?:true|false)|moneyDelta:|awarenessDelta:|feedback:/);
+});
+
+test("guest choice scoring can run with the write-based rate limiter", async () => {
+  const migration = await read("../supabase/migrations/20260922143000_allow_guest_choice_rate_limit.sql");
+  assert.match(migration, /create or replace function public\.evaluate_guest_choice\(scenario_id integer, choice_index integer\)/);
+  assert.match(migration, /security definer/);
+  assert.match(migration, /private\.evaluate_choice\(scenario_id, choice_index\)/);
+  assert.match(migration, /grant execute on function public\.evaluate_guest_choice\(integer, integer\) to anon, authenticated/);
+  assert.doesNotMatch(migration, /\bstable\b/);
 });
 
 test("critical UI states are accessible and responsive", async () => {
