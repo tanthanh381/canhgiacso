@@ -140,6 +140,7 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
 .ux-utility-popover { position: absolute; right: 0; top: calc(100% + 8px); z-index: 90; width: 150px; padding: 5px; border: 1px solid var(--line); border-radius: 11px; background: var(--surface); box-shadow: var(--shadow); }
 .ux-utility-popover button { width: 100%; border: 0; background: transparent; border-radius: 7px; padding: 9px 10px; text-align: left; font-size: 12px; cursor: pointer; }
 .ux-utility-popover button:hover { background: var(--paper); }
+.ux-utility-popover-mobile { display: none; }
 .ux-utility-backdrop,
 .ux-mobile-menu-backdrop { display: none; }
 
@@ -262,6 +263,7 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
 
 @media (max-width: 560px) {
   .top-actions { gap: 4px; }
+  .product-lockup strong { display: none; }
   .topbar .auth-actions .login-button,
   .topbar .auth-actions .signup-button { min-height: 34px; padding-inline: 7px; font-size: 10px; }
   .ux-utility-trigger { width: 34px; height: 34px; }
@@ -332,7 +334,9 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
 
 
 @media (max-width: 900px) {
-  .ux-utility-popover {
+  .ux-utility-popover-desktop { display: none; }
+  .ux-utility-popover-mobile {
+    display: block;
     position: fixed;
     z-index: 88;
     top: 128px;
@@ -342,8 +346,8 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
     border-radius: 14px;
     box-shadow: 0 18px 44px rgba(20, 20, 20, .22);
   }
-  .ux-utility-popover button {
-    min-height: 42px;
+  .ux-utility-popover-mobile button {
+    min-height: 44px;
     padding: 10px 12px;
     font-size: 13px;
   }
@@ -384,7 +388,7 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
     white-space: nowrap;
     font-size: 9px;
   }
-  .ux-utility-popover {
+  .ux-utility-popover-mobile {
     top: 126px;
     right: 10px;
     width: min(210px, calc(100vw - 20px));
