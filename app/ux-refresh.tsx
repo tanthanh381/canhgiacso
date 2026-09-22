@@ -89,6 +89,10 @@ export function UxRefresh() {
     setInsightOpen(false);
     setScenariosOpen(false);
     setUtilityOpen(false);
+    if (label === "Cẩm nang") {
+      window.location.assign("/kien-thuc/");
+      return;
+    }
     activate(label);
   };
   const dismissBanner = () => {
