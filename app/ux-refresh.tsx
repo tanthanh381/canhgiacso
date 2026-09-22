@@ -152,7 +152,7 @@ export function UxRefresh() {
   return <>
     {topActions && createPortal(<>
       {bannerDismissed && <button className="ux-simulation-chip" onClick={restoreBanner}><span aria-hidden="true">🛡</span> Mô phỏng</button>}
-      {signedIn && <div className="ux-utility-menu"><button className="ux-utility-trigger" aria-expanded={utilityOpen} aria-controls="ux-utility-popover" aria-label="Mở chức năng quản lý" onClick={() => { setMobileKnowledgeOpen(false); setUtilityOpen((value) => !value); }}>•••</button></div>}
+      {signedIn && <div className="ux-utility-menu"><button className="ux-utility-trigger" aria-expanded={utilityOpen} aria-controls="ux-utility-popover" aria-label="Mở chức năng quản lý" onClick={() => { setMobileKnowledgeOpen(false); setUtilityOpen((value) => !value); }}>•••</button>{utilityOpen && <div className="ux-utility-popover ux-utility-popover-desktop" role="menu" aria-label="Chức năng quản lý"><button role="menuitem" onClick={() => navigate("Dashboard")}>Dashboard</button>{hasAdmin && <button role="menuitem" onClick={() => navigate("Quản trị")}>Quản trị</button>}</div>}</div>}
     </>, topActions)}
 
     {banner && !bannerDismissed && createPortal(<button className="ux-banner-close" aria-label="Ẩn lưu ý môi trường mô phỏng" onClick={dismissBanner}>×</button>, banner)}
@@ -185,7 +185,7 @@ export function UxRefresh() {
 
     {utilityOpen && <button className="ux-utility-backdrop" aria-label="Đóng menu quản lý" onClick={() => setUtilityOpen(false)} />}
     {mobileKnowledgeOpen && <button className="ux-mobile-menu-backdrop" aria-label="Đóng menu Cẩm nang" onClick={() => setMobileKnowledgeOpen(false)} />}
-    {utilityOpen && signedIn && <div id="ux-utility-popover" className="ux-utility-popover" role="menu" aria-label="Chức năng quản lý"><button role="menuitem" onClick={() => navigate("Dashboard")}>Dashboard</button>{hasAdmin && <button role="menuitem" onClick={() => navigate("Quản trị")}>Quản trị</button>}</div>}
+    {utilityOpen && signedIn && <div id="ux-utility-popover" className="ux-utility-popover ux-utility-popover-mobile" role="menu" aria-label="Chức năng quản lý"><button role="menuitem" onClick={() => navigate("Dashboard")}>Dashboard</button>{hasAdmin && <button role="menuitem" onClick={() => navigate("Quản trị")}>Quản trị</button>}</div>}
     {mobileKnowledgeOpen && (
       <div id="ux-mobile-knowledge-menu" className="ux-mobile-knowledge-menu" role="menu" aria-label="Cẩm nang">
         <button type="button" role="menuitem" onClick={openKnowledgeArticles}>
