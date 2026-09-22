@@ -240,7 +240,7 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
     bottom: auto;
     height: 58px;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     border: 0;
     border-top: 1px solid var(--line);
     border-bottom: 1px solid var(--line);
@@ -275,4 +275,55 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
 
 @media (max-width: 390px) {
   .product-lockup strong { display: none; }
+}
+
+
+@media (max-width: 900px) {
+  .ux-mobile-knowledge-menu {
+    position: absolute;
+    z-index: 80;
+    top: calc(100% + 6px);
+    left: 20%;
+    width: min(248px, calc(100vw - 24px));
+    padding: 5px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    box-shadow: 0 14px 36px rgba(20, 20, 20, .18);
+  }
+  .ux-mobile-knowledge-menu > button {
+    width: 100%;
+    display: block;
+    padding: 10px 11px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--ink);
+    text-align: left;
+  }
+  .ux-mobile-knowledge-menu > button + button {
+    margin-top: 2px;
+    border-top: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+  .ux-mobile-knowledge-menu > button:hover,
+  .ux-mobile-knowledge-menu > button:focus-visible {
+    background: color-mix(in srgb, var(--paper) 72%, var(--surface));
+  }
+  .ux-mobile-knowledge-menu strong,
+  .ux-mobile-knowledge-menu small {
+    display: block;
+  }
+  .ux-mobile-knowledge-menu strong {
+    font-size: 12px;
+    line-height: 1.35;
+  }
+  .ux-mobile-knowledge-menu small {
+    margin-top: 3px;
+    color: var(--muted);
+    font-size: 10px;
+    line-height: 1.4;
+    font-weight: 500;
+  }
 }
