@@ -140,6 +140,8 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
 .ux-utility-popover { position: absolute; right: 0; top: calc(100% + 8px); z-index: 90; width: 150px; padding: 5px; border: 1px solid var(--line); border-radius: 11px; background: var(--surface); box-shadow: var(--shadow); }
 .ux-utility-popover button { width: 100%; border: 0; background: transparent; border-radius: 7px; padding: 9px 10px; text-align: left; font-size: 12px; cursor: pointer; }
 .ux-utility-popover button:hover { background: var(--paper); }
+.ux-utility-backdrop,
+.ux-mobile-menu-backdrop { display: none; }
 
 .ux-drawer-backdrop { position: fixed; inset: 0; z-index: 68; border: 0; background: rgba(10, 10, 10, .28); cursor: default; }
 .ux-insight-backdrop { z-index: 69; }
@@ -233,7 +235,7 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
 
   .ux-bottom-nav {
     position: fixed;
-    z-index: 66;
+    z-index: 72;
     top: 64px;
     left: 0;
     right: 0;
@@ -280,10 +282,10 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
 
 @media (max-width: 900px) {
   .ux-mobile-knowledge-menu {
-    position: absolute;
-    z-index: 80;
-    top: calc(100% + 6px);
-    left: 20%;
+    position: fixed;
+    z-index: 86;
+    top: 128px;
+    left: 12px;
     width: min(248px, calc(100vw - 24px));
     padding: 5px;
     border: 1px solid var(--line);
@@ -325,5 +327,71 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
     font-size: 10px;
     line-height: 1.4;
     font-weight: 500;
+  }
+}
+
+
+@media (max-width: 900px) {
+  .ux-utility-popover {
+    position: fixed;
+    z-index: 88;
+    top: 128px;
+    right: 12px;
+    width: min(220px, calc(100vw - 24px));
+    padding: 6px;
+    border-radius: 14px;
+    box-shadow: 0 18px 44px rgba(20, 20, 20, .22);
+  }
+  .ux-utility-popover button {
+    min-height: 42px;
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+  .ux-utility-backdrop,
+  .ux-mobile-menu-backdrop {
+    display: block;
+    position: fixed;
+    z-index: 82;
+    inset: 122px 0 0;
+    border: 0;
+    padding: 0;
+    background: rgba(10, 10, 10, .22);
+    backdrop-filter: blur(1px);
+  }
+  .ux-mobile-menu-backdrop { z-index: 84; }
+  .ux-mobile-knowledge-menu {
+    width: min(260px, calc(100vw - 24px));
+    box-shadow: 0 18px 44px rgba(20, 20, 20, .22);
+  }
+  .topbar,
+  .ux-bottom-nav {
+    isolation: isolate;
+  }
+}
+
+@media (max-width: 560px) {
+  .ux-bottom-nav {
+    padding-inline: 4px;
+  }
+  .ux-bottom-nav button {
+    min-width: 0;
+    padding-inline: 2px;
+  }
+  .ux-bottom-nav small {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 9px;
+  }
+  .ux-utility-popover {
+    top: 126px;
+    right: 10px;
+    width: min(210px, calc(100vw - 20px));
+  }
+  .ux-mobile-knowledge-menu {
+    top: 126px;
+    left: 10px;
+    width: min(250px, calc(100vw - 20px));
   }
 }
