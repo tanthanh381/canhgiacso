@@ -1,5 +1,9 @@
 import { expect, test } from "@playwright/test";
 
+test.beforeEach(async ({ page }) => {
+  await page.route("**/rest/v1/rpc/get_public_site_content", (route) => route.abort());
+});
+
 async function waitForApp(page) {
   await page.goto("/");
   await expect(page.locator(".app")).toBeVisible({ timeout: 20_000 });
@@ -163,7 +167,6 @@ test.describe("mobile interaction states", () => {
 test.describe("resilience and breakpoint boundaries", () => {
   test("built-in scenarios remain playable when public content RPC is unavailable", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop-chromium", "single deterministic resilience run");
-    await page.route("**/rest/v1/rpc/get_public_site_content", (route) => route.abort());
     await page.goto("/");
     await expect(page.locator(".app")).toBeVisible({ timeout: 20_000 });
     const choice = page.locator(".choice:not([disabled])").first();
