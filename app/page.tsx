@@ -79,6 +79,21 @@ const GUEST_CERTIFICATE_KEY = "canh-giac-so-guest-certificate";
 const SECURITY_CHECKLIST_KEY = "canh-giac-so-security-checklist";
 const PHISHING_QUIZ_URL = "https://phishingquiz.withgoogle.com/?hl=vi";
 
+function safeStorageGet(key: string) {
+  if (typeof window === "undefined") return null;
+  try { return window.localStorage.getItem(key); } catch { return null; }
+}
+
+function safeStorageSet(key: string, value: string) {
+  if (typeof window === "undefined") return false;
+  try { window.localStorage.setItem(key, value); return true; } catch { return false; }
+}
+
+function safeStorageRemove(key: string) {
+  if (typeof window === "undefined") return false;
+  try { window.localStorage.removeItem(key); return true; } catch { return false; }
+}
+
 function scenarioCategoryLabel(category: string) {
   if (category === "Deepfake") return "Giả mạo bằng AI (deepfake)";
   if (category === "Phishing") return "Lừa đảo giả mạo (phishing)";
@@ -478,7 +493,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!checklistReady) return;
-    localStorage.setItem(SECURITY_CHECKLIST_KEY, JSON.stringify(completedChecklistIds));
+    safeStorageSet(SECURITY_CHECKLIST_KEY, JSON.stringify(completedChecklistIds));
   }, [checklistReady, completedChecklistIds]);
 
   useEffect(() => {
@@ -551,8 +566,8 @@ export default function Home() {
 
   useEffect(() => {
     if (!hydrated) return;
-    localStorage.setItem(THEME_KEY, dark ? "dark" : "light");
-    if (!sessionAccount && !activeUser.current) localStorage.setItem(progressKey(null), JSON.stringify({ balance, awareness, results, dark, playerName }));
+    safeStorageSet(THEME_KEY, dark ? "dark" : "light");
+    if (!sessionAccount && !activeUser.current) safeStorageSet(progressKey(null), JSON.stringify({ balance, awareness, results, dark, playerName }));
   }, [balance, awareness, results, dark, playerName, hydrated, sessionAccount]);
 
   useEffect(() => {
@@ -690,7 +705,7 @@ export default function Home() {
     setBalance(progress.balance);
     setAwareness(progress.awareness);
     setResults(progress.results);
-    setDark(localStorage.getItem(THEME_KEY) === "dark" || progress.dark);
+    setDark(safeStorageGet(THEME_KEY) === "dark" || progress.dark);
     setPlayerName(displayName || "Người chơi ẩn danh");
     setAnswer(null);
     setAnswerOutcome(null);
@@ -715,7 +730,7 @@ export default function Home() {
       balance: 300_000_000,
       awareness: 100,
       results: [],
-      dark: localStorage.getItem(THEME_KEY) === "dark",
+      dark: safeStorageGet(THEME_KEY) === "dark",
       playerName: "Người chơi ẩn danh",
     };
     setSessionAccount(null);
@@ -758,7 +773,7 @@ export default function Home() {
       balance: state.balance,
       awareness: state.awareness,
       results: state.results,
-      dark: localStorage.getItem(THEME_KEY) === "dark",
+      dark: safeStorageGet(THEME_KEY) === "dark",
       playerName: profile.display_name,
     };
 
@@ -887,7 +902,7 @@ export default function Home() {
       if (epoch !== accountEpoch.current) return;
       if (error || !data) {
         if (error?.code === "22023") {
-          localStorage.removeItem(`khien-so-pending:${pending.userId}`);
+          safeStorageRemove(`khien-so-pending:${pending.userId}`);
           setPendingChoice(null);
           setDataStatus("Nội dung hoặc lượt chơi đã thay đổi. Vui lòng tải lại trang trước khi trả lời.");
         } else setDataStatus("Chưa xác nhận được kết quả. Câu trả lời đã được giữ trên thiết bị; hãy thử lưu lại khi có mạng.");
@@ -901,7 +916,7 @@ export default function Home() {
       setAnswerOutcome(state.outcome ?? null);
       if (result && !result.correct) setLossNotice({ scenarioTitle: pending.scenario.title,
         amountLost: Math.max(0, -(state.outcome?.moneyDelta ?? 0)), awarenessLost: Math.max(0, -(state.outcome?.awarenessDelta ?? 0)), balanceAfter: state.balance });
-      localStorage.removeItem(`khien-so-pending:${pending.userId}`);
+      safeStorageRemove(`khien-so-pending:${pending.userId}`);
       setPendingChoice(null);
       if (state.results.length >= scenarios.length) await refreshCertificates(pending.runId);
       else setDataStatus("Đã xác nhận và lưu kết quả.");
