@@ -28,3 +28,19 @@ test("Pages build runs SEO wave 5 after indexation enrichment", async () => {
   assert.ok(build.indexOf("patch-indexation-wave4.mjs") < build.indexOf("patch-google-traffic-wave5.mjs"));
   assert.ok(build.indexOf("patch-google-traffic-wave5.mjs") < build.indexOf("patch-realtime-analytics.mjs"));
 });
+
+test("Knowledge hub uses the shared Cảnh Giác Số visual system", async () => {
+  const [hub, styles] = await Promise.all([
+    read("public/kien-thuc/index.html"),
+    read("public/seo.css"),
+  ]);
+
+  assert.match(hub, /<link rel="stylesheet" href="\/seo\.css"/);
+  assert.match(hub, /class="seo-header"/);
+  assert.match(hub, /class="seo-brand-logo"/);
+  assert.match(hub, /id="google-priority-tools"/);
+  assert.match(styles, /\.seo-header\s*\{[\s\S]*position: sticky/);
+  assert.match(styles, /\.seo-brand-logo\s*\{[\s\S]*khien-so-logo\.png/);
+  assert.match(styles, /#google-priority-tools\s*\{[\s\S]*box-shadow: 0 0 0 100vmax/);
+  assert.match(styles, /\.seo-card\s*\{[\s\S]*border-radius: 8px/);
+});
