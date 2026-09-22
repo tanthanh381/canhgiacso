@@ -30,12 +30,15 @@ test("Pages build runs SEO wave 5 after indexation enrichment", async () => {
 });
 
 test("Knowledge hub uses the shared Cảnh Giác Số visual system", async () => {
-  const [hub, styles] = await Promise.all([
+  const [hub, styles, patchKnowledgeUi] = await Promise.all([
     read("public/kien-thuc/index.html"),
     read("public/seo.css"),
+    read("scripts/patch-knowledge-ui.mjs"),
   ]);
 
   assert.match(hub, /<link rel="stylesheet" href="\/seo\.css"/);
+  assert.match(patchKnowledgeUi, /SEO_CSS_VERSION = "20260922-ui"/);
+  assert.match(patchKnowledgeUi, /\/seo\.css\?v=\$\{SEO_CSS_VERSION\}/);
   assert.match(hub, /class="seo-header"/);
   assert.match(hub, /class="seo-brand-logo"/);
   assert.match(hub, /id="google-priority-tools"/);
