@@ -1,0 +1,61 @@
+name: Cross Browser QC
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "app/**"
+      - "github-pages/**"
+      - "public/**"
+      - "tests/e2e/**"
+      - "playwright.qc.config.ts"
+      - ".github/workflows/cross-browser-qc.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cross-browser-qc-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
+        with:
+          version: 10
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build:pages
+      - name: Install Playwright test runtime
+        run: pnpm add -D --ignore-scripts @playwright/test@1.55.0
+      - name: Install browser engines
+        run: pnpm exec playwright install --with-deps chromium firefox webkit
+      - name: Start static server
+        run: |
+          python3 -m http.server 4173 --directory docs >/tmp/canhgiacso-qc-server.log 2>&1 &
+          for i in {1..30}; do
+            curl -fsS http://127.0.0.1:4173/ >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/canhgiacso-qc-server.log
+          exit 1
+      - name: Run cross-browser QC
+        run: pnpm exec playwright test --config=playwright.qc.config.ts
+      - name: Upload QC artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cross-browser-qc-artifacts
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7
