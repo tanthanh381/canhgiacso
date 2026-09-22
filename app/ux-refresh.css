@@ -43,7 +43,7 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
   display: flex;
   flex-direction: column;
   position: fixed;
-  z-index: 72;
+  z-index: 104;
   right: 0;
   top: 78px;
   bottom: 0;
@@ -144,9 +144,9 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
 .ux-utility-backdrop,
 .ux-mobile-menu-backdrop { display: none; }
 
-.ux-drawer-backdrop { position: fixed; inset: 0; z-index: 68; border: 0; background: rgba(10, 10, 10, .28); cursor: default; }
-.ux-insight-backdrop { z-index: 69; }
-.ux-drawer-close { position: fixed; z-index: 76; width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 50%; background: var(--surface); color: var(--ink); cursor: pointer; font-size: 20px; box-shadow: var(--shadow); }
+.ux-drawer-backdrop { position: fixed; inset: 0; z-index: 100; border: 0; background: rgba(10, 10, 10, .28); cursor: default; }
+.ux-insight-backdrop { z-index: 101; }
+.ux-drawer-close { position: fixed; z-index: 108; width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 50%; background: var(--surface); color: var(--ink); cursor: pointer; font-size: 20px; box-shadow: var(--shadow); }
 .ux-insight-close { right: min(315px, calc(92vw - 45px)); top: 91px; }
 .ux-scenario-close { display: none; }
 
@@ -161,6 +161,7 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
 }
 
 @media (max-width: 900px) {
+  html, body, .app { max-width: 100%; overflow-x: hidden; }
   body { padding-bottom: 0; }
   .topbar {
     height: 64px;
@@ -199,7 +200,7 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
   .stage { padding: 14px 14px 34px; }
   .scenario-panel {
     position: fixed;
-    z-index: 73;
+    z-index: 104;
     left: 0;
     top: 0;
     bottom: 0;
