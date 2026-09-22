@@ -147,7 +147,7 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
 .ux-insight-close { right: min(315px, calc(92vw - 45px)); top: 91px; }
 .ux-scenario-close { display: none; }
 
-/* Mobile keeps the same content and actions as desktop, adapted into bottom navigation + drawers. */
+/* Mobile keeps the same content and actions as desktop, adapted into top navigation + drawers. */
 .ux-bottom-nav { display: none; }
 
 @media (max-width: 1180px) {
@@ -158,8 +158,13 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
 }
 
 @media (max-width: 900px) {
-  body { padding-bottom: 68px; }
-  .topbar { height: 64px; grid-template-columns: minmax(0, 1fr) auto; padding: 0 14px; }
+  body { padding-bottom: 0; }
+  .topbar {
+    height: 64px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: 0 14px;
+    margin-bottom: 66px;
+  }
   .brand { min-width: 0; }
   .brand-logo { width: 44px; height: 44px; background-size: 46px 46px; }
   .product-lockup { min-width: 0; overflow: hidden; }
@@ -229,25 +234,28 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
   .ux-bottom-nav {
     position: fixed;
     z-index: 66;
-    left: 8px;
-    right: 8px;
-    bottom: max(8px, env(safe-area-inset-bottom));
+    top: 64px;
+    left: 0;
+    right: 0;
+    bottom: auto;
     height: 58px;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    border: 1px solid var(--line);
-    border-radius: 17px;
-    background: color-mix(in srgb, var(--surface) 96%, transparent);
+    border: 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+    background: color-mix(in srgb, var(--surface) 97%, transparent);
     backdrop-filter: blur(16px);
-    box-shadow: 0 12px 34px rgba(20, 20, 20, .18);
-    padding: 4px;
+    box-shadow: 0 8px 20px rgba(20, 20, 20, .08);
+    padding: 4px 8px;
   }
   .ux-bottom-nav button { border: 0; background: transparent; color: var(--muted); border-radius: 12px; display: grid; place-items: center; align-content: center; gap: 1px; cursor: pointer; }
   .ux-bottom-nav button > span { font-size: 17px; line-height: 1; }
   .ux-bottom-nav small { font-size: 10px; font-weight: 750; }
   .ux-bottom-nav button.active { color: var(--ux-brand); background: color-mix(in srgb, var(--ux-brand) 7%, var(--surface)); }
 
-  .content-page { padding-bottom: 92px; }
+  .content-page { padding-bottom: 32px; }
 }
 
 @media (max-width: 560px) {
