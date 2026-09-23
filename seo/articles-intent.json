@@ -1,72 +1,206 @@
 [
   {
-    "slug":"tra-cuu-lua-dao",
-    "title":"Tra cứu lừa đảo: Số điện thoại, tài khoản và link giả mạo",
-    "meta":"Hướng dẫn tra cứu lừa đảo trước khi giao dịch: kiểm tra số điện thoại, số tài khoản ngân hàng, đường link và website giả mạo bằng nhiều nguồn độc lập.",
-    "eyebrow":"Tra cứu lừa đảo",
-    "h1":"Tra cứu lừa đảo trước khi chuyển tiền, bấm link hoặc cung cấp thông tin",
-    "lead":"Khi một số điện thoại, tài khoản ngân hàng hoặc đường link làm bạn nghi ngờ, mục tiêu không phải là tìm một dấu xác nhận duy nhất rằng đối tượng an toàn. Cách hiệu quả hơn là kiểm tra chéo nhiều tín hiệu độc lập trước khi hành động.",
-    "published":"2026-09-14",
-    "sections":[
-      ["Chọn đúng cách tra cứu theo thứ bạn đang có", "<div class=\"seo-grid\"><a class=\"seo-card\" href=\"/kien-thuc/kiem-tra-so-dien-thoai-lua-dao/\"><small>Cuộc gọi / SMS</small><h3>Kiểm tra số điện thoại lừa đảo</h3><p>Tra cứu số lạ, đối chiếu dấu vết công khai và đánh giá hành vi của người gọi.</p></a><a class=\"seo-card\" href=\"/kien-thuc/tra-cuu-so-tai-khoan-lua-dao/\"><small>Chuyển khoản</small><h3>Tra cứu số tài khoản lừa đảo</h3><p>Kiểm tra thông tin người nhận và các cảnh báo công khai trước khi chuyển tiền.</p></a><a class=\"seo-card\" href=\"/kien-thuc/kiem-tra-link-gia-mao/\"><small>Link / website</small><h3>Kiểm tra link lừa đảo</h3><p>Đọc tên miền, kiểm tra điểm đến và đối chiếu với nguồn cảnh báo uy tín.</p></a></div>"],
-      ["Quy trình tra cứu 60 giây trước khi giao dịch", "<ol class=\"seo-checklist\"><li><strong>Dừng giao dịch.</strong> Không vừa tra cứu vừa tiếp tục làm theo hướng dẫn của người đang liên hệ.</li><li><strong>Chuẩn hóa dữ liệu cần kiểm tra.</strong> Ghi lại đầy đủ số điện thoại, số tài khoản, tên ngân hàng, tên người nhận hoặc URL thực tế.</li><li><strong>Tìm chính xác trên công cụ tìm kiếm.</strong> Đặt số điện thoại, số tài khoản hoặc tên miền trong dấu ngoặc kép để tìm các kết quả khớp chính xác.</li><li><strong>Đối chiếu với nguồn độc lập.</strong> Tự mở website, ứng dụng hoặc hotline chính thức; không dùng link và số liên hệ do đối tượng cung cấp.</li><li><strong>Đánh giá hành vi.</strong> Yêu cầu OTP, cài app lạ, giữ bí mật, chuyển tiền khẩn hoặc lợi nhuận bất thường là các tín hiệu rủi ro mạnh hơn một hồ sơ mạng xã hội đẹp.</li><li><strong>Không có cảnh báo không đồng nghĩa an toàn.</strong> Số điện thoại và tài khoản mới có thể chưa từng bị báo cáo.</li></ol>"],
-      ["Tại sao một kết quả tra cứu duy nhất là chưa đủ?", "<p>Các cơ sở dữ liệu cộng đồng và danh sách cảnh báo luôn có độ trễ. Kẻ xấu có thể thay SIM, tài khoản nhận tiền, tên miền và tài khoản mạng xã hội rất nhanh. Ngược lại, dữ liệu cộng đồng cũng có thể có báo cáo sai hoặc thiếu ngữ cảnh. Vì vậy, Cảnh Giác Số khuyến nghị xem kết quả tra cứu là một tín hiệu hỗ trợ, không phải chứng nhận an toàn.</p><p>Đặc biệt với giao dịch tài chính, hãy ưu tiên xác minh danh tính người nhận, mục đích giao dịch và kênh liên hệ chính thức. Nếu bên kia phản ứng tiêu cực khi bạn muốn kiểm tra độc lập, đó là lý do đủ để dừng giao dịch.</p>"],
-      ["Những dấu hiệu phải dừng ngay dù chưa tra ra cảnh báo", "<ul class=\"seo-checklist\"><li>Yêu cầu đọc OTP, mật khẩu, PIN, CVV hoặc mã khôi phục.</li><li>Yêu cầu cài APK, phần mềm điều khiển từ xa hoặc bật quyền trợ năng.</li><li>Yêu cầu chuyển tiền sang “tài khoản an toàn”, “tài khoản xác minh” hoặc tài khoản cá nhân không liên quan.</li><li>Dọa khóa tài khoản, bắt giữ, phạt nguội hoặc phát sinh hậu quả nếu không thực hiện ngay.</li><li>Cam kết lợi nhuận cao, rút tiền chắc chắn hoặc việc nhẹ lương cao nhưng phải nạp tiền trước.</li><li>Không cho bạn tự gọi lại qua số chính thức hoặc hỏi người thân.</li></ul>"],
-      ["Nguồn kiểm chứng nên ưu tiên", "<p>Với website hoặc tên miền nghi ngờ, có thể đối chiếu thêm hệ thống cảnh báo được cơ quan chức năng giới thiệu tại <a href=\"https://tinnhiemmang.vn/website-lua-dao\" rel=\"noopener noreferrer\">Tín nhiệm mạng</a>. Hiệp hội An ninh mạng Quốc gia cũng phát triển nTrust để hỗ trợ kiểm tra số điện thoại, website, số tài khoản, ứng dụng và mã QR. Khi liên quan ngân hàng hoặc cơ quan nhà nước, hãy tự tìm hotline, ứng dụng và website chính thức của tổ chức đó.</p><p>Tham khảo thêm cảnh báo mới của <a href=\"https://www.bocongan.gov.vn/bai-viet/nang-cao-canh-giac-truoc-25-kich-ban-lua-dao-tren-khong-gian-mang-nam-2026-1788865614\" rel=\"noopener noreferrer\">Bộ Công an về các kịch bản lừa đảo năm 2026</a>.</p>"]
+    "slug": "tra-cuu-lua-dao",
+    "title": "Tra cứu lừa đảo: Số điện thoại, tài khoản và link giả mạo",
+    "meta": "Hướng dẫn tra cứu lừa đảo trước khi giao dịch: kiểm tra số điện thoại, số tài khoản ngân hàng, đường link và website giả mạo bằng nhiều nguồn độc lập.",
+    "eyebrow": "Tra cứu lừa đảo",
+    "h1": "Tra cứu lừa đảo trước khi chuyển tiền, bấm link hoặc cung cấp thông tin",
+    "lead": "Khi một số điện thoại, tài khoản ngân hàng hoặc đường link làm bạn nghi ngờ, mục tiêu không phải là tìm một dấu xác nhận duy nhất rằng đối tượng an toàn. Cách hiệu quả hơn là kiểm tra chéo nhiều tín hiệu độc lập trước khi hành động.",
+    "published": "2026-09-14",
+    "sections": [
+      [
+        "Chọn đúng cách tra cứu theo thứ bạn đang có",
+        "<div class=\"seo-grid\"><a class=\"seo-card\" href=\"/kien-thuc/kiem-tra-so-dien-thoai-lua-dao/\"><small>Cuộc gọi / SMS</small><h3>Kiểm tra số điện thoại lừa đảo</h3><p>Tra cứu số lạ, đối chiếu dấu vết công khai và đánh giá hành vi của người gọi.</p></a><a class=\"seo-card\" href=\"/kien-thuc/tra-cuu-so-tai-khoan-lua-dao/\"><small>Chuyển khoản</small><h3>Tra cứu số tài khoản lừa đảo</h3><p>Kiểm tra thông tin người nhận và các cảnh báo công khai trước khi chuyển tiền.</p></a><a class=\"seo-card\" href=\"/kien-thuc/kiem-tra-link-gia-mao/\"><small>Link / website</small><h3>Kiểm tra link lừa đảo</h3><p>Đọc tên miền, kiểm tra điểm đến và đối chiếu với nguồn cảnh báo uy tín.</p></a></div>"
+      ],
+      [
+        "Quy trình tra cứu 60 giây trước khi giao dịch",
+        "<ol class=\"seo-checklist\"><li><strong>Dừng giao dịch.</strong> Không vừa tra cứu vừa tiếp tục làm theo hướng dẫn của người đang liên hệ.</li><li><strong>Chuẩn hóa dữ liệu cần kiểm tra.</strong> Ghi lại đầy đủ số điện thoại, số tài khoản, tên ngân hàng, tên người nhận hoặc URL thực tế.</li><li><strong>Tìm chính xác trên công cụ tìm kiếm.</strong> Đặt số điện thoại, số tài khoản hoặc tên miền trong dấu ngoặc kép để tìm các kết quả khớp chính xác.</li><li><strong>Đối chiếu với nguồn độc lập.</strong> Tự mở website, ứng dụng hoặc hotline chính thức; không dùng link và số liên hệ do đối tượng cung cấp.</li><li><strong>Đánh giá hành vi.</strong> Yêu cầu OTP, cài app lạ, giữ bí mật, chuyển tiền khẩn hoặc lợi nhuận bất thường là các tín hiệu rủi ro mạnh hơn một hồ sơ mạng xã hội đẹp.</li><li><strong>Không có cảnh báo không đồng nghĩa an toàn.</strong> Số điện thoại và tài khoản mới có thể chưa từng bị báo cáo.</li></ol>"
+      ],
+      [
+        "Tại sao một kết quả tra cứu duy nhất là chưa đủ?",
+        "<p>Các cơ sở dữ liệu cộng đồng và danh sách cảnh báo luôn có độ trễ. Kẻ xấu có thể thay SIM, tài khoản nhận tiền, tên miền và tài khoản mạng xã hội rất nhanh. Ngược lại, dữ liệu cộng đồng cũng có thể có báo cáo sai hoặc thiếu ngữ cảnh. Vì vậy, Cảnh Giác Số khuyến nghị xem kết quả tra cứu là một tín hiệu hỗ trợ, không phải chứng nhận an toàn.</p><p>Đặc biệt với giao dịch tài chính, hãy ưu tiên xác minh danh tính người nhận, mục đích giao dịch và kênh liên hệ chính thức. Nếu bên kia phản ứng tiêu cực khi bạn muốn kiểm tra độc lập, đó là lý do đủ để dừng giao dịch.</p>"
+      ],
+      [
+        "Những dấu hiệu phải dừng ngay dù chưa tra ra cảnh báo",
+        "<ul class=\"seo-checklist\"><li>Yêu cầu đọc OTP, mật khẩu, PIN, CVV hoặc mã khôi phục.</li><li>Yêu cầu cài APK, phần mềm điều khiển từ xa hoặc bật quyền trợ năng.</li><li>Yêu cầu chuyển tiền sang “tài khoản an toàn”, “tài khoản xác minh” hoặc tài khoản cá nhân không liên quan.</li><li>Dọa khóa tài khoản, bắt giữ, phạt nguội hoặc phát sinh hậu quả nếu không thực hiện ngay.</li><li>Cam kết lợi nhuận cao, rút tiền chắc chắn hoặc việc nhẹ lương cao nhưng phải nạp tiền trước.</li><li>Không cho bạn tự gọi lại qua số chính thức hoặc hỏi người thân.</li></ul>"
+      ],
+      [
+        "Nguồn kiểm chứng nên ưu tiên",
+        "<p>Với website hoặc tên miền nghi ngờ, có thể đối chiếu thêm hệ thống cảnh báo được cơ quan chức năng giới thiệu tại <a href=\"https://tinnhiemmang.vn/website-lua-dao\" rel=\"noopener noreferrer\">Tín nhiệm mạng</a>. Hiệp hội An ninh mạng Quốc gia cũng phát triển nTrust để hỗ trợ kiểm tra số điện thoại, website, số tài khoản, ứng dụng và mã QR. Khi liên quan ngân hàng hoặc cơ quan nhà nước, hãy tự tìm hotline, ứng dụng và website chính thức của tổ chức đó.</p><p>Tham khảo thêm cảnh báo mới của <a href=\"https://www.bocongan.gov.vn/bai-viet/nang-cao-canh-giac-truoc-25-kich-ban-lua-dao-tren-khong-gian-mang-nam-2026-1788865614\" rel=\"noopener noreferrer\">Bộ Công an về các kịch bản lừa đảo năm 2026</a>.</p>"
+      ]
     ],
-    "related":[["Kiểm tra số điện thoại lừa đảo","/kien-thuc/kiem-tra-so-dien-thoai-lua-dao/"],["Tra cứu số tài khoản lừa đảo","/kien-thuc/tra-cuu-so-tai-khoan-lua-dao/"],["Kiểm tra link và website giả mạo","/kien-thuc/kiem-tra-link-gia-mao/"],["25 kịch bản lừa đảo năm 2026","/kien-thuc/25-kich-ban-lua-dao-2026/"]]
+    "related": [
+      [
+        "Kiểm tra số điện thoại lừa đảo",
+        "/kien-thuc/kiem-tra-so-dien-thoai-lua-dao/"
+      ],
+      [
+        "Tra cứu số tài khoản lừa đảo",
+        "/kien-thuc/tra-cuu-so-tai-khoan-lua-dao/"
+      ],
+      [
+        "Kiểm tra link và website giả mạo",
+        "/kien-thuc/kiem-tra-link-gia-mao/"
+      ],
+      [
+        "25 kịch bản lừa đảo năm 2026",
+        "/kien-thuc/25-kich-ban-lua-dao-2026/"
+      ]
+    ]
   },
   {
-    "slug":"kiem-tra-so-dien-thoai-lua-dao",
-    "title":"Kiểm tra số điện thoại lừa đảo: 7 cách tra cứu an toàn",
-    "meta":"Cách kiểm tra số điện thoại lừa đảo hoặc số lạ gọi đến: tìm kiếm chính xác, kiểm tra nguồn công khai, xác minh danh tính và nhận biết cuộc gọi mạo danh.",
-    "eyebrow":"Tra cứu số điện thoại",
-    "h1":"Kiểm tra số điện thoại lừa đảo: 7 cách tra cứu trước khi tin",
-    "lead":"Một số điện thoại chưa từng bị báo cáo vẫn có thể được dùng để lừa đảo, và số hiển thị trên màn hình cũng có thể không phản ánh đầy đủ danh tính người gọi. Vì vậy, hãy kết hợp tra cứu số với kiểm tra hành vi và xác minh qua kênh chính thức.",
-    "published":"2026-09-14",
-    "sections":[
-      ["7 cách kiểm tra số điện thoại lạ hoặc nghi lừa đảo", "<ol class=\"seo-checklist\"><li><strong>Tìm số điện thoại chính xác trên Google.</strong> Đặt số trong dấu ngoặc kép, thử cả dạng có và không có mã quốc gia +84 để tìm bài cảnh báo, thảo luận và thông tin doanh nghiệp.</li><li><strong>Kiểm tra trên các nguồn chống lừa đảo uy tín.</strong> Có thể đối chiếu ứng dụng nTrust của Hiệp hội An ninh mạng Quốc gia và các nguồn cảnh báo chính thống khác.</li><li><strong>Không tin tên hiển thị của cuộc gọi.</strong> Brandname, ảnh đại diện và tên tài khoản có thể bị lợi dụng để tạo cảm giác quen thuộc.</li><li><strong>Tự gọi lại qua số chính thức.</strong> Nếu người gọi tự xưng là ngân hàng, công an, đơn vị giao hàng hoặc doanh nghiệp, hãy kết thúc cuộc gọi rồi tự tìm số liên hệ trên website/app chính thức.</li><li><strong>Đối chiếu nội dung họ biết về bạn.</strong> Việc người gọi biết họ tên, địa chỉ hoặc một phần thông tin giao dịch không chứng minh họ là người thật; dữ liệu có thể đến từ rò rỉ hoặc nguồn công khai.</li><li><strong>Kiểm tra hành vi yêu cầu.</strong> Đòi OTP, yêu cầu cài app, chia sẻ màn hình, chuyển tiền khẩn hoặc giữ bí mật là tín hiệu rủi ro nghiêm trọng.</li><li><strong>Chặn và báo cáo khi cần.</strong> Nếu cuộc gọi có dấu hiệu lừa đảo hoặc quấy rối, không tiếp tục tranh luận; lưu bằng chứng cần thiết rồi sử dụng chức năng chặn/báo cáo của thiết bị hoặc nền tảng.</li></ol>"],
-      ["Cách tìm số điện thoại trên Google hiệu quả hơn", "<p>Hãy tìm cả số nguyên bản và các biến thể thường gặp. Ví dụ với số bắt đầu bằng 0, thử thêm phiên bản +84 và bỏ số 0 đầu. Dùng dấu ngoặc kép để Google ưu tiên chuỗi khớp chính xác. Có thể kết hợp với các từ khóa như <strong>lừa đảo</strong>, <strong>spam</strong>, <strong>ngân hàng</strong>, <strong>shipper</strong> hoặc tên doanh nghiệp mà người gọi tự xưng.</p><p>Khi đọc kết quả, ưu tiên nguồn có danh tính rõ ràng và bối cảnh cụ thể. Một bình luận đơn lẻ không đủ để kết luận một số điện thoại thuộc kẻ lừa đảo; nhưng nhiều báo cáo độc lập với cùng mô típ hành vi là tín hiệu đáng lưu ý.</p>"],
-      ["Các kiểu cuộc gọi cần đặc biệt cảnh giác", "<ul class=\"seo-checklist\"><li>Mạo danh công an, viện kiểm sát, tòa án hoặc cơ quan nhà nước để dọa liên quan vụ án.</li><li>Mạo danh ngân hàng để yêu cầu OTP, xác minh tài khoản hoặc cài ứng dụng.</li><li>Mạo danh shipper yêu cầu chuyển khoản phí nhỏ rồi dẫn sang QR/link hoàn tiền.</li><li>Giả người thân hoặc lãnh đạo, kể cả bằng giọng nói/video deepfake, để vay tiền hoặc chuyển khoản khẩn.</li><li>Thông báo trúng thưởng, hoàn thuế, hoàn tiền, khoản vay hoặc việc làm nhưng yêu cầu đóng phí trước.</li></ul>"],
-      ["Không tìm thấy cảnh báo thì số đó có an toàn không?", "<p>Không. Danh sách cảnh báo luôn chậm hơn thực tế vì số điện thoại mới có thể được sử dụng ngay trước khi có nạn nhân báo cáo. SIM cũng có thể bị bỏ, thay đổi hoặc dùng trong thời gian ngắn. Vì vậy, kết quả “không tìm thấy” chỉ có nghĩa là bạn chưa thấy dữ liệu công khai phù hợp, không phải chứng nhận số đó an toàn.</p><div class=\"seo-note\"><strong>Quy tắc quyết định:</strong><p>Nếu yêu cầu của người gọi liên quan tiền, mã xác thực, cài ứng dụng hoặc dữ liệu nhạy cảm, hãy xác minh danh tính qua một kênh độc lập trước khi làm bất kỳ bước nào.</p></div>"],
-      ["Nguồn tham khảo", "<p>Ứng dụng nTrust của Hiệp hội An ninh mạng Quốc gia được giới thiệu với chức năng kiểm tra số điện thoại, website, số tài khoản, ứng dụng và mã QR. Bạn cũng có thể tham khảo hướng dẫn báo chí về <a href=\"https://vietnamnet.vn/huong-dan-kiem-tra-so-dien-thoai-lua-dao-2455380.html\" rel=\"noopener noreferrer\">cách kiểm tra số điện thoại lừa đảo</a> và đối chiếu thêm các cảnh báo từ cơ quan chức năng.</p>"]
+    "slug": "kiem-tra-so-dien-thoai-lua-dao",
+    "title": "Kiểm tra số điện thoại lừa đảo: 7 cách tra cứu an toàn",
+    "meta": "Cách kiểm tra số điện thoại lừa đảo hoặc số lạ gọi đến: tìm kiếm chính xác, kiểm tra nguồn công khai, xác minh danh tính và nhận biết cuộc gọi mạo danh.",
+    "eyebrow": "Tra cứu số điện thoại",
+    "h1": "Kiểm tra số điện thoại lừa đảo: 7 cách tra cứu trước khi tin",
+    "lead": "Một số điện thoại chưa từng bị báo cáo vẫn có thể được dùng để lừa đảo, và số hiển thị trên màn hình cũng có thể không phản ánh đầy đủ danh tính người gọi. Vì vậy, hãy kết hợp tra cứu số với kiểm tra hành vi và xác minh qua kênh chính thức.",
+    "published": "2026-09-14",
+    "sections": [
+      [
+        "7 cách kiểm tra số điện thoại lạ hoặc nghi lừa đảo",
+        "<ol class=\"seo-checklist\"><li><strong>Tìm số điện thoại chính xác trên Google.</strong> Đặt số trong dấu ngoặc kép, thử cả dạng có và không có mã quốc gia +84 để tìm bài cảnh báo, thảo luận và thông tin doanh nghiệp.</li><li><strong>Kiểm tra trên các nguồn chống lừa đảo uy tín.</strong> Có thể đối chiếu ứng dụng nTrust của Hiệp hội An ninh mạng Quốc gia và các nguồn cảnh báo chính thống khác.</li><li><strong>Không tin tên hiển thị của cuộc gọi.</strong> Brandname, ảnh đại diện và tên tài khoản có thể bị lợi dụng để tạo cảm giác quen thuộc.</li><li><strong>Tự gọi lại qua số chính thức.</strong> Nếu người gọi tự xưng là ngân hàng, công an, đơn vị giao hàng hoặc doanh nghiệp, hãy kết thúc cuộc gọi rồi tự tìm số liên hệ trên website/app chính thức.</li><li><strong>Đối chiếu nội dung họ biết về bạn.</strong> Việc người gọi biết họ tên, địa chỉ hoặc một phần thông tin giao dịch không chứng minh họ là người thật; dữ liệu có thể đến từ rò rỉ hoặc nguồn công khai.</li><li><strong>Kiểm tra hành vi yêu cầu.</strong> Đòi OTP, yêu cầu cài app, chia sẻ màn hình, chuyển tiền khẩn hoặc giữ bí mật là tín hiệu rủi ro nghiêm trọng.</li><li><strong>Chặn và báo cáo khi cần.</strong> Nếu cuộc gọi có dấu hiệu lừa đảo hoặc quấy rối, không tiếp tục tranh luận; lưu bằng chứng cần thiết rồi sử dụng chức năng chặn/báo cáo của thiết bị hoặc nền tảng.</li></ol>"
+      ],
+      [
+        "Cách tìm số điện thoại trên Google hiệu quả hơn",
+        "<p>Hãy tìm cả số nguyên bản và các biến thể thường gặp. Ví dụ với số bắt đầu bằng 0, thử thêm phiên bản +84 và bỏ số 0 đầu. Dùng dấu ngoặc kép để Google ưu tiên chuỗi khớp chính xác. Có thể kết hợp với các từ khóa như <strong>lừa đảo</strong>, <strong>spam</strong>, <strong>ngân hàng</strong>, <strong>shipper</strong> hoặc tên doanh nghiệp mà người gọi tự xưng.</p><p>Khi đọc kết quả, ưu tiên nguồn có danh tính rõ ràng và bối cảnh cụ thể. Một bình luận đơn lẻ không đủ để kết luận một số điện thoại thuộc kẻ lừa đảo; nhưng nhiều báo cáo độc lập với cùng mô típ hành vi là tín hiệu đáng lưu ý.</p>"
+      ],
+      [
+        "Các kiểu cuộc gọi cần đặc biệt cảnh giác",
+        "<ul class=\"seo-checklist\"><li>Mạo danh công an, viện kiểm sát, tòa án hoặc cơ quan nhà nước để dọa liên quan vụ án.</li><li>Mạo danh ngân hàng để yêu cầu OTP, xác minh tài khoản hoặc cài ứng dụng.</li><li>Mạo danh shipper yêu cầu chuyển khoản phí nhỏ rồi dẫn sang QR/link hoàn tiền.</li><li>Giả người thân hoặc lãnh đạo, kể cả bằng giọng nói/video deepfake, để vay tiền hoặc chuyển khoản khẩn.</li><li>Thông báo trúng thưởng, hoàn thuế, hoàn tiền, khoản vay hoặc việc làm nhưng yêu cầu đóng phí trước.</li></ul>"
+      ],
+      [
+        "Không tìm thấy cảnh báo thì số đó có an toàn không?",
+        "<p>Không. Danh sách cảnh báo luôn chậm hơn thực tế vì số điện thoại mới có thể được sử dụng ngay trước khi có nạn nhân báo cáo. SIM cũng có thể bị bỏ, thay đổi hoặc dùng trong thời gian ngắn. Vì vậy, kết quả “không tìm thấy” chỉ có nghĩa là bạn chưa thấy dữ liệu công khai phù hợp, không phải chứng nhận số đó an toàn.</p><div class=\"seo-note\"><strong>Quy tắc quyết định:</strong><p>Nếu yêu cầu của người gọi liên quan tiền, mã xác thực, cài ứng dụng hoặc dữ liệu nhạy cảm, hãy xác minh danh tính qua một kênh độc lập trước khi làm bất kỳ bước nào.</p></div>"
+      ],
+      [
+        "Nguồn tham khảo",
+        "<p>Ứng dụng nTrust của Hiệp hội An ninh mạng Quốc gia được giới thiệu với chức năng kiểm tra số điện thoại, website, số tài khoản, ứng dụng và mã QR. Bạn cũng có thể tham khảo hướng dẫn báo chí về <a href=\"https://vietnamnet.vn/huong-dan-kiem-tra-so-dien-thoai-lua-dao-2455380.html\" rel=\"noopener noreferrer\">cách kiểm tra số điện thoại lừa đảo</a> và đối chiếu thêm các cảnh báo từ cơ quan chức năng.</p>"
+      ]
     ],
-    "related":[["Tra cứu lừa đảo trước khi giao dịch","/kien-thuc/tra-cuu-lua-dao/"],["Giả mạo công an, cơ quan nhà nước","/kien-thuc/gia-mao-cong-an-co-quan-nha-nuoc/"],["Giả mạo ngân hàng","/kien-thuc/gia-mao-ngan-hang/"],["Deepfake giả giọng người thân","/kien-thuc/deepfake-gia-giong-nguoi-than/"]]
+    "related": [
+      [
+        "Tra cứu lừa đảo trước khi giao dịch",
+        "/kien-thuc/tra-cuu-lua-dao/"
+      ],
+      [
+        "Giả mạo công an, cơ quan nhà nước",
+        "/kien-thuc/gia-mao-cong-an-co-quan-nha-nuoc/"
+      ],
+      [
+        "Giả mạo ngân hàng",
+        "/kien-thuc/gia-mao-ngan-hang/"
+      ],
+      [
+        "Deepfake giả giọng người thân",
+        "/kien-thuc/deepfake-gia-giong-nguoi-than/"
+      ]
+    ]
   },
   {
-    "slug":"tra-cuu-so-tai-khoan-lua-dao",
-    "title":"Tra cứu số tài khoản lừa đảo trước khi chuyển tiền",
-    "meta":"Hướng dẫn tra cứu số tài khoản lừa đảo trước khi chuyển khoản: kiểm tra tên người nhận, tìm dấu vết công khai, đối chiếu nhiều nguồn và nhận biết tài khoản đáng ngờ.",
-    "eyebrow":"Tra cứu tài khoản ngân hàng",
-    "h1":"Tra cứu số tài khoản lừa đảo: kiểm tra gì trước khi chuyển tiền?",
-    "lead":"Không có một danh sách công khai nào có thể bảo đảm bao phủ mọi tài khoản được dùng để nhận tiền lừa đảo. Trước khi chuyển khoản, hãy coi việc tra cứu là bước sàng lọc và kết hợp với xác minh danh tính, mục đích giao dịch và tên người nhận.",
-    "published":"2026-09-14",
-    "sections":[
-      ["6 bước kiểm tra số tài khoản trước khi chuyển tiền", "<ol class=\"seo-checklist\"><li><strong>Nhập số tài khoản trong ứng dụng ngân hàng nhưng chưa xác nhận giao dịch.</strong> Đối chiếu tên người nhận hiển thị với người hoặc tổ chức bạn đang giao dịch.</li><li><strong>Tìm số tài khoản chính xác trên Google.</strong> Đặt số trong dấu ngoặc kép và thử kèm các từ “lừa đảo”, “scam”, tên ngân hàng hoặc tên người nhận.</li><li><strong>Đối chiếu các nguồn cảnh báo chống lừa đảo.</strong> Nếu một nguồn cộng đồng báo cáo tài khoản, hãy đọc bối cảnh và tìm thêm nguồn thứ hai trước khi kết luận.</li><li><strong>Kiểm tra lý do sử dụng tài khoản cá nhân.</strong> Khi thanh toán cho doanh nghiệp hoặc dịch vụ chính thức nhưng người nhận là cá nhân không liên quan, cần hỏi lại qua kênh chính thức.</li><li><strong>Không chuyển sang tài khoản mới chỉ vì được báo “tài khoản cũ lỗi”.</strong> Thay đổi tài khoản nhận vào phút cuối là tín hiệu cần xác minh lại toàn bộ giao dịch.</li><li><strong>Dừng khi bị thúc ép.</strong> Bất kỳ yêu cầu chuyển tiền để mở khóa, nhận hoàn tiền, chứng minh trong sạch, đóng thuế/phí trước hoặc tăng hạn mức đều cần kiểm tra độc lập.</li></ol>"],
-      ["Tên người nhận khớp có nghĩa là an toàn không?", "<p>Không. Tên người nhận khớp chỉ xác nhận tài khoản ngân hàng đang mang tên đó, không xác nhận người này đang thực hiện một giao dịch hợp pháp. Tài khoản thật vẫn có thể bị chiếm quyền, cho thuê, mua bán hoặc được dùng làm tài khoản trung gian. Hãy xác minh cả <strong>người yêu cầu chuyển tiền</strong>, <strong>mục đích</strong> và <strong>kênh liên hệ</strong>.</p>"],
-      ["Những tình huống rủi ro cao liên quan chuyển khoản", "<ul class=\"seo-checklist\"><li>Mua hàng giá rẻ bất thường nhưng bắt đặt cọc toàn bộ.</li><li>Shipper yêu cầu chuyển khoản nhỏ rồi gửi link/QR “hủy đăng ký” hoặc “hoàn tiền”.</li><li>Cộng tác viên hoặc đầu tư online yêu cầu nạp thêm để mở khóa khoản rút.</li><li>Người tự xưng công an/ngân hàng yêu cầu chuyển sang tài khoản “an toàn” để xác minh.</li><li>Người quen nhắn vay tiền từ tài khoản mạng xã hội nhưng từ chối gọi video hoặc xác minh bằng kênh cũ.</li><li>Dịch vụ hứa lấy lại tiền bị lừa nhưng yêu cầu đóng phí trước.</li></ul>"],
-      ["Nếu đã chuyển tiền cho tài khoản nghi lừa đảo", "<p>Không chuyển thêm tiền dù đối tượng đưa ra lý do “phí hoàn tiền”, “thuế”, “mở khóa” hoặc “xác minh”. Liên hệ ngay ngân hàng bằng hotline/app/điểm giao dịch chính thức, lưu biên lai, thời gian giao dịch, số tài khoản nhận, nội dung chat, URL và các bằng chứng liên quan. Sau đó trình báo cơ quan chức năng theo hướng dẫn phù hợp.</p><p>Khả năng thu hồi tiền phụ thuộc nhiều yếu tố và không có dịch vụ bên ngoài nào có thể cam kết chắc chắn lấy lại tiền. Cảnh giác với các tài khoản tự xưng luật sư, chuyên gia hoặc đơn vị thu hồi tiền yêu cầu thanh toán trước.</p>"],
-      ["Nguồn kiểm chứng đáng tin cậy", "<p>Hiệp hội An ninh mạng Quốc gia phát triển nTrust với chức năng hỗ trợ kiểm tra số tài khoản cùng nhiều loại tín hiệu khác. Bộ Công an cũng liên tục cảnh báo các kịch bản mạo danh ngân hàng, cơ quan nhà nước, đầu tư và việc làm trực tuyến. Xem <a href=\"https://www.bocongan.gov.vn/bai-viet/nang-cao-canh-giac-truoc-25-kich-ban-lua-dao-tren-khong-gian-mang-nam-2026-1788865614\" rel=\"noopener noreferrer\">cảnh báo 25 kịch bản lừa đảo năm 2026</a>.</p>"]
+    "slug": "tra-cuu-so-tai-khoan-lua-dao",
+    "title": "Tra cứu số tài khoản lừa đảo trước khi chuyển tiền",
+    "meta": "Tra cứu số tài khoản lừa đảo trước khi chuyển khoản: kiểm tra người nhận, dấu vết công khai, đối chiếu nhiều nguồn và nhận biết tài khoản đáng ngờ.",
+    "eyebrow": "Tra cứu tài khoản ngân hàng",
+    "h1": "Tra cứu số tài khoản lừa đảo: kiểm tra gì trước khi chuyển tiền?",
+    "lead": "Không có một danh sách công khai nào có thể bảo đảm bao phủ mọi tài khoản được dùng để nhận tiền lừa đảo. Trước khi chuyển khoản, hãy coi việc tra cứu là bước sàng lọc và kết hợp với xác minh danh tính, mục đích giao dịch và tên người nhận.",
+    "published": "2026-09-14",
+    "sections": [
+      [
+        "6 bước kiểm tra số tài khoản trước khi chuyển tiền",
+        "<ol class=\"seo-checklist\"><li><strong>Nhập số tài khoản trong ứng dụng ngân hàng nhưng chưa xác nhận giao dịch.</strong> Đối chiếu tên người nhận hiển thị với người hoặc tổ chức bạn đang giao dịch.</li><li><strong>Tìm số tài khoản chính xác trên Google.</strong> Đặt số trong dấu ngoặc kép và thử kèm các từ “lừa đảo”, “scam”, tên ngân hàng hoặc tên người nhận.</li><li><strong>Đối chiếu các nguồn cảnh báo chống lừa đảo.</strong> Nếu một nguồn cộng đồng báo cáo tài khoản, hãy đọc bối cảnh và tìm thêm nguồn thứ hai trước khi kết luận.</li><li><strong>Kiểm tra lý do sử dụng tài khoản cá nhân.</strong> Khi thanh toán cho doanh nghiệp hoặc dịch vụ chính thức nhưng người nhận là cá nhân không liên quan, cần hỏi lại qua kênh chính thức.</li><li><strong>Không chuyển sang tài khoản mới chỉ vì được báo “tài khoản cũ lỗi”.</strong> Thay đổi tài khoản nhận vào phút cuối là tín hiệu cần xác minh lại toàn bộ giao dịch.</li><li><strong>Dừng khi bị thúc ép.</strong> Bất kỳ yêu cầu chuyển tiền để mở khóa, nhận hoàn tiền, chứng minh trong sạch, đóng thuế/phí trước hoặc tăng hạn mức đều cần kiểm tra độc lập.</li></ol>"
+      ],
+      [
+        "Tên người nhận khớp có nghĩa là an toàn không?",
+        "<p>Không. Tên người nhận khớp chỉ xác nhận tài khoản ngân hàng đang mang tên đó, không xác nhận người này đang thực hiện một giao dịch hợp pháp. Tài khoản thật vẫn có thể bị chiếm quyền, cho thuê, mua bán hoặc được dùng làm tài khoản trung gian. Hãy xác minh cả <strong>người yêu cầu chuyển tiền</strong>, <strong>mục đích</strong> và <strong>kênh liên hệ</strong>.</p>"
+      ],
+      [
+        "Những tình huống rủi ro cao liên quan chuyển khoản",
+        "<ul class=\"seo-checklist\"><li>Mua hàng giá rẻ bất thường nhưng bắt đặt cọc toàn bộ.</li><li>Shipper yêu cầu chuyển khoản nhỏ rồi gửi link/QR “hủy đăng ký” hoặc “hoàn tiền”.</li><li>Cộng tác viên hoặc đầu tư online yêu cầu nạp thêm để mở khóa khoản rút.</li><li>Người tự xưng công an/ngân hàng yêu cầu chuyển sang tài khoản “an toàn” để xác minh.</li><li>Người quen nhắn vay tiền từ tài khoản mạng xã hội nhưng từ chối gọi video hoặc xác minh bằng kênh cũ.</li><li>Dịch vụ hứa lấy lại tiền bị lừa nhưng yêu cầu đóng phí trước.</li></ul>"
+      ],
+      [
+        "Nếu đã chuyển tiền cho tài khoản nghi lừa đảo",
+        "<p>Không chuyển thêm tiền dù đối tượng đưa ra lý do “phí hoàn tiền”, “thuế”, “mở khóa” hoặc “xác minh”. Liên hệ ngay ngân hàng bằng hotline/app/điểm giao dịch chính thức, lưu biên lai, thời gian giao dịch, số tài khoản nhận, nội dung chat, URL và các bằng chứng liên quan. Sau đó trình báo cơ quan chức năng theo hướng dẫn phù hợp.</p><p>Khả năng thu hồi tiền phụ thuộc nhiều yếu tố và không có dịch vụ bên ngoài nào có thể cam kết chắc chắn lấy lại tiền. Cảnh giác với các tài khoản tự xưng luật sư, chuyên gia hoặc đơn vị thu hồi tiền yêu cầu thanh toán trước.</p>"
+      ],
+      [
+        "Nguồn kiểm chứng đáng tin cậy",
+        "<p>Hiệp hội An ninh mạng Quốc gia phát triển nTrust với chức năng hỗ trợ kiểm tra số tài khoản cùng nhiều loại tín hiệu khác. Bộ Công an cũng liên tục cảnh báo các kịch bản mạo danh ngân hàng, cơ quan nhà nước, đầu tư và việc làm trực tuyến. Xem <a href=\"https://www.bocongan.gov.vn/bai-viet/nang-cao-canh-giac-truoc-25-kich-ban-lua-dao-tren-khong-gian-mang-nam-2026-1788865614\" rel=\"noopener noreferrer\">cảnh báo 25 kịch bản lừa đảo năm 2026</a>.</p>"
+      ]
     ],
-    "related":[["Tra cứu lừa đảo trước khi giao dịch","/kien-thuc/tra-cuu-lua-dao/"],["Bị lừa chuyển tiền phải làm gì?","/kien-thuc/xu-ly-khi-bi-lua-dao-chuyen-tien/"],["Lừa đảo đầu tư online","/kien-thuc/lua-dao-dau-tu-online/"],["Lừa đảo cộng tác viên","/kien-thuc/lua-dao-cong-tac-vien-viec-nhe-luong-cao/"]]
+    "related": [
+      [
+        "Tra cứu lừa đảo trước khi giao dịch",
+        "/kien-thuc/tra-cuu-lua-dao/"
+      ],
+      [
+        "Bị lừa chuyển tiền phải làm gì?",
+        "/kien-thuc/xu-ly-khi-bi-lua-dao-chuyen-tien/"
+      ],
+      [
+        "Lừa đảo đầu tư online",
+        "/kien-thuc/lua-dao-dau-tu-online/"
+      ],
+      [
+        "Lừa đảo cộng tác viên",
+        "/kien-thuc/lua-dao-cong-tac-vien-viec-nhe-luong-cao/"
+      ]
+    ]
   },
   {
-    "slug":"25-kich-ban-lua-dao-2026",
-    "title":"25 kịch bản lừa đảo năm 2026: 5 nhóm cần cảnh giác",
-    "meta":"Bộ Công an cảnh báo 25 kịch bản lừa đảo trên không gian mạng năm 2026, tập trung trong 5 nhóm: mạo danh, deepfake AI, đầu tư việc làm, mua bán và chiếm tài khoản.",
-    "eyebrow":"Cảnh báo lừa đảo 2026",
-    "h1":"25 kịch bản lừa đảo năm 2026: 5 nhóm thủ đoạn cần cảnh giác",
-    "lead":"Ngày 08/09/2026, Bộ Công an cảnh báo 25 kịch bản lừa đảo phổ biến trên không gian mạng và nhóm chúng thành 5 nhóm thủ đoạn lớn. Dưới đây là bản diễn giải theo hướng hành động để bạn nhận diện nhanh và biết điểm nào cần dừng lại.",
-    "published":"2026-09-14",
-    "sections":[
-      ["Nhóm 1 — Mạo danh cơ quan, tổ chức", "<p>Đối tượng có thể giả danh công an, viện kiểm sát, tòa án, ngân hàng, nhà trường, bệnh viện, bảo hiểm xã hội, điện lực, viễn thông hoặc sử dụng tin nhắn mang hình thức giống Brandname. Mục tiêu thường là lấy dữ liệu cá nhân, OTP, mật khẩu hoặc khiến nạn nhân chuyển tiền với lý do xác minh, xử lý vi phạm, trả nợ cước, nhận hoàn tiền hoặc nộp phạt.</p><p><strong>Cách xử lý:</strong> kết thúc cuộc gọi/tin nhắn rồi tự tìm kênh liên hệ chính thức. Không chuyển tiền để “chứng minh trong sạch” và không cung cấp mã xác thực cho người chủ động liên hệ.</p>"],
-      ["Nhóm 2 — Lừa đảo bằng AI, Deepfake và DeepVoice", "<p>AI có thể tạo ảnh, video và giọng nói giống người thật để mạo danh người thân, bạn bè hoặc lãnh đạo. Một cuộc gọi có hình ảnh hoặc giọng nói quen thuộc không còn là bằng chứng đủ mạnh để xác nhận danh tính.</p><p><strong>Cách xử lý:</strong> gọi lại bằng số đã lưu từ trước, dùng câu hỏi riêng chỉ hai bên biết hoặc xác minh qua một người thứ ba. Nếu yêu cầu liên quan tiền, hãy tách khỏi kênh đang liên hệ trước khi quyết định.</p>"],
-      ["Nhóm 3 — Đầu tư tài chính và tuyển dụng việc làm", "<p>Các quảng cáo việc nhẹ lương cao, cộng tác viên làm nhiệm vụ, chứng khoán, tiền số hoặc ngoại hối có thể cho nạn nhân rút khoản nhỏ lúc đầu để tạo niềm tin. Sau đó hệ thống yêu cầu nạp khoản lớn hơn, báo lỗi hoặc khóa rút và tiếp tục đòi thêm phí.</p><p><strong>Cách xử lý:</strong> không nạp thêm tiền để “mở khóa” khoản rút. Kiểm tra pháp nhân, giấy phép, tên miền và điều kiện dịch vụ bằng nguồn độc lập trước khi giao dịch.</p>"],
-      ["Nhóm 4 — Lừa đảo trong mua bán trực tuyến", "<p>Đối tượng có thể dùng biên lai chuyển khoản giả, giả danh người mua/người bán, yêu cầu đặt cọc hoặc thay đổi tài khoản nhận tiền. Kịch bản shipper giả cũng khai thác đúng tâm lý này: bắt đầu từ một khoản phí nhỏ rồi dẫn sang QR, link hoặc quy trình hoàn tiền giả.</p><p><strong>Cách xử lý:</strong> kiểm tra trạng thái giao dịch trực tiếp trong ứng dụng ngân hàng, không tin ảnh chụp biên lai; với đơn hàng, đối chiếu ngay trong ứng dụng hoặc nền tảng đã đặt mua.</p>"],
-      ["Nhóm 5 — Đánh cắp dữ liệu và chiếm quyền thiết bị", "<p>Link giả mạo, mã QR độc hại, APK lạ, phần mềm điều khiển từ xa và quyền trợ năng có thể bị dùng để lấy tài khoản mạng xã hội, ngân hàng và dữ liệu cá nhân. Sau khi chiếm một tài khoản, kẻ xấu còn có thể dùng nó để lừa tiếp người quen của nạn nhân.</p><p><strong>Cách xử lý:</strong> không cài ứng dụng theo hướng dẫn của người lạ, không nhập mật khẩu/OTP trên trang mở từ link đáng ngờ và kiểm tra URL trước khi đăng nhập.</p>"],
-      ["Checklist 30 giây áp dụng cho cả 5 nhóm", "<ol class=\"seo-checklist\"><li>Người này có đang tạo áp lực về thời gian hoặc cảm xúc không?</li><li>Họ có yêu cầu OTP, mật khẩu, cài ứng dụng, quét QR hoặc chia sẻ màn hình không?</li><li>Tôi có thể tự tìm một kênh khác để xác minh không?</li><li>Tài khoản nhận tiền có đúng người/tổ chức và đúng mục đích không?</li><li>Nếu dừng lại 10 phút để kiểm tra, có lý do hợp pháp nào khiến tôi phải chịu hậu quả ngay lập tức không?</li></ol>"],
-      ["Nguồn chính thức", "<p>Nội dung này được diễn giải từ cảnh báo của <a href=\"https://www.bocongan.gov.vn/bai-viet/nang-cao-canh-giac-truoc-25-kich-ban-lua-dao-tren-khong-gian-mang-nam-2026-1788865614\" rel=\"noopener noreferrer\">Cổng Thông tin điện tử Bộ Công an: Nâng cao cảnh giác trước 25 kịch bản lừa đảo trên không gian mạng năm 2026</a>, đăng ngày 08/09/2026. Cảnh Giác Số không thay thế nội dung gốc; mục đích của trang là chuyển cảnh báo thành checklist dễ áp dụng khi gặp tình huống thực tế.</p>"]
+    "slug": "25-kich-ban-lua-dao-2026",
+    "title": "25 kịch bản lừa đảo năm 2026: 5 nhóm cần cảnh giác",
+    "meta": "Bộ Công an cảnh báo 25 kịch bản lừa đảo năm 2026 trong 5 nhóm: mạo danh, deepfake AI, đầu tư việc làm, mua bán online và chiếm tài khoản.",
+    "eyebrow": "Cảnh báo lừa đảo 2026",
+    "h1": "25 kịch bản lừa đảo năm 2026: 5 nhóm thủ đoạn cần cảnh giác",
+    "lead": "Ngày 08/09/2026, Bộ Công an cảnh báo 25 kịch bản lừa đảo phổ biến trên không gian mạng và nhóm chúng thành 5 nhóm thủ đoạn lớn. Dưới đây là bản diễn giải theo hướng hành động để bạn nhận diện nhanh và biết điểm nào cần dừng lại.",
+    "published": "2026-09-14",
+    "sections": [
+      [
+        "Nhóm 1 — Mạo danh cơ quan, tổ chức",
+        "<p>Đối tượng có thể giả danh công an, viện kiểm sát, tòa án, ngân hàng, nhà trường, bệnh viện, bảo hiểm xã hội, điện lực, viễn thông hoặc sử dụng tin nhắn mang hình thức giống Brandname. Mục tiêu thường là lấy dữ liệu cá nhân, OTP, mật khẩu hoặc khiến nạn nhân chuyển tiền với lý do xác minh, xử lý vi phạm, trả nợ cước, nhận hoàn tiền hoặc nộp phạt.</p><p><strong>Cách xử lý:</strong> kết thúc cuộc gọi/tin nhắn rồi tự tìm kênh liên hệ chính thức. Không chuyển tiền để “chứng minh trong sạch” và không cung cấp mã xác thực cho người chủ động liên hệ.</p>"
+      ],
+      [
+        "Nhóm 2 — Lừa đảo bằng AI, Deepfake và DeepVoice",
+        "<p>AI có thể tạo ảnh, video và giọng nói giống người thật để mạo danh người thân, bạn bè hoặc lãnh đạo. Một cuộc gọi có hình ảnh hoặc giọng nói quen thuộc không còn là bằng chứng đủ mạnh để xác nhận danh tính.</p><p><strong>Cách xử lý:</strong> gọi lại bằng số đã lưu từ trước, dùng câu hỏi riêng chỉ hai bên biết hoặc xác minh qua một người thứ ba. Nếu yêu cầu liên quan tiền, hãy tách khỏi kênh đang liên hệ trước khi quyết định.</p>"
+      ],
+      [
+        "Nhóm 3 — Đầu tư tài chính và tuyển dụng việc làm",
+        "<p>Các quảng cáo việc nhẹ lương cao, cộng tác viên làm nhiệm vụ, chứng khoán, tiền số hoặc ngoại hối có thể cho nạn nhân rút khoản nhỏ lúc đầu để tạo niềm tin. Sau đó hệ thống yêu cầu nạp khoản lớn hơn, báo lỗi hoặc khóa rút và tiếp tục đòi thêm phí.</p><p><strong>Cách xử lý:</strong> không nạp thêm tiền để “mở khóa” khoản rút. Kiểm tra pháp nhân, giấy phép, tên miền và điều kiện dịch vụ bằng nguồn độc lập trước khi giao dịch.</p>"
+      ],
+      [
+        "Nhóm 4 — Lừa đảo trong mua bán trực tuyến",
+        "<p>Đối tượng có thể dùng biên lai chuyển khoản giả, giả danh người mua/người bán, yêu cầu đặt cọc hoặc thay đổi tài khoản nhận tiền. Kịch bản shipper giả cũng khai thác đúng tâm lý này: bắt đầu từ một khoản phí nhỏ rồi dẫn sang QR, link hoặc quy trình hoàn tiền giả.</p><p><strong>Cách xử lý:</strong> kiểm tra trạng thái giao dịch trực tiếp trong ứng dụng ngân hàng, không tin ảnh chụp biên lai; với đơn hàng, đối chiếu ngay trong ứng dụng hoặc nền tảng đã đặt mua.</p>"
+      ],
+      [
+        "Nhóm 5 — Đánh cắp dữ liệu và chiếm quyền thiết bị",
+        "<p>Link giả mạo, mã QR độc hại, APK lạ, phần mềm điều khiển từ xa và quyền trợ năng có thể bị dùng để lấy tài khoản mạng xã hội, ngân hàng và dữ liệu cá nhân. Sau khi chiếm một tài khoản, kẻ xấu còn có thể dùng nó để lừa tiếp người quen của nạn nhân.</p><p><strong>Cách xử lý:</strong> không cài ứng dụng theo hướng dẫn của người lạ, không nhập mật khẩu/OTP trên trang mở từ link đáng ngờ và kiểm tra URL trước khi đăng nhập.</p>"
+      ],
+      [
+        "Checklist 30 giây áp dụng cho cả 5 nhóm",
+        "<ol class=\"seo-checklist\"><li>Người này có đang tạo áp lực về thời gian hoặc cảm xúc không?</li><li>Họ có yêu cầu OTP, mật khẩu, cài ứng dụng, quét QR hoặc chia sẻ màn hình không?</li><li>Tôi có thể tự tìm một kênh khác để xác minh không?</li><li>Tài khoản nhận tiền có đúng người/tổ chức và đúng mục đích không?</li><li>Nếu dừng lại 10 phút để kiểm tra, có lý do hợp pháp nào khiến tôi phải chịu hậu quả ngay lập tức không?</li></ol>"
+      ],
+      [
+        "Nguồn chính thức",
+        "<p>Nội dung này được diễn giải từ cảnh báo của <a href=\"https://www.bocongan.gov.vn/bai-viet/nang-cao-canh-giac-truoc-25-kich-ban-lua-dao-tren-khong-gian-mang-nam-2026-1788865614\" rel=\"noopener noreferrer\">Cổng Thông tin điện tử Bộ Công an: Nâng cao cảnh giác trước 25 kịch bản lừa đảo trên không gian mạng năm 2026</a>, đăng ngày 08/09/2026. Cảnh Giác Số không thay thế nội dung gốc; mục đích của trang là chuyển cảnh báo thành checklist dễ áp dụng khi gặp tình huống thực tế.</p>"
+      ]
     ],
-    "related":[["Tra cứu lừa đảo trước khi giao dịch","/kien-thuc/tra-cuu-lua-dao/"],["Chống lừa đảo trực tuyến","/kien-thuc/phong-chong-lua-dao-truc-tuyen/"],["Deepfake giả giọng người thân","/kien-thuc/deepfake-gia-giong-nguoi-than/"],["Giả mạo công an, cơ quan nhà nước","/kien-thuc/gia-mao-cong-an-co-quan-nha-nuoc/"]]
+    "related": [
+      [
+        "Tra cứu lừa đảo trước khi giao dịch",
+        "/kien-thuc/tra-cuu-lua-dao/"
+      ],
+      [
+        "Chống lừa đảo trực tuyến",
+        "/kien-thuc/phong-chong-lua-dao-truc-tuyen/"
+      ],
+      [
+        "Deepfake giả giọng người thân",
+        "/kien-thuc/deepfake-gia-giong-nguoi-than/"
+      ],
+      [
+        "Giả mạo công an, cơ quan nhà nước",
+        "/kien-thuc/gia-mao-cong-an-co-quan-nha-nuoc/"
+      ]
+    ]
   }
 ]
