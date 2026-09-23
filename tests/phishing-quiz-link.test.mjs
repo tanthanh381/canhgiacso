@@ -3,8 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 test("Cẩm nang embeds the official Vietnamese Jigsaw phishing quiz", async () => {
-  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
-  assert.match(page, /https:\/\/phishingquiz\.withgoogle\.com\/\?hl=vi/);
+  const [page, presentation] = await Promise.all([\n    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),\n    readFile(new URL("../app/domains/training/presentation.ts", import.meta.url), "utf8"),\n  ]);\n  assert.match(presentation, /https:\/\/phishingquiz\.withgoogle\.com\/\?hl=vi/);
   assert.match(page, /<iframe/);
   assert.match(page, /src=\{PHISHING_QUIZ_URL\}/);
   assert.match(page, /sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"/);
