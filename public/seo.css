@@ -347,6 +347,19 @@ a:hover { text-decoration-thickness: 2px; }
   font-size: 14px;
 }
 .seo-footer strong { color: var(--seo-ink); }
+.seo-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin: 10px 0 8px;
+}
+.seo-footer-links a {
+  color: var(--seo-link);
+  font-weight: 700;
+  text-decoration: none;
+}
+.seo-footer-links a:hover,
+.seo-footer-links a:focus-visible { text-decoration: underline; }
 .seo-resources {
   border-top: 1px solid var(--seo-line);
   background: var(--seo-surface);
