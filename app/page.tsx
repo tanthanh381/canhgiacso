@@ -221,8 +221,14 @@ export default function Home() {
     return () => { active = false; };
   }, [view, sessionAccount]);
 
-  const completedIds = new Set(results.map((result) => result.scenarioId));
-  const safeIds = new Set(results.filter((result) => result.correct).map((result) => result.scenarioId));
+  const completedIds = useMemo(
+    () => new Set(results.map((result) => result.scenarioId)),
+    [results],
+  );
+  const safeIds = useMemo(
+    () => new Set(results.filter((result) => result.correct).map((result) => result.scenarioId)),
+    [results],
+  );
   const unlockedDifficulties = getUnlockedDifficulties(scenarios, completedIds);
   const availableScenarios = scenarios.filter((item) => unlockedDifficulties.has(item.difficulty));
   const selectedCandidate = scenarios.find((item) => item.id === selectedId);
