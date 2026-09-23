@@ -291,7 +291,7 @@ const articles = [
   },
   {
     slug:"gia-danh-benh-vien-bao-nguoi-than-cap-cuu",
-    title:"Bệnh viện gọi báo người thân cấp cứu: Cách xác minh trước khi chuyển tiền",
+    title:"Bệnh viện báo người thân cấp cứu: Cách xác minh trước khi chuyển",
     description:"Cách xử lý khi có người tự xưng bệnh viện báo người thân cấp cứu, yêu cầu chuyển tiền mổ gấp: xác minh bệnh nhân, khoa, tài khoản và kênh bệnh viện.",
     h1:"Bệnh viện gọi báo người thân cấp cứu: cách xác minh trước khi chuyển tiền",
     breadcrumb:"Giả danh bệnh viện",
@@ -332,7 +332,7 @@ const articles = [
   {
     slug:"nguoi-mua-gui-link-nhan-tien-lua-dao",
     title:"Người mua gửi link nhận tiền có phải lừa đảo không?",
-    description:"Người mua gửi link hoặc QR để người bán 'nhận tiền' có an toàn không? Cách nhận biết phishing mua bán online, biên lai giả và trang thanh toán giả mạo.",
+    description:"Người mua gửi link hoặc QR để người bán nhận tiền có an toàn không? Cách nhận biết phishing mua bán online, biên lai giả và trang thanh toán giả mạo.",
     h1:"Người mua gửi link nhận tiền có phải lừa đảo không?",
     breadcrumb:"Link nhận tiền từ người mua",
     eyebrow:"MUA BÁN ONLINE · LINK GIẢ",
@@ -665,7 +665,7 @@ const tools = [
     content:`<section><h2>Tín hiệu quan trọng nhất là tổ hợp quyền + nguồn cài</h2><p>Ứng dụng từ link lạ yêu cầu Trợ năng, đọc SMS và chia sẻ màn hình có mức rủi ro cao hơn nhiều so với ứng dụng chính thức có lý do chức năng rõ ràng. Xem <a href="/kien-thuc/app-quyen-tro-nang-lua-dao/">giải thích chi tiết về quyền Trợ năng</a>.</p></section>`,
   },
   {
-    slug:"kiem-tra-truoc-khi-chuyen-tien", title:"Checklist trước khi chuyển tiền: 30 giây để giảm rủi ro lừa đảo", description:"Checklist 30 giây trước khi chuyển tiền: người nhận có quen không, đã xác minh độc lập chưa, tài khoản có thay đổi, có bị thúc gấp hoặc yêu cầu phí mở khóa không.", h1:"Kiểm tra trước khi chuyển tiền — checklist 30 giây", lead:"Trước khi bấm xác nhận giao dịch, kiểm tra nhanh các tín hiệu làm tăng rủi ro giả mạo và lừa đảo.",
+    slug:"kiem-tra-truoc-khi-chuyen-tien", title:"Checklist trước khi chuyển tiền: 30 giây để giảm rủi ro lừa đảo", description:"Checklist 30 giây trước khi chuyển tiền: xác minh người nhận, tài khoản thay đổi, áp lực chuyển gấp và các khoản phí mở khóa hoặc bảo chứng.", h1:"Kiểm tra trước khi chuyển tiền — checklist 30 giây", lead:"Trước khi bấm xác nhận giao dịch, kiểm tra nhanh các tín hiệu làm tăng rủi ro giả mạo và lừa đảo.",
     tool:`<section class="scam-tool-panel" data-scam-tool="transfer-check"><form><fieldset><legend>Bạn có biết/xác minh được người nhận?</legend><select name="known"><option value="yes">Có</option><option value="no">Không hoặc chỉ biết qua online</option></select></fieldset><fieldset><legend>Bạn đã xác minh yêu cầu qua kênh độc lập?</legend><select name="verified"><option value="no">Chưa</option><option value="yes">Có</option></select></fieldset><label><input type="checkbox" name="changed" /> Tài khoản nhận vừa thay đổi so với trước</label><label><input type="checkbox" name="urgent" /> Tôi đang bị thúc phải chuyển ngay</label><label><input type="checkbox" name="fee" /> Đây là phí để mở khóa/rút tiền/xác minh/nhận quà</label><button type="submit">Đánh giá trước khi chuyển</button></form>${resultBox()}</section>`,
     content:`<section><h2>Checklist phù hợp với những tình huống nào?</h2><p>Chuyển tiền cho người quen, nhà cung cấp, đặt cọc, đầu tư, nhận quà hoặc xử lý “khẩn cấp”. Với doanh nghiệp, xem thêm <a href="/kien-thuc/gia-mao-lanh-dao-yeu-cau-chuyen-tien-bec/">BEC/CEO Fraud</a>.</p></section>`,
   },
