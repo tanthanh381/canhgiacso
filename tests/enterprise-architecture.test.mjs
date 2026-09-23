@@ -53,3 +53,19 @@ test("domain modules have explicit bounded-context ownership", async () => {
     await access(new URL(`../${file}`, import.meta.url));
   }
 });
+
+
+test("content compiler finalizes canonical inventory after growth and before instrumentation", async () => {
+  const manifest = JSON.parse(await read("content/content-architecture.json"));
+  const ids = manifest.phases.map((phase) => phase.id);
+  const finalizeIndex = ids.indexOf("finalize");
+  const growthIndex = ids.indexOf("growth");
+  const instrumentationIndex = ids.indexOf("instrumentation");
+  assert.ok(finalizeIndex > growthIndex);
+  assert.ok(finalizeIndex < instrumentationIndex);
+  const finalizer = await read("scripts/finalize-content-architecture.mjs");
+  assert.match(finalizer, /Duplicate canonical/);
+  assert.match(finalizer, /Duplicate title/);
+  assert.match(finalizer, /Duplicate meta description/);
+  assert.match(finalizer, /sitemap rebuilt from final artifacts/);
+});
