@@ -9,7 +9,7 @@ test("SEO CTR Wave 8 runs after intent shaping and before analytics", async () =
   const stages = architecture.phases.flatMap((phase) => phase.stages);
   assert.ok(stages.indexOf("patch-seo-intent-wave7.mjs") < stages.indexOf("patch-seo-ctr-wave8.mjs"));
   assert.ok(stages.indexOf("patch-seo-ctr-wave8.mjs") < stages.indexOf("patch-content-growth-wave9.mjs"));
-  assert.ok(stages.indexOf("patch-content-growth-wave9.mjs") < stages.indexOf("patch-realtime-analytics.mjs"));
+  assert.ok(stages.indexOf("patch-content-growth-wave9.mjs") < stages.indexOf("instrument-content.mjs"));
 });
 
 test("Wave 8 fixes count-to-content mismatches in SERP promises", async () => {
