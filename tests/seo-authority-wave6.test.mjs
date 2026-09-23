@@ -13,6 +13,9 @@ test("SEO authority wave adds trust pages and reconciles sitemap coverage", asyn
   assert.match(script, /generated article missing from sitemap|ensureUrl/);
   assert.match(script, /refreshLastmod/);
   assert.match(script, /search-logo\.svg/);
+  assert.match(script, /function ensureLegacyArticleSeo/);
+  assert.match(script, /BreadcrumbList/);
+  assert.match(script, /twitter:card/);
 });
 
 test("Pages build runs SEO authority wave after QC content passes", async () => {
