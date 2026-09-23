@@ -35,7 +35,7 @@ function pageShell({ title, description, canonical, type, h1, eyebrow, lead, bod
         name: "Cảnh Giác Số",
         url: `${SITE}/`,
         description: "Nền tảng giáo dục an toàn số giúp nhận diện lừa đảo trực tuyến, xác minh thông tin và rèn kỹ năng phòng tránh rủi ro.",
-        logo: { "@type": "ImageObject", url: `${SITE}/khien-so-logo.png`, width: 800, height: 800 },
+        logo: { "@type": "ImageObject", url: `${SITE}/search-logo.svg`, width: 800, height: 800 },
         publishingPrinciples: `${SITE}/phuong-phap-kiem-chung/`,
         knowsAbout: ["lừa đảo trực tuyến", "phishing", "an toàn thông tin", "bảo vệ tài khoản", "xác minh thông tin"],
       },
@@ -147,6 +147,7 @@ let patched = 0;
 const knowledgeDir = path.join(PUBLIC, "kien-thuc");
 for (const file of await htmlFiles(knowledgeDir)) {
   let html = await readFile(file, "utf8");
+  html = html.replaceAll(`${SITE}/khien-so-logo.png`, `${SITE}/search-logo.svg`); // normalize structured-data logo
   if (!html.includes("seo-footer-links")) {
     html = html.replace(/(<footer class="seo-footer"><div class="seo-shell"><strong>[^<]+<\/strong>)/, `$1${TRUST_NAV}`);
   }
