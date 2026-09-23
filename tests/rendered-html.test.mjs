@@ -43,13 +43,16 @@ test("primary game navigation uses the Thử thách label without changing its r
 });
 
 test("ships product metadata and social artwork", async () => {
-  const [layout, page, dashboardView, knowledgeView, accountDialogs, shellView, admin, data, schema, contentRoles, packageJson, styles, ui, storage, presentation, authModel] = await Promise.all([
+  const [layout, page, dashboardView, knowledgeView, accountDialogs, shellView, trainingGateway, dashboardGateway, contentGateway, admin, data, schema, contentRoles, packageJson, styles, ui, storage, presentation, authModel] = await Promise.all([
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/domains/dashboard/view.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/domains/security-awareness/view.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/domains/auth/dialogs.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/domains/shell/view.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/domains/training/gateway.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/domains/dashboard/gateway.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/domains/content/gateway.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/admin.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/data.ts", import.meta.url), "utf8"),
     readFile(new URL("../supabase/schema.sql", import.meta.url), "utf8"),
@@ -61,7 +64,7 @@ test("ships product metadata and social artwork", async () => {
     readFile(new URL("../app/domains/training/presentation.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/domains/auth/model.ts", import.meta.url), "utf8"),
   ]);
-  const appSource = `${page}\n${dashboardView}\n${knowledgeView}\n${accountDialogs}\n${shellView}`;
+  const appSource = `${page}\n${dashboardView}\n${knowledgeView}\n${accountDialogs}\n${shellView}\n${trainingGateway}\n${dashboardGateway}\n${contentGateway}`;
 
   assert.match(layout, /og\.png/);
   assert.match(layout, /const siteTitle = "Cảnh Giác Số: Nhận diện lừa đảo trực tuyến \| HDBank"/);
@@ -89,9 +92,9 @@ test("ships product metadata and social artwork", async () => {
   assert.match(appSource, /guest-badge-button/);
   assert.match(appSource, /Bạn đang sử dụng với tính năng giới hạn/);
   assert.match(appSource, /Đồng bộ tiến trình, lưu lịch sử lượt chơi/);
-  assert.match(page, /supabase\.rpc\("submit_game_choice"/);
-  assert.match(page, /supabase\.rpc\("get_game_state"/);
-  assert.match(page, /get_ciso_dashboard/);
+  assert.match(appSource, /supabase\.rpc\("submit_game_choice"/);
+  assert.match(appSource, /supabase\.rpc\("get_game_state"/);
+  assert.match(appSource, /get_ciso_dashboard/);
   assert.match(presentation, /DefenseBadge/);
   assert.match(presentation, /Chuyên gia Cảnh Giác Số/);
   assert.match(appSource, /achievement-progress/);
@@ -110,7 +113,7 @@ test("ships product metadata and social artwork", async () => {
   assert.match(admin, /Kiểm soát trước khi xuất bản/);
   assert.match(data, /Website được quản lý và vận hành bởi: IT Security Team - HDBank/);
   assert.match(data, /nâng cao nhận thức cộng đồng về phòng chống tội phạm lừa đảo trực tuyến/);
-  assert.match(page, /get_public_site_content/);
+  assert.match(appSource, /get_public_site_content/);
   assert.match(page, /#\/admin/);
   assert.match(page, /AdminPage/);
   assert.match(admin, /Lưu bản nháp/);
