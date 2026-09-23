@@ -174,6 +174,9 @@ for (const pathname of interactiveToolPaths) {
   const html = await readFile(file, "utf8");
   if (!html.includes('/scam-tools.js')) fail(`${site}${pathname}: missing client-side anti-scam tool script`);
   if (!html.includes('/theme-init.js')) fail(`${site}${pathname}: missing CSP-safe theme initializer`);
+  if (!/http-equiv=["']Content-Security-Policy["']/i.test(html)) fail(`${site}${pathname}: missing Content Security Policy`);
+  if (!/script-src[^;]*'self'/i.test(html)) fail(`${site}${pathname}: CSP does not allow same-origin tool scripts`);
+  if (!/object-src[^;]*'none'/i.test(html)) fail(`${site}${pathname}: CSP does not block plugin objects`);
 }
 
 const robots = await readFile(path.join(root, "robots.txt"), "utf8");
