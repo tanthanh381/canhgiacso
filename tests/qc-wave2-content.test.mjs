@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 const packageJson = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
+const contentArchitecture = JSON.parse(await readFile(new URL("../content/content-architecture.json", import.meta.url), "utf8"));
 const qcWave2 = await readFile(new URL("../scripts/patch-qc-wave2.mjs", import.meta.url), "utf8");
 const terminology = await readFile(new URL("../scripts/patch-qc-terminology.mjs", import.meta.url), "utf8");
 const pageSource = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
@@ -33,7 +34,12 @@ const knowledgeSlugs = [
 ];
 
 test("QC Wave 2 runs after SEO content generation and before downstream QC/analytics", () => {
-  assert.match(packageJson.scripts["build:pages"], /patch-google-traffic-wave5\.mjs && node scripts\/patch-qc-wave2\.mjs && node scripts\/patch-qc-wave3\.mjs && node scripts\/patch-seo-authority-wave6\.mjs && node scripts\/patch-seo-intent-wave7\.mjs && node scripts\/patch-seo-ctr-wave8\.mjs && node scripts\/patch-content-growth-wave9\.mjs && node scripts\/patch-realtime-analytics\.mjs/);
+  const stages = contentArchitecture.phases.flatMap((phase) => phase.stages);
+  assert.ok(stages.indexOf("patch-google-traffic-wave5.mjs") < stages.indexOf("patch-qc-wave2.mjs"));
+  assert.ok(stages.indexOf("patch-qc-wave2.mjs") < stages.indexOf("patch-qc-wave3.mjs"));
+  assert.ok(stages.indexOf("patch-qc-wave3.mjs") < stages.indexOf("patch-seo-authority-wave6.mjs"));
+  assert.ok(stages.indexOf("patch-content-growth-wave9.mjs") < stages.indexOf("patch-realtime-analytics.mjs"));
+  assert.match(packageJson.scripts["build:pages"], /content:compile/);
   assert.match(packageJson.scripts.build, /prepare:content/);
   assert.match(packageJson.scripts.dev, /prepare:content/);
 });
