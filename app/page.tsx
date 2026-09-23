@@ -11,6 +11,7 @@ import { authErrorMessage } from "./auth-error";
 import { SECURITY_CHECKLIST_KEY, securityChecklistItemIds } from "./domains/security-awareness/checklist";
 import { KnowledgeView } from "./domains/security-awareness/view";
 import { validateAuthSubmission, type AuthMode, type SessionAccount } from "./domains/auth/model";
+import { AccountDialogs } from "./domains/auth/dialogs";
 import { mapAnalyticsUsers, mapScenarioRisks, summarizeAnalytics, topScenarioRisks, type AnalyticsUser, type DashboardStatus, type ScenarioRisk } from "./domains/dashboard/model";
 import { DashboardView } from "./domains/dashboard/view";
 import { bestCorrectStreak, buildDefenseBadges, difficulties, difficultyTone, PHISHING_QUIZ_URL, scenarioCategoryLabel, scenarioChannelLabel } from "./domains/training/presentation";
@@ -1089,48 +1090,40 @@ export default function Home() {
 
       <Modal open={guide} onClose={() => setGuide(false)} labelledBy="guide-title" className="response-guide-modal"><button className="modal-close" aria-label="Đóng hướng dẫn" onClick={() => setGuide(false)}>×</button><span className="modal-symbol">H</span><span className="eyebrow">HDBANK · IT SECURITY</span><h2 id="guide-title">Dừng — Khóa — Báo</h2><ol><li><b>01</b><div><strong>Dừng tương tác</strong><p>Không chuyển thêm tiền, không cài ứng dụng, không chia sẻ màn hình, mật khẩu hoặc OTP.</p></div></li><li><b>02</b><div><strong>Chặn tổn thất</strong><p>Nếu đã chuyển tiền hoặc lộ thông tin, tự mở ứng dụng hoặc liên hệ ngân hàng qua kênh chính thức để yêu cầu hỗ trợ, khóa dịch vụ cần thiết.</p></div></li><li><b>03</b><div><strong>Lưu bằng chứng và báo cáo</strong><p>Lưu số điện thoại, liên kết, tin nhắn và mã giao dịch; trình báo cơ quan công an gần nhất. Cuộc gọi có dấu hiệu lừa đảo có thể phản ánh tới 156 hoặc 5656.</p></div></li></ol><p className="guide-disclaimer">Không tin dịch vụ “thu hồi tiền” yêu cầu nộp phí trước. Hướng dẫn này phục vụ đào tạo và không thay thế quy trình xử lý sự cố của tổ chức.</p><button className="primary-button" onClick={() => setGuide(false)}>Tôi đã hiểu</button></Modal>
 
-      <Modal open={showGuestLimitNotice} onClose={dismissGuestLimitNotice} labelledBy="guest-limit-title" className="guest-limit-modal">
-        <button className="modal-close" aria-label="Đóng thông báo chế độ khách" onClick={dismissGuestLimitNotice}>×</button>
-        <span className="modal-symbol">K</span>
-        <span className="eyebrow">CHẾ ĐỘ KHÁCH</span>
-        <h2 id="guest-limit-title">Bạn đang sử dụng với tính năng giới hạn</h2>
-        <p className="guest-limit-intro">Bạn vẫn có thể làm thử thách ngay, nhưng kết quả chỉ lưu trên thiết bị hiện tại và có thể mất khi xóa dữ liệu trình duyệt.</p>
-        <div className="guest-limit-grid" aria-label="So sánh chế độ khách và tài khoản">
-          <article><strong>Khách</strong><span>Lưu tiến trình cục bộ, nhận bản ghi nhận PDF cục bộ và không đồng bộ giữa các thiết bị.</span></article>
-          <article><strong>Tài khoản</strong><span>Đồng bộ tiến trình, lưu lịch sử lượt chơi, dùng chứng nhận đã xác minh và mở đầy đủ tính năng theo quyền được cấp.</span></article>
-        </div>
-        <div className="guest-limit-actions">
-          <button className="primary-button" onClick={() => openAuthFromGuestNotice("register")}>Tạo tài khoản</button>
-          <button className="admin-secondary" onClick={() => openAuthFromGuestNotice("login")}>Đăng nhập</button>
-          <button className="guest-continue" type="button" onClick={dismissGuestLimitNotice}>Tiếp tục với tư cách khách</button>
-        </div>
-      </Modal>
-
-      <Modal open={authOpen} onClose={closeAuth} labelledBy="auth-title" className="auth-modal">
-        <button className="modal-close" aria-label="Đóng đăng nhập" onClick={closeAuth}>×</button>
-        <span className="modal-symbol">H</span>
-        <span className="eyebrow">CẢNH GIÁC SỐ · TÀI KHOẢN ĐỒNG BỘ</span>
-        <div className="auth-tabs" aria-label="Chọn hình thức tài khoản">
-          <button type="button" aria-pressed={authMode === "login"} className={authMode === "login" ? "active" : ""} onClick={() => switchAuthMode("login")}>Đăng nhập</button>
-          <button type="button" aria-pressed={authMode === "register"} className={authMode === "register" ? "active" : ""} onClick={() => switchAuthMode("register")}>Đăng ký</button>
-        </div>
-        <h2 id="auth-title">{authMode === "login" ? "Chào mừng trở lại" : "Tạo hồ sơ phòng vệ"}</h2>
-        <p className="auth-intro">Đăng nhập để lưu kết quả và tiếp tục trên thiết bị khác. Tài khoản mới được sử dụng ngay, không cần xác nhận email. Tiến trình khách được giữ riêng trên thiết bị và không tự chuyển vào tài khoản. Không sử dụng mật khẩu ngân hàng thật.</p>
-        <form className="auth-form" onSubmit={submitAuth}>
-          {authMode === "register" && <label><span>Tên hiển thị</span><input autoComplete="name" value={authDisplayName} maxLength={32} onChange={(event) => setAuthDisplayName(event.target.value)} placeholder="Ví dụ: Minh An" /></label>}
-          {authMode === "register" && <label><span>Tên đăng nhập</span><input autoComplete="username" value={authUsername} minLength={3} maxLength={24} onChange={(event) => setAuthUsername(event.target.value)} placeholder="tanthanh381" autoCapitalize="none" spellCheck={false} /></label>}
-          <label><span>Email</span><input type="email" autoComplete="email" value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} placeholder="email@example.com" autoCapitalize="none" spellCheck={false} /></label>
-          <label><span>Mật khẩu</span><input type="password" autoComplete={authMode === "login" ? "current-password" : "new-password"} value={authPassword} minLength={8} maxLength={72} onChange={(event) => setAuthPassword(event.target.value)} placeholder={authMode === "register" ? "Hoa, thường, số và ký tự đặc biệt" : "Ít nhất 8 ký tự"} /></label>
-          {authMode === "register" && <label><span>Xác nhận mật khẩu</span><input type="password" autoComplete="new-password" value={authConfirmPassword} onChange={(event) => setAuthConfirmPassword(event.target.value)} placeholder="Nhập lại mật khẩu" /></label>}
-          {authError && <p className="auth-error" role="alert">{authError}</p>}
-          {authNotice && <p className="auth-notice" role="status">{authNotice}</p>}
-          <button className="primary-button auth-submit" type="submit" disabled={authBusy}>{authBusy ? "Đang bảo vệ tài khoản…" : authMode === "login" ? "Đăng nhập" : "Tạo tài khoản"}</button>
-          <div className="auth-or" aria-hidden="true"><span>hoặc</span></div>
-          <button className="guest-continue" type="button" onClick={continueAsGuest}>Tiếp tục với tư cách khách</button>
-        </form>
-      </Modal>
-
-      <Modal open={profileOpen} onClose={closeProfile} labelledBy="profile-title" className="profile-modal"><button className="modal-close" aria-label="Đóng hồ sơ" onClick={closeProfile}>×</button><span className="eyebrow">TÀI KHOẢN ĐÃ ĐĂNG NHẬP</span><h2 id="profile-title">Hồ sơ của bạn</h2><p className="account-username">@{sessionAccount?.username} · {sessionAccount?.email}</p><label className="profile-name-field"><span>Tên hiển thị</span><input aria-label="Tên hiển thị" value={playerName} maxLength={32} onChange={(event) => setPlayerName(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void closeProfile(); }} /></label><div className="profile-actions"><button className="primary-button" onClick={closeProfile}>Lưu thay đổi</button><button className="logout-button" onClick={logout}>Đăng xuất</button></div><p className="profile-note">Tiến trình được đồng bộ an toàn và phiên cũ trên trình duyệt được xoá khi đổi tài khoản.</p></Modal>
+      <AccountDialogs
+        showGuestLimitNotice={showGuestLimitNotice}
+        authOpen={authOpen}
+        profileOpen={profileOpen}
+        authMode={authMode}
+        authFields={{
+          email: authEmail,
+          username: authUsername,
+          displayName: authDisplayName,
+          password: authPassword,
+          confirmPassword: authConfirmPassword,
+        }}
+        authSetters={{
+          setEmail: setAuthEmail,
+          setUsername: setAuthUsername,
+          setDisplayName: setAuthDisplayName,
+          setPassword: setAuthPassword,
+          setConfirmPassword: setAuthConfirmPassword,
+        }}
+        authError={authError}
+        authNotice={authNotice}
+        authBusy={authBusy}
+        account={sessionAccount}
+        playerName={playerName}
+        onPlayerNameChange={setPlayerName}
+        onDismissGuestNotice={dismissGuestLimitNotice}
+        onOpenAuthFromGuestNotice={openAuthFromGuestNotice}
+        onCloseAuth={closeAuth}
+        onSwitchAuthMode={switchAuthMode}
+        onSubmitAuth={submitAuth}
+        onContinueAsGuest={continueAsGuest}
+        onCloseProfile={closeProfile}
+        onLogout={logout}
+      />
 
       <Modal open={resetConfirmOpen} onClose={() => { if (!resetBusy) setResetConfirmOpen(false); }} labelledBy="reset-confirm-title" className="reset-confirm-modal">
         <button className="modal-close" aria-label="Đóng xác nhận đặt lại" disabled={resetBusy} onClick={() => setResetConfirmOpen(false)}>×</button>
