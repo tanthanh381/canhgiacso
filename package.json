@@ -11,12 +11,13 @@
     "prepare:analytics": "node scripts/patch-realtime-analytics.mjs && node scripts/patch-google-analytics.mjs",
     "dev": "pnpm run prepare:navigation && pnpm run prepare:content && pnpm run prepare:analytics && WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext dev",
     "build": "pnpm run prepare:navigation && pnpm run prepare:content && pnpm run prepare:analytics && WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext build",
-    "build:pages": "node scripts/patch-public-nav-links.mjs && node scripts/patch-traffic-section-nav.mjs && node scripts/patch-qc-terminology.mjs && node scripts/generate-seo-content.mjs && node scripts/seo-title-overrides.mjs && node scripts/generate-organic-growth.mjs && node scripts/generate-fresh-seo.mjs && node scripts/trim-growth-meta.mjs && node scripts/patch-home-growth-links.mjs && node scripts/patch-priority-discovery.mjs && node scripts/patch-serp-intent-wave3.mjs && node scripts/patch-methodology-social.mjs && node scripts/patch-trust-links-wave3.mjs && node scripts/patch-knowledge-ui.mjs && node scripts/patch-indexation-wave4.mjs && node scripts/patch-google-traffic-wave5.mjs && node scripts/patch-qc-wave2.mjs && node scripts/patch-qc-wave3.mjs && node scripts/patch-seo-authority-wave6.mjs && node scripts/patch-seo-intent-wave7.mjs && node scripts/patch-seo-ctr-wave8.mjs && node scripts/patch-content-growth-wave9.mjs && node scripts/patch-realtime-analytics.mjs && node scripts/patch-google-analytics.mjs && vite build --config vite.github-pages.config.ts",
+    "build:pages": "pnpm run content:compile && vite build --config vite.github-pages.config.ts",
     "start": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext start",
     "test": "pnpm run build && node --test tests/*.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "seo:audit": "node scripts/seo-audit.mjs docs",
-    "db:generate": "drizzle-kit generate"
+    "db:generate": "drizzle-kit generate",
+    "content:compile": "node scripts/content-compiler.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.112.3",
