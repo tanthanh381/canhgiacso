@@ -206,7 +206,7 @@ test.describe("resilience and breakpoint boundaries", () => {
 });
 
 test.describe("public static content", () => {
-  for (const path of ["/kien-thuc/", "/tin-tuc/"]) {
+  for (const path of ["/kien-thuc/", "/tin-tuc/", "/gioi-thieu/", "/quyen-rieng-tu/", "/phuong-phap-kiem-chung/", "/sitemap/"]) {
     test(`${path} has responsive layout without horizontal overflow`, async ({ page }) => {
       await page.goto(path);
       await page.waitForLoadState("domcontentloaded");
@@ -234,4 +234,23 @@ test("visible buttons expose an accessible name", async ({ page }) => {
       .map((button) => (button as HTMLElement).outerHTML.slice(0, 180)),
   );
   expect(unnamed).toEqual([]);
+});
+
+
+test.describe("trust/system page consistency", () => {
+  for (const path of ["/gioi-thieu/", "/quyen-rieng-tu/", "/phuong-phap-kiem-chung/", "/sitemap/"]) {
+    test(`${path} shares the site brand shell and dark-mode preference`, async ({ page }) => {
+      await page.addInitScript(() => localStorage.setItem("khien-so-theme", "dark"));
+      await page.goto(path);
+      await expect(page.locator(".seo-header")).toBeVisible();
+      await expect(page.locator(".seo-brand-logo")).toBeVisible();
+      await expect(page.locator(".seo-brand-divider")).toBeVisible();
+      await expect(page.locator(".seo-product-lockup")).toBeVisible();
+      await expect(page.locator(".seo-footer")).toBeVisible();
+      await expect(page.locator(".seo-footer-links a")).toHaveCount(4);
+      await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+      await expect(page.locator(".seo-nav-links a", { hasText: "Cẩm nang" })).toBeVisible();
+      await expectNoHorizontalOverflow(page);
+    });
+  }
 });
