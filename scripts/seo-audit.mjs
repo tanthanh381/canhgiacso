@@ -150,7 +150,7 @@ const growthWave9Required = [
   "/kien-thuc/gia-mao-lanh-dao-yeu-cau-chuyen-tien-bec/",
 ];
 for (const pathname of growthWave9Required) {
-  const required = `${site}${pathname`;
+  const required = `${site}${pathname}`;
   if (!urls.includes(required)) fail(`${required}: Growth Wave 9 URL missing from sitemap`);
 }
 
