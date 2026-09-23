@@ -29,5 +29,5 @@ test("Content compiler installs GA4 after the first-party analytics/CSP patch", 
   assert.ok(stages.includes("patch-google-analytics.mjs"));
   assert.ok(stages.indexOf("patch-realtime-analytics.mjs") < stages.indexOf("patch-google-analytics.mjs"));
   assert.match(pkg.scripts["build:pages"], /content:compile/);
-  assert.match(pkg.scripts["prepare:analytics"], /patch-google-analytics\.mjs/);
+  assert.equal(pkg.scripts["prepare:analytics"], undefined);
 });
