@@ -69,4 +69,7 @@ test("content compiler finalizes canonical inventory after growth and before ins
   assert.match(finalizer, /Duplicate title/);
   assert.match(finalizer, /Duplicate meta description/);
   assert.match(finalizer, /sitemap rebuilt from final artifacts/);
+  assert.match(finalizer, /ensureSearchMetadata/);
+  assert.match(finalizer, /twitter:card/);
+  assert.match(finalizer, /hreflang="x-default"/);
 });
