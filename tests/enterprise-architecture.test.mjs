@@ -4,12 +4,13 @@ import test from "node:test";
 
 const read = (file) => readFile(new URL(`../${file}`, import.meta.url), "utf8");
 
-test("all application builds enter through the unified content compiler", async () => {
+test("application build is side-effect free while Pages publication owns content compilation", async () => {
   const pkg = JSON.parse(await read("package.json"));
-  for (const name of ["dev", "build", "build:pages"]) {
-    assert.match(pkg.scripts[name], /content:compile/, `${name} must use content:compile`);
-    assert.doesNotMatch(pkg.scripts[name], /patch-[a-z0-9-]+\.mjs/, `${name} must not call patch scripts directly`);
+  for (const name of ["dev", "build"]) {
+    assert.doesNotMatch(pkg.scripts[name], /content:compile|patch-[a-z0-9-]+\.mjs/, `${name} must not mutate static content`);
   }
+  assert.match(pkg.scripts["build:pages"], /content:compile/);
+  assert.doesNotMatch(pkg.scripts["build:pages"], /patch-[a-z0-9-]+\.mjs/);
   assert.equal(pkg.scripts["prepare:navigation"], undefined);
   assert.equal(pkg.scripts["prepare:content"], undefined);
   assert.equal(pkg.scripts["prepare:analytics"], undefined);
