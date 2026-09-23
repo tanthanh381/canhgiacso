@@ -15,6 +15,11 @@ test("application shell, guest gameplay and static knowledge work on this OS/bro
   await page.goto("/");
   await expect(page.locator(".app")).toBeVisible({ timeout: 20_000 });
   await expect(page.locator(".topbar nav")).toBeVisible();
+  const guestModal = page.locator(".guest-limit-modal");
+  if (await guestModal.isVisible().catch(() => false)) {
+    await guestModal.getByRole("button", { name: "Tiếp tục với tư cách khách" }).click();
+    await expect(guestModal).toBeHidden();
+  }
   await expect(page.locator(".choice:not([disabled])").first()).toBeVisible({ timeout: 20_000 });
 
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
