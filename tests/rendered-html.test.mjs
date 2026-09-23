@@ -43,7 +43,7 @@ test("primary game navigation uses the Thử thách label without changing its r
 });
 
 test("ships product metadata and social artwork", async () => {
-  const [layout, page, admin, data, schema, contentRoles, packageJson, styles, ui, storage, presentation] = await Promise.all([
+  const [layout, page, admin, data, schema, contentRoles, packageJson, styles, ui, storage, presentation, authModel] = await Promise.all([
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/admin.tsx", import.meta.url), "utf8"),
@@ -55,6 +55,7 @@ test("ships product metadata and social artwork", async () => {
     readFile(new URL("../app/shared/ui-primitives.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/shared/browser-storage.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/domains/training/presentation.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/domains/auth/model.ts", import.meta.url), "utf8"),
   ]);
 
   assert.match(layout, /og\.png/);
@@ -71,9 +72,10 @@ test("ships product metadata and social artwork", async () => {
   assert.match(page, /readStoredProgress/);
   assert.match(page, /supabase\.auth\.signUp/);
   assert.match(page, /data: \{ username, display_name: displayName \}/);
-  assert.match(page, /USERNAME_PATTERN/);
-  assert.match(page, /PASSWORD_PATTERN/);
-  assert.match(page, /Mật khẩu cần 8–72 ký tự/);
+  assert.match(page, /validateAuthSubmission/);
+  assert.match(authModel, /USERNAME_PATTERN/);
+  assert.match(authModel, /PASSWORD_PATTERN/);
+  assert.match(authModel, /Mật khẩu cần 8–72 ký tự/);
   assert.match(page, /supabase\.auth\.signInWithPassword/);
   assert.match(page, /supabase\.auth\.signOut\(\{ scope: "local" \}\)/);
   assert.match(page, /continueAsGuest/);
