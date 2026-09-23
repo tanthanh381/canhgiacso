@@ -11,7 +11,7 @@ import { authErrorMessage } from "./auth-error";
 import { SECURITY_CHECKLIST_KEY, securityChecklistGroups, securityChecklistItemIds } from "./domains/security-awareness/checklist";
 import { PASSWORD_PATTERN, USERNAME_PATTERN, type AuthMode, type SessionAccount } from "./domains/auth/model";
 import { mapAnalyticsUsers, mapScenarioRisks, summarizeAnalytics, topScenarioRisks, type AnalyticsUser, type DashboardStatus, type ScenarioRisk } from "./domains/dashboard/model";
-import { bestCorrectStreak, buildDefenseBadges, difficulties, difficultyTone, scenarioCategoryLabel, scenarioChannelLabel } from "./domains/training/presentation";
+import { bestCorrectStreak, buildDefenseBadges, difficulties, difficultyTone, PHISHING_QUIZ_URL, scenarioCategoryLabel, scenarioChannelLabel } from "./domains/training/presentation";
 import { evaluateGuestChoice, type ChoiceOutcome, type GameHistory, type GameState, type PendingChoice, type Result, type StoredProgress } from "./domains/training/model";
 import { GUEST_CERTIFICATE_KEY, LEGACY_PROGRESS_KEY, THEME_KEY, progressKey, readStoredProgress, safeStorageGet, safeStorageRemove, safeStorageSet } from "./shared/browser-storage";
 import { BadgeIcon, BrandMark, FooterNotice, Modal } from "./shared/ui-primitives";
