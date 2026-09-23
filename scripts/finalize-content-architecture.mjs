@@ -43,6 +43,7 @@ function ensureSearchMetadata(html) {
   if (!canonical || !title || !description || !isIndexable(html)) return html;
 
   const additions = [];
+  if (!/rel=["']icon["']/i.test(html)) additions.push('<link rel="icon" type="image/png" href="/khien-so-logo.png" />');
   if (!/hreflang=["']vi-VN["']/i.test(html)) additions.push(`<link rel="alternate" hreflang="vi-VN" href="${attrEscape(canonical)}" />`);
   if (!/hreflang=["']x-default["']/i.test(html)) additions.push(`<link rel="alternate" hreflang="x-default" href="${attrEscape(canonical)}" />`);
   if (!/property=["']og:site_name["']/i.test(html)) additions.push('<meta property="og:site_name" content="Cảnh Giác Số" />');
