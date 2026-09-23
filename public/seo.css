@@ -333,6 +333,53 @@ a:hover { text-decoration-thickness: 2px; }
 .seo-related ul { padding-left: 20px; }
 .seo-checklist { padding-left: 22px; }
 .seo-checklist li { margin: 9px 0; }
+.seo-answer-box {
+  margin: 20px 0 26px;
+  padding: 18px 20px;
+  border: 1px solid color-mix(in srgb, var(--seo-link) 34%, var(--seo-line));
+  border-left: 4px solid var(--seo-link);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--seo-surface) 88%, var(--seo-link));
+}
+.seo-answer-box strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--seo-ink);
+  font-size: 13px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.seo-answer-box p { margin: 0; }
+
+.seo-quick-intents { padding: 8px 0 26px; }
+.seo-quick-intents h2 {
+  margin: 8px 0 16px;
+  color: var(--seo-ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 560;
+}
+.seo-intent-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.seo-intent-grid a {
+  display: grid;
+  gap: 5px;
+  min-height: 108px;
+  padding: 16px 17px;
+  border: 1px solid var(--seo-line);
+  border-radius: 16px;
+  background: var(--seo-surface);
+  color: var(--seo-ink);
+  text-decoration: none;
+}
+.seo-intent-grid a:hover,
+.seo-intent-grid a:focus-visible { border-color: var(--seo-link); transform: translateY(-1px); }
+.seo-intent-grid strong { font-size: 15px; }
+.seo-intent-grid span { color: var(--seo-muted); font-size: 13px; line-height: 1.45; }
+
 .seo-search-cluster {
   margin-top: 38px;
   padding: 22px 24px;
@@ -359,6 +406,156 @@ a:hover { text-decoration-thickness: 2px; }
   padding-top: 28px;
   border-top: 1px solid var(--seo-line);
 }
+
+.growth-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: 18px 0 34px;
+}
+.growth-card {
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+  border: 1px solid var(--seo-line);
+  border-radius: 16px;
+  background: var(--seo-surface);
+  color: inherit;
+  text-decoration: none;
+}
+.growth-card:hover,
+.growth-card:focus-visible { border-color: var(--seo-link); box-shadow: var(--seo-shadow); }
+.growth-card strong { color: var(--seo-ink); font-size: 17px; }
+.growth-card span { color: var(--seo-muted); font-size: 14px; line-height: 1.5; }
+.growth-card small { color: var(--seo-accent); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+
+.scam-tool-panel {
+  margin: 26px 0;
+  padding: 22px;
+  border: 1px solid var(--seo-line);
+  border-radius: 18px;
+  background: var(--seo-surface);
+  box-shadow: var(--seo-shadow);
+}
+.scam-tool-panel fieldset {
+  min-width: 0;
+  margin: 0 0 18px;
+  padding: 0;
+  border: 0;
+}
+.scam-tool-panel legend {
+  margin-bottom: 10px;
+  color: var(--seo-ink);
+  font-weight: 800;
+}
+.scam-tool-panel label {
+  display: block;
+  margin: 8px 0;
+  color: var(--seo-body);
+}
+.scam-tool-panel select,
+.scam-tool-panel textarea,
+.scam-tool-panel input[type="text"],
+.scam-filter-bar input,
+.scam-filter-bar select {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--seo-line);
+  border-radius: 10px;
+  background: var(--seo-bg);
+  color: var(--seo-ink);
+  font: inherit;
+}
+.scam-tool-panel textarea { min-height: 170px; resize: vertical; }
+.scam-tool-panel button {
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--seo-accent);
+  color: #fff;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+.scam-tool-panel button:hover { filter: brightness(.96); }
+.scam-tool-result {
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid var(--seo-line);
+  border-radius: 14px;
+  background: var(--seo-soft);
+}
+.scam-tool-result[hidden] { display: none; }
+.scam-tool-result[data-level="high"] { border-color: color-mix(in srgb, var(--seo-accent) 68%, var(--seo-line)); }
+.scam-tool-result[data-level="medium"] { border-color: color-mix(in srgb, var(--seo-warm) 68%, var(--seo-line)); }
+.scam-tool-result[data-level="low"] { border-color: color-mix(in srgb, var(--seo-link) 58%, var(--seo-line)); }
+.scam-result-level {
+  display: inline-flex;
+  margin-bottom: 8px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--seo-bg);
+  color: var(--seo-ink);
+  font-size: 12px;
+  font-weight: 850;
+}
+.scam-tool-result ul { margin-bottom: 0; padding-left: 22px; }
+
+.scam-filter-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 10px;
+  margin: 18px 0;
+}
+.scam-directory,
+.scam-scenario-grid,
+.scam-dictionary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.scam-directory article,
+.scam-scenario-grid article,
+.scam-dictionary-grid article {
+  padding: 16px;
+  border: 1px solid var(--seo-line);
+  border-radius: 14px;
+  background: var(--seo-surface);
+}
+.scam-directory h2,
+.scam-scenario-grid h2,
+.scam-dictionary-grid h2 {
+  margin: 0 0 8px;
+  font-family: inherit;
+  font-size: 18px;
+}
+.scam-directory p,
+.scam-scenario-grid p,
+.scam-dictionary-grid p { margin: 0 0 8px; font-size: 15px; }
+.scam-directory article[hidden],
+.scam-scenario-grid article[hidden] { display: none; }
+
+.alert-stream {
+  display: grid;
+  gap: 12px;
+  margin: 22px 0;
+}
+.alert-item {
+  padding: 18px;
+  border: 1px solid var(--seo-line);
+  border-left: 4px solid var(--seo-accent);
+  border-radius: 12px;
+  background: var(--seo-surface);
+}
+.alert-item time {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--seo-muted);
+  font-size: 13px;
+}
+.alert-item h2 { margin-top: 0; }
 
 .seo-footer {
   border-top: 1px solid var(--seo-line);
@@ -406,7 +603,8 @@ a:hover { text-decoration-thickness: 2px; }
 }
 
 @media (max-width: 920px) {
-  .seo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .seo-grid,
+  .growth-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 760px) {
@@ -438,7 +636,11 @@ a:hover { text-decoration-thickness: 2px; }
   .seo-shell > section:not(.seo-hero) > h2,
   .seo-article h2,
   .seo-related h2 { font-size: 28px; }
-  .seo-grid { grid-template-columns: 1fr; }
+  .seo-grid,
+  .growth-grid,
+  .scam-directory,
+  .scam-scenario-grid,
+  .scam-dictionary-grid { grid-template-columns: 1fr; }
   .seo-card { padding: 16px; }
   .seo-article {
     padding-top: 34px;
@@ -451,6 +653,8 @@ a:hover { text-decoration-thickness: 2px; }
 
 @media (max-width: 520px) {
   .seo-intent-grid { grid-template-columns: 1fr; }
+  .scam-filter-bar { grid-template-columns: 1fr; }
+  .scam-tool-panel { padding: 16px; }
   .seo-search-cluster { padding: 18px; }
   .seo-answer-box { padding: 16px; }
   .seo-brand-logo {
