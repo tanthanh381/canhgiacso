@@ -21,12 +21,13 @@ test("GA4 injector patches CSP and rejects duplicate Google tags", async () => {
   assert.match(patch, /Expected exactly one Google tag/);
 });
 
-test("Pages build installs GA4 after the first-party analytics/CSP patch", async () => {
+test("Content compiler installs GA4 after the first-party analytics/CSP patch", async () => {
   const pkg = JSON.parse(await read("package.json"));
-  const pages = pkg.scripts["build:pages"];
-  const prepare = pkg.scripts["prepare:analytics"];
-  assert.match(pages, /patch-realtime-analytics\.mjs/);
-  assert.match(pages, /patch-google-analytics\.mjs/);
-  assert.ok(pages.indexOf("patch-realtime-analytics.mjs") < pages.indexOf("patch-google-analytics.mjs"));
-  assert.match(prepare, /patch-google-analytics\.mjs/);
+  const architecture = JSON.parse(await read("content/content-architecture.json"));
+  const stages = architecture.phases.flatMap((phase) => phase.stages);
+  assert.ok(stages.includes("patch-realtime-analytics.mjs"));
+  assert.ok(stages.includes("patch-google-analytics.mjs"));
+  assert.ok(stages.indexOf("patch-realtime-analytics.mjs") < stages.indexOf("patch-google-analytics.mjs"));
+  assert.match(pkg.scripts["build:pages"], /content:compile/);
+  assert.match(pkg.scripts["prepare:analytics"], /patch-google-analytics\.mjs/);
 });
