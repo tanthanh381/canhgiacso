@@ -33,7 +33,6 @@
       "stages": [
         "patch-priority-discovery.mjs",
         "patch-serp-intent-wave3.mjs",
-        "patch-knowledge-ui.mjs",
         "patch-indexation-wave4.mjs",
         "patch-google-traffic-wave5.mjs"
       ]
@@ -67,8 +66,7 @@
       "id": "instrumentation",
       "description": "Attach first-party analytics and GA4 after content is final.",
       "stages": [
-        "patch-realtime-analytics.mjs",
-        "patch-google-analytics.mjs"
+        "instrument-content.mjs"
       ]
     }
   ],
