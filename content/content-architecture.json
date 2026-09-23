@@ -23,7 +23,6 @@
       "description": "Generate canonical SEO and organic content.",
       "stages": [
         "generate-seo-content.mjs",
-        "seo-title-overrides.mjs",
         "generate-organic-growth.mjs",
         "generate-fresh-seo.mjs",
         "trim-growth-meta.mjs"
