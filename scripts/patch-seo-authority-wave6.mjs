@@ -1,4 +1,4 @@
-import { mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const ROOT = process.cwd();
@@ -169,7 +169,9 @@ for (const relative of ["phuong-phap-kiem-chung/index.html", "sitemap/index.html
       }
     }
     await writeFile(file, html, "utf8");
-  } catch {}
+  } catch (error) {
+    if (error?.code !== "ENOENT") throw error;
+  }
 }
 
 const sitemapFile = path.join(PUBLIC, "sitemap.xml");
