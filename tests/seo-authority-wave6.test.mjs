@@ -27,7 +27,7 @@ test("Content compiler runs SEO authority wave after QC content passes", async (
   assert.ok(stages.includes("patch-qc-wave3.mjs"));
   assert.ok(stages.includes("patch-seo-authority-wave6.mjs"));
   assert.ok(stages.indexOf("patch-qc-wave3.mjs") < stages.indexOf("patch-seo-authority-wave6.mjs"));
-  assert.ok(stages.indexOf("patch-seo-authority-wave6.mjs") < stages.indexOf("patch-realtime-analytics.mjs"));
+  assert.ok(stages.indexOf("patch-seo-authority-wave6.mjs") < stages.indexOf("instrument-content.mjs"));
 });
 
 test("Verify workflow enforces generated-site SEO audit", async () => {
