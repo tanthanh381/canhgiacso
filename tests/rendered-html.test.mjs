@@ -43,7 +43,7 @@ test("primary game navigation uses the Thử thách label without changing its r
 });
 
 test("ships product metadata and social artwork", async () => {
-  const [layout, page, admin, data, schema, contentRoles, packageJson, styles] = await Promise.all([
+  const [layout, page, admin, data, schema, contentRoles, packageJson, styles, ui, storage] = await Promise.all([
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/admin.tsx", import.meta.url), "utf8"),
@@ -52,17 +52,19 @@ test("ships product metadata and social artwork", async () => {
     readFile(new URL("../supabase/content_roles.sql", import.meta.url), "utf8"),
     readFile(new URL("../package.json", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/shared/ui-primitives.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/shared/browser-storage.ts", import.meta.url), "utf8"),
   ]);
 
   assert.match(layout, /og\.png/);
   assert.match(layout, /const siteTitle = "Cảnh Giác Số: Nhận diện lừa đảo trực tuyến \| HDBank"/);
   assert.match(layout, /lang="vi-VN"/);
-  assert.match(page, /localStorage/);
+  assert.match(storage, /localStorage/);
   assert.match(page, /CẢNH GIÁC SỐ/);
   assert.match(page, /FooterNotice/);
-  assert.match(page, /footer-warning/);
-  assert.match(page, /split\(\/\\n\+\//);
-  assert.match(page, /event\.key === "Escape"/);
+  assert.match(ui, /footer-warning/);
+  assert.match(ui, /split\(\/\\n\+\//);
+  assert.match(ui, /event\.key === "Escape"/);
   assert.match(page, /aria-pressed/);
   assert.match(page, /role="status"/);
   assert.match(page, /readStoredProgress/);
@@ -89,7 +91,7 @@ test("ships product metadata and social artwork", async () => {
   assert.match(page, /Đăng xuất/);
   assert.match(page, /Tài sản vừa bị tổn thất/);
   assert.match(page, /Đã hiểu hậu quả/);
-  assert.match(page, /khien-so-progress:\$\{username/);
+  assert.match(storage, /khien-so-progress:\$\{username/);
   assert.match(page, /resetAuthForm/);
   assert.match(page, /loadRemoteAccount/);
   assert.match(page, /exportCisoReport/);
@@ -142,7 +144,7 @@ test("ships product metadata and social artwork", async () => {
   await assert.rejects(access(new URL("../public/favicon.svg", import.meta.url)));
   await assert.rejects(access(new URL("../public/hdbank-logo.png", import.meta.url)));
   await assert.rejects(access(new URL("../public/favicon.png", import.meta.url)));
-  assert.match(page, /function BrandMark/);
+  assert.match(ui, /function BrandMark/);
   assert.match(styles, /khien-so-logo\.png/);
   assert.doesNotMatch(styles, /khien-logo-shield|khien-logo-signal/);
   assert.doesNotMatch(page, /hdbank-logo\.png|alt="HDBank"|className="hdbank-logo"/);
