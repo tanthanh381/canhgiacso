@@ -43,6 +43,9 @@ const localPathFor = (url) => {
   return path.join(root, pathname.replace(/^\/|\/$/g, ""), "index.html");
 };
 
+const seenTitles = new Map();
+const seenDescriptions = new Map();
+
 for (const url of urls) {
   const file = localPathFor(url);
   if (!(await exists(file))) {
@@ -57,6 +60,10 @@ for (const url of urls) {
   const wordCount = stripTags(html.split("<body")[1] || html).split(/\s+/).filter(Boolean).length;
 
   if (title.length < 15 || title.length > 70) fail(`${url}: title length ${title.length}`);
+  if (seenTitles.has(title)) fail(`${url}: duplicate title with ${seenTitles.get(title)}`);
+  else seenTitles.set(title, url);
+  if (seenDescriptions.has(description)) fail(`${url}: duplicate meta description with ${seenDescriptions.get(description)}`);
+  else seenDescriptions.set(description, url);
   if (description.length < 90 || description.length > 160) fail(`${url}: meta description length ${description.length}`);
   if (canonical !== url) fail(`${url}: canonical mismatch (${canonical})`);
   if (h1Count !== 1) fail(`${url}: expected exactly one H1, found ${h1Count}`);
@@ -76,6 +83,22 @@ for (const url of urls) {
   }
 }
 
+const knowledgeRoot = path.join(root, "kien-thuc");
+if (await exists(knowledgeRoot)) {
+  const knowledgeEntries = await (await import("node:fs/promises")).readdir(knowledgeRoot, { withFileTypes: true });
+  for (const entry of knowledgeEntries) {
+    if (!entry.isDirectory()) continue;
+    const file = path.join(knowledgeRoot, entry.name, "index.html");
+    if (!(await exists(file))) continue;
+    const expected = `${site}/kien-thuc/${entry.name}/`;
+    if (!urls.includes(expected)) fail(`${expected}: generated article missing from sitemap`);
+  }
+}
+
+for (const required of [`${site}/gioi-thieu/`, `${site}/quyen-rieng-tu/`, `${site}/phuong-phap-kiem-chung/`]) {
+  if (!urls.includes(required)) fail(`${required}: trust page missing from sitemap`);
+}
+
 const robots = await readFile(path.join(root, "robots.txt"), "utf8");
 if (!robots.includes("Sitemap: https://canhgiacso.com/sitemap.xml")) fail("robots.txt does not advertise sitemap");
 else ok("robots.txt advertises sitemap");
@@ -86,5 +109,8 @@ if (homeWords < 450) fail(`Homepage crawlable content is thin (${homeWords} word
 else ok(`Homepage has ${homeWords} crawlable words`);
 if (!home.includes("/kien-thuc/phong-chong-lua-dao-truc-tuyen/")) fail("Homepage missing anti-scam pillar link");
 if (!home.includes("/kien-thuc/an-toan-thong-tin-ca-nhan/")) fail("Homepage missing information-security pillar link");
+if (!home.includes("/gioi-thieu/")) fail("Homepage missing About/trust link");
+if (!home.includes("/phuong-phap-kiem-chung/")) fail("Homepage missing editorial-method link");
+if (!home.includes("/quyen-rieng-tu/")) fail("Homepage missing privacy link");
 
 if (!process.exitCode) console.log("SEO audit passed.");
