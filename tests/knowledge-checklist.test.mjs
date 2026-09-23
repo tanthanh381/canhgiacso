@@ -10,7 +10,7 @@ test("Cẩm nang includes an interactive security checklist", async () => {
     read("../app/globals.css"),
     read("../app/domains/security-awareness/checklist.ts"),
   ]);
-  const groupIds = [...checklist.matchAll(/^ {4}id: "([a-z-]+)",$/gm)].map((match) => match[1]);
+  const groupIds = [...checklist.matchAll(/\bid: "([a-z-]+)", icon:/g)].map((match) => match[1]);
   const itemIds = [...checklist.matchAll(/^ {6}\{ id: "([a-z]+-[a-z-]+)"/gm)].map((match) => match[1]);
 
   assert.equal(groupIds.length, 12);
