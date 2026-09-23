@@ -1,5 +1,7 @@
 import type { Difficulty } from "../../data";
 
+export const PHISHING_QUIZ_URL = "https://phishingquiz.withgoogle.com/?hl=vi";
+
 export type BadgeTone = "starter" | "bronze" | "silver" | "gold" | "expert" | "legendary";
 export type DefenseBadge = {
   icon: string;
