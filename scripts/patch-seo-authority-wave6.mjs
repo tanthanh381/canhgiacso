@@ -6,6 +6,7 @@ const PUBLIC = path.join(ROOT, "public");
 const SITE = "https://canhgiacso.com";
 const UPDATED = "2026-09-23";
 const BRAND = '<span class="seo-brand-logo" aria-hidden="true"></span><span class="seo-brand-divider" aria-hidden="true"></span><span class="seo-product-lockup"><strong>CẢNH GIÁC SỐ</strong><small>IT SECURITY</small></span>';
+const THEME_INIT = '<script>try{if(localStorage.getItem("khien-so-theme")==="dark")document.documentElement.dataset.theme="dark"}catch{}<\/script>';
 const TRUST_NAV = '<nav class="seo-footer-links" aria-label="Thông tin website"><a href="/gioi-thieu/">Giới thiệu</a><a href="/phuong-phap-kiem-chung/">Phương pháp kiểm chứng</a><a href="/quyen-rieng-tu/">Quyền riêng tư</a><a href="/sitemap/">Sơ đồ nội dung</a></nav>';
 
 async function write(relative, content) {
@@ -60,8 +61,10 @@ function pageShell({ title, description, canonical, type, h1, eyebrow, lead, bod
   return `<!doctype html>
 <html lang="vi-VN">
 <head>
+  ${THEME_INIT}
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
   <title>${title}</title>
   <meta name="description" content="${description}" />
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
@@ -85,7 +88,7 @@ function pageShell({ title, description, canonical, type, h1, eyebrow, lead, bod
   <script type="application/ld+json">${schema}</script>
 </head>
 <body>
-<header class="seo-header"><div class="seo-shell seo-nav"><a class="seo-brand" href="/">${BRAND}</a><nav class="seo-nav-links" aria-label="Điều hướng"><a href="/">Thử thách</a><a href="/kien-thuc/">Kiến thức</a></nav></div></header>
+<header class="seo-header"><div class="seo-shell seo-nav"><a class="seo-brand" href="/">${BRAND}</a><nav class="seo-nav-links" aria-label="Điều hướng"><a href="/">Thử thách</a><a href="/kien-thuc/">Cẩm nang</a></nav></div></header>
 <main class="seo-article">
   <div class="seo-breadcrumb"><a href="/">Cảnh Giác Số</a> › ${h1}</div>
   <span class="seo-eyebrow">${eyebrow}</span>
@@ -249,6 +252,34 @@ for (const relative of ["phuong-phap-kiem-chung/index.html", "sitemap/index.html
   const file = path.join(PUBLIC, relative);
   try {
     let html = await readFile(file, "utf8");
+    if (!html.includes('khien-so-theme')) html = html.replace("<head>", `<head>\n  ${THEME_INIT}`);
+    if (!html.includes('name="referrer"')) html = html.replace(/(<meta name="viewport"[^>]*>)/i, '$1\n  <meta name="referrer" content="strict-origin-when-cross-origin" />');
+
+    if (relative.startsWith("phuong-phap-kiem-chung")) {
+      html = html
+        .replace(
+          /<a class="seo-brand" href="\/"><img[^>]+><span>Cảnh Giác Số<\/span><\/a>/,
+          `<a class="seo-brand" href="/">${BRAND}</a>`,
+        )
+        .replaceAll(`${SITE}/khien-so-logo.png`, `${SITE}/search-logo.svg`);
+    }
+
+    if (relative.startsWith("sitemap") && !html.includes('class="seo-header"')) {
+      html = html
+        .replace(
+          "<body>",
+          `<body><header class="seo-header"><div class="seo-shell seo-nav"><a class="seo-brand" href="/">${BRAND}</a><nav class="seo-nav-links" aria-label="Điều hướng"><a href="/">Thử thách</a><a href="/kien-thuc/">Cẩm nang</a></nav></div></header>`,
+        )
+        .replace(
+          '<main class="seo-article"><h1>',
+          '<main class="seo-article"><div class="seo-breadcrumb"><a href="/">Cảnh Giác Số</a> › Sơ đồ nội dung</div><span class="seo-eyebrow">ĐIỀU HƯỚNG NỘI DUNG</span><h1>',
+        )
+        .replace(
+          "</main>",
+          `</main><footer class="seo-footer"><div class="seo-shell"><strong>Cảnh Giác Số</strong>${TRUST_NAV}<p class="seo-safety">Tất cả nội dung công khai của Cảnh Giác Số theo nhóm chủ đề.</p></div></footer>`,
+        );
+    }
+
     if (!html.includes("seo-footer-links")) {
       if (html.includes('<footer class="seo-footer">')) {
         html = html.replace(/(<footer class="seo-footer"><div class="seo-shell"><strong>[^<]+<\/strong>)/, `$1${TRUST_NAV}`);
