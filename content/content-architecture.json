@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "name": "CanhGiacSo Content Architecture",
+  "sourceOfTruth": {
+    "application": [
+      "app/data.ts",
+      "app/news-content.ts"
+    ],
+    "staticContent": [
+      "public/kien-thuc",
+      "public/tin-tuc",
+      "github-pages/index.html"
+    ],
+    "policy": "Source content may be authored in application/static content sources. Generated docs/ is never a source of truth."
+  },
+  "output": {
+    "root": "docs",
+    "generatedOnly": true
+  },
+  "phases": [
+    {
+      "id": "navigation",
+      "description": "Normalize public navigation and terminology before content generation.",
+      "stages": [
+        "patch-public-nav-links.mjs",
+        "patch-traffic-section-nav.mjs",
+        "patch-qc-terminology.mjs"
+      ]
+    },
+    {
+      "id": "generate",
+      "description": "Generate canonical SEO and organic content.",
+      "stages": [
+        "generate-seo-content.mjs",
+        "seo-title-overrides.mjs",
+        "generate-organic-growth.mjs",
+        "generate-fresh-seo.mjs",
+        "trim-growth-meta.mjs"
+      ]
+    },
+    {
+      "id": "discoverability",
+      "description": "Apply deterministic internal-link, SERP and trust architecture.",
+      "stages": [
+        "patch-home-growth-links.mjs",
+        "patch-priority-discovery.mjs",
+        "patch-serp-intent-wave3.mjs",
+        "patch-methodology-social.mjs",
+        "patch-trust-links-wave3.mjs",
+        "patch-knowledge-ui.mjs",
+        "patch-indexation-wave4.mjs",
+        "patch-google-traffic-wave5.mjs"
+      ]
+    },
+    {
+      "id": "quality",
+      "description": "Normalize quality, terminology and evidence.",
+      "stages": [
+        "patch-qc-wave2.mjs",
+        "patch-qc-wave3.mjs"
+      ]
+    },
+    {
+      "id": "growth",
+      "description": "Compile authority, intent, CTR and content-growth waves.",
+      "stages": [
+        "patch-seo-authority-wave6.mjs",
+        "patch-seo-intent-wave7.mjs",
+        "patch-seo-ctr-wave8.mjs",
+        "patch-content-growth-wave9.mjs"
+      ]
+    },
+    {
+      "id": "instrumentation",
+      "description": "Attach first-party analytics and GA4 after content is final.",
+      "stages": [
+        "patch-realtime-analytics.mjs",
+        "patch-google-analytics.mjs"
+      ]
+    }
+  ],
+  "invariants": [
+    "Every stage must be idempotent.",
+    "No stage may write outside app/, public/, github-pages/ or docs/.",
+    "docs/ is generated and must never be manually authored.",
+    "SEO audit runs only after compilation and Vite build.",
+    "Production analytics instrumentation runs after content normalization."
+  ]
+}
