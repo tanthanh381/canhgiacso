@@ -3,7 +3,8 @@ import path from "node:path";
 
 const ROOT = process.cwd();
 const KNOWLEDGE_DIR = path.join(ROOT, "public", "kien-thuc");
-const SEO_CSS_VERSION = "20260922-ui";
+const SEO_CSS_VERSION = "20260923-brand";
+const BRAND_MARKUP = '<span class="seo-brand-logo" aria-hidden="true"></span><span class="seo-brand-divider" aria-hidden="true"></span><span class="seo-product-lockup"><strong>CẢNH GIÁC SỐ</strong><small>IT SECURITY</small></span>';
 
 async function htmlFiles(dir) {
   const entries = await readdir(dir);
@@ -30,20 +31,22 @@ for (const file of files) {
     .replaceAll(`href='/seo.css?v=${SEO_CSS_VERSION}?v=${SEO_CSS_VERSION}'`, `href='/seo.css?v=${SEO_CSS_VERSION}'`)
     .replaceAll(
       '<img src="/khien-so-logo.png" alt="Logo Cảnh Giác Số" width="42" height="42" /><span>Cảnh Giác Số</span>',
-      '<span class="seo-brand-logo" aria-hidden="true"></span><span class="seo-brand-lockup">Cảnh Giác Số</span>',
+      BRAND_MARKUP,
     )
     .replaceAll(
       '<img src="/khien-so-logo.png" alt="Logo Cảnh Giác Số" width="54" height="54" /><span>Cảnh Giác Số</span>',
-      '<span class="seo-brand-logo" aria-hidden="true"></span><span class="seo-brand-lockup">Cảnh Giác Số</span>',
+      BRAND_MARKUP,
     )
     .replaceAll(
       '<img src="/canh-giac-so-mark.svg" alt="Logo Cảnh Giác Số" width="42" height="42" /><span>Cảnh Giác Số</span>',
-      '<span class="seo-brand-logo" aria-hidden="true"></span><span class="seo-brand-lockup">Cảnh Giác Số</span>',
+      BRAND_MARKUP,
     )
     .replaceAll(
       '<img src="/canh-giac-so-mark.svg" alt="Logo Cảnh Giác Số" width="54" height="54" /><span>Cảnh Giác Số</span>',
-      '<span class="seo-brand-logo" aria-hidden="true"></span><span class="seo-brand-lockup">Cảnh Giác Số</span>',
+      BRAND_MARKUP,
     )
+    .replaceAll('<span class="seo-brand-logo" aria-hidden="true"></span><span class="seo-brand-lockup">Cảnh Giác Số</span>', BRAND_MARKUP)
+    .replaceAll('<span class="seo-brand-logo" role="img" aria-label="Logo Cảnh Giác Số"></span><span class="seo-brand-lockup">Cảnh Giác Số</span>', BRAND_MARKUP)
     .replaceAll('<a href="/kien-thuc/">Kiến thức</a></nav>', '<a href="/kien-thuc/" aria-current="page">Cẩm nang</a></nav>')
     .replaceAll('› <a href="/kien-thuc/">Kiến thức</a> ›', '› <a href="/kien-thuc/">Cẩm nang</a> ›');
 
