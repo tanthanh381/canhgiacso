@@ -4,8 +4,9 @@ import path from "node:path";
 const file = path.join(process.cwd(), "app", "page.tsx");
 let source = await readFile(file, "utf8");
 
-const helperMarker = "function scenarioCategoryLabel";
-if (!source.includes(helperMarker)) {
+const helperMarker = "scenarioCategoryLabel";
+const helperAvailable = source.includes('from "./domains/training/presentation"') && source.includes(helperMarker);
+if (!helperAvailable && !source.includes("function scenarioCategoryLabel")) {
   const anchor = 'const PHISHING_QUIZ_URL = "https://phishingquiz.withgoogle.com/?hl=vi";';
   const helpers = `${anchor}\n\nfunction scenarioCategoryLabel(category: string) {\n  if (category === "Deepfake") return "Giả mạo bằng AI (deepfake)";\n  if (category === "Phishing") return "Lừa đảo giả mạo (phishing)";\n  if (category === "Brandname giả") return "SMS Brandname giả mạo";\n  return category;\n}\n\nfunction scenarioChannelLabel(channel: string) {\n  if (channel === "Video call") return "Cuộc gọi video";\n  if (channel === "Nhóm chat") return "Nhóm trò chuyện";\n  return channel;\n}`;
   if (!source.includes(anchor)) {
