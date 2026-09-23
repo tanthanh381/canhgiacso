@@ -183,14 +183,31 @@ const ensureUrl = (url, priority, changefreq = "monthly") => {
   sitemap = sitemap.replace("</urlset>", `  <url>\n    <loc>${url}</loc>\n    <lastmod>${UPDATED}</lastmod>\n    <changefreq>${changefreq}</changefreq>\n    <priority>${priority}</priority>\n  </url>\n</urlset>`);
 };
 
+const refreshLastmod = (url) => {
+  const loc = `<loc>${url}</loc>`;
+  const locIndex = sitemap.indexOf(loc);
+  if (locIndex < 0) return;
+  const start = sitemap.indexOf("<lastmod>", locIndex);
+  const end = sitemap.indexOf("</lastmod>", start);
+  if (start < 0 || end < 0) return;
+  sitemap = sitemap.slice(0, start + "<lastmod>".length) + UPDATED + sitemap.slice(end);
+};
+
 ensureUrl(`${SITE}/gioi-thieu/`, "0.7");
 ensureUrl(`${SITE}/quyen-rieng-tu/`, "0.6");
 ensureUrl(`${SITE}/phuong-phap-kiem-chung/`, "0.8");
+refreshLastmod(`${SITE}/`);
+refreshLastmod(`${SITE}/kien-thuc/`);
+refreshLastmod(`${SITE}/gioi-thieu/`);
+refreshLastmod(`${SITE}/quyen-rieng-tu/`);
+refreshLastmod(`${SITE}/phuong-phap-kiem-chung/`);
 
 for (const file of await htmlFiles(knowledgeDir)) {
   const relative = path.relative(knowledgeDir, path.dirname(file)).split(path.sep).join("/");
   if (!relative || relative === ".") continue;
-  ensureUrl(`${SITE}/kien-thuc/${relative}/`, "0.8");
+  const articleUrl = `${SITE}/kien-thuc/${relative}/`;
+  ensureUrl(articleUrl, "0.8");
+  refreshLastmod(articleUrl);
 }
 
 await writeFile(sitemapFile, sitemap, "utf8");
