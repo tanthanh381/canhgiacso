@@ -309,3 +309,18 @@ test.describe("Growth Wave 9 anti-scam tools", () => {
     await expect(page.locator(".seo-footer")).toBeVisible();
   });
 });
+
+
+test.describe("Wave 9 security shell", () => {
+  test("Wave 9 tool pages keep CSP and local tool scripts", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop-chromium", "single deterministic security-shell run");
+    await page.goto("/cong-cu/kiem-tra-tin-nhan-dang-ngo/");
+    await expect(page.locator('meta[http-equiv="Content-Security-Policy"]')).toHaveCount(1);
+    const csp = await page.locator('meta[http-equiv="Content-Security-Policy"]').getAttribute("content");
+    expect(csp).toContain("script-src 'self'");
+    expect(csp).toContain("object-src 'none'");
+    await expect(page.locator('script[src="/theme-init.js"]')).toHaveCount(1);
+    await expect(page.locator('script[src="/scam-tools.js"]')).toHaveCount(1);
+    await expectNoHorizontalOverflow(page);
+  });
+});
