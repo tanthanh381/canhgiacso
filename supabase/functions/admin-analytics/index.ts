@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
     return json(origin, 500, { error: "runtime_configuration_error" });
   }
 
-  const client = createClient(supabaseUrl, key, {
+  const userClient = createClient(supabaseUrl, key, {
     global: { headers: { Authorization: authHeader } },
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
   });
@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
   }
   const windowKey = normalizeWindow(body.window);
 
-  const roleResult = await client.rpc("get_content_management_role");
+  const roleResult = await userClient.rpc("get_content_management_role");
   if (roleResult.error || roleResult.data !== "admin") {
     console.warn(JSON.stringify({
       event: "admin_analytics_denied",
@@ -98,11 +98,21 @@ Deno.serve(async (req) => {
     return json(origin, 403, { error: "admin_required" });
   }
 
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  if (!serviceRoleKey) {
+    console.error(JSON.stringify({ event: "admin_analytics_error", requestId, reason: "missing_service_role" }));
+    return json(origin, 500, { error: "runtime_configuration_error" });
+  }
+
+  const serviceClient = createClient(supabaseUrl, serviceRoleKey, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  });
+
   const [dashboard, google, insights, country] = await Promise.all([
-    client.rpc("get_web_analytics_dashboard", { p_window: windowKey }),
-    client.rpc("get_google_traffic_dashboard", { p_window: windowKey }),
-    client.rpc("get_web_analytics_insights", { p_window: windowKey }),
-    client.rpc("get_country_traffic_dashboard", { p_window: windowKey }),
+    serviceClient.rpc("get_web_analytics_dashboard", { p_window: windowKey }),
+    serviceClient.rpc("get_google_traffic_dashboard", { p_window: windowKey }),
+    serviceClient.rpc("get_web_analytics_insights", { p_window: windowKey }),
+    serviceClient.rpc("get_country_traffic_dashboard", { p_window: windowKey }),
   ]);
 
   const failures = [
