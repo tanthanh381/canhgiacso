@@ -51,6 +51,8 @@ test("application shell, guest gameplay and static knowledge work on this OS/bro
   await expect(page.locator("h1").first()).toBeVisible();
   const knowledgeOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(knowledgeOverflow).toBeLessThanOrEqual(2);
+  const knowledgeCsp = await page.locator('meta[http-equiv="Content-Security-Policy"]').getAttribute("content");
+  expect(knowledgeCsp).toContain("https://www.google.com");
 
   await page.goto("/cong-cu/");
   await expect(page.locator(".seo-header")).toBeVisible();
