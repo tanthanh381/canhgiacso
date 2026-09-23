@@ -24,19 +24,19 @@ test("Content compiler runs SEO wave 5 after indexation enrichment", async () =>
   const architecture = JSON.parse(await read("content/content-architecture.json"));
   const stages = architecture.phases.flatMap((phase) => phase.stages);
   assert.ok(stages.indexOf("patch-indexation-wave4.mjs") < stages.indexOf("patch-google-traffic-wave5.mjs"));
-  assert.ok(stages.indexOf("patch-google-traffic-wave5.mjs") < stages.indexOf("patch-realtime-analytics.mjs"));
+  assert.ok(stages.indexOf("patch-google-traffic-wave5.mjs") < stages.indexOf("instrument-content.mjs"));
 });
 
 test("Knowledge hub uses the shared Cảnh Giác Số visual system", async () => {
-  const [hub, styles, patchKnowledgeUi] = await Promise.all([
+  const [hub, styles, finalizer] = await Promise.all([
     read("public/kien-thuc/index.html"),
     read("public/seo.css"),
-    read("scripts/patch-knowledge-ui.mjs"),
+    read("scripts/finalize-content-architecture.mjs"),
   ]);
 
   assert.match(hub, /<link rel="stylesheet" href="\/seo\.css(?:\?v=[^"]+)?"/);
-  assert.match(patchKnowledgeUi, /SEO_CSS_VERSION = "\d{8}-[a-z0-9-]+"/);
-  assert.match(patchKnowledgeUi, /\/seo\.css\?v=\$\{SEO_CSS_VERSION\}/);
+  assert.match(finalizer, /SEO_CSS_VERSION = "\d{8}-[a-z0-9-]+"/);
+  assert.match(finalizer, /\/seo\.css\?v=\$\{SEO_CSS_VERSION\}/);
   assert.match(hub, /class="seo-header"/);
   assert.match(hub, /class="seo-brand-logo"/);
   assert.match(hub, /id="google-priority-tools"/);
