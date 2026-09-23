@@ -65,12 +65,13 @@ test("từ chối URL nguồn không an toàn và ID trùng", () => {
 });
 
 test("giao diện có menu, bộ lọc, liên kết nguồn và khu vực quản trị Tin tức", async () => {
-  const [page, admin, editor] = await Promise.all([
+  const [page, shell, admin, editor] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/domains/shell/view.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/admin.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/news-editor.tsx", import.meta.url), "utf8"),
   ]);
-  assert.match(page, />Tin tức<\/button>/);
+  assert.match(shell, />Tin tức<\/button>/);
   assert.match(page, /aria-label="Tìm tin tức"/);
   assert.match(page, /rel="noopener noreferrer"/);
   assert.match(editor, /Quản lý bài tin/);
