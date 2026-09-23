@@ -1,4 +1,4 @@
-import { createReadStream, existsSync, statSync } from "node:fs";
+import { createReadStream, existsSync, readFileSync, statSync } from "node:fs";
 import { createServer } from "node:http";
 import { extname, join, normalize, resolve, sep } from "node:path";
 
@@ -46,6 +46,14 @@ const server = createServer((req, res) => {
   });
   if (req.method === "HEAD") {
     res.end();
+    return;
+  }
+  if (extname(file).toLowerCase() === ".html") {
+    // Production is HTTPS and intentionally uses upgrade-insecure-requests.
+    // The QC server is plain HTTP; WebKit otherwise upgrades localhost assets
+    // to HTTPS and fails TLS before the application can mount.
+    const html = readFileSync(file, "utf8").replace(/;?\s*upgrade-insecure-requests\s*/gi, "");
+    res.end(html);
     return;
   }
   createReadStream(file).pipe(res);
