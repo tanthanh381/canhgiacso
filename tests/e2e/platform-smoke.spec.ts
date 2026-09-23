@@ -52,5 +52,12 @@ test("application shell, guest gameplay and static knowledge work on this OS/bro
   const knowledgeOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(knowledgeOverflow).toBeLessThanOrEqual(2);
 
+  await page.goto("/cong-cu/");
+  await expect(page.locator(".seo-header")).toBeVisible();
+  await expect(page.locator("h1")).toContainText("Kiểm tra");
+  await expect(page.locator('a[href="/cong-cu/kiem-tra-cuoc-goi-la/"]')).toBeVisible();
+  const toolOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  expect(toolOverflow).toBeLessThanOrEqual(2);
+
   expect(severeConsole).toEqual([]);
 });
