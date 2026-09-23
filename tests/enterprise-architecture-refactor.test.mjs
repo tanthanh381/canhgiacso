@@ -11,19 +11,24 @@ test("P1 exposes one deterministic content compiler entrypoint", async () => {
   assert.equal(pkg.scripts["build:pages"], "pnpm run content:compile && vite build --config vite.github-pages.config.ts");
   const stages = architecture.phases.flatMap((phase) => phase.stages);
   assert.ok(stages.length >= 1);
-  assert.ok(stages.length <= 20, `content pipeline should shrink over time; found ${stages.length} stages`);
+  assert.ok(stages.length <= 15, `content pipeline should stay consolidated; found ${stages.length} stages`);
   assert.equal(new Set(stages).size, stages.length);
   assert.equal(architecture.output.root, "docs");
   assert.equal(architecture.output.generatedOnly, true);
 });
 
 test("P2 keeps page.tsx as orchestrator and moves domain concerns out", async () => {
-  const [page, checklist, training, storage, ui] = await Promise.all([
+  const [page, checklist, training, storage, ui, shellView, authGateway, trainingGateway, dashboardGateway, contentGateway] = await Promise.all([
     read("app/page.tsx"),
     read("app/domains/security-awareness/checklist.ts"),
     read("app/domains/training/model.ts"),
     read("app/shared/browser-storage.ts"),
     read("app/shared/ui-primitives.tsx"),
+    read("app/domains/shell/view.tsx"),
+    read("app/domains/auth/gateway.ts"),
+    read("app/domains/training/gateway.ts"),
+    read("app/domains/dashboard/gateway.ts"),
+    read("app/domains/content/gateway.ts"),
   ]);
   assert.match(page, /domains\/security-awareness\/checklist/);
   assert.match(page, /domains\/training\/model/);
@@ -33,6 +38,15 @@ test("P2 keeps page.tsx as orchestrator and moves domain concerns out", async ()
   assert.doesNotMatch(page, /function safeStorageGet/);
   assert.doesNotMatch(page, /function BrandMark/);
   assert.doesNotMatch(page, /function Modal/);
+  assert.doesNotMatch(page, /from "\.\/supabase"/);
+  assert.doesNotMatch(page, /supabase\./);
+  assert.match(page, /AppHeader/);
+  assert.match(page, /AccountDialogs/);
+  assert.match(shellView, /export function AppHeader/);
+  assert.match(authGateway, /supabase\.auth/);
+  assert.match(trainingGateway, /submit_game_choice/);
+  assert.match(dashboardGateway, /get_ciso_dashboard/);
+  assert.match(contentGateway, /get_public_site_content/);
   assert.match(checklist, /export const securityChecklistGroups/);
   assert.match(training, /export function evaluateGuestChoice/);
   assert.match(storage, /export function safeStorageGet/);
