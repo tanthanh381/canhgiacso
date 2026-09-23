@@ -5,65 +5,6 @@ const ROOT = process.cwd();
 const SUPABASE_ORIGINS = "https://goietwyapiywrtibpkwo.supabase.co wss://goietwyapiywrtibpkwo.supabase.co";
 const TRACKER_TAG = '<script src="/web-analytics.js" defer></script>';
 
-async function patchAdmin() {
-  const file = path.join(ROOT, "app", "admin.tsx");
-  let source = await readFile(file, "utf8");
-  const before = source;
-
-  if (!source.includes('from "./admin-traffic-analytics"')) {
-    source = source.replace(
-      'import { supabase } from "./supabase";',
-      'import { supabase } from "./supabase";\nimport { AdminTrafficAnalytics } from "./admin-traffic-analytics";',
-    );
-  }
-  source = source.replace(
-    'type AdminTab = "general" | "certificate" | "scenarios" | "knowledge" | "news" | "users";',
-    'type AdminTab = "general" | "certificate" | "scenarios" | "knowledge" | "news" | "traffic" | "users";',
-  );
-
-  if (!source.includes('setTab("traffic")')) {
-    source = source.replace(
-      '{role === "admin" && <button role="tab" aria-selected={tab === "users"}',
-      '{role === "admin" && <button role="tab" aria-selected={tab === "traffic"} className={tab === "traffic" ? "active" : ""} onClick={() => setTab("traffic")}>Thống kê truy cập</button>}\n        {role === "admin" && <button role="tab" aria-selected={tab === "users"}',
-    );
-  }
-
-  if (!source.includes('tab === "traffic" && role === "admin"')) {
-    source = source.replace(
-      '{tab === "users" && role === "admin" && <div className="role-management">',
-      '{tab === "traffic" && role === "admin" && <AdminTrafficAnalytics />}\n\n      {tab === "users" && role === "admin" && <div className="role-management">',
-    );
-  }
-
-  if (source !== before) {
-    await writeFile(file, source, "utf8");
-    console.log("Patched admin traffic analytics tab.");
-  }
-}
-
-async function patchCountryAnalytics() {
-  const file = path.join(ROOT, "app", "admin-traffic-analytics.tsx");
-  let source = await readFile(file, "utf8");
-  const before = source;
-
-  if (!source.includes('from "./admin-country-analytics"')) {
-    source = source.replace(
-      'import "./admin-google-traffic.css";',
-      'import "./admin-google-traffic.css";\nimport { AdminCountryAnalytics } from "./admin-country-analytics";',
-    );
-  }
-
-  if (!source.includes('<AdminCountryAnalytics windowKey={windowKey} />')) {
-    const marker = '      <section className="traffic-panel traffic-chart-panel">';
-    source = source.replace(marker, `      <AdminCountryAnalytics windowKey={windowKey} />\n\n${marker}`);
-  }
-
-  if (source !== before) {
-    await writeFile(file, source, "utf8");
-    console.log("Patched country analytics panel.");
-  }
-}
-
 function patchCsp(html) {
   if (html.includes(SUPABASE_ORIGINS)) return html;
   return html.replace(/connect-src 'self'([^;]*);/g, (_match, rest) => `connect-src 'self' ${SUPABASE_ORIGINS}${rest};`);
@@ -93,8 +34,6 @@ async function htmlFiles(dir) {
   return files;
 }
 
-await patchAdmin();
-await patchCountryAnalytics();
 let htmlChanged = 0;
 for (const relativeRoot of ["public", "github-pages"]) {
   const root = path.join(ROOT, relativeRoot);
