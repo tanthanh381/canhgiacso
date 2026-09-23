@@ -10,6 +10,7 @@ const CSP_ORIGINS = {
   "script-src": ["https://www.googletagmanager.com"],
   "connect-src": [
     "https://www.google-analytics.com",
+    "https://www.google.com",
     "https://analytics.google.com",
     "https://region1.google-analytics.com",
     "https://www.googletagmanager.com",
