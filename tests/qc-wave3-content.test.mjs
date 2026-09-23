@@ -2,14 +2,13 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const packageJson = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
+const contentArchitecture = JSON.parse(await readFile(new URL("../content/content-architecture.json", import.meta.url), "utf8"));
 const wave3 = await readFile(new URL("../scripts/patch-qc-wave3.mjs", import.meta.url), "utf8");
 
 test("QC Wave 3 runs immediately after Wave 2 before the SEO authority wave", () => {
-  assert.match(
-    packageJson.scripts["build:pages"],
-    /patch-qc-wave2\.mjs && node scripts\/patch-qc-wave3\.mjs && node scripts\/patch-seo-authority-wave6\.mjs && node scripts\/patch-seo-intent-wave7\.mjs && node scripts\/patch-seo-ctr-wave8\.mjs && node scripts\/patch-content-growth-wave9\.mjs && node scripts\/patch-realtime-analytics\.mjs/,
-  );
+  const stages = contentArchitecture.phases.flatMap((phase) => phase.stages);
+  assert.equal(stages[stages.indexOf("patch-qc-wave2.mjs") + 1], "patch-qc-wave3.mjs");
+  assert.ok(stages.indexOf("patch-qc-wave3.mjs") < stages.indexOf("patch-seo-authority-wave6.mjs"));
 });
 
 test("QC Wave 3 enforces evidence traceability and trust floor", () => {
