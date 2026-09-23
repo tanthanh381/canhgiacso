@@ -16,6 +16,9 @@ test("SEO authority wave adds trust pages and reconciles sitemap coverage", asyn
   assert.match(script, /function ensureLegacyArticleSeo/);
   assert.match(script, /BreadcrumbList/);
   assert.match(script, /twitter:card/);
+  assert.match(script, /THEME_INIT/);
+  assert.match(script, /seo-brand-divider/);
+  assert.match(script, /Sơ đồ nội dung/);
 });
 
 test("Pages build runs SEO authority wave after QC content passes", async () => {
@@ -41,4 +44,21 @@ test("Homepage exposes trust links and publishing principles", async () => {
   assert.match(home, /\/gioi-thieu\//);
   assert.match(home, /\/phuong-phap-kiem-chung\//);
   assert.match(home, /\/quyen-rieng-tu\//);
+});
+
+
+test("trust and system pages use the shared visual shell", async () => {
+  const script = await read("scripts/patch-seo-authority-wave6.mjs");
+  for (const marker of [
+    'class="seo-header"',
+    'class="seo-brand"',
+    'class="seo-brand-logo"',
+    'class="seo-brand-divider"',
+    'class="seo-product-lockup"',
+    'class="seo-footer"',
+    'seo-footer-links',
+    'Cẩm nang',
+  ]) assert.ok(script.includes(marker), `missing shared shell marker: ${marker}`);
+  assert.match(script, /phuong-phap-kiem-chung\/index\.html/);
+  assert.match(script, /sitemap\/index\.html/);
 });
