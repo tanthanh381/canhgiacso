@@ -18,7 +18,8 @@ import { bestCorrectStreak, buildDefenseBadges, difficulties, difficultyTone, PH
 import { evaluateGuestChoice, type ChoiceOutcome, type GameHistory, type GameState, type PendingChoice, type Result, type StoredProgress } from "./domains/training/model";
 import { GUEST_CERTIFICATE_KEY, LEGACY_PROGRESS_KEY, THEME_KEY, progressKey, readStoredProgress, safeStorageGet, safeStorageRemove, safeStorageSet } from "./shared/browser-storage";
 import { BadgeIcon, BrandMark, FooterNotice, Modal } from "./shared/ui-primitives";
-import { canChangeHash, navigateBrowser, restoreHash, routeFromHash, SIMULATION_BANNER_VIEWS, type View } from "./domains/shell/navigation";
+import { canChangeHash, navigateBrowser, restoreHash, routeFromHash, type View } from "./domains/shell/navigation";
+import { AppFooter, AppHeader, SyncStatus } from "./domains/shell/view";
 
 const AdminPage = lazy(() => import("./admin").then((module) => ({ default: module.AdminPage })));
 
@@ -783,48 +784,24 @@ export default function Home() {
 
   return (
     <main className={dark ? "app dark" : "app"}>
-      <header className="topbar">
-        <button className="brand" onClick={() => navigateTo("game")} aria-label="Cảnh Giác Số — về màn chơi">
-          <BrandMark />
-          <span className="brand-divider" aria-hidden="true" />
-          <span className="product-lockup"><strong>{siteContent.copy.productName}</strong><small>{siteContent.copy.departmentName}</small></span>
-        </button>
-        <nav aria-label="Điều hướng chính">
-          <button aria-current={view === "game" ? "page" : undefined} className={view === "game" ? "active" : ""} onClick={() => navigateTo("game")}>Thử thách</button>
-          <details className="knowledge-menu">
-            <summary aria-label="Mở menu Cẩm nang" aria-current={view === "knowledge" ? "page" : undefined} className={view === "knowledge" ? "active" : ""}>Cẩm nang</summary>
-            <div className="knowledge-submenu" role="group" aria-label="Cẩm nang">
-              <button type="button" onClick={() => window.location.assign("/kien-thuc/")}><strong>Bài viết kiến thức</strong><small>Hướng dẫn, cảnh báo và nội dung tra cứu</small></button>
-              <button type="button" onClick={() => { document.querySelector<HTMLDetailsElement>(".knowledge-menu")?.removeAttribute("open"); navigateTo("knowledge"); window.setTimeout(() => document.getElementById("security-checklist-title")?.scrollIntoView({ behavior: "smooth", block: "start" }), 80); }}><strong>Danh sách kiểm tra</strong><small>Tự kiểm tra an toàn số và lưu tiến độ</small></button>
-            </div>
-          </details>
-          <button aria-current={view === "news" ? "page" : undefined} className={view === "news" ? "active" : ""} onClick={() => navigateTo("news")}>Tin tức</button>
-          <button aria-current={view === "quiz" ? "page" : undefined} className={view === "quiz" ? "active" : ""} onClick={() => navigateTo("quiz")}>Thực hành tương tác</button>
-          <button aria-current={view === "stats" ? "page" : undefined} className={view === "stats" ? "active" : ""} onClick={() => navigateTo("stats")}>Thành tích</button>
-          <button aria-current={view === "dashboard" ? "page" : undefined} className={view === "dashboard" ? "active" : ""} onClick={() => navigateTo("dashboard")}>Dashboard</button>
-          {sessionAccount && <button aria-current={view === "admin" ? "page" : undefined} className={view === "admin" ? "active" : ""} onClick={() => navigateTo("admin")}>Quản trị</button>}
-        </nav>
-        <div className="top-actions">
-          <button className="icon-button" aria-pressed={dark} onClick={() => setDark((value) => !value)} aria-label="Đổi chế độ sáng tối">{dark ? "☀" : "☾"}</button>
-          {sessionAccount ? (
-            <button className="profile-button" onClick={() => setProfileOpen(true)} aria-label={`Mở tài khoản của ${playerName}`}><span>{playerName.trim().slice(0, 1).toUpperCase() || "N"}</span>{playerName}</button>
-          ) : (
-            <div className="auth-actions">
-              <button className="guest-badge guest-badge-button" type="button" onClick={() => setGuestLimitOpen(true)}>Khách</button>
-              <button className="login-button" onClick={() => openAuth("login")}>Đăng nhập</button>
-              <button className="signup-button" onClick={() => openAuth("register")}>Đăng ký</button>
-            </div>
-          )}
-        </div>
-      </header>
-      {SIMULATION_BANNER_VIEWS.has(view) && <div className="security-awareness-banner" role="note">
-        <strong>Môi trường mô phỏng</strong>
-        <span>Không nhập mật khẩu ngân hàng, OTP, số thẻ hoặc dữ liệu thật. Mọi số tiền chỉ dùng cho đào tạo.</span>
-      </div>}
-      {(dataStatus || pendingChoice) && <div className="sync-status">
-        {dataStatus && <span role="status" aria-live="polite">{dataStatus}</span>}
-        {pendingChoice && <button className="admin-secondary" disabled={savingChoice} onClick={() => void syncChoice(pendingChoice)}>{savingChoice ? "Đang lưu…" : "Thử lưu lại"}</button>}
-      </div>}
+      <AppHeader
+        view={view}
+        copy={siteContent.copy}
+        account={sessionAccount}
+        playerName={playerName}
+        dark={dark}
+        onNavigate={navigateTo}
+        onToggleDark={() => setDark((value) => !value)}
+        onOpenProfile={() => setProfileOpen(true)}
+        onOpenGuestNotice={() => setGuestLimitOpen(true)}
+        onOpenAuth={openAuth}
+      />
+      <SyncStatus
+        message={dataStatus}
+        hasPendingChoice={!!pendingChoice}
+        saving={savingChoice}
+        onRetry={() => { if (pendingChoice) void syncChoice(pendingChoice); }}
+      />
 
       {view === "game" && (
         <div className="game-shell">
@@ -1061,7 +1038,7 @@ export default function Home() {
           }}
         /></Suspense>}
 
-      <footer><div className="footer-brand" aria-label="Cảnh Giác Số"><BrandMark /><span><b>{siteContent.copy.departmentName}</b><small>{siteContent.copy.footerTagline}</small></span></div><FooterNotice notice={siteContent.copy.footerNotice}/><div className="footer-actions"><nav aria-label="Thông tin website"><a href="/gioi-thieu/">Giới thiệu</a><a href="/phuong-phap-kiem-chung/">Kiểm chứng</a><a href="/quyen-rieng-tu/">Quyền riêng tư</a></nav><button onClick={() => setGuide(true)}>Hướng dẫn & trợ giúp</button></div></footer>
+      <AppFooter copy={siteContent.copy} onOpenGuide={() => setGuide(true)} />
 
       {completionCertificate && !lossNotice && <Modal open onClose={() => setCompletionCertificate(null)} labelledBy="certificate-complete-title" className="certificate-complete-modal">
         <button className="modal-close" aria-label="Đóng thông báo chứng nhận" onClick={() => setCompletionCertificate(null)}>×</button>
