@@ -1,7 +1,6 @@
 (() => {
   "use strict";
 
-  const byId = (id) => document.getElementById(id);
   const text = (el, value) => { if (el) el.textContent = value; };
   const show = (el) => { if (el) el.hidden = false; };
   const clear = (el) => { if (el) el.replaceChildren(); };
