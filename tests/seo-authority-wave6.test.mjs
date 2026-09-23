@@ -21,13 +21,13 @@ test("SEO authority wave adds trust pages and reconciles sitemap coverage", asyn
   assert.match(script, /Sơ đồ nội dung/);
 });
 
-test("Pages build runs SEO authority wave after QC content passes", async () => {
-  const pkg = JSON.parse(await read("package.json"));
-  const build = pkg.scripts["build:pages"];
-  assert.match(build, /patch-qc-wave3\.mjs/);
-  assert.match(build, /patch-seo-authority-wave6\.mjs/);
-  assert.ok(build.indexOf("patch-qc-wave3.mjs") < build.indexOf("patch-seo-authority-wave6.mjs"));
-  assert.ok(build.indexOf("patch-seo-authority-wave6.mjs") < build.indexOf("patch-realtime-analytics.mjs"));
+test("Content compiler runs SEO authority wave after QC content passes", async () => {
+  const architecture = JSON.parse(await read("content/content-architecture.json"));
+  const stages = architecture.phases.flatMap((phase) => phase.stages);
+  assert.ok(stages.includes("patch-qc-wave3.mjs"));
+  assert.ok(stages.includes("patch-seo-authority-wave6.mjs"));
+  assert.ok(stages.indexOf("patch-qc-wave3.mjs") < stages.indexOf("patch-seo-authority-wave6.mjs"));
+  assert.ok(stages.indexOf("patch-seo-authority-wave6.mjs") < stages.indexOf("patch-realtime-analytics.mjs"));
 });
 
 test("Verify workflow enforces generated-site SEO audit", async () => {
