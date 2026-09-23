@@ -45,7 +45,9 @@ test("admin analytics dashboard is organized as a professional end-to-end analyt
   assert.match(component, /Campaign UTM/);
   assert.match(component, /Landing page/);
   assert.match(component, /Exit page/);
-  assert.match(component, /Traffic từ Google/);
+  assert.match(component, /Traffic từ Google \(referrer\)/);
+  assert.match(component, /không phải số liệu GA4/);
+  assert.match(component, /chưa kết nối GA4 Data API/);
   assert.match(component, /Google Search Console/);
   assert.match(component, /AdminCountryAnalytics/);
   assert.match(component, /Trình duyệt/);
