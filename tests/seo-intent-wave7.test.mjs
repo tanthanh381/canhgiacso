@@ -8,7 +8,7 @@ test("SEO Intent Wave 7 runs after authority normalization and before analytics"
   const architecture = JSON.parse(await read("content/content-architecture.json"));
   const stages = architecture.phases.flatMap((phase) => phase.stages);
   assert.ok(stages.indexOf("patch-seo-authority-wave6.mjs") < stages.indexOf("patch-seo-intent-wave7.mjs"));
-  assert.ok(stages.indexOf("patch-seo-intent-wave7.mjs") < stages.indexOf("patch-realtime-analytics.mjs"));
+  assert.ok(stages.indexOf("patch-seo-intent-wave7.mjs") < stages.indexOf("instrument-content.mjs"));
 });
 
 test("Wave 7 separates overlapping search intents instead of duplicating titles", async () => {
