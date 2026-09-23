@@ -439,7 +439,7 @@ export function AdminTrafficAnalytics() {
 
         <section className="traffic-panel traffic-google-panel">
           <div className="traffic-google-heading">
-            <div><span className="traffic-google-badge">GOOGLE ORGANIC / REFERRER</span><h3>Traffic từ Google</h3><p>Nhận diện phiên có referrer từ hostname Google; không suy đoán từ traffic trực tiếp.</p></div><small>{WINDOW_LABELS[windowKey]}</small>
+            <div><span className="traffic-google-badge">FIRST-PARTY · GOOGLE REFERRER</span><h3>Traffic từ Google (referrer)</h3><p>Chỉ tính phiên có HTTP referrer thuộc Google. Đây không phải số liệu GA4.</p></div><small>{WINDOW_LABELS[windowKey]}</small>
           </div>
           {googleMessage && <div className="traffic-error compact" role="alert">{googleMessage}</div>}
           {googleData && <>
@@ -451,13 +451,13 @@ export function AdminTrafficAnalytics() {
             </div>
             <div className="traffic-google-grid">
               <div className="traffic-google-subpanel"><h4>Xu hướng Google traffic</h4><p>Lượt xem theo {windowKey === "24h" ? "giờ" : "ngày"}.</p>
-                {googleData.googleSeries.length ? <div className="traffic-chart traffic-google-chart" role="img" aria-label="Biểu đồ traffic từ Google">{googleData.googleSeries.map((point) => <div className="traffic-bar-column" key={point.bucket} title={`${point.bucket}: ${point.views} lượt xem · ${point.sessions} phiên · ${point.users} người dùng`}><div className="traffic-bar-value">{point.views}</div><div className="traffic-bar-track"><span style={{ height: `${Math.max(5, point.views / googleChartMax * 100)}%` }} /></div><small>{bucketLabel(point.bucket, windowKey)}</small></div>)}</div> : <div className="traffic-empty compact">Chưa ghi nhận traffic Google trong kỳ.</div>}
+                {googleData.googleSeries.length ? <div className="traffic-chart traffic-google-chart" role="img" aria-label="Biểu đồ traffic từ Google">{googleData.googleSeries.map((point) => <div className="traffic-bar-column" key={point.bucket} title={`${point.bucket}: ${point.views} lượt xem · ${point.sessions} phiên · ${point.users} người dùng`}><div className="traffic-bar-value">{point.views}</div><div className="traffic-bar-track"><span style={{ height: `${Math.max(5, point.views / googleChartMax * 100)}%` }} /></div><small>{bucketLabel(point.bucket, windowKey)}</small></div>)}</div> : <div className="traffic-empty compact">Không ghi nhận phiên có referrer Google trong {WINDOW_LABELS[windowKey]}. Hãy thử 30/90 ngày để xem lịch sử.</div>}
               </div>
               <div className="traffic-google-subpanel"><h4>Landing page từ Google</h4><p>Trang đầu tiên của phiên có nguồn Google.</p>
                 {googleData.googleLandingPages.length ? <div className="traffic-table-wrap"><table><thead><tr><th>Landing page</th><th>View</th><th>User</th><th>Phiên</th></tr></thead><tbody>{googleData.googleLandingPages.map((page) => <tr key={page.path}><td title={page.path}><strong>{pathLabel(page.path)}</strong><small>{page.path}</small></td><td>{compact(page.views)}</td><td>{compact(page.users)}</td><td>{compact(page.sessions)}</td></tr>)}</tbody></table></div> : <div className="traffic-empty compact">Chưa có landing page từ Google.</div>}
               </div>
             </div>
-            <p className="traffic-google-note">Từ khóa, impression, CTR và vị trí tìm kiếm vẫn phải đọc từ Google Search Console; HTTP referrer thường không cung cấp truy vấn tìm kiếm.</p>
+            <p className="traffic-google-note"><strong>Lưu ý nguồn dữ liệu:</strong> Khối này dùng collector first-party và HTTP referrer, không đọc Google Analytics Data API. GA4 vẫn chạy song song trên website để đối chiếu bên ngoài. Từ khóa, impression, CTR và vị trí tìm kiếm phải đọc từ Google Search Console.</p>
           </>}
         </section>
 
@@ -544,7 +544,7 @@ export function AdminTrafficAnalytics() {
           <article><strong>Riêng tư</strong><span>Không lưu IP, raw user-agent, email, account ID, cookie nội dung hay dữ liệu biểu mẫu.</span></article>
         </div>
 
-        <div className="traffic-privacy-note"><strong>Nguồn dữ liệu</strong><span>First-party Supabase Analytics là nguồn chính của dashboard này. GA4 chạy song song để đối chiếu bên ngoài; Google Search Console dùng cho query, impression, CTR và ranking.</span></div>
+        <div className="traffic-privacy-note"><strong>Nguồn dữ liệu</strong><span>First-party Supabase Analytics là nguồn chính của dashboard này. Khối “Google” chỉ lọc phiên có Google referrer; dashboard hiện chưa kết nối GA4 Data API. GA4 chạy song song để đối chiếu bên ngoài; Google Search Console dùng cho query, impression, CTR và ranking.</span></div>
       </section>
     </>}
   </div>;
