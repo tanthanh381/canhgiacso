@@ -56,17 +56,17 @@ test("admin analytics dashboard is organized as a professional end-to-end analyt
 });
 
 test("analytics application wiring is canonical source while build instrumentation only touches static HTML", async () => {
-  const [patch, admin, traffic] = await Promise.all([
-    read("scripts/patch-realtime-analytics.mjs"),
+  const [instrumentation, admin, traffic] = await Promise.all([
+    read("scripts/instrument-content.mjs"),
     read("app/admin.tsx"),
     read("app/admin-traffic-analytics.tsx"),
   ]);
   assert.match(admin, /AdminTrafficAnalytics/);
   assert.match(admin, /Thống kê truy cập/);
   assert.match(traffic, /AdminCountryAnalytics/);
-  assert.doesNotMatch(patch, /patchAdmin|patchCountryAnalytics|admin\.tsx|admin-traffic-analytics\.tsx/);
-  assert.match(patch, /web-analytics\.js/);
-  assert.match(patch, /connect-src/);
+  assert.doesNotMatch(instrumentation, /patchAdmin|patchCountryAnalytics|admin\.tsx|admin-traffic-analytics\.tsx/);
+  assert.match(instrumentation, /web-analytics\.js/);
+  assert.match(instrumentation, /connect-src/);
 });
 
 test("database analytics remains private, separates legacy data and exposes professional insights", async () => {
