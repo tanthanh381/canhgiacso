@@ -3,7 +3,7 @@ import path from "node:path";
 
 const ROOT = process.cwd();
 const KNOWLEDGE_DIR = path.join(ROOT, "public", "kien-thuc");
-const SEO_CSS_VERSION = "20260923-brand";
+const SEO_CSS_VERSION = "20260923-logo-mask";
 const BRAND_MARKUP = '<span class="seo-brand-logo" aria-hidden="true"></span><span class="seo-brand-divider" aria-hidden="true"></span><span class="seo-product-lockup"><strong>CẢNH GIÁC SỐ</strong><small>IT SECURITY</small></span>';
 
 async function htmlFiles(dir) {
