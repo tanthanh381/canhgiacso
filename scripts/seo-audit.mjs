@@ -45,6 +45,14 @@ const localPathFor = (url) => {
 
 const seenTitles = new Map();
 const seenDescriptions = new Map();
+const prioritySerpChecks = new Map([
+  [`${site}/kien-thuc/kiem-tra-so-dien-thoai-lua-dao/`, "kiểm tra số điện thoại lừa đảo"],
+  [`${site}/kien-thuc/kiem-tra-link-gia-mao/`, "kiểm tra link lừa đảo"],
+  [`${site}/kien-thuc/lua-dao-cong-tac-vien-viec-nhe-luong-cao/`, "lừa đảo cộng tác viên online"],
+  [`${site}/kien-thuc/gia-mao-ngan-hang/`, "giả mạo ngân hàng"],
+  [`${site}/kien-thuc/xu-ly-khi-bi-lua-dao-chuyen-tien/`, "bị lừa chuyển tiền"],
+  [`${site}/kien-thuc/phishing-la-gi/`, "phishing là gì"],
+]);
 
 for (const url of urls) {
   const file = localPathFor(url);
@@ -73,6 +81,17 @@ for (const url of urls) {
   if (!/rel=["']icon["']/i.test(html)) fail(`${url}: missing favicon`);
   if (!/property=["']og:title["']/i.test(html)) fail(`${url}: missing Open Graph title`);
   if (!/name=["']twitter:card["']/i.test(html)) fail(`${url}: missing Twitter card`);
+
+  const primaryIntent = prioritySerpChecks.get(url);
+  if (primaryIntent) {
+    if (title.length < 42 || title.length > 62) fail(`${url}: priority SERP title length ${title.length}`);
+    if (description.length < 120 || description.length > 160) fail(`${url}: priority SERP description length ${description.length}`);
+    if (!title.toLocaleLowerCase("vi").includes(primaryIntent)) fail(`${url}: title does not lead with primary intent ${primaryIntent}`);
+    if (!html.includes('class="seo-answer-box"')) fail(`${url}: missing answer-first block`);
+    if (!html.includes('class="seo-search-cluster"')) fail(`${url}: missing contextual search cluster`);
+    if (!/property=["']article:modified_time["']/i.test(html)) fail(`${url}: missing article:modified_time`);
+    if (!/<time\s+datetime=["']\d{4}-\d{2}-\d{2}["']/i.test(html)) fail(`${url}: missing visible updated date`);
+  }
 
   if (url.includes("/kien-thuc/") && url !== `${site}/kien-thuc/`) {
     if (!/"@type":"Article"/.test(html)) fail(`${url}: missing Article schema`);
