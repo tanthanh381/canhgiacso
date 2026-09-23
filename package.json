@@ -14,7 +14,8 @@
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "seo:audit": "node scripts/seo-audit.mjs docs",
     "db:generate": "drizzle-kit generate",
-    "content:compile": "node scripts/content-compiler.mjs"
+    "content:compile": "node scripts/content-compiler.mjs",
+    "health:production": "node scripts/production-health.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.112.3",
