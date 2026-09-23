@@ -5,13 +5,13 @@ import { defaultSiteContent, Difficulty, normalizeSiteContent, SiteContent } fro
 import { loadPublishedSiteContent } from "./domains/content/gateway";
 import { NewsArticleView } from './news-article';
 import { publicNews, safeImage } from './news-content';
-import { supabase } from "./supabase";
 import { difficultyOrder, getLevelProgress, getUnlockedDifficulties } from "./progression";
 import { downloadTrainingCertificatePdf, TrainingCertificate } from "./certificate";
 import { authErrorMessage } from "./auth-error";
 import { SECURITY_CHECKLIST_KEY, securityChecklistItemIds } from "./domains/security-awareness/checklist";
 import { KnowledgeView } from "./domains/security-awareness/view";
 import { validateAuthSubmission, type AuthMode, type SessionAccount } from "./domains/auth/model";
+import { getCurrentAuthSession, loginAccount, registerAccount, signOutLocal, subscribeToAuthChanges, updateProfileDisplayName } from "./domains/auth/gateway";
 import { AccountDialogs } from "./domains/auth/dialogs";
 import { mapAnalyticsUsers, mapScenarioRisks, summarizeAnalytics, topScenarioRisks, type AnalyticsUser, type DashboardStatus, type ScenarioRisk } from "./domains/dashboard/model";
 import { DashboardView } from "./domains/dashboard/view";
@@ -158,7 +158,7 @@ export default function Home() {
   useEffect(() => {
     let active = true;
     const load = async () => {
-      const { data } = await supabase.auth.getSession();
+      const { data } = await getCurrentAuthSession();
       if (!active) return;
       if (data.session?.user) await loadRemoteAccount(data.session.user.id, data.session.user.email ?? "");
       else loadGuestProgress();
@@ -166,7 +166,7 @@ export default function Home() {
     };
     void load();
 
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: listener } = subscribeToAuthChanges((event, session) => {
       if (!active) return;
       if (event === "SIGNED_OUT") {
         setSessionAccount(null);
@@ -552,7 +552,7 @@ export default function Home() {
   }
 
   async function continueAsGuest() {
-    await supabase.auth.signOut({ scope: "local" });
+    await signOutLocal();
     setSessionAccount(null);
     loadGuestProgress();
     dismissGuestLimitNotice();
@@ -581,13 +581,12 @@ export default function Home() {
     setAuthBusy(true);
     try {
       if (authMode === "register") {
-        await supabase.auth.signOut({ scope: "local" });
-        const { data, error } = await supabase.auth.signUp({
+        await signOutLocal();
+        const { data, error } = await registerAccount({
           email,
           password: authPassword,
-          options: {
-            data: { username, display_name: displayName },
-          },
+          username,
+          displayName,
         });
         if (error) {
           setAuthError(authErrorMessage(error, "register"));
@@ -602,8 +601,8 @@ export default function Home() {
           setAuthNotice("Tài khoản đã được tạo. Bạn có thể đăng nhập ngay mà không cần xác nhận email.");
         }
       } else {
-        await supabase.auth.signOut({ scope: "local" });
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password: authPassword });
+        await signOutLocal();
+        const { data, error } = await loginAccount(email, authPassword);
         if (error || !data.user) {
           setAuthError(authErrorMessage(error ?? {}, "login"));
           return;
@@ -622,7 +621,7 @@ export default function Home() {
     const displayName = playerName.trim() || "Người chơi ẩn danh";
     setPlayerName(displayName);
     if (sessionAccount) {
-      const { error } = await supabase.from("profiles").update({ display_name: displayName }).eq("id", sessionAccount.id);
+      const { error } = await updateProfileDisplayName(sessionAccount.id, displayName);
       if (error) setDataStatus("Không thể lưu tên hiển thị.");
       else setSessionAccount({ ...sessionAccount, displayName });
     }
@@ -631,7 +630,7 @@ export default function Home() {
 
   async function logout() {
     if (view === "admin" && !window.dispatchEvent(new Event("admin-before-leave", { cancelable: true }))) return;
-    await supabase.auth.signOut({ scope: "local" });
+    await signOutLocal();
     setSessionAccount(null);
     setCertificates([]);
     setCompletionCertificate(null);
