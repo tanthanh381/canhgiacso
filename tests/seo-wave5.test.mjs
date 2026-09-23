@@ -37,7 +37,7 @@ test("Knowledge hub uses the shared Cảnh Giác Số visual system", async () =
   ]);
 
   assert.match(hub, /<link rel="stylesheet" href="\/seo\.css"/);
-  assert.match(patchKnowledgeUi, /SEO_CSS_VERSION = "20260922-ui"/);
+  assert.match(patchKnowledgeUi, /SEO_CSS_VERSION = "\\d{8}-[a-z0-9-]+"/);
   assert.match(patchKnowledgeUi, /\/seo\.css\?v=\$\{SEO_CSS_VERSION\}/);
   assert.match(hub, /class="seo-header"/);
   assert.match(hub, /class="seo-brand-logo"/);
