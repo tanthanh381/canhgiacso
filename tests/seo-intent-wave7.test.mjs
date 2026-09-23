@@ -5,13 +5,10 @@ import test from "node:test";
 const read = (file) => readFile(new URL(`../${file}`, import.meta.url), "utf8");
 
 test("SEO Intent Wave 7 runs after authority normalization and before analytics", async () => {
-  const pkg = JSON.parse(await read("package.json"));
-  const build = pkg.scripts["build:pages"];
-  assert.match(build, /patch-seo-authority-wave6\.mjs/);
-  assert.match(build, /patch-seo-intent-wave7\.mjs/);
-  assert.match(build, /patch-realtime-analytics\.mjs/);
-  assert.ok(build.indexOf("patch-seo-authority-wave6.mjs") < build.indexOf("patch-seo-intent-wave7.mjs"));
-  assert.ok(build.indexOf("patch-seo-intent-wave7.mjs") < build.indexOf("patch-realtime-analytics.mjs"));
+  const architecture = JSON.parse(await read("content/content-architecture.json"));
+  const stages = architecture.phases.flatMap((phase) => phase.stages);
+  assert.ok(stages.indexOf("patch-seo-authority-wave6.mjs") < stages.indexOf("patch-seo-intent-wave7.mjs"));
+  assert.ok(stages.indexOf("patch-seo-intent-wave7.mjs") < stages.indexOf("patch-realtime-analytics.mjs"));
 });
 
 test("Wave 7 separates overlapping search intents instead of duplicating titles", async () => {
