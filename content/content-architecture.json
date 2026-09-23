@@ -31,10 +31,8 @@
       "id": "discoverability",
       "description": "Apply deterministic internal-link, SERP and trust architecture.",
       "stages": [
-        "patch-home-growth-links.mjs",
         "patch-priority-discovery.mjs",
         "patch-serp-intent-wave3.mjs",
-        "patch-trust-links-wave3.mjs",
         "patch-knowledge-ui.mjs",
         "patch-indexation-wave4.mjs",
         "patch-google-traffic-wave5.mjs"
@@ -79,6 +77,7 @@
     "No stage may write outside app/, public/, github-pages/ or docs/.",
     "docs/ is generated and must never be manually authored.",
     "SEO audit runs only after compilation and Vite build.",
-    "Production analytics instrumentation runs after content normalization."
+    "Production analytics instrumentation runs after content normalization.",
+    "Legacy build transforms must be retired once their output is canonical in source or the finalizer."
   ]
 }
