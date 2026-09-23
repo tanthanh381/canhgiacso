@@ -9,7 +9,7 @@ import { difficultyOrder, getLevelProgress, getUnlockedDifficulties } from "./pr
 import { downloadTrainingCertificatePdf, TrainingCertificate } from "./certificate";
 import { authErrorMessage } from "./auth-error";
 import { SECURITY_CHECKLIST_KEY, securityChecklistGroups, securityChecklistItemIds } from "./domains/security-awareness/checklist";
-import { PASSWORD_PATTERN, USERNAME_PATTERN, type AuthMode, type SessionAccount } from "./domains/auth/model";
+import { validateAuthSubmission, type AuthMode, type SessionAccount } from "./domains/auth/model";
 import { mapAnalyticsUsers, mapScenarioRisks, summarizeAnalytics, topScenarioRisks, type AnalyticsUser, type DashboardStatus, type ScenarioRisk } from "./domains/dashboard/model";
 import { bestCorrectStreak, buildDefenseBadges, difficulties, difficultyTone, PHISHING_QUIZ_URL, scenarioCategoryLabel, scenarioChannelLabel } from "./domains/training/presentation";
 import { evaluateGuestChoice, type ChoiceOutcome, type GameHistory, type GameState, type PendingChoice, type Result, type StoredProgress } from "./domains/training/model";
@@ -561,40 +561,26 @@ export default function Home() {
 
   async function submitAuth(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const username = authUsername.trim().toLowerCase();
-    const email = authEmail.trim().toLowerCase();
     setAuthError("");
     setAuthNotice("");
 
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
-      setAuthError("Vui lòng nhập địa chỉ email hợp lệ.");
-      return;
-    }
-    if (authMode === "register" && !USERNAME_PATTERN.test(username)) {
-      setAuthError("Tên đăng nhập cần 3–24 ký tự: chữ thường, số, dấu chấm, gạch ngang hoặc gạch dưới.");
-      return;
-    }
-    if (authMode === "register" && !PASSWORD_PATTERN.test(authPassword)) {
-      setAuthError("Mật khẩu cần 8–72 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt; không chứa khoảng trắng.");
-      return;
-    }
-    if (authMode === "login" && authPassword.length < 8) {
-      setAuthError("Mật khẩu cần ít nhất 8 ký tự.");
+    const validation = validateAuthSubmission({
+      mode: authMode,
+      email: authEmail,
+      username: authUsername,
+      displayName: authDisplayName,
+      password: authPassword,
+      confirmPassword: authConfirmPassword,
+    });
+    if (!validation.ok) {
+      setAuthError(validation.error);
       return;
     }
 
+    const { email, username, displayName } = validation;
     setAuthBusy(true);
     try {
       if (authMode === "register") {
-        const displayName = authDisplayName.trim();
-        if (displayName.length < 2 || displayName.length > 32) {
-          setAuthError("Tên hiển thị cần từ 2 đến 32 ký tự.");
-          return;
-        }
-        if (authPassword !== authConfirmPassword) {
-          setAuthError("Mật khẩu xác nhận chưa khớp.");
-          return;
-        }
         await supabase.auth.signOut({ scope: "local" });
         const { data, error } = await supabase.auth.signUp({
           email,
