@@ -9,6 +9,9 @@ import { difficultyOrder, getLevelProgress, getUnlockedDifficulties } from "./pr
 import { downloadTrainingCertificatePdf, TrainingCertificate } from "./certificate";
 import { authErrorMessage } from "./auth-error";
 import { SECURITY_CHECKLIST_KEY, securityChecklistGroups, securityChecklistItemIds } from "./domains/security-awareness/checklist";
+import { PASSWORD_PATTERN, USERNAME_PATTERN, type AuthMode, type SessionAccount } from "./domains/auth/model";
+import { mapAnalyticsUsers, mapScenarioRisks, type AnalyticsUser, type DashboardStatus, type ScenarioRisk } from "./domains/dashboard/model";
+import { difficulties, difficultyTone, scenarioCategoryLabel, scenarioChannelLabel, type DefenseBadge } from "./domains/training/presentation";
 import { evaluateGuestChoice, type ChoiceOutcome, type GameHistory, type GameState, type PendingChoice, type Result, type StoredProgress } from "./domains/training/model";
 import { GUEST_CERTIFICATE_KEY, LEGACY_PROGRESS_KEY, THEME_KEY, progressKey, readStoredProgress, safeStorageGet, safeStorageRemove, safeStorageSet } from "./shared/browser-storage";
 import { BadgeIcon, BrandMark, FooterNotice, Modal } from "./shared/ui-primitives";
@@ -17,75 +20,7 @@ const AdminPage = lazy(() => import("./admin").then((module) => ({ default: modu
 
 type View = "game" | "knowledge" | "news" | "quiz" | "stats" | "evidence" | "dashboard" | "admin";
 const SIMULATION_BANNER_VIEWS: ReadonlySet<View> = new Set(["game", "quiz"]);
-type SessionAccount = {
-  id: string;
-  email: string;
-  username: string;
-  displayName: string;
-  createdAt: string;
-};
-type AuthMode = "login" | "register";
-type LossNotice = {
-  scenarioTitle: string;
-  amountLost: number;
-  awarenessLost: number;
-  balanceAfter: number;
-};
-type AnalyticsUser = {
-  username: string;
-  displayName: string;
-  createdAt: string;
-  completed: number;
-  correct: number;
-  accuracy: number;
-  awareness: number;
-  balance: number;
-  loss: number;
-  risk: "Thấp" | "Trung bình" | "Cao";
-};
-type DashboardStatus = "idle" | "loading" | "ready" | "forbidden" | "error";
-type ScenarioRisk = { scenarioId: number; attempts: number; wrong: number; rate: number };
-type BadgeTone = "starter" | "bronze" | "silver" | "gold" | "expert" | "legendary";
-type DefenseBadge = {
-  icon: string;
-  name: string;
-  description: string;
-  tier: string;
-  tone: BadgeTone;
-  current: number;
-  target: number;
-  progress: number;
-  unlocked: boolean;
-};
-
-const PHISHING_QUIZ_URL = "https://phishingquiz.withgoogle.com/?hl=vi";
-
-function scenarioCategoryLabel(category: string) {
-  if (category === "Deepfake") return "Giả mạo bằng AI (deepfake)";
-  if (category === "Phishing") return "Lừa đảo giả mạo (phishing)";
-  if (category === "Brandname giả") return "SMS Brandname giả mạo";
-  return category;
-}
-
-function scenarioChannelLabel(channel: string) {
-  if (channel === "Video call") return "Cuộc gọi video";
-  if (channel === "Nhóm chat") return "Nhóm trò chuyện";
-  return channel;
-}
-const USERNAME_PATTERN = /^[a-z0-9._-]{3,24}$/;
-const PASSWORD_PATTERN = /^(?=.{8,72}$)(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d])\S+$/;
-
-
 const money = new Intl.NumberFormat("vi-VN");
-const difficulties: Array<"Tất cả" | Difficulty> = ["Tất cả", "Dễ", "Trung bình", "Khó", "Rất khó"];
-
-const difficultyTone: Record<Difficulty, string> = {
-  Dễ: "easy",
-  "Trung bình": "medium",
-  Khó: "hard",
-  "Rất khó": "extreme",
-};
-
 export default function Home() {
   const [view, setView] = useState<View>("game");
   const [siteContent, setSiteContent] = useState<SiteContent>(defaultSiteContent);
@@ -279,24 +214,8 @@ export default function Home() {
       }
       const payload = data as { users?: Array<Record<string, unknown>>; scenarios?: Array<Record<string, unknown>> };
       setHistorySummary(historical.data);
-      setAnalyticsUsers((payload.users ?? []).map((user) => ({
-        username: String(user.username ?? ""),
-        displayName: String(user.display_name ?? ""),
-        createdAt: String(user.created_at ?? ""),
-        completed: Number(user.completed ?? 0),
-        correct: Number(user.correct ?? 0),
-        accuracy: Number(user.accuracy ?? 0),
-        awareness: Number(user.awareness ?? 100),
-        balance: Number(user.balance ?? 300_000_000),
-        loss: Number(user.loss ?? 0),
-        risk: user.risk === "Cao" || user.risk === "Thấp" ? user.risk : "Trung bình",
-      })));
-      setDashboardScenarioRisks((payload.scenarios ?? []).map((item) => ({
-        scenarioId: Number(item.scenario_id ?? 0),
-        attempts: Number(item.attempts ?? 0),
-        wrong: Number(item.wrong ?? 0),
-        rate: Number(item.rate ?? 0),
-      })));
+      setAnalyticsUsers(mapAnalyticsUsers(payload.users ?? []));
+      setDashboardScenarioRisks(mapScenarioRisks(payload.scenarios ?? []));
       setDashboardStatus("ready");
     })();
     return () => { active = false; };
