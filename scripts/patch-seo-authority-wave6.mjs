@@ -143,11 +143,98 @@ async function htmlFiles(dir) {
   return out;
 }
 
+function ensureLegacyArticleSeo(html, slug) {
+  const canonical = `${SITE}/kien-thuc/${slug}/`;
+  const title = html.match(/<title>([\s\S]*?)<\/title>/i)?.[1]?.trim() ?? "";
+  const description = html.match(/<meta\s+name="description"\s+content="([^"]*)"/i)?.[1]?.trim() ?? "";
+  const ogTitle = html.match(/<meta\s+property="og:title"\s+content="([^"]*)"/i)?.[1]?.trim() || title;
+  const ogDescription = html.match(/<meta\s+property="og:description"\s+content="([^"]*)"/i)?.[1]?.trim() || description;
+  const ogImage = html.match(/<meta\s+property="og:image"\s+content="([^"]*)"/i)?.[1]?.trim() || `${SITE}/og.png`;
+
+  if (!/hreflang="vi-VN"/i.test(html)) {
+    html = html.replace(
+      /(<link rel="canonical" href="[^"]+"\s*\/>)/i,
+      `$1\n  <link rel="alternate" hreflang="vi-VN" href="${canonical}" />`,
+    );
+  }
+  if (!/hreflang="x-default"/i.test(html)) {
+    const vi = `<link rel="alternate" hreflang="vi-VN" href="${canonical}" />`;
+    html = html.replace(vi, `${vi}\n  <link rel="alternate" hreflang="x-default" href="${canonical}" />`);
+  }
+  if (!/property="og:site_name"/i.test(html)) {
+    html = html.replace(
+      /(<meta property="og:locale" content="[^"]*"\s*\/>)/i,
+      `$1\n  <meta property="og:site_name" content="Cảnh Giác Số" />`,
+    );
+  }
+  if (!/name="twitter:card"/i.test(html)) {
+    const twitter = `  <meta name="twitter:card" content="summary_large_image" />\n  <meta name="twitter:title" content="${ogTitle.replaceAll('"', "&quot;")}" />\n  <meta name="twitter:description" content="${ogDescription.replaceAll('"', "&quot;")}" />\n  <meta name="twitter:image" content="${ogImage}" />\n`;
+    html = html.replace(/(<script type="application\/ld\+json">)/i, `${twitter}$1`);
+  }
+
+  html = html.replace(
+    /<script type="application\/ld\+json">([\s\S]*?)<\/script>/i,
+    (full, raw) => {
+      try {
+        const schema = JSON.parse(raw);
+        const graph = Array.isArray(schema?.["@graph"]) ? schema["@graph"] : [];
+        const article = graph.find((node) => node?.["@type"] === "Article");
+        if (!article) return full;
+
+        article["@id"] ||= `${canonical}#article`;
+        article.mainEntityOfPage = { "@type": "WebPage", "@id": canonical };
+        article.image ||= { "@type": "ImageObject", url: ogImage, width: 1731, height: 909 };
+        article.author = { "@id": `${SITE}/#organization` };
+        article.publisher = { "@id": `${SITE}/#organization` };
+
+        const organization = graph.find((node) => node?.["@type"] === "Organization");
+        if (organization) {
+          organization["@id"] ||= `${SITE}/#organization`;
+          organization.url ||= `${SITE}/`;
+          organization.logo = { "@type": "ImageObject", url: `${SITE}/search-logo.svg`, width: 800, height: 800 };
+          organization.publishingPrinciples ||= `${SITE}/phuong-phap-kiem-chung/`;
+        } else {
+          graph.push({
+            "@type": "Organization",
+            "@id": `${SITE}/#organization`,
+            name: "Cảnh Giác Số",
+            url: `${SITE}/`,
+            logo: { "@type": "ImageObject", url: `${SITE}/search-logo.svg`, width: 800, height: 800 },
+            publishingPrinciples: `${SITE}/phuong-phap-kiem-chung/`,
+          });
+        }
+
+        if (!graph.some((node) => node?.["@type"] === "WebSite")) {
+          graph.push({ "@type": "WebSite", "@id": `${SITE}/#website`, url: `${SITE}/`, name: "Cảnh Giác Số", inLanguage: "vi-VN" });
+        }
+        if (!graph.some((node) => node?.["@type"] === "BreadcrumbList")) {
+          graph.push({
+            "@type": "BreadcrumbList",
+            "@id": `${canonical}#breadcrumb`,
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "Cảnh Giác Số", item: `${SITE}/` },
+              { "@type": "ListItem", position: 2, name: "Kiến thức", item: `${SITE}/kien-thuc/` },
+              { "@type": "ListItem", position: 3, name: title, item: canonical },
+            ],
+          });
+        }
+        schema["@graph"] = graph;
+        return `<script type="application/ld+json">${JSON.stringify(schema)}</script>`;
+      } catch {
+        return full;
+      }
+    },
+  );
+
+  return html.replaceAll(`${SITE}/khien-so-logo.png`, `${SITE}/search-logo.svg`);
+}
+
 let patched = 0;
 const knowledgeDir = path.join(PUBLIC, "kien-thuc");
 for (const file of await htmlFiles(knowledgeDir)) {
   let html = await readFile(file, "utf8");
-  html = html.replaceAll(`${SITE}/khien-so-logo.png`, `${SITE}/search-logo.svg`); // normalize structured-data logo
+  const slug = path.basename(path.dirname(file));
+  if (slug !== "kien-thuc") html = ensureLegacyArticleSeo(html, slug);
   if (!html.includes("seo-footer-links")) {
     html = html.replace(/(<footer class="seo-footer"><div class="seo-shell"><strong>[^<]+<\/strong>)/, `$1${TRUST_NAV}`);
   }
