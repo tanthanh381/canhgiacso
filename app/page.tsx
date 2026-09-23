@@ -2,6 +2,7 @@
 
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { defaultSiteContent, Difficulty, normalizeSiteContent, SiteContent } from "./data";
+import { loadPublishedSiteContent } from "./domains/content/gateway";
 import { NewsArticleView } from './news-article';
 import { publicNews, safeImage } from './news-content';
 import { supabase } from "./supabase";
@@ -14,8 +15,10 @@ import { validateAuthSubmission, type AuthMode, type SessionAccount } from "./do
 import { AccountDialogs } from "./domains/auth/dialogs";
 import { mapAnalyticsUsers, mapScenarioRisks, summarizeAnalytics, topScenarioRisks, type AnalyticsUser, type DashboardStatus, type ScenarioRisk } from "./domains/dashboard/model";
 import { DashboardView } from "./domains/dashboard/view";
+import { loadCisoDashboardData } from "./domains/dashboard/gateway";
 import { bestCorrectStreak, buildDefenseBadges, difficulties, difficultyTone, PHISHING_QUIZ_URL, scenarioCategoryLabel, scenarioChannelLabel } from "./domains/training/presentation";
 import { evaluateGuestChoice, type ChoiceOutcome, type GameHistory, type GameState, type PendingChoice, type Result, type StoredProgress } from "./domains/training/model";
+import { issueTrainingCertificate, loadTrainingAccountData, loadTrainingCertificates, restartTrainingRun, submitTrainingChoice } from "./domains/training/gateway";
 import { GUEST_CERTIFICATE_KEY, LEGACY_PROGRESS_KEY, THEME_KEY, progressKey, readStoredProgress, safeStorageGet, safeStorageRemove, safeStorageSet } from "./shared/browser-storage";
 import { BadgeIcon, Modal } from "./shared/ui-primitives";
 import { canChangeHash, navigateBrowser, restoreHash, routeFromHash, type View } from "./domains/shell/navigation";
@@ -139,7 +142,7 @@ export default function Home() {
   useEffect(() => {
     let active = true;
     void (async () => {
-      const { data, error } = await supabase.rpc("get_public_site_content");
+      const { data, error } = await loadPublishedSiteContent();
       if (!active) return;
       const normalized = normalizeSiteContent(data);
       if (normalized) {
@@ -200,9 +203,8 @@ export default function Home() {
       await Promise.resolve();
       if (!active) return;
       setDashboardStatus("loading");
-      const [{ data, error }, historical] = await Promise.all([
-        supabase.rpc("get_ciso_dashboard"), supabase.rpc("get_training_history_summary"),
-      ]);
+      const { dashboard, history: historical } = await loadCisoDashboardData();
+      const { data, error } = dashboard;
       if (!active) return;
       if (error?.code === "42501") {
         setDashboardStatus("forbidden");
@@ -328,11 +330,7 @@ export default function Home() {
     setRunId(null);
     setPendingChoice(null);
     setDataStatus("Đang đồng bộ dữ liệu…");
-    const [profileResult, progressResult, certificateResult] = await Promise.all([
-      supabase.from("profiles").select("username, display_name, created_at").eq("id", userId).single(),
-      supabase.rpc("get_game_state"),
-      supabase.rpc("get_my_training_certificates"),
-    ]);
+    const [profileResult, progressResult, certificateResult] = await loadTrainingAccountData(userId);
     if (epoch !== accountEpoch.current) return;
     if (profileResult.error || progressResult.error || !progressResult.data) {
       setDataStatus("Không thể tải dữ liệu tài khoản. Vui lòng đăng nhập lại.");
@@ -454,10 +452,11 @@ export default function Home() {
     const epoch = accountEpoch.current;
     setDataStatus("Đang xác nhận và lưu kết quả…");
     try {
-      const { data, error } = await supabase.rpc("submit_game_choice", {
-        expected_run: pending.runId, scenario_id: pending.scenario.id,
-        choice_index: pending.index,
-      });
+      const { data, error } = await submitTrainingChoice(
+        pending.runId,
+        pending.scenario.id,
+        pending.index,
+      );
       if (epoch !== accountEpoch.current) return;
       if (error || !data) {
         if (error?.code === "22023") {
@@ -488,7 +487,7 @@ export default function Home() {
     setResetBusy(true);
     if (sessionAccount) {
       const epoch = accountEpoch.current;
-      const { data, error } = await supabase.rpc("restart_game", { expected_run: runId });
+      const { data, error } = await restartTrainingRun(runId);
       if (epoch !== accountEpoch.current) { setResetBusy(false); return; }
       if (error || !data) {
         setDataStatus("Chưa xác nhận được lượt chơi mới. Vui lòng thử lại để tải trạng thái chính xác.");
@@ -642,7 +641,7 @@ export default function Home() {
 
   async function refreshCertificates(celebrateRunId?: string) {
     if (!sessionAccount) return;
-    const { data, error } = await supabase.rpc("get_my_training_certificates");
+    const { data, error } = await loadTrainingCertificates();
     if (error || !Array.isArray(data)) {
       setDataStatus("Đã hoàn thành khóa đào tạo nhưng chưa tải được thông tin chứng nhận. Vui lòng thử lại.");
       return;
@@ -663,7 +662,7 @@ export default function Home() {
   async function ensureCurrentCertificate() {
     if (!sessionAccount || !runId) return;
     setDataStatus("Đang xác nhận điều kiện cấp chứng nhận…");
-    const { data, error } = await supabase.rpc("issue_training_certificate", { expected_run: runId });
+    const { data, error } = await issueTrainingCertificate(runId);
     if (error || !data) {
       setDataStatus(error?.code === "22023" ? "Bạn cần hoàn thành toàn bộ tình huống trước khi nhận chứng nhận." : "Chưa thể cấp chứng nhận. Vui lòng thử lại.");
       return;
