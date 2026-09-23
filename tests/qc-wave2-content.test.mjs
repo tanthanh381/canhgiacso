@@ -7,6 +7,7 @@ const contentArchitecture = JSON.parse(await readFile(new URL("../content/conten
 const qcWave2 = await readFile(new URL("../scripts/patch-qc-wave2.mjs", import.meta.url), "utf8");
 const terminology = await readFile(new URL("../scripts/patch-qc-terminology.mjs", import.meta.url), "utf8");
 const pageSource = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+const presentation = await readFile(new URL("../app/domains/training/presentation.ts", import.meta.url), "utf8");
 
 const knowledgeSlugs = [
   "phong-chong-lua-dao-truc-tuyen",
@@ -40,8 +41,8 @@ test("QC Wave 2 runs after SEO content generation and before downstream QC/analy
   assert.ok(stages.indexOf("patch-qc-wave3.mjs") < stages.indexOf("patch-seo-authority-wave6.mjs"));
   assert.ok(stages.indexOf("patch-content-growth-wave9.mjs") < stages.indexOf("patch-realtime-analytics.mjs"));
   assert.match(packageJson.scripts["build:pages"], /content:compile/);
-  assert.match(packageJson.scripts.build, /prepare:content/);
-  assert.match(packageJson.scripts.dev, /prepare:content/);
+  assert.match(packageJson.scripts.build, /content:compile/);
+  assert.match(packageJson.scripts.dev, /content:compile/);
 });
 
 test("every public knowledge topic has a topic-specific source mapping", () => {
@@ -81,7 +82,9 @@ test("interactive content standardizes labels only at the presentation layer", (
 
   // `pnpm test` runs `pnpm build` first; the display patch must therefore be
   // visible in page.tsx while Scenario data remains untouched for round trips.
-  assert.ok(pageSource.includes('function scenarioCategoryLabel'));
+  assert.ok(pageSource.includes('from "./domains/training/presentation"'));
+  assert.ok(presentation.includes('function scenarioCategoryLabel'));
+  assert.ok(presentation.includes('function scenarioChannelLabel'));
   assert.ok(pageSource.includes('scenarioChannelLabel(item.channel)'));
   assert.ok(pageSource.includes('scenarioCategoryLabel(selected.category)'));
 });
