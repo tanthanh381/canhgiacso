@@ -6,6 +6,7 @@ const read = (path) => readFileSync(path, "utf8");
 const page = read("app/page.tsx");
 const ux = read("app/ux-refresh.tsx");
 const seo = read("public/seo.css");
+const storage = read("app/shared/browser-storage.ts");
 
 test("public scenario loading always unlocks the built-in fallback library", () => {
   const block = page.match(/supabase\.rpc\("get_public_site_content"\)[\s\S]*?return \(\) => \{ active = false; \};/)?.[0] ?? "";
@@ -43,8 +44,8 @@ test("SEO pages avoid root overflow scroll containers that can break sticky head
 
 
 test("guest progress tolerates browsers that restrict localStorage", () => {
-  assert.match(page, /function safeStorageGet\(key: string\)/);
-  assert.match(page, /function safeStorageSet\(key: string, value: string\)/);
+  assert.match(storage, /function safeStorageGet\(key: string\)/);
+  assert.match(storage, /function safeStorageSet\(key: string, value: string\)/);
   assert.match(page, /safeStorageSet\(SECURITY_CHECKLIST_KEY/);
   assert.match(page, /safeStorageSet\(THEME_KEY/);
   assert.match(page, /safeStorageSet\(progressKey\(null\)/);
