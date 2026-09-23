@@ -1,3 +1,5 @@
+import type { Scenario } from "../../data";
+
 export type AnalyticsUser = {
   username: string;
   displayName: string;
@@ -36,4 +38,29 @@ export function mapScenarioRisks(rows: Array<Record<string, unknown>>): Scenario
     wrong: Number(item.wrong ?? 0),
     rate: Number(item.rate ?? 0),
   }));
+}
+
+export function summarizeAnalytics(users: AnalyticsUser[]) {
+  const attempts = users.reduce((sum, user) => sum + user.completed, 0);
+  const correct = users.reduce((sum, user) => sum + user.correct, 0);
+  const active = users.filter((user) => user.completed > 0).length;
+  return {
+    active,
+    participation: users.length ? Math.round((active / users.length) * 100) : 0,
+    attempts,
+    correct,
+    accuracy: attempts ? Math.round((correct / attempts) * 100) : 0,
+    highRisk: users.filter((user) => user.risk === "Cao").length,
+    totalLoss: users.reduce((sum, user) => sum + user.loss, 0),
+  };
+}
+
+export function topScenarioRisks(scenarios: Scenario[], risks: ScenarioRisk[], limit = 5) {
+  return risks
+    .map((risk) => ({
+      ...(scenarios.find((scenario) => scenario.id === risk.scenarioId) ?? scenarios[0]),
+      ...risk,
+    }))
+    .sort((a, b) => b.rate - a.rate || b.attempts - a.attempts)
+    .slice(0, limit);
 }
