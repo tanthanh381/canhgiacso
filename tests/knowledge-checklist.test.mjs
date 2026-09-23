@@ -5,8 +5,11 @@ import test from "node:test";
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
 
 test("Cẩm nang includes an interactive security checklist", async () => {
-  const [page, styles] = await Promise.all([read("../app/page.tsx"), read("../app/globals.css")]);
-  const checklist = page.slice(page.indexOf("const securityChecklistGroups"), page.indexOf("const securityChecklistItemIds"));
+  const [page, styles, checklist] = await Promise.all([
+    read("../app/page.tsx"),
+    read("../app/globals.css"),
+    read("../app/domains/security-awareness/checklist.ts"),
+  ]);
   const groupIds = [...checklist.matchAll(/^ {4}id: "([a-z-]+)",$/gm)].map((match) => match[1]);
   const itemIds = [...checklist.matchAll(/^ {6}\{ id: "([a-z]+-[a-z-]+)"/gm)].map((match) => match[1]);
 
@@ -19,7 +22,7 @@ test("Cẩm nang includes an interactive security checklist", async () => {
   assert.doesNotMatch(page, /Personal Security Checklist/);
   assert.match(page, /role="progressbar"/);
   assert.match(page, /type="checkbox"/);
-  assert.match(page, /SECURITY_CHECKLIST_KEY/);
+  assert.match(checklist, /SECURITY_CHECKLIST_KEY/);
   assert.match(page, /safeStorageSet\(SECURITY_CHECKLIST_KEY/);
   assert.match(styles, /\.checklist-items/);
   assert.match(styles, /\.checklist-priority/);
