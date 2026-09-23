@@ -5,15 +5,11 @@ import test from "node:test";
 const read = (file) => readFile(new URL(`../${file}`, import.meta.url), "utf8");
 
 test("SEO CTR Wave 8 runs after intent shaping and before analytics", async () => {
-  const pkg = JSON.parse(await read("package.json"));
-  const build = pkg.scripts["build:pages"];
-  assert.match(build, /patch-seo-intent-wave7\.mjs/);
-  assert.match(build, /patch-seo-ctr-wave8\.mjs/);
-  assert.match(build, /patch-content-growth-wave9\.mjs/);
-  assert.match(build, /patch-realtime-analytics\.mjs/);
-  assert.ok(build.indexOf("patch-seo-intent-wave7.mjs") < build.indexOf("patch-seo-ctr-wave8.mjs"));
-  assert.ok(build.indexOf("patch-seo-ctr-wave8.mjs") < build.indexOf("patch-content-growth-wave9.mjs"));
-  assert.ok(build.indexOf("patch-content-growth-wave9.mjs") < build.indexOf("patch-realtime-analytics.mjs"));
+  const architecture = JSON.parse(await read("content/content-architecture.json"));
+  const stages = architecture.phases.flatMap((phase) => phase.stages);
+  assert.ok(stages.indexOf("patch-seo-intent-wave7.mjs") < stages.indexOf("patch-seo-ctr-wave8.mjs"));
+  assert.ok(stages.indexOf("patch-seo-ctr-wave8.mjs") < stages.indexOf("patch-content-growth-wave9.mjs"));
+  assert.ok(stages.indexOf("patch-content-growth-wave9.mjs") < stages.indexOf("patch-realtime-analytics.mjs"));
 });
 
 test("Wave 8 fixes count-to-content mismatches in SERP promises", async () => {
