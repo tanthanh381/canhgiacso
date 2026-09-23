@@ -24,8 +24,7 @@
       "stages": [
         "generate-seo-content.mjs",
         "generate-organic-growth.mjs",
-        "generate-fresh-seo.mjs",
-        "trim-growth-meta.mjs"
+        "generate-fresh-seo.mjs"
       ]
     },
     {
