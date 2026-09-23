@@ -59,21 +59,28 @@ test("answer keys are redacted and content management uses protected RPCs", asyn
   assert.doesNotMatch(definitions, /correct:\s*(?:true|false)|moneyDelta:|awarenessDelta:|feedback:/);
 });
 
-test("guest choice scoring can run with the write-based rate limiter", async () => {
-  const migration = await read("../supabase/migrations/20260922143000_allow_guest_choice_rate_limit.sql");
-  assert.match(migration, /create or replace function public\.evaluate_guest_choice\(scenario_id integer, choice_index integer\)/);
-  assert.match(migration, /security definer/);
-  assert.match(migration, /private\.evaluate_choice\(scenario_id, choice_index\)/);
-  assert.match(migration, /grant execute on function public\.evaluate_guest_choice\(integer, integer\) to anon, authenticated/);
-  assert.doesNotMatch(migration, /\bstable\b/);
+test("guest choice scoring is local and obsolete privileged RPC access is revoked", async () => {
+  const [page, model, hardening] = await Promise.all([
+    read("../app/page.tsx"),
+    read("../app/domains/training/model.ts"),
+    read("../supabase/migrations/20260923085000_enterprise_security_hardening_p0.sql"),
+  ]);
+  assert.match(page, /evaluateGuestChoice\(selected, index\)/);
+  assert.match(model, /export function evaluateGuestChoice/);
+  assert.match(hardening, /revoke all on function public\.evaluate_guest_choice\(integer,integer\)/);
+  assert.doesNotMatch(page, /supabase\.rpc\("evaluate_guest_choice"/);
 });
 
 test("critical UI states are accessible and responsive", async () => {
-  const [page, styles] = await Promise.all([read("../app/page.tsx"), read("../app/globals.css")]);
+  const [page, styles, ui] = await Promise.all([
+    read("../app/page.tsx"),
+    read("../app/globals.css"),
+    read("../app/shared/ui-primitives.tsx"),
+  ]);
   assert.match(page, /aria-live="polite"/);
-  assert.match(page, /role="dialog"/);
-  assert.match(page, /aria-modal="true"/);
-  assert.match(page, /event\.key === "Escape"/);
+  assert.match(ui, /role="dialog"/);
+  assert.match(ui, /aria-modal="true"/);
+  assert.match(ui, /event\.key === "Escape"/);
   assert.match(page, /aria-current=/);
   assert.match(styles, /:focus-visible/);
   assert.match(styles, /@media \(max-width: 820px\)/);
