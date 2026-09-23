@@ -17,7 +17,7 @@ import { DashboardView } from "./domains/dashboard/view";
 import { bestCorrectStreak, buildDefenseBadges, difficulties, difficultyTone, PHISHING_QUIZ_URL, scenarioCategoryLabel, scenarioChannelLabel } from "./domains/training/presentation";
 import { evaluateGuestChoice, type ChoiceOutcome, type GameHistory, type GameState, type PendingChoice, type Result, type StoredProgress } from "./domains/training/model";
 import { GUEST_CERTIFICATE_KEY, LEGACY_PROGRESS_KEY, THEME_KEY, progressKey, readStoredProgress, safeStorageGet, safeStorageRemove, safeStorageSet } from "./shared/browser-storage";
-import { BadgeIcon, BrandMark, FooterNotice, Modal } from "./shared/ui-primitives";
+import { BadgeIcon, Modal } from "./shared/ui-primitives";
 import { canChangeHash, navigateBrowser, restoreHash, routeFromHash, type View } from "./domains/shell/navigation";
 import { AppFooter, AppHeader, SyncStatus } from "./domains/shell/view";
 
