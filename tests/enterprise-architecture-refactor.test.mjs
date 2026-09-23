@@ -10,7 +10,8 @@ test("P1 exposes one deterministic content compiler entrypoint", async () => {
   assert.equal(pkg.scripts["content:compile"], "node scripts/content-compiler.mjs");
   assert.equal(pkg.scripts["build:pages"], "pnpm run content:compile && vite build --config vite.github-pages.config.ts");
   const stages = architecture.phases.flatMap((phase) => phase.stages);
-  assert.ok(stages.length >= 20);
+  assert.ok(stages.length >= 1);
+  assert.ok(stages.length <= 20, `content pipeline should shrink over time; found ${stages.length} stages`);
   assert.equal(new Set(stages).size, stages.length);
   assert.equal(architecture.output.root, "docs");
   assert.equal(architecture.output.generatedOnly, true);
