@@ -14,6 +14,7 @@ test("GA4 injector patches CSP and rejects duplicate Google tags", async () => {
   const patch = await read("scripts/patch-google-analytics.mjs");
   assert.match(patch, /https:\/\/www\.googletagmanager\.com/);
   assert.match(patch, /https:\/\/www\.google-analytics\.com/);
+  assert.match(patch, /https:\/\/www\.google\.com/);
   assert.match(patch, /https:\/\/analytics\.google\.com/);
   assert.match(patch, /https:\/\/region1\.google-analytics\.com/);
   assert.match(patch, /Multiple Google tags found/);
