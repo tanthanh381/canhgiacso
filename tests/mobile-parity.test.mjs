@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const read = (path) => readFileSync(path, "utf8");
-const page = read("app/page.tsx");
+const page = `${read("app/page.tsx")}\n${read("app/domains/shell/view.tsx")}`;
 const ux = read("app/ux-refresh.css");
 const practice = read("app/interactive-practice-nav.css");
 
