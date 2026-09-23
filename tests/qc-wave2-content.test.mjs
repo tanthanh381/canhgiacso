@@ -33,7 +33,7 @@ const knowledgeSlugs = [
 ];
 
 test("QC Wave 2 runs after SEO content generation and before downstream QC/analytics", () => {
-  assert.match(packageJson.scripts["build:pages"], /patch-google-traffic-wave5\.mjs && node scripts\/patch-qc-wave2\.mjs && node scripts\/patch-qc-wave3\.mjs && node scripts\/patch-seo-authority-wave6\\.mjs && node scripts\\/patch-seo-intent-wave7\\.mjs && node scripts\\/patch-realtime-analytics\\.mjs/);
+  assert.match(packageJson.scripts["build:pages"], /patch-google-traffic-wave5\.mjs && node scripts\/patch-qc-wave2\.mjs && node scripts\/patch-qc-wave3\.mjs && node scripts\/patch-seo-authority-wave6\.mjs && node scripts\/patch-seo-intent-wave7\.mjs && node scripts\/patch-realtime-analytics\.mjs/);
   assert.match(packageJson.scripts.build, /prepare:content/);
   assert.match(packageJson.scripts.dev, /prepare:content/);
 });
