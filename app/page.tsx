@@ -15,11 +15,10 @@ import { bestCorrectStreak, buildDefenseBadges, difficulties, difficultyTone, PH
 import { evaluateGuestChoice, type ChoiceOutcome, type GameHistory, type GameState, type PendingChoice, type Result, type StoredProgress } from "./domains/training/model";
 import { GUEST_CERTIFICATE_KEY, LEGACY_PROGRESS_KEY, THEME_KEY, progressKey, readStoredProgress, safeStorageGet, safeStorageRemove, safeStorageSet } from "./shared/browser-storage";
 import { BadgeIcon, BrandMark, FooterNotice, Modal } from "./shared/ui-primitives";
+import { canChangeHash, navigateBrowser, restoreHash, routeFromHash, SIMULATION_BANNER_VIEWS, type View } from "./domains/shell/navigation";
 
 const AdminPage = lazy(() => import("./admin").then((module) => ({ default: module.AdminPage })));
 
-type View = "game" | "knowledge" | "news" | "quiz" | "stats" | "evidence" | "dashboard" | "admin";
-const SIMULATION_BANNER_VIEWS: ReadonlySet<View> = new Set(["game", "quiz"]);
 const money = new Intl.NumberFormat("vi-VN");
 export default function Home() {
   const [view, setView] = useState<View>("game");
@@ -121,15 +120,15 @@ export default function Home() {
   useEffect(() => {
     let previousHash = window.location.hash;
     const syncHash = () => {
-      if (previousHash === '#/admin' && window.location.hash !== previousHash && !window.dispatchEvent(new Event('admin-before-leave', { cancelable: true }))) {
-        window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}${previousHash}`);
+      const nextHash = window.location.hash;
+      if (!canChangeHash(previousHash, nextHash)) {
+        restoreHash(previousHash);
         return;
       }
-      previousHash = window.location.hash;
-      if (window.location.hash === "#/admin") setView("admin");
-      else if (window.location.hash.startsWith('#/news/')) { setNewsSlug(window.location.hash.slice(7)); setView('news'); }
-      else if (window.location.hash === '#/news') { setNewsSlug(''); setView('news'); }
-      else { setNewsSlug(''); setView('game'); }
+      previousHash = nextHash;
+      const route = routeFromHash(nextHash);
+      setNewsSlug(route.newsSlug);
+      setView(route.view);
     };
     syncHash();
     window.addEventListener("hashchange", syncHash);
@@ -392,12 +391,8 @@ export default function Home() {
   }
 
   function navigateTo(nextView: View) {
-    if (view === 'admin' && nextView !== 'admin' && !window.dispatchEvent(new Event('admin-before-leave', { cancelable: true }))) return;
-    setNewsSlug('');
-    if (nextView === 'news') window.location.hash = '/news';
-    else if (window.location.hash.startsWith('#/news')) window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
-    if (nextView === "admin") window.location.hash = "/admin";
-    else if (window.location.hash === "#/admin") window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
+    if (!navigateBrowser(view, nextView)) return;
+    setNewsSlug("");
     setView(nextView);
   }
 
