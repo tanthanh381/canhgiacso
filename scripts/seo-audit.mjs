@@ -118,6 +118,60 @@ for (const required of [`${site}/gioi-thieu/`, `${site}/quyen-rieng-tu/`, `${sit
   if (!urls.includes(required)) fail(`${required}: trust page missing from sitemap`);
 }
 
+const growthWave9Required = [
+  "/canh-bao-lua-dao-hom-nay/",
+  "/co-phai-lua-dao-khong/",
+  "/tu-dien-lua-dao/",
+  "/cong-cu/",
+  "/cong-cu/kiem-tra-cuoc-goi-la/",
+  "/cong-cu/xu-ly-khi-bi-lua/",
+  "/cong-cu/kiem-tra-bien-lai-chuyen-khoan/",
+  "/cong-cu/kiem-tra-tin-nhan-dang-ngo/",
+  "/cong-cu/kiem-tra-quyen-ung-dung-android/",
+  "/cong-cu/kiem-tra-truoc-khi-chuyen-tien/",
+  "/cong-cu/tra-cuu-kenh-chinh-thuc/",
+  "/cong-cu/thu-vien-kich-ban-lua-dao/",
+  "/kien-thuc/bien-lai-chuyen-khoan-gia/",
+  "/kien-thuc/cuoc-goi-im-lang-lua-dao/",
+  "/kien-thuc/lua-dao-khoa-sim-chuan-hoa-thue-bao/",
+  "/kien-thuc/app-quyen-tro-nang-lua-dao/",
+  "/kien-thuc/app-dieu-khien-dien-thoai-tu-xa/",
+  "/kien-thuc/lua-dao-hoan-thue-gia-mao/",
+  "/kien-thuc/gia-danh-giao-vien-bao-con-tai-nan/",
+  "/kien-thuc/gia-danh-benh-vien-bao-nguoi-than-cap-cuu/",
+  "/kien-thuc/sms-brandname-gia-mao/",
+  "/kien-thuc/nguoi-mua-gui-link-nhan-tien-lua-dao/",
+  "/kien-thuc/dat-coc-mua-hang-online-lua-dao/",
+  "/kien-thuc/trung-thuong-nhan-qua-dong-phi-lua-dao/",
+  "/kien-thuc/romance-scam-lua-dao-tinh-cam/",
+  "/kien-thuc/lua-dao-dau-tu-telegram-zalo/",
+  "/kien-thuc/bat-coc-online/",
+  "/kien-thuc/ai-ghep-anh-video-tong-tien/",
+  "/kien-thuc/gia-mao-lanh-dao-yeu-cau-chuyen-tien-bec/",
+];
+for (const pathname of growthWave9Required) {
+  const required = `${site}${pathname`;
+  if (!urls.includes(required)) fail(`${required}: Growth Wave 9 URL missing from sitemap`);
+}
+
+const interactiveToolPaths = [
+  "/cong-cu/kiem-tra-cuoc-goi-la/",
+  "/cong-cu/xu-ly-khi-bi-lua/",
+  "/cong-cu/kiem-tra-bien-lai-chuyen-khoan/",
+  "/cong-cu/kiem-tra-tin-nhan-dang-ngo/",
+  "/cong-cu/kiem-tra-quyen-ung-dung-android/",
+  "/cong-cu/kiem-tra-truoc-khi-chuyen-tien/",
+  "/cong-cu/tra-cuu-kenh-chinh-thuc/",
+  "/cong-cu/thu-vien-kich-ban-lua-dao/",
+];
+for (const pathname of interactiveToolPaths) {
+  const file = localPathFor(`${site}${pathname}`);
+  if (!(await exists(file))) continue;
+  const html = await readFile(file, "utf8");
+  if (!html.includes('/scam-tools.js')) fail(`${site}${pathname}: missing client-side anti-scam tool script`);
+  if (!html.includes('/theme-init.js')) fail(`${site}${pathname}: missing CSP-safe theme initializer`);
+}
+
 const robots = await readFile(path.join(root, "robots.txt"), "utf8");
 if (!robots.includes("Sitemap: https://canhgiacso.com/sitemap.xml")) fail("robots.txt does not advertise sitemap");
 else ok("robots.txt advertises sitemap");
