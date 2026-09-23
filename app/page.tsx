@@ -1574,7 +1574,7 @@ export default function Home() {
           }}
         /></Suspense>}
 
-      <footer><div className="footer-brand" aria-label="Cảnh Giác Số"><BrandMark /><span><b>{siteContent.copy.departmentName}</b><small>{siteContent.copy.footerTagline}</small></span></div><FooterNotice notice={siteContent.copy.footerNotice}/><button onClick={() => setGuide(true)}>Hướng dẫn & trợ giúp</button></footer>
+      <footer><div className="footer-brand" aria-label="Cảnh Giác Số"><BrandMark /><span><b>{siteContent.copy.departmentName}</b><small>{siteContent.copy.footerTagline}</small></span></div><FooterNotice notice={siteContent.copy.footerNotice}/><div className="footer-actions"><nav aria-label="Thông tin website"><a href="/gioi-thieu/">Giới thiệu</a><a href="/phuong-phap-kiem-chung/">Kiểm chứng</a><a href="/quyen-rieng-tu/">Quyền riêng tư</a></nav><button onClick={() => setGuide(true)}>Hướng dẫn & trợ giúp</button></div></footer>
 
       {completionCertificate && !lossNotice && <Modal open onClose={() => setCompletionCertificate(null)} labelledBy="certificate-complete-title" className="certificate-complete-modal">
         <button className="modal-close" aria-label="Đóng thông báo chứng nhận" onClick={() => setCompletionCertificate(null)}>×</button>
