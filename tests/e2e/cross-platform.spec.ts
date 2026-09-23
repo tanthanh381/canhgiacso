@@ -318,6 +318,7 @@ test.describe("Wave 9 security shell", () => {
     await expect(page.locator('meta[http-equiv="Content-Security-Policy"]')).toHaveCount(1);
     const csp = await page.locator('meta[http-equiv="Content-Security-Policy"]').getAttribute("content");
     expect(csp).toContain("script-src 'self'");
+    expect(csp).toContain("https://www.google.com");
     expect(csp).toContain("object-src 'none'");
     await expect(page.locator('script[src="/theme-init.js"]')).toHaveCount(1);
     await expect(page.locator('script[src="/scam-tools.js"]')).toHaveCount(1);
