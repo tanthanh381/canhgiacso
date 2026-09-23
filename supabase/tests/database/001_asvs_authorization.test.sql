@@ -17,19 +17,39 @@ begin
   join pg_namespace n on n.oid = p.pronamespace
   where n.nspname = 'public'
     and p.prosecdef
-    and has_function_privilege('anon', p.oid, 'EXECUTE');
+    and has_function_privilege('anon', p.oid, 'EXECUTE')
+    and p.proname <> 'record_web_analytics_event_v4';
   if exposed_definers <> 0 then
-    raise exception 'ASVS authz failure: anon can execute % public SECURITY DEFINER function(s)', exposed_definers;
+    raise exception 'ASVS authz failure: anon can execute % unexpected public SECURITY DEFINER function(s)', exposed_definers;
+  end if;
+
+  if not has_function_privilege(
+    'anon',
+    'public.record_web_analytics_event_v4(text,text,text,text,text,text,text,text,text,text,text,text)',
+    'EXECUTE'
+  ) then
+    raise exception 'ASVS analytics failure: active v4 analytics RPC is not callable by anon';
+  end if;
+
+  if has_function_privilege('anon', 'public.evaluate_guest_choice(integer,integer)', 'EXECUTE') then
+    raise exception 'ASVS authz failure: obsolete guest choice RPC remains callable by anon';
+  end if;
+
+  if has_function_privilege('anon', 'public.record_web_analytics_event(text,text,text,text)', 'EXECUTE')
+    or has_function_privilege('anon', 'public.record_web_analytics_event_v2(text,text,text,text,text,text,text,text)', 'EXECUTE')
+    or has_function_privilege('anon', 'public.record_web_analytics_event_v3(text,text,text,text,text,text,text,text,text)', 'EXECUTE') then
+    raise exception 'ASVS analytics failure: legacy analytics RPC remains callable by anon';
   end if;
 
   select count(*) into unprotected_tables
   from pg_class c
   join pg_namespace n on n.oid = c.relnamespace
-  where n.nspname = 'public'
+  where n.nspname in ('public','private')
     and c.relkind in ('r','p')
-    and not c.relrowsecurity;
+    and not c.relrowsecurity
+    and c.relname not in ('schema_migrations');
   if unprotected_tables <> 0 then
-    raise exception 'ASVS authz failure: % public table(s) do not have RLS enabled', unprotected_tables;
+    raise exception 'ASVS authz failure: % application table(s) do not have RLS enabled', unprotected_tables;
   end if;
 
   select has_function_privilege('anon', 'public.save_managed_site_content(text,jsonb)', 'EXECUTE')
