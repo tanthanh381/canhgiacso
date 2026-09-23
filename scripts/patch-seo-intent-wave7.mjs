@@ -305,8 +305,8 @@ if (await exists(HOME)) {
   let home = await readFile(HOME, "utf8");
   if (!home.includes('/kien-thuc/phishing-la-gi/')) {
     home = home.replace(
-      /(<a href="\/kien-thuc\/nhan-dien-email-phishing\/"[^>]*>)/,
-      '<a href="/kien-thuc/phishing-la-gi/" class="home-growth-link">Phishing là gì?</a>$1',
+      '<li><a href="/kien-thuc/nhan-dien-email-phishing/">Nhận diện email phishing và link giả mạo</a></li>',
+      '<li><a href="/kien-thuc/phishing-la-gi/">Phishing là gì? Dấu hiệu và cách phòng tránh</a></li><li><a href="/kien-thuc/nhan-dien-email-phishing/">Nhận diện email phishing và link giả mạo</a></li>',
     );
   }
   await writeFile(HOME, home, "utf8");
