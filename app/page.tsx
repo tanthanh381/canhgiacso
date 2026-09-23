@@ -8,23 +8,15 @@ import { supabase } from "./supabase";
 import { difficultyOrder, getLevelProgress, getUnlockedDifficulties } from "./progression";
 import { downloadTrainingCertificatePdf, TrainingCertificate } from "./certificate";
 import { authErrorMessage } from "./auth-error";
+import { SECURITY_CHECKLIST_KEY, securityChecklistGroups, securityChecklistItemIds } from "./domains/security-awareness/checklist";
+import { evaluateGuestChoice, type ChoiceOutcome, type GameHistory, type GameState, type PendingChoice, type Result, type StoredProgress } from "./domains/training/model";
+import { GUEST_CERTIFICATE_KEY, LEGACY_PROGRESS_KEY, THEME_KEY, progressKey, readStoredProgress, safeStorageGet, safeStorageRemove, safeStorageSet } from "./shared/browser-storage";
+import { BadgeIcon, BrandMark, FooterNotice, Modal } from "./shared/ui-primitives";
 
 const AdminPage = lazy(() => import("./admin").then((module) => ({ default: module.AdminPage })));
 
-type Result = { scenarioId: number; correct: boolean; choiceIndex: number };
-type GameHistory = { runId: string; finishedAt: string; balance: number; completed: number; correct: number };
-type ChoiceOutcome = { scenarioId: number; choiceIndex: number; correct: boolean; moneyDelta: number; awarenessDelta: number; feedback: string };
-type GameState = { run_id: string; balance: number; awareness: number; results: Result[]; history: GameHistory[]; outcome?: ChoiceOutcome };
-type PendingChoice = { userId: string; runId: string; scenario: SiteContent["scenarios"][number]; index: number };
 type View = "game" | "knowledge" | "news" | "quiz" | "stats" | "evidence" | "dashboard" | "admin";
 const SIMULATION_BANNER_VIEWS: ReadonlySet<View> = new Set(["game", "quiz"]);
-type StoredProgress = {
-  balance: number;
-  awareness: number;
-  results: Result[];
-  dark: boolean;
-  playerName: string;
-};
 type SessionAccount = {
   id: string;
   email: string;
@@ -65,34 +57,8 @@ type DefenseBadge = {
   progress: number;
   unlocked: boolean;
 };
-type SecurityChecklistGroup = {
-  id: string;
-  icon: string;
-  title: string;
-  description: string;
-  items: Array<{ id: string; title: string; description: string; priority: "Thiết yếu" | "Nên làm" }>;
-};
 
-const LEGACY_PROGRESS_KEY = "khien-so-progress";
-const THEME_KEY = "khien-so-theme";
-const GUEST_CERTIFICATE_KEY = "canh-giac-so-guest-certificate";
-const SECURITY_CHECKLIST_KEY = "canh-giac-so-security-checklist";
 const PHISHING_QUIZ_URL = "https://phishingquiz.withgoogle.com/?hl=vi";
-
-function safeStorageGet(key: string) {
-  if (typeof window === "undefined") return null;
-  try { return window.localStorage.getItem(key); } catch { return null; }
-}
-
-function safeStorageSet(key: string, value: string) {
-  if (typeof window === "undefined") return false;
-  try { window.localStorage.setItem(key, value); return true; } catch { return false; }
-}
-
-function safeStorageRemove(key: string) {
-  if (typeof window === "undefined") return false;
-  try { window.localStorage.removeItem(key); return true; } catch { return false; }
-}
 
 function scenarioCategoryLabel(category: string) {
   if (category === "Deepfake") return "Giả mạo bằng AI (deepfake)";
@@ -109,159 +75,6 @@ function scenarioChannelLabel(channel: string) {
 const USERNAME_PATTERN = /^[a-z0-9._-]{3,24}$/;
 const PASSWORD_PATTERN = /^(?=.{8,72}$)(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d])\S+$/;
 
-const securityChecklistGroups: SecurityChecklistGroup[] = [
-  {
-    id: "account",
-    icon: "◇",
-    title: "Tài khoản & xác thực",
-    description: "Giảm nguy cơ bị chiếm tài khoản ngay cả khi mật khẩu bị lộ.",
-    items: [
-      { id: "account-unique-password", title: "Dùng mật khẩu riêng cho từng tài khoản", description: "Ưu tiên cụm mật khẩu dài hoặc trình quản lý mật khẩu; không dùng lại mật khẩu email cho ngân hàng và mạng xã hội.", priority: "Thiết yếu" },
-      { id: "account-mfa", title: "Bật xác thực hai lớp", description: "Dùng ứng dụng xác thực, passkey hoặc khóa bảo mật nếu dịch vụ hỗ trợ; tuyệt đối không chuyển mã xác thực cho người khác.", priority: "Thiết yếu" },
-      { id: "account-recovery", title: "Bảo vệ phương thức khôi phục", description: "Kiểm tra email, số điện thoại khôi phục và cất mã dự phòng ở nơi riêng biệt, an toàn.", priority: "Thiết yếu" },
-      { id: "account-sessions", title: "Rà soát thiết bị đang đăng nhập", description: "Đăng xuất thiết bị lạ và bật cảnh báo khi có đăng nhập mới hoặc thay đổi thông tin bảo mật.", priority: "Nên làm" },
-    ],
-  },
-  {
-    id: "finance",
-    icon: "₫",
-    title: "Tài chính & giao dịch",
-    description: "Tạo thêm điểm dừng trước khi tiền rời khỏi tài khoản.",
-    items: [
-      { id: "finance-beneficiary", title: "Đọc lại người nhận trước khi chuyển", description: "Đối chiếu tên, số tài khoản, ngân hàng và nội dung giao dịch trên màn hình xác nhận cuối cùng.", priority: "Thiết yếu" },
-      { id: "finance-independent-check", title: "Xác minh yêu cầu tiền qua kênh khác", description: "Tự gọi số quen thuộc hoặc gặp trực tiếp; không xác minh bằng số điện thoại hay đường link do người yêu cầu cung cấp.", priority: "Thiết yếu" },
-      { id: "finance-alerts", title: "Bật thông báo biến động số dư", description: "Theo dõi giao dịch ngay khi phát sinh và liên hệ ngân hàng qua kênh chính thức nếu thấy bất thường.", priority: "Thiết yếu" },
-      { id: "finance-limits", title: "Đặt hạn mức phù hợp", description: "Giữ hạn mức chuyển tiền hằng ngày ở mức cần thiết và chỉ nâng tạm thời khi chính bạn chủ động giao dịch.", priority: "Nên làm" },
-    ],
-  },
-  {
-    id: "contact",
-    icon: "☎",
-    title: "Cuộc gọi & tin nhắn",
-    description: "Nhận diện thao túng tâm lý trước khi làm theo chỉ dẫn.",
-    items: [
-      { id: "contact-pause", title: "Dừng lại khi bị thúc ép", description: "Cúp máy hoặc ngừng nhắn tin nếu đối phương đe dọa, yêu cầu giữ bí mật hay ép xử lý trong vài phút.", priority: "Thiết yếu" },
-      { id: "contact-identity", title: "Tự tìm kênh liên hệ chính thức", description: "Tra cứu số tổng đài trên website hoặc ứng dụng chính thức thay vì gọi lại số mà người lạ đọc cho bạn.", priority: "Thiết yếu" },
-      { id: "contact-no-install", title: "Không cài ứng dụng theo hướng dẫn từ xa", description: "Không chia sẻ màn hình, cấp quyền trợ năng hoặc cài tệp APK do người tự xưng là cơ quan, ngân hàng hay shipper gửi.", priority: "Thiết yếu" },
-      { id: "contact-report", title: "Chặn và lưu bằng chứng", description: "Lưu số điện thoại, nội dung tin nhắn, đường link và thời gian liên hệ trước khi chặn hoặc báo cáo.", priority: "Nên làm" },
-    ],
-  },
-  {
-    id: "links",
-    icon: "⌁",
-    title: "Đường link & mã QR",
-    description: "Kiểm tra điểm đến trước khi đăng nhập, thanh toán hoặc tải tệp.",
-    items: [
-      { id: "links-domain", title: "Đọc kỹ tên miền", description: "Kiểm tra lỗi chính tả, ký tự thay thế và phần tên miền thật ngay trước dấu gạch chéo đầu tiên.", priority: "Thiết yếu" },
-      { id: "links-official-entry", title: "Tự mở ứng dụng hoặc gõ địa chỉ", description: "Với ngân hàng và dịch vụ quan trọng, không đăng nhập từ link trong SMS, email, quảng cáo tìm kiếm hoặc tin nhắn.", priority: "Thiết yếu" },
-      { id: "links-https", title: "Không xem biểu tượng ổ khóa là đủ", description: "HTTPS chỉ mã hóa kết nối; website giả vẫn có thể sở hữu chứng chỉ và giao diện giống trang thật.", priority: "Nên làm" },
-      { id: "links-qr", title: "Xem trước địa chỉ sau mã QR", description: "Không quét mã bị dán đè; đọc tên miền hiển thị trước khi tiếp tục hoặc nhập thông tin.", priority: "Thiết yếu" },
-    ],
-  },
-  {
-    id: "social",
-    icon: "◎",
-    title: "Mạng xã hội & quyền riêng tư",
-    description: "Hạn chế dữ liệu mà kẻ gian có thể dùng để tạo câu chuyện đáng tin.",
-    items: [
-      { id: "social-visibility", title: "Giới hạn thông tin công khai", description: "Ẩn ngày sinh, số điện thoại, địa chỉ, lịch trình và thông tin người thân khỏi người không quen biết.", priority: "Nên làm" },
-      { id: "social-requests", title: "Kiểm tra tài khoản kết bạn", description: "Xem lịch sử hoạt động, bạn chung và xác minh ngoài nền tảng trước khi tin một tài khoản mới hoặc tài khoản sao chép.", priority: "Thiết yếu" },
-      { id: "social-video", title: "Có mật hiệu xác minh với người thân", description: "Khi nhận cuộc gọi vay tiền bất thường, đặt câu hỏi riêng hoặc gọi lại để phòng video và giọng nói giả mạo.", priority: "Thiết yếu" },
-      { id: "social-permissions", title: "Rà soát ứng dụng đã liên kết", description: "Gỡ trò chơi, tiện ích và ứng dụng không còn dùng khỏi tài khoản Google, Apple, Facebook hoặc Microsoft.", priority: "Nên làm" },
-    ],
-  },
-  {
-    id: "devices",
-    icon: "▣",
-    title: "Thiết bị & dữ liệu",
-    description: "Giữ thiết bị đủ an toàn để các lớp bảo vệ khác phát huy tác dụng.",
-    items: [
-      { id: "devices-updates", title: "Bật cập nhật tự động", description: "Cập nhật hệ điều hành, trình duyệt và ứng dụng để vá các lỗ hổng đã được công bố.", priority: "Thiết yếu" },
-      { id: "devices-lock", title: "Khóa màn hình và bật tìm thiết bị", description: "Dùng mã khóa mạnh hoặc sinh trắc học, bật tính năng định vị và xóa từ xa khi thiết bị thất lạc.", priority: "Thiết yếu" },
-      { id: "devices-store", title: "Chỉ cài ứng dụng từ nguồn chính thức", description: "Kiểm tra đúng nhà phát hành và quyền truy cập; không cài tệp gửi qua chat hoặc website lạ.", priority: "Thiết yếu" },
-      { id: "devices-backup", title: "Duy trì bản sao lưu quan trọng", description: "Sao lưu ảnh, tài liệu và dữ liệu thiết yếu định kỳ; kiểm tra rằng bản sao có thể khôi phục được.", priority: "Thiết yếu" },
-    ],
-  },
-  {
-    id: "email",
-    icon: "@",
-    title: "Email & tệp đính kèm",
-    description: "Chặn các đường vào phổ biến của lừa đảo, mã độc và đánh cắp tài khoản.",
-    items: [
-      { id: "email-sender", title: "Kiểm tra địa chỉ người gửi và nơi trả lời", description: "Mở đầy đủ địa chỉ email, so sánh tên miền và cảnh giác khi địa chỉ Reply-To khác người gửi hiển thị.", priority: "Thiết yếu" },
-      { id: "email-attachments", title: "Xác minh trước khi mở tệp", description: "Gọi lại người gửi nếu tệp bất ngờ; không bật macro, không giải nén tệp có mật khẩu từ một email chưa được xác minh.", priority: "Thiết yếu" },
-      { id: "email-images", title: "Hạn chế tải ảnh từ email lạ", description: "Ảnh từ xa có thể xác nhận bạn đã mở thư; chỉ tải khi nhận diện chắc chắn người gửi và nội dung.", priority: "Nên làm" },
-      { id: "email-recovery", title: "Bảo vệ riêng email khôi phục", description: "Dùng mật khẩu độc nhất và xác thực hai lớp cho hộp thư dùng để khôi phục các tài khoản quan trọng.", priority: "Thiết yếu" },
-    ],
-  },
-  {
-    id: "browsing",
-    icon: "◉",
-    title: "Trình duyệt & quyền riêng tư",
-    description: "Giảm theo dõi, tiện ích độc hại và rò rỉ dữ liệu khi duyệt web.",
-    items: [
-      { id: "browsing-extensions", title: "Gỡ tiện ích mở rộng không cần thiết", description: "Rà soát quyền đọc dữ liệu trang web và chỉ giữ tiện ích từ nhà phát hành đáng tin cậy, còn được cập nhật.", priority: "Thiết yếu" },
-      { id: "browsing-notifications", title: "Chặn thông báo từ website lạ", description: "Xóa quyền thông báo, vị trí, camera và micro đã cấp nhầm; không bấm Cho phép chỉ để xem nội dung.", priority: "Thiết yếu" },
-      { id: "browsing-profiles", title: "Tách hồ sơ duyệt web quan trọng", description: "Dùng hồ sơ riêng cho ngân hàng hoặc công việc để hạn chế cookie và tiện ích từ hoạt động duyệt web thông thường.", priority: "Nên làm" },
-      { id: "browsing-shared-device", title: "Không đăng nhập nhạy cảm trên máy dùng chung", description: "Nếu bắt buộc, không lưu mật khẩu, đăng xuất hoàn toàn và đổi mật khẩu từ thiết bị tin cậy sau đó.", priority: "Thiết yếu" },
-    ],
-  },
-  {
-    id: "networks",
-    icon: "⌁",
-    title: "Mạng & Wi‑Fi",
-    description: "Bảo vệ đường truyền tại nhà và hạn chế rủi ro trên mạng công cộng.",
-    items: [
-      { id: "networks-router", title: "Đổi mật khẩu quản trị bộ phát Wi‑Fi", description: "Không dùng tài khoản mặc định; cập nhật phần mềm bộ phát và tắt quản trị từ Internet nếu không cần.", priority: "Thiết yếu" },
-      { id: "networks-encryption", title: "Dùng WPA2 hoặc WPA3 và tắt WPS", description: "Đặt mật khẩu Wi‑Fi dài, không chứa thông tin dễ đoán và không dùng chuẩn bảo mật cũ như WEP.", priority: "Thiết yếu" },
-      { id: "networks-public", title: "Tránh giao dịch nhạy cảm trên Wi‑Fi công cộng", description: "Ưu tiên 4G/5G cá nhân; không nhập thông tin ngân hàng khi mạng yêu cầu cài chứng chỉ hoặc ứng dụng lạ.", priority: "Thiết yếu" },
-      { id: "networks-guest", title: "Tạo mạng khách cho người lạ và thiết bị IoT", description: "Tách các thiết bị ít tin cậy khỏi máy tính và điện thoại chứa dữ liệu quan trọng trong gia đình.", priority: "Nên làm" },
-    ],
-  },
-  {
-    id: "smart-home",
-    icon: "⌂",
-    title: "Nhà thông minh & IoT",
-    description: "Giảm nguy cơ camera, loa, TV và thiết bị gia dụng trở thành điểm xâm nhập.",
-    items: [
-      { id: "smart-home-passwords", title: "Đổi mọi mật khẩu mặc định", description: "Đặt mật khẩu riêng cho camera, đầu ghi, bộ điều khiển và tài khoản đám mây ngay khi lắp đặt.", priority: "Thiết yếu" },
-      { id: "smart-home-updates", title: "Bật cập nhật và kiểm tra hỗ trợ", description: "Cập nhật ứng dụng cùng phần mềm thiết bị; thay thiết bị đã hết hỗ trợ và không còn nhận bản vá.", priority: "Thiết yếu" },
-      { id: "smart-home-features", title: "Tắt truy cập từ xa, camera hoặc micro không dùng", description: "Chỉ bật tính năng cần thiết và che hoặc rút nguồn thiết bị ghi hình ở khu vực riêng tư khi không sử dụng.", priority: "Thiết yếu" },
-      { id: "smart-home-inventory", title: "Lập danh sách thiết bị đang kết nối", description: "Kiểm tra định kỳ trong bộ phát Wi‑Fi, xóa thiết bị lạ và đặt thiết bị thông minh vào mạng khách.", priority: "Nên làm" },
-    ],
-  },
-  {
-    id: "human",
-    icon: "△",
-    title: "Thao túng tâm lý",
-    description: "Dùng quy tắc đơn giản để chống giả danh, deepfake và áp lực ra quyết định.",
-    items: [
-      { id: "human-second-opinion", title: "Hỏi thêm một người tin cậy trước quyết định lớn", description: "Tạm dừng và kể lại toàn bộ yêu cầu cho người thân hoặc đồng nghiệp, nhất là khi phải chuyển tiền, cài ứng dụng hay giữ bí mật.", priority: "Thiết yếu" },
-      { id: "human-pressure", title: "Không quyết định khi đang bị gây áp lực", description: "Dừng ít nhất vài phút trước yêu cầu có yếu tố đe dọa, giữ bí mật, phần thưởng lớn hoặc thời hạn cực ngắn.", priority: "Thiết yếu" },
-      { id: "human-authority", title: "Xác minh người có thẩm quyền qua kênh chính thức", description: "Tự gọi cơ quan, công ty hoặc quản lý bằng thông tin bạn đã biết; không dùng số và link đối phương cung cấp.", priority: "Thiết yếu" },
-      { id: "human-oversharing", title: "Hạn chế công khai lịch trình và vai trò", description: "Không đăng trước chuyến đi, sơ đồ tổ chức hoặc công việc nội bộ có thể giúp kẻ gian xây dựng kịch bản giả danh.", priority: "Nên làm" },
-    ],
-  },
-  {
-    id: "physical",
-    icon: "▰",
-    title: "An toàn vật lý",
-    description: "Bảo vệ thiết bị, giấy tờ và phương tiện khôi phục khỏi tiếp cận trực tiếp.",
-    items: [
-      { id: "physical-unattended", title: "Khóa thiết bị mỗi khi rời chỗ", description: "Bật tự động khóa trong thời gian ngắn và không để điện thoại hoặc máy tính mở khóa ngoài tầm mắt.", priority: "Thiết yếu" },
-      { id: "physical-usb", title: "Không cắm USB hoặc cáp không rõ nguồn gốc", description: "Dùng bộ sạc của mình; không kết nối thiết bị lưu trữ nhặt được hay được gửi đến khi chưa kiểm tra an toàn.", priority: "Thiết yếu" },
-      { id: "physical-documents", title: "Hủy giấy tờ nhạy cảm trước khi bỏ", description: "Cắt hoặc hủy hóa đơn, bản sao giấy tờ, mã vận đơn; che bàn phím khi nhập PIN ở nơi công cộng.", priority: "Nên làm" },
-      { id: "physical-recovery", title: "Cất bản sao lưu và mã khôi phục ở nơi riêng", description: "Không để tất cả thiết bị, khóa bảo mật, mã dự phòng và giấy tờ gốc trong cùng một túi hoặc vị trí.", priority: "Thiết yếu" },
-    ],
-  },
-];
-
-const securityChecklistItemIds = new Set(securityChecklistGroups.flatMap((group) => group.items.map((item) => item.id)));
-
-function progressKey(username: string | null) {
-  return `khien-so-progress:${username ?? "guest"}`;
-}
-
 
 const money = new Intl.NumberFormat("vi-VN");
 const difficulties: Array<"Tất cả" | Difficulty> = ["Tất cả", "Dễ", "Trung bình", "Khó", "Rất khó"];
@@ -272,132 +85,6 @@ const difficultyTone: Record<Difficulty, string> = {
   Khó: "hard",
   "Rất khó": "extreme",
 };
-
-function BadgeIcon({ children }: { children: React.ReactNode }) {
-  return <span className="badge-icon" aria-hidden="true">{children}</span>;
-}
-
-function BrandMark() {
-  return <span className="brand-logo" aria-hidden="true" />;
-}
-
-function FooterNotice({ notice }: { notice: string }) {
-  const match = notice.match(/^\*\*(.+?)\*\*\s*([\s\S]*)$/);
-  const heading = match?.[1];
-  const detail = match?.[2] ?? notice;
-  const lines = detail.split(/\n+/).map((line) => line.trim()).filter(Boolean);
-  return <p className="footer-notice">{heading && <strong>{heading}</strong>}{lines.map((line, index) => <span className={line.startsWith("Lưu ý:") ? "footer-warning" : undefined} key={`${index}-${line}`}>{line}</span>)}</p>;
-}
-
-function readStoredProgress(key: string): StoredProgress | null {
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return null;
-    const saved = JSON.parse(raw) as Record<string, unknown>;
-    const results = Array.isArray(saved.results)
-      ? saved.results.filter((result): result is Result => {
-          if (!result || typeof result !== "object") return false;
-          const candidate = result as Record<string, unknown>;
-          return Number.isInteger(candidate.scenarioId)
-            && Number(candidate.scenarioId) >= 1
-            && Number(candidate.scenarioId) <= 100
-            && typeof candidate.correct === "boolean"
-            && Number.isInteger(candidate.choiceIndex)
-            && Number(candidate.choiceIndex) >= 0
-            && Number(candidate.choiceIndex) <= 2;
-        })
-      : [];
-
-    return {
-      balance: typeof saved.balance === "number" && Number.isFinite(saved.balance)
-        ? Math.max(0, Math.min(300_000_000, saved.balance))
-        : 300_000_000,
-      awareness: typeof saved.awareness === "number" && Number.isFinite(saved.awareness)
-        ? Math.max(0, Math.min(100, saved.awareness))
-        : 100,
-      results,
-      dark: saved.dark === true,
-      playerName: typeof saved.playerName === "string" && saved.playerName.trim()
-        ? saved.playerName.trim().slice(0, 32)
-        : "Người chơi ẩn danh",
-    };
-  } catch {
-    return null;
-  }
-}
-
-function Modal({
-  open,
-  onClose,
-  labelledBy,
-  className = "",
-  children,
-}: {
-  open: boolean;
-  onClose: () => void;
-  labelledBy: string;
-  className?: string;
-  children: React.ReactNode;
-}) {
-  const dialogRef = useRef<HTMLElement>(null);
-  const previousFocus = useRef<HTMLElement | null>(null);
-  const onCloseRef = useRef(onClose);
-
-  useEffect(() => {
-    onCloseRef.current = onClose;
-  }, [onClose]);
-
-  useEffect(() => {
-    if (!open) return;
-    previousFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const dialog = dialogRef.current;
-    const focusableSelector = "button, input, select, textarea, a[href], [tabindex]:not([tabindex='-1'])";
-    const focusTimer = window.setTimeout(() => {
-      dialog?.querySelector<HTMLElement>(focusableSelector)?.focus();
-    }, 0);
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        onCloseRef.current();
-        return;
-      }
-      if (event.key !== "Tab" || !dialog) return;
-      const focusable = Array.from(dialog.querySelectorAll<HTMLElement>(focusableSelector))
-        .filter((element) => !element.hasAttribute("disabled"));
-      if (!focusable.length) return;
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    }
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.clearTimeout(focusTimer);
-      document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = previousOverflow;
-      previousFocus.current?.focus();
-    };
-  }, [open]);
-
-  if (!open) return null;
-  return (
-    <div className="modal-layer">
-      <button className="modal-backdrop" aria-label="Đóng hộp thoại" onClick={onClose} />
-      <section ref={dialogRef} className={`modal ${className}`.trim()} role="dialog" aria-modal="true" aria-labelledby={labelledBy}>
-        {children}
-      </section>
-    </div>
-  );
-}
 
 export default function Home() {
   const [view, setView] = useState<View>("game");
@@ -852,19 +539,11 @@ export default function Home() {
     // anonymous learner should not depend on a network RPC just to select an
     // answer. Authenticated attempts continue to use submit_game_choice so
     // server-side progress and certificates remain authoritative.
-    const choice = selected.choices[index];
-    if (!choice) {
+    const outcome = evaluateGuestChoice(selected, index);
+    if (!outcome) {
       setDataStatus("Không tìm thấy lựa chọn này. Vui lòng tải lại trang và thử lại.");
       return;
     }
-    const outcome: ChoiceOutcome = {
-      scenarioId: selected.id,
-      choiceIndex: index,
-      correct: choice.correct === true,
-      moneyDelta: typeof choice.moneyDelta === "number" ? choice.moneyDelta : 0,
-      awarenessDelta: typeof choice.awarenessDelta === "number" ? choice.awarenessDelta : 0,
-      feedback: choice.feedback ?? selected.tip,
-    };
     const nextBalance = Math.max(0, balance + outcome.moneyDelta);
     const nextAwareness = Math.max(0, Math.min(100, awareness + outcome.awarenessDelta));
     const nextResults = [...results, { scenarioId: selected.id, correct: outcome.correct, choiceIndex: index }];
