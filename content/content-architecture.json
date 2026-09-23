@@ -71,6 +71,13 @@
       ]
     },
     {
+      "id": "finalize",
+      "description": "Derive canonical index inventory and sitemap from final compiled artifacts.",
+      "stages": [
+        "finalize-content-architecture.mjs"
+      ]
+    },
+    {
       "id": "instrumentation",
       "description": "Attach first-party analytics and GA4 after content is final.",
       "stages": [
