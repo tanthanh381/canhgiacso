@@ -5,7 +5,6 @@ import { readFile } from "node:fs/promises";
 const packageJson = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
 const contentArchitecture = JSON.parse(await readFile(new URL("../content/content-architecture.json", import.meta.url), "utf8"));
 const qcWave2 = await readFile(new URL("../scripts/patch-qc-wave2.mjs", import.meta.url), "utf8");
-const terminology = await readFile(new URL("../scripts/patch-qc-terminology.mjs", import.meta.url), "utf8");
 const pageSource = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
 const presentation = await readFile(new URL("../app/domains/training/presentation.ts", import.meta.url), "utf8");
 
@@ -69,22 +68,19 @@ test("methodology documents source hierarchy, certainty levels and standard term
 });
 
 test("interactive content standardizes labels only at the presentation layer", () => {
-  assert.ok(terminology.includes('function scenarioCategoryLabel'));
-  assert.ok(terminology.includes('category === "Deepfake"'));
-  assert.ok(terminology.includes('"Giả mạo bằng AI (deepfake)"'));
-  assert.ok(terminology.includes('"Lừa đảo giả mạo (phishing)"'));
-  assert.ok(terminology.includes('"SMS Brandname giả mạo"'));
-  assert.ok(terminology.includes('function scenarioChannelLabel'));
-  assert.ok(terminology.includes('channel === "Video call"'));
-  assert.ok(terminology.includes('"Cuộc gọi video"'));
-  assert.ok(terminology.includes('"Nhóm trò chuyện"'));
-  assert.ok(terminology.includes('without changing stored content'));
-
-  // `pnpm test` runs `pnpm build` first; the display patch must therefore be
-  // visible in page.tsx while Scenario data remains untouched for round trips.
-  assert.ok(pageSource.includes('from "./domains/training/presentation"'));
   assert.ok(presentation.includes('function scenarioCategoryLabel'));
+  assert.ok(presentation.includes('category === "Deepfake"'));
+  assert.ok(presentation.includes('"Giả mạo bằng AI (deepfake)"'));
+  assert.ok(presentation.includes('"Lừa đảo giả mạo (phishing)"'));
+  assert.ok(presentation.includes('"SMS Brandname giả mạo"'));
   assert.ok(presentation.includes('function scenarioChannelLabel'));
+  assert.ok(presentation.includes('channel === "Video call"'));
+  assert.ok(presentation.includes('"Cuộc gọi video"'));
+  assert.ok(presentation.includes('"Nhóm trò chuyện"'));
+
+  // Presentation terminology now belongs to the training bounded context,
+  // while page.tsx only consumes the stable domain API.
+  assert.ok(pageSource.includes('from "./domains/training/presentation"'));
   assert.ok(pageSource.includes('scenarioChannelLabel(item.channel)'));
   assert.ok(pageSource.includes('scenarioCategoryLabel(selected.category)'));
 });
