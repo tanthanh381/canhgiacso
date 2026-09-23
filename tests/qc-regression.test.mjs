@@ -26,11 +26,16 @@ test("all public data tables have RLS and ownership policies", async () => {
 });
 
 test("browser bundle contains no server secret and keeps auth validation", async () => {
-  const [client, page] = await Promise.all([read("../app/supabase.ts"), read("../app/page.tsx")]);
+  const [client, page, auth] = await Promise.all([
+    read("../app/supabase.ts"),
+    read("../app/page.tsx"),
+    read("../app/domains/auth/model.ts"),
+  ]);
   assert.match(client, /SUPABASE_PUBLISHABLE_KEY/);
   assert.doesNotMatch(client, /service_role|SUPABASE_SECRET_KEY/i);
-  assert.match(page, /PASSWORD_PATTERN/);
-  assert.match(page, /USERNAME_PATTERN/);
+  assert.match(auth, /PASSWORD_PATTERN/);
+  assert.match(auth, /USERNAME_PATTERN/);
+  assert.match(page, /validateAuthSubmission/);
   assert.match(page, /signOut\(\{ scope: "local" \}\)/);
   assert.match(client, /guestSupabase = guestClient/);
   assert.match(page, /get_public_site_content/);
