@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-09-23",
+  "phase": "Phase 3 - CTR & Ranking Optimization",
+  "searchConsole": {
+    "status": "unavailable",
+    "reason": "GSC Wizard subscription/trial inactive",
+    "implication": "No account-level impressions, CTR or average-position data used in this wave"
+  },
+  "firstPartyWindowDays": 30,
+  "priorityPages": [
+    {
+      "path": "/kien-thuc/lua-dao-cong-tac-vien-viec-nhe-luong-cao/",
+      "pageviews": 10,
+      "sessions": 7,
+      "users": 3,
+      "landings": 2
+    },
+    {
+      "path": "/kien-thuc/kiem-tra-so-dien-thoai-lua-dao/",
+      "pageviews": 8,
+      "sessions": 5,
+      "users": 2,
+      "landings": 0
+    },
+    {
+      "path": "/kien-thuc/gia-mao-ngan-hang/",
+      "pageviews": 6,
+      "sessions": 6,
+      "users": 3,
+      "landings": 2
+    },
+    {
+      "path": "/kien-thuc/kiem-tra-link-gia-mao/",
+      "pageviews": 4,
+      "sessions": 3,
+      "users": 2,
+      "landings": 1
+    },
+    {
+      "path": "/kien-thuc/xu-ly-khi-bi-lua-dao-chuyen-tien/",
+      "pageviews": 2,
+      "sessions": 2,
+      "users": 2,
+      "landings": 0
+    },
+    {
+      "path": "/kien-thuc/phishing-la-gi/",
+      "pageviews": 0,
+      "sessions": 0,
+      "users": 0,
+      "landings": 0,
+      "note": "new in Phase 2; baseline starts at zero"
+    }
+  ],
+  "optimizationHypotheses": [
+    "Match title promises to actual numbered content to improve trust and reduce pogo-sticking",
+    "Lead titles with the primary query intent and keep priority titles within a compact SERP-friendly range",
+    "Use answer-first summaries and visible freshness to increase snippet relevance",
+    "Strengthen contextual internal links from high-authority hub/home pages to priority landing pages",
+    "Separate incident-response intent from prevention/recognition intent to reduce cannibalization"
+  ]
+}
