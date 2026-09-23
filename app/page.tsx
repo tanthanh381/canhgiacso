@@ -8,9 +8,11 @@ import { supabase } from "./supabase";
 import { difficultyOrder, getLevelProgress, getUnlockedDifficulties } from "./progression";
 import { downloadTrainingCertificatePdf, TrainingCertificate } from "./certificate";
 import { authErrorMessage } from "./auth-error";
-import { SECURITY_CHECKLIST_KEY, securityChecklistGroups, securityChecklistItemIds } from "./domains/security-awareness/checklist";
+import { SECURITY_CHECKLIST_KEY, securityChecklistItemIds } from "./domains/security-awareness/checklist";
+import { KnowledgeView } from "./domains/security-awareness/view";
 import { validateAuthSubmission, type AuthMode, type SessionAccount } from "./domains/auth/model";
 import { mapAnalyticsUsers, mapScenarioRisks, summarizeAnalytics, topScenarioRisks, type AnalyticsUser, type DashboardStatus, type ScenarioRisk } from "./domains/dashboard/model";
+import { DashboardView } from "./domains/dashboard/view";
 import { bestCorrectStreak, buildDefenseBadges, difficulties, difficultyTone, PHISHING_QUIZ_URL, scenarioCategoryLabel, scenarioChannelLabel } from "./domains/training/presentation";
 import { evaluateGuestChoice, type ChoiceOutcome, type GameHistory, type GameState, type PendingChoice, type Result, type StoredProgress } from "./domains/training/model";
 import { GUEST_CERTIFICATE_KEY, LEGACY_PROGRESS_KEY, THEME_KEY, progressKey, readStoredProgress, safeStorageGet, safeStorageRemove, safeStorageSet } from "./shared/browser-storage";
@@ -76,9 +78,6 @@ export default function Home() {
   const newsArticles = useMemo(() => publicNews(siteContent.newsArticles), [siteContent.newsArticles]);
   const [newsSlug, setNewsSlug] = useState('');
   const readingArticle = newsArticles.find(article => (article.slug || article.id) === newsSlug);
-  const checklistCompleted = completedChecklistIds.length;
-  const checklistTotal = securityChecklistItemIds.size;
-  const checklistProgress = Math.round((checklistCompleted / checklistTotal) * 100);
   useEffect(() => {
     if (!readingArticle) return;
     const oldTitle = document.title;
@@ -929,54 +928,12 @@ export default function Home() {
       )}
 
       {view === "knowledge" && (
-        <section className="content-page knowledge-page">
-          <div className="page-hero knowledge-hero">
-            <div><span className="eyebrow">{siteContent.copy.knowledgeEyebrow}</span><h1>{siteContent.copy.knowledgeTitle}</h1></div>
-            <p>{siteContent.copy.knowledgeIntro}</p>
-          </div>
-
-          <div className="knowledge-section-heading">
-            <div><span className="eyebrow">NỘI DUNG THAM KHẢO</span><h2>Cẩm nang thực hành</h2></div>
-            <p>Các nguyên tắc ngắn gọn để nhận diện, xác minh và xử lý tình huống có dấu hiệu lừa đảo.</p>
-          </div>
-          <div className="knowledge-grid">{knowledgeCards.map((card, index) => <article key={card.title}><span>{String(index + 1).padStart(2, "0")}</span><BadgeIcon>{card.icon}</BadgeIcon><h2>{card.title}</h2><p>{card.text}</p></article>)}</div>
-
-          <section className="security-checklist" aria-labelledby="security-checklist-title">
-            <div className="checklist-heading">
-              <div><span className="eyebrow">TỰ KIỂM TRA AN TOÀN SỐ</span><h2 id="security-checklist-title">Danh sách kiểm tra</h2><p>Ưu tiên hoàn thành các mục “Thiết yếu”, sau đó tiếp tục với các mục “Nên làm”. Tiến độ được lưu riêng trên thiết bị này.</p></div>
-              <div className="checklist-overall" aria-label={`Đã hoàn thành ${checklistCompleted} trên ${checklistTotal} mục`}>
-                <strong>{checklistProgress}%</strong><span>{checklistCompleted}/{checklistTotal} hoàn thành</span>
-                <div className="checklist-progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={checklistProgress}><i style={{ width: `${checklistProgress}%` }} /></div>
-              </div>
-            </div>
-            <div className="checklist-groups">
-              {securityChecklistGroups.map((group) => {
-                const completed = group.items.filter((item) => completedChecklistIds.includes(item.id)).length;
-                const progress = Math.round((completed / group.items.length) * 100);
-                return <details className="checklist-group" key={group.id}>
-                  <summary>
-                    <span className="checklist-icon" aria-hidden="true">{group.icon}</span>
-                    <span className="checklist-group-copy"><strong>{group.title}</strong><small>{group.description}</small></span>
-                    <span className="checklist-group-progress"><b>{progress}%</b><small>{completed}/{group.items.length} mục</small></span>
-                  </summary>
-                  <div className="checklist-items">
-                    {group.items.map((item) => {
-                      const checked = completedChecklistIds.includes(item.id);
-                      return <label aria-label={item.title} className={checked ? "completed" : ""} htmlFor={`security-check-${item.id}`} key={item.id}>
-                        <input id={`security-check-${item.id}`} type="checkbox" checked={checked} onChange={() => toggleChecklistItem(item.id)} />
-                        <span>
-                          <em className={`checklist-priority ${item.priority === "Thiết yếu" ? "essential" : "recommended"}`}>{item.priority}</em>
-                          <strong>{item.title}</strong>
-                          <small>{item.description}</small>
-                        </span>
-                      </label>;
-                    })}
-                  </div>
-                </details>;
-              })}
-            </div>
-          </section>
-        </section>
+        <KnowledgeView
+          copy={siteContent.copy}
+          knowledgeCards={knowledgeCards}
+          completedChecklistIds={completedChecklistIds}
+          onToggleChecklistItem={toggleChecklistItem}
+        />
       )}
 
       {view === "news" && (
@@ -1077,33 +1034,18 @@ export default function Home() {
       )}
 
       {view === "dashboard" && (
-        <section className="content-page dashboard-page">
-          <div className="dashboard-heading">
-            <div><span className="eyebrow">{siteContent.copy.dashboardEyebrow}</span><h1>{siteContent.copy.dashboardTitle}</h1><p>{siteContent.copy.dashboardIntro}</p></div>
-            {visibleDashboardStatus === "ready" && <button className="export-button" onClick={exportCisoReport} disabled={!analyticsUsers.length}>⇩ Xuất báo cáo CSV</button>}
-          </div>
-          {!sessionAccount && <div className="dashboard-gate"><BadgeIcon>◇</BadgeIcon><h2>Đăng nhập để truy cập Dashboard</h2><p>Dữ liệu tổng hợp chỉ dành cho tài khoản Quản trị đã được IT Security phê duyệt.</p><button className="primary-button" onClick={() => openAuth("login")}>Đăng nhập</button></div>}
-          {sessionAccount && visibleDashboardStatus === "loading" && <div className="dashboard-gate"><h2>Đang tải dữ liệu báo cáo…</h2></div>}
-          {sessionAccount && visibleDashboardStatus === "error" && <div className="dashboard-gate"><h2>Chưa thể tải Dashboard</h2><p>Vui lòng kiểm tra kết nối và thử lại.</p></div>}
-          {sessionAccount && visibleDashboardStatus === "forbidden" && <div className="dashboard-gate"><BadgeIcon>◇</BadgeIcon><h2>Tài khoản chưa có quyền Quản trị</h2><p>Dashboard tổng hợp được bảo vệ bằng phân quyền phía máy chủ. Hãy liên hệ IT Security để được phê duyệt.</p></div>}
-          {visibleDashboardStatus === "ready" && <>
-            <div className="data-scope-note" role="note"><strong>Phạm vi dữ liệu:</strong> {analyticsUsers.length} tài khoản · Chỉ gồm hồ sơ đăng ký và kết quả mô phỏng · Không chứa mật khẩu, OTP hoặc dữ liệu ngân hàng.</div>
-            <div className="data-scope-note" role="note"><strong>Lượt chơi hiện tại:</strong> Các chỉ số và CSV bên dưới phản ánh lượt hiện tại của mỗi tài khoản. <strong>Lịch sử đã lưu:</strong> {historySummary.runs} lượt · {historySummary.attempts} câu trả lời · {historySummary.correct} câu đúng. {historySummary.legacyAttempts > 0 && <span>Có {historySummary.legacyAttempts} kết quả cũ được giữ nguyên, chưa được cơ chế chấm điểm máy chủ mới xác minh.</span>}</div>
-            <div className="dashboard-handling-note" role="note"><strong>Phân loại sử dụng nội bộ:</strong> Chỉ xuất và chia sẻ báo cáo cho người có trách nhiệm; không dùng kết quả mô phỏng làm kết luận duy nhất về rủi ro cá nhân.</div>
-            <div className="ciso-kpis">
-              <article><small>Người dùng đã đăng ký</small><strong>{analyticsUsers.length}</strong><span>{analytics.active} đã tham gia đào tạo</span></article>
-              <article><small>Tỷ lệ tham gia</small><strong>{analytics.participation}%</strong><span>{analytics.active}/{analyticsUsers.length || 0} người dùng hoạt động</span></article>
-              <article><small>Tỷ lệ xử lý an toàn</small><strong>{analytics.accuracy}%</strong><span>{analytics.correct}/{analytics.attempts} lượt đúng</span></article>
-              <article className={analytics.highRisk ? "risk-kpi" : ""}><small>Người dùng rủi ro cao</small><strong>{analytics.highRisk}</strong><span>Cần ưu tiên đào tạo lại</span></article>
-              <article><small>Tổn thất mô phỏng</small><strong className="dashboard-money">{money.format(analytics.totalLoss)}đ</strong><span>Tổng tác động từ lựa chọn sai</span></article>
-            </div>
-            <div className="dashboard-grid">
-              <article className="dashboard-card outcome-card"><div className="dashboard-card-title"><div><small>HIỆU QUẢ ĐÀO TẠO</small><h2>Kết quả xử lý tình huống</h2></div><strong>{analytics.attempts} lượt</strong></div><div className="outcome-chart" aria-label={`${analytics.correct} lượt an toàn, ${Math.max(0, analytics.attempts - analytics.correct)} lượt mắc bẫy`}><div className="outcome-bar"><span style={{ width: `${analytics.accuracy}%` }} /></div><div className="outcome-legend"><span><i className="safe-dot" />An toàn <b>{analytics.correct}</b></span><span><i className="risk-dot" />Mắc bẫy <b>{Math.max(0, analytics.attempts - analytics.correct)}</b></span></div></div></article>
-              <article className="dashboard-card"><div className="dashboard-card-title"><div><small>RỦI RO NỔI BẬT</small><h2>Kịch bản dễ mắc bẫy</h2></div></div><div className="risk-ranking">{scenarioRisks.map((item, index) => <div key={item.id}><span>{index + 1}</span><div><strong>{item.title}</strong><small>{item.attempts ? `${item.wrong}/${item.attempts} lượt sai` : "Chưa có dữ liệu"}</small></div><b>{item.rate}%</b></div>)}</div></article>
-            </div>
-            <article className="dashboard-card user-analysis"><div className="dashboard-card-title"><div><small>PHÂN TÍCH NGƯỜI DÙNG</small><h2>Danh sách ưu tiên đào tạo</h2></div><span>Sắp xếp theo mức rủi ro</span></div><div className="analytics-table-wrap"><table><thead><tr><th>Người dùng</th><th>Tham gia</th><th>Chính xác</th><th>Cảnh giác</th><th>Tổn thất mô phỏng</th><th>Đánh giá</th></tr></thead><tbody>{analyticsUsers.map((user) => <tr key={user.username}><td><strong>{user.displayName}</strong><small>@{user.username} · {new Date(user.createdAt).toLocaleDateString("vi-VN")}</small></td><td>{user.completed}/{scenarios.length}</td><td>{user.accuracy}%</td><td>{user.awareness}%</td><td>{money.format(user.loss)}đ</td><td><span className={`risk-label risk-${user.risk === "Cao" ? "high" : user.risk === "Thấp" ? "low" : "medium"}`}>{user.risk}</span></td></tr>)}{!analyticsUsers.length && <tr><td colSpan={6} className="empty-table">Chưa có tài khoản để phân tích.</td></tr>}</tbody></table></div></article>
-          </>}
-        </section>
+        <DashboardView
+          copy={siteContent.copy}
+          account={sessionAccount}
+          status={visibleDashboardStatus}
+          users={analyticsUsers}
+          analytics={analytics}
+          historySummary={historySummary}
+          scenarioRisks={scenarioRisks}
+          scenarioCount={scenarios.length}
+          onLogin={() => openAuth("login")}
+          onExport={exportCisoReport}
+        />
       )}
 
       {view === "admin" && <Suspense fallback={<section className="content-page admin-page"><div className="dashboard-gate"><h1>Đang mở trang quản trị…</h1><p>Vui lòng chờ trong giây lát.</p></div></section>}><AdminPage
