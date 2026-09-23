@@ -43,12 +43,13 @@ test("primary game navigation uses the Thử thách label without changing its r
 });
 
 test("ships product metadata and social artwork", async () => {
-  const [layout, page, dashboardView, knowledgeView, accountDialogs, admin, data, schema, contentRoles, packageJson, styles, ui, storage, presentation, authModel] = await Promise.all([
+  const [layout, page, dashboardView, knowledgeView, accountDialogs, shellView, admin, data, schema, contentRoles, packageJson, styles, ui, storage, presentation, authModel] = await Promise.all([
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/domains/dashboard/view.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/domains/security-awareness/view.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/domains/auth/dialogs.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/domains/shell/view.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/admin.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/data.ts", import.meta.url), "utf8"),
     readFile(new URL("../supabase/schema.sql", import.meta.url), "utf8"),
@@ -60,14 +61,14 @@ test("ships product metadata and social artwork", async () => {
     readFile(new URL("../app/domains/training/presentation.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/domains/auth/model.ts", import.meta.url), "utf8"),
   ]);
-  const appSource = `${page}\n${dashboardView}\n${knowledgeView}\n${accountDialogs}`;
+  const appSource = `${page}\n${dashboardView}\n${knowledgeView}\n${accountDialogs}\n${shellView}`;
 
   assert.match(layout, /og\.png/);
   assert.match(layout, /const siteTitle = "Cảnh Giác Số: Nhận diện lừa đảo trực tuyến \| HDBank"/);
   assert.match(layout, /lang="vi-VN"/);
   assert.match(storage, /localStorage/);
-  assert.match(page, /CẢNH GIÁC SỐ/);
-  assert.match(page, /FooterNotice/);
+  assert.match(appSource, /CẢNH GIÁC SỐ/);
+  assert.match(appSource, /FooterNotice/);
   assert.match(ui, /footer-warning/);
   assert.match(ui, /split\(\/\\n\+\//);
   assert.match(ui, /event\.key === "Escape"/);
@@ -85,7 +86,7 @@ test("ships product metadata and social artwork", async () => {
   assert.match(page, /continueAsGuest/);
   assert.match(appSource, /Tiếp tục với tư cách khách/);
   assert.match(page, /guestLimitOpen, setGuestLimitOpen\] = useState\(true\)/);
-  assert.match(page, /guest-badge-button/);
+  assert.match(appSource, /guest-badge-button/);
   assert.match(appSource, /Bạn đang sử dụng với tính năng giới hạn/);
   assert.match(appSource, /Đồng bộ tiến trình, lưu lịch sử lượt chơi/);
   assert.match(page, /supabase\.rpc\("submit_game_choice"/);
@@ -103,7 +104,7 @@ test("ships product metadata and social artwork", async () => {
   assert.match(page, /loadRemoteAccount/);
   assert.match(page, /exportCisoReport/);
   assert.match(data, /Dashboard rủi ro nhận thức/);
-  assert.match(page, /Môi trường mô phỏng/);
+  assert.match(appSource, /Môi trường mô phỏng/);
   assert.match(appSource, /Phân loại sử dụng nội bộ/);
   assert.match(page, /156 hoặc 5656/);
   assert.match(admin, /Kiểm soát trước khi xuất bản/);
