@@ -9,6 +9,7 @@ const UPDATED = "2026-09-23";
 const UPDATED_LABEL = "23/09/2026";
 const BRAND = '<span class="seo-brand-logo" aria-hidden="true"></span><span class="seo-brand-divider" aria-hidden="true"></span><span class="seo-product-lockup"><strong>CẢNH GIÁC SỐ</strong><small>IT SECURITY</small></span>';
 const THEME = '<script src="/theme-init.js"></script>';
+const CSP_META = '<meta http-equiv="Content-Security-Policy" content="default-src \'self\'; script-src \'self\' https://www.googletagmanager.com; style-src \'self\' \'unsafe-inline\'; img-src \'self\' data: blob: https://www.google-analytics.com https://www.googletagmanager.com; font-src \'self\' data:; connect-src \'self\' https://goietwyapiywrtibpkwo.supabase.co wss://goietwyapiywrtibpkwo.supabase.co https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://www.googletagmanager.com; object-src \'none\'; base-uri \'self\'; form-action \'self\'; upgrade-insecure-requests" />';
 const FOOTER = '<footer class="seo-footer"><div class="seo-shell"><strong>Cảnh Giác Số</strong><nav class="seo-footer-links" aria-label="Thông tin website"><a href="/gioi-thieu/">Giới thiệu</a><a href="/phuong-phap-kiem-chung/">Phương pháp kiểm chứng</a><a href="/quyen-rieng-tu/">Quyền riêng tư</a><a href="/sitemap/">Sơ đồ nội dung</a></nav><p class="seo-safety">Nội dung phục vụ giáo dục, nhận diện rủi ro và nâng cao nhận thức an toàn thông tin.</p></div></footer>';
 
 const SOURCES = {
@@ -96,6 +97,7 @@ function articlePage(a) {
   return `<!doctype html>
 <html lang="vi-VN">
 <head>
+  ${CSP_META}
   ${THEME}
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -567,6 +569,7 @@ function simpleSchema({ type="WebPage", canonical, name, description }) {
 
 function standardHead({ title, description, canonical, schema }) {
   return `<head>
+  ${CSP_META}
   ${THEME}
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" /><meta name="referrer" content="strict-origin-when-cross-origin" />
   <title>${esc(title)}</title><meta name="description" content="${esc(description)}" /><meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
