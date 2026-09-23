@@ -8,7 +8,7 @@ const wave3 = await readFile(new URL("../scripts/patch-qc-wave3.mjs", import.met
 test("QC Wave 3 runs immediately after Wave 2 before the SEO authority wave", () => {
   assert.match(
     packageJson.scripts["build:pages"],
-    /patch-qc-wave2\.mjs && node scripts\/patch-qc-wave3\.mjs && node scripts\/patch-seo-authority-wave6\\.mjs && node scripts\\/patch-seo-intent-wave7\\.mjs && node scripts\\/patch-realtime-analytics\\.mjs/,
+    /patch-qc-wave2\.mjs && node scripts\/patch-qc-wave3\.mjs && node scripts\/patch-seo-authority-wave6\.mjs && node scripts\/patch-seo-intent-wave7\.mjs && node scripts\/patch-realtime-analytics\.mjs/,
   );
 });
 
