@@ -32,9 +32,40 @@ function isIndexable(html) {
   return !robots.includes("noindex");
 }
 
+function attrEscape(value) {
+  return String(value).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function ensureSearchMetadata(html) {
+  const canonical = match(html, /<link\s+rel=["']canonical["']\s+href=["']([^"']+)["']/i);
+  const title = match(html, /<title>([\s\S]*?)<\/title>/i).replace(/\s+/g, " ");
+  const description = match(html, /<meta\s+name=["']description["']\s+content=["']([^"']*)["']/i);
+  if (!canonical || !title || !description || !isIndexable(html)) return html;
+
+  const additions = [];
+  if (!/hreflang=["']vi-VN["']/i.test(html)) additions.push(`<link rel="alternate" hreflang="vi-VN" href="${attrEscape(canonical)}" />`);
+  if (!/hreflang=["']x-default["']/i.test(html)) additions.push(`<link rel="alternate" hreflang="x-default" href="${attrEscape(canonical)}" />`);
+  if (!/property=["']og:site_name["']/i.test(html)) additions.push('<meta property="og:site_name" content="Cảnh Giác Số" />');
+  if (!/property=["']og:title["']/i.test(html)) additions.push(`<meta property="og:title" content="${attrEscape(title)}" />`);
+  if (!/property=["']og:description["']/i.test(html)) additions.push(`<meta property="og:description" content="${attrEscape(description)}" />`);
+  if (!/property=["']og:url["']/i.test(html)) additions.push(`<meta property="og:url" content="${attrEscape(canonical)}" />`);
+  if (!/property=["']og:image["']/i.test(html)) additions.push(`<meta property="og:image" content="${SITE}/og.png" />`);
+  if (!/name=["']twitter:card["']/i.test(html)) additions.push('<meta name="twitter:card" content="summary_large_image" />');
+  if (!/name=["']twitter:title["']/i.test(html)) additions.push(`<meta name="twitter:title" content="${attrEscape(title)}" />`);
+  if (!/name=["']twitter:description["']/i.test(html)) additions.push(`<meta name="twitter:description" content="${attrEscape(description)}" />`);
+  if (!/name=["']twitter:image["']/i.test(html)) additions.push(`<meta name="twitter:image" content="${SITE}/og.png" />`);
+
+  return additions.length ? html.replace("</head>", `  ${additions.join("\n  ")}\n</head>`) : html;
+}
+
 const records = [];
 for (const file of [HOME, ...(await htmlFiles(PUBLIC))]) {
-  const html = await readFile(file, "utf8");
+  let html = await readFile(file, "utf8");
+  const normalized = ensureSearchMetadata(html);
+  if (normalized !== html) {
+    await writeFile(file, normalized, "utf8");
+    html = normalized;
+  }
   if (!isIndexable(html)) continue;
   const canonical = match(html, /<link\s+rel=["']canonical["']\s+href=["']([^"']+)["']/i);
   if (!canonical || !canonical.startsWith(SITE)) continue;
