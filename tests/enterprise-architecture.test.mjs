@@ -48,6 +48,7 @@ test("domain modules have explicit bounded-context ownership", async () => {
     "app/domains/training/model.ts",
     "app/domains/training/presentation.ts",
     "app/domains/security-awareness/checklist.ts",
+    "app/domains/shell/navigation.ts",
     "app/shared/browser-storage.ts",
     "app/shared/ui-primitives.tsx",
   ]) {
@@ -72,4 +73,23 @@ test("content compiler finalizes canonical inventory after growth and before ins
   assert.match(finalizer, /ensureSearchMetadata/);
   assert.match(finalizer, /twitter:card/);
   assert.match(finalizer, /hreflang="x-default"/);
+});
+
+
+test("shell navigation and auth validation are owned by their bounded contexts", async () => {
+  const [page, navigation, auth] = await Promise.all([
+    read("app/page.tsx"),
+    read("app/domains/shell/navigation.ts"),
+    read("app/domains/auth/model.ts"),
+  ]);
+  assert.match(page, /routeFromHash/);
+  assert.match(page, /navigateBrowser/);
+  assert.doesNotMatch(page, /^type View =/m);
+  assert.match(navigation, /export type View/);
+  assert.match(navigation, /function routeFromHash/);
+  assert.match(navigation, /admin-before-leave/);
+  assert.match(page, /validateAuthSubmission/);
+  assert.match(auth, /function validateAuthSubmission/);
+  assert.match(auth, /USERNAME_PATTERN/);
+  assert.match(auth, /PASSWORD_PATTERN/);
 });
