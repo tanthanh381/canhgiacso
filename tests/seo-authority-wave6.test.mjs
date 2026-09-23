@@ -11,6 +11,8 @@ test("SEO authority wave adds trust pages and reconciles sitemap coverage", asyn
   assert.match(script, /publishingPrinciples/);
   assert.match(script, /seo-footer-links/);
   assert.match(script, /generated article missing from sitemap|ensureUrl/);
+  assert.match(script, /refreshLastmod/);
+  assert.match(script, /search-logo\.svg/);
 });
 
 test("Pages build runs SEO authority wave after QC content passes", async () => {
@@ -32,6 +34,7 @@ test("Verify workflow enforces generated-site SEO audit", async () => {
 test("Homepage exposes trust links and publishing principles", async () => {
   const home = await read("github-pages/index.html");
   assert.match(home, /publishingPrinciples/);
+  assert.match(home, /search-logo\.svg/);
   assert.match(home, /\/gioi-thieu\//);
   assert.match(home, /\/phuong-phap-kiem-chung\//);
   assert.match(home, /\/quyen-rieng-tu\//);
