@@ -26,19 +26,22 @@ test("all public data tables have RLS and ownership policies", async () => {
 });
 
 test("browser bundle contains no server secret and keeps auth validation", async () => {
-  const [client, page, auth] = await Promise.all([
+  const [client, page, auth, authGateway, contentGateway] = await Promise.all([
     read("../app/supabase.ts"),
     read("../app/page.tsx"),
     read("../app/domains/auth/model.ts"),
+    read("../app/domains/auth/gateway.ts"),
+    read("../app/domains/content/gateway.ts"),
   ]);
+  const browserSource = `${page}\n${authGateway}\n${contentGateway}`;
   assert.match(client, /SUPABASE_PUBLISHABLE_KEY/);
   assert.doesNotMatch(client, /service_role|SUPABASE_SECRET_KEY/i);
   assert.match(auth, /PASSWORD_PATTERN/);
   assert.match(auth, /USERNAME_PATTERN/);
   assert.match(page, /validateAuthSubmission/);
-  assert.match(page, /signOut\(\{ scope: "local" \}\)/);
+  assert.match(browserSource, /signOut\(\{ scope: "local" \}\)/);
   assert.match(client, /guestSupabase = guestClient/);
-  assert.match(page, /get_public_site_content/);
+  assert.match(browserSource, /get_public_site_content/);
   assert.match(page, /Guest gameplay is intentionally local/);
   assert.doesNotMatch(page, /supabase\.rpc\("evaluate_guest_choice"/);
   assert.doesNotMatch(page, /scenario_snapshot/);
@@ -77,16 +80,18 @@ test("guest choice scoring is local and obsolete privileged RPC access is revoke
 });
 
 test("critical UI states are accessible and responsive", async () => {
-  const [page, styles, ui] = await Promise.all([
+  const [page, shell, styles, ui] = await Promise.all([
     read("../app/page.tsx"),
+    read("../app/domains/shell/view.tsx"),
     read("../app/globals.css"),
     read("../app/shared/ui-primitives.tsx"),
   ]);
-  assert.match(page, /aria-live="polite"/);
+  const uiSource = `${page}\n${shell}`;
+  assert.match(uiSource, /aria-live="polite"/);
   assert.match(ui, /role="dialog"/);
   assert.match(ui, /aria-modal="true"/);
   assert.match(ui, /event\.key === "Escape"/);
-  assert.match(page, /aria-current=/);
+  assert.match(uiSource, /aria-current=/);
   assert.match(styles, /:focus-visible/);
   assert.match(styles, /@media \(max-width: 820px\)/);
   assert.match(styles, /@media \(max-width: 520px\)/);
@@ -95,8 +100,9 @@ test("critical UI states are accessible and responsive", async () => {
 });
 
 test("QC fixes keep destructive reset explicit and mobile text readable", async () => {
-  const [page, styles, config] = await Promise.all([
+  const [page, trainingGateway, styles, config] = await Promise.all([
     read("../app/page.tsx"),
+    read("../app/domains/training/gateway.ts"),
     read("../app/globals.css"),
     read("../vite.github-pages.config.ts"),
   ]);
@@ -104,7 +110,7 @@ test("QC fixes keep destructive reset explicit and mobile text readable", async 
   assert.match(page, /Thao tác này không thể hoàn tác/);
   assert.match(page, /Xóa và bắt đầu lại/);
   assert.match(page, /Lịch sử lượt chơi/);
-  assert.match(page, /supabase\.rpc\("restart_game"/);
+  assert.match(trainingGateway, /supabase\.rpc\("restart_game"/);
   assert.match(styles, /\.topbar nav button \{ font-size: 12px/);
   assert.match(styles, /footer-brand small \{ font-size: 12px/);
   assert.match(config, /manualChunks\(id\)/);
