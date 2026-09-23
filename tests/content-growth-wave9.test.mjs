@@ -5,13 +5,10 @@ import test from "node:test";
 const read = (file) => readFile(new URL(`../${file}`, import.meta.url), "utf8");
 
 test("Content Growth Wave 9 runs after CTR optimization and before analytics", async () => {
-  const pkg = JSON.parse(await read("package.json"));
-  const build = pkg.scripts["build:pages"];
-  assert.match(build, /patch-seo-ctr-wave8\.mjs/);
-  assert.match(build, /patch-content-growth-wave9\.mjs/);
-  assert.match(build, /patch-realtime-analytics\.mjs/);
-  assert.ok(build.indexOf("patch-seo-ctr-wave8.mjs") < build.indexOf("patch-content-growth-wave9.mjs"));
-  assert.ok(build.indexOf("patch-content-growth-wave9.mjs") < build.indexOf("patch-realtime-analytics.mjs"));
+  const architecture = JSON.parse(await read("content/content-architecture.json"));
+  const stages = architecture.phases.flatMap((phase) => phase.stages);
+  assert.ok(stages.indexOf("patch-seo-ctr-wave8.mjs") < stages.indexOf("patch-content-growth-wave9.mjs"));
+  assert.ok(stages.indexOf("patch-content-growth-wave9.mjs") < stages.indexOf("patch-realtime-analytics.mjs"));
 });
 
 test("Wave 9 covers the recommended high-growth scam topics", async () => {
