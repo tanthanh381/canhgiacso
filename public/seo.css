@@ -389,6 +389,7 @@ a:hover { text-decoration-thickness: 2px; }
 }
 
 @media (max-width: 760px) {
+  .seo-intent-grid { grid-template-columns: 1fr 1fr; }
   .seo-shell,
   .seo-article { width: calc(100% - 48px); }
   .seo-nav {
@@ -428,6 +429,8 @@ a:hover { text-decoration-thickness: 2px; }
 
 
 @media (max-width: 520px) {
+  .seo-intent-grid { grid-template-columns: 1fr; }
+  .seo-answer-box { padding: 16px; }
   .seo-brand-logo {
     width: 43px;
     height: 43px;
