@@ -34,9 +34,9 @@ test("server renders the Cảnh Giác Số experience", async () => {
 });
 
 test("primary game navigation uses the Thử thách label without changing its route", async () => {
-  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
-  const gameNavigation = /onClick=\{\(\) => navigateTo\("game"\)\}>([^<]+)<\/button>/g;
-  const labels = [...page.matchAll(gameNavigation)].map((match) => match[1]);
+  const shell = await readFile(new URL("../app/domains/shell/view.tsx", import.meta.url), "utf8");
+  const gameNavigation = /onClick=\{\(\) => onNavigate\("game"\)\}>([^<]+)<\/button>/g;
+  const labels = [...shell.matchAll(gameNavigation)].map((match) => match[1]);
 
   assert.ok(labels.includes("Thử thách"));
   assert.ok(!labels.includes("Mô phỏng"));
