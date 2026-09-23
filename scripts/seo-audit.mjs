@@ -25,7 +25,11 @@ const stripTags = (value) =>
     .replace(/<[^>]+>/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-const extract = (html, regex) => html.match(regex)?.[1]?.trim() || "";
+const extract = (html, regex) => {
+  const match = html.match(regex);
+  if (!match) return "";
+  return (match.slice(1).find((value) => typeof value === "string" && value.length) || "").trim();
+};
 
 const sitemapPath = path.join(root, "sitemap.xml");
 if (!(await exists(sitemapPath))) {
@@ -62,8 +66,8 @@ for (const url of urls) {
   }
   const html = await readFile(file, "utf8");
   const title = extract(html, /<title>([\s\S]*?)<\/title>/i);
-  const description = extract(html, /<meta\s+name=["']description["']\s+content=["']([^"']*)["']/i);
-  const canonical = extract(html, /<link\s+rel=["']canonical["']\s+href=["']([^"']*)["']/i);
+  const description = extract(html, /<meta\s+name=["']description["']\s+content=(?:"([^"]*)"|'([^']*)')/i);
+  const canonical = extract(html, /<link\s+rel=["']canonical["']\s+href=(?:"([^"]*)"|'([^']*)')/i);
   const h1Count = (html.match(/<h1\b/gi) || []).length;
   const wordCount = stripTags(html.split("<body")[1] || html).split(/\s+/).filter(Boolean).length;
 
