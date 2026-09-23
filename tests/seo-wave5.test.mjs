@@ -20,13 +20,11 @@ test("SEO wave 5 targets high-intent Google queries without creating new URLs", 
   assert.doesNotMatch(patch, /<url>\s*<loc>https:\/\/canhgiacso\.com\/kien-thuc\/[^$]/);
 });
 
-test("Pages build runs SEO wave 5 after indexation enrichment", async () => {
-  const pkg = JSON.parse(await read("package.json"));
-  const build = pkg.scripts["build:pages"];
-  assert.match(build, /patch-indexation-wave4\.mjs/);
-  assert.match(build, /patch-google-traffic-wave5\.mjs/);
-  assert.ok(build.indexOf("patch-indexation-wave4.mjs") < build.indexOf("patch-google-traffic-wave5.mjs"));
-  assert.ok(build.indexOf("patch-google-traffic-wave5.mjs") < build.indexOf("patch-realtime-analytics.mjs"));
+test("Content compiler runs SEO wave 5 after indexation enrichment", async () => {
+  const architecture = JSON.parse(await read("content/content-architecture.json"));
+  const stages = architecture.phases.flatMap((phase) => phase.stages);
+  assert.ok(stages.indexOf("patch-indexation-wave4.mjs") < stages.indexOf("patch-google-traffic-wave5.mjs"));
+  assert.ok(stages.indexOf("patch-google-traffic-wave5.mjs") < stages.indexOf("patch-realtime-analytics.mjs"));
 });
 
 test("Knowledge hub uses the shared Cảnh Giác Số visual system", async () => {
