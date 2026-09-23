@@ -8,8 +8,11 @@ async function waitForApp(page) {
   await page.goto("/");
   await expect(page.locator(".app")).toBeVisible({ timeout: 20_000 });
   const guestModal = page.locator(".guest-limit-modal");
-  if (await guestModal.isVisible().catch(() => false)) {
-    await guestModal.getByRole("button", { name: "Tiếp tục với tư cách khách" }).click();
+  const guestNoticeAppeared = await guestModal.waitFor({ state: "visible", timeout: 3_000 })
+    .then(() => true)
+    .catch(() => false);
+  if (guestNoticeAppeared) {
+    await guestModal.getByRole("button", { name: "Tiếp tục với tư cách khách", exact: true }).click();
     await expect(guestModal).toBeHidden();
   }
   await expect(page.locator(".choice").first()).toBeVisible({ timeout: 20_000 });
@@ -101,7 +104,7 @@ test.describe("mobile interaction states", () => {
 
   test("auth modal stays above mobile navigation", async ({ page }) => {
     await waitForApp(page);
-    const login = page.getByRole("button", { name: "Đăng nhập" });
+    const login = page.getByRole("button", { name: "Đăng nhập", exact: true });
     await login.click();
     const modalLayer = page.locator(".modal-layer");
     await expect(modalLayer).toBeVisible();
@@ -172,8 +175,7 @@ test.describe("mobile interaction states", () => {
 test.describe("resilience and breakpoint boundaries", () => {
   test("built-in scenarios remain playable when public content RPC is unavailable", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop-chromium", "single deterministic resilience run");
-    await page.goto("/");
-    await expect(page.locator(".app")).toBeVisible({ timeout: 20_000 });
+    await waitForApp(page);
     const choice = page.locator(".choice:not([disabled])").first();
     await expect(choice).toBeVisible({ timeout: 20_000 });
     await choice.click();
@@ -281,7 +283,7 @@ test.describe("Growth Wave 9 anti-scam tools", () => {
     test.skip(testInfo.project.name !== "desktop-chromium", "deterministic tool interaction run");
     await page.goto("/cong-cu/kiem-tra-tin-nhan-dang-ngo/");
     const tool = page.locator('[data-scam-tool="sms-check"]');
-    await tool.locator("textarea").fill("NGAN HANG: tai khoan se bi khoa. Bam https://example.top va nhap OTP de xac minh ngay.");
+    await tool.locator("textarea").fill("NGÂN HÀNG: KHẨN. Bấm https://example.top và nhập OTP để xác minh ngay.");
     await tool.getByRole("button", { name: "Phân tích tín hiệu" }).click();
     const result = tool.locator("[data-tool-result]");
     await expect(result).toBeVisible();
