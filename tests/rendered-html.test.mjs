@@ -87,7 +87,7 @@ test("ships product metadata and social artwork", async () => {
   assert.match(page, /guestLimitOpen, setGuestLimitOpen\] = useState\(true\)/);
   assert.match(page, /guest-badge-button/);
   assert.match(appSource, /Bạn đang sử dụng với tính năng giới hạn/);
-  assert.match(page, /Đồng bộ tiến trình, lưu lịch sử lượt chơi/);
+  assert.match(appSource, /Đồng bộ tiến trình, lưu lịch sử lượt chơi/);
   assert.match(page, /supabase\.rpc\("submit_game_choice"/);
   assert.match(page, /supabase\.rpc\("get_game_state"/);
   assert.match(page, /get_ciso_dashboard/);
