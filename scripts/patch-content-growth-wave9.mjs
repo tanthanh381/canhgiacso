@@ -763,6 +763,18 @@ for (const file of knowledgeFiles) {
   await writeFile(file,html,"utf8");
 }
 
+for (const relative of ["gioi-thieu/index.html","quyen-rieng-tu/index.html","phuong-phap-kiem-chung/index.html","sitemap/index.html"]) {
+  const file = path.join(PUBLIC,relative);
+  if (!(await exists(file))) continue;
+  let html = await readFile(file,"utf8");
+  html = html.replace(/<script>try\{if\(localStorage\.getItem\("khien-so-theme"\)===["']dark["']\)document\.documentElement\.dataset\.theme=["']dark["']\}catch\{\}<\/script>/g,THEME);
+  if (!html.includes('/theme-init.js')) html = html.replace("<head>",`<head>\n  ${THEME}`);
+  if (html.includes('class="seo-nav-links"') && !html.includes('href="/cong-cu/"')) {
+    html = html.replace(/(<nav class="seo-nav-links"[^>]*>[\s\S]*?<\/nav>)/i,(nav)=>nav.replace("</nav>",'<a href="/cong-cu/">Công cụ</a><a href="/canh-bao-lua-dao-hom-nay/">Cảnh báo</a></nav>'));
+  }
+  await writeFile(file,html,"utf8");
+}
+
 let hub = await read("kien-thuc/index.html");
 if (!hub.includes('data-growth-wave9="knowledge-hub"')) {
   const cards = articles.slice(0,12).map((a)=>`<a class="growth-card" href="/kien-thuc/${a.slug}/"><strong>${a.breadcrumb}</strong><span>${a.quick}</span></a>`).join("");
