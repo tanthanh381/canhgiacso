@@ -5,11 +5,13 @@ import test from "node:test";
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
 
 test("Cẩm nang includes an interactive security checklist", async () => {
-  const [page, styles, checklist] = await Promise.all([
+  const [page, view, styles, checklist] = await Promise.all([
     read("../app/page.tsx"),
+    read("../app/domains/security-awareness/view.tsx"),
     read("../app/globals.css"),
     read("../app/domains/security-awareness/checklist.ts"),
   ]);
+  const featureSource = `${page}\n${view}`;
   const groupIds = [...checklist.matchAll(/\bid: "([a-z-]+)", icon:/g)].map((match) => match[1]);
   const itemIds = [...checklist.matchAll(/^ {6}\{ id: "([a-z]+-[a-z-]+)"/gm)].map((match) => match[1]);
 
@@ -18,10 +20,10 @@ test("Cẩm nang includes an interactive security checklist", async () => {
   assert.equal(itemIds.length, 48);
   assert.equal(new Set(itemIds).size, 48);
   assert.equal((checklist.match(/priority: "(?:Thiết yếu|Nên làm)" \}/g) ?? []).length, 48);
-  assert.match(page, /Danh sách kiểm tra/);
-  assert.doesNotMatch(page, /Personal Security Checklist/);
-  assert.match(page, /role="progressbar"/);
-  assert.match(page, /type="checkbox"/);
+  assert.match(featureSource, /Danh sách kiểm tra/);
+  assert.doesNotMatch(featureSource, /Personal Security Checklist/);
+  assert.match(featureSource, /role="progressbar"/);
+  assert.match(featureSource, /type="checkbox"/);
   assert.match(checklist, /SECURITY_CHECKLIST_KEY/);
   assert.match(page, /safeStorageSet\(SECURITY_CHECKLIST_KEY/);
   assert.match(styles, /\.checklist-items/);
