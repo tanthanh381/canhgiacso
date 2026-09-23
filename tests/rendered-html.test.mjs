@@ -43,11 +43,12 @@ test("primary game navigation uses the Thử thách label without changing its r
 });
 
 test("ships product metadata and social artwork", async () => {
-  const [layout, page, dashboardView, knowledgeView, admin, data, schema, contentRoles, packageJson, styles, ui, storage, presentation, authModel] = await Promise.all([
+  const [layout, page, dashboardView, knowledgeView, accountDialogs, admin, data, schema, contentRoles, packageJson, styles, ui, storage, presentation, authModel] = await Promise.all([
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/domains/dashboard/view.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/domains/security-awareness/view.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/domains/auth/dialogs.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/admin.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/data.ts", import.meta.url), "utf8"),
     readFile(new URL("../supabase/schema.sql", import.meta.url), "utf8"),
@@ -59,7 +60,7 @@ test("ships product metadata and social artwork", async () => {
     readFile(new URL("../app/domains/training/presentation.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/domains/auth/model.ts", import.meta.url), "utf8"),
   ]);
-  const appSource = `${page}\n${dashboardView}\n${knowledgeView}`;
+  const appSource = `${page}\n${dashboardView}\n${knowledgeView}\n${accountDialogs}`;
 
   assert.match(layout, /og\.png/);
   assert.match(layout, /const siteTitle = "Cảnh Giác Số: Nhận diện lừa đảo trực tuyến \| HDBank"/);
@@ -82,10 +83,10 @@ test("ships product metadata and social artwork", async () => {
   assert.match(page, /supabase\.auth\.signInWithPassword/);
   assert.match(page, /supabase\.auth\.signOut\(\{ scope: "local" \}\)/);
   assert.match(page, /continueAsGuest/);
-  assert.match(page, /Tiếp tục với tư cách khách/);
+  assert.match(appSource, /Tiếp tục với tư cách khách/);
   assert.match(page, /guestLimitOpen, setGuestLimitOpen\] = useState\(true\)/);
   assert.match(page, /guest-badge-button/);
-  assert.match(page, /Bạn đang sử dụng với tính năng giới hạn/);
+  assert.match(appSource, /Bạn đang sử dụng với tính năng giới hạn/);
   assert.match(page, /Đồng bộ tiến trình, lưu lịch sử lượt chơi/);
   assert.match(page, /supabase\.rpc\("submit_game_choice"/);
   assert.match(page, /supabase\.rpc\("get_game_state"/);
@@ -94,7 +95,7 @@ test("ships product metadata and social artwork", async () => {
   assert.match(presentation, /Chuyên gia Cảnh Giác Số/);
   assert.match(appSource, /achievement-progress/);
   assert.match(appSource, /defenseBadges\.length/);
-  assert.match(page, /Đăng xuất/);
+  assert.match(appSource, /Đăng xuất/);
   assert.match(page, /Tài sản vừa bị tổn thất/);
   assert.match(page, /Đã hiểu hậu quả/);
   assert.match(storage, /khien-so-progress:\$\{username/);
