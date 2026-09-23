@@ -95,4 +95,18 @@ test("SEO audit requires all Wave 9 indexable URLs and tool scripts", async () =
   assert.match(audit, /Growth Wave 9 URL missing from sitemap/);
   assert.match(audit, /missing client-side anti-scam tool script/);
   assert.match(audit, /missing CSP-safe theme initializer/);
+  assert.match(audit, /missing Content Security Policy/);
+  assert.match(audit, /CSP does not allow same-origin tool scripts/);
+  assert.match(audit, /CSP does not block plugin objects/);
+});
+
+
+test("Wave 9 pages carry a production-equivalent CSP", async () => {
+  const script = await read("scripts/patch-content-growth-wave9.mjs");
+  assert.match(script, /const CSP_META/);
+  assert.match(script, /default-src/);
+  assert.match(script, /script-src/);
+  assert.match(script, /connect-src/);
+  assert.match(script, /object-src/);
+  assert.match(script, /upgrade-insecure-requests/);
 });
