@@ -6,14 +6,32 @@ test.beforeEach(async ({ page }) => {
 
 test("application shell, guest gameplay and static knowledge work on this OS/browser", async ({ page }) => {
   const severeConsole = [];
+  const pageErrors = [];
+  const requestFailures = [];
   page.on("console", (message) => {
     if (message.type() === "error" && !/supabase|net::ERR_FAILED|Failed to load resource/i.test(message.text())) {
       severeConsole.push(message.text());
     }
   });
+  page.on("pageerror", (error) => pageErrors.push(error.message));
+  page.on("requestfailed", (request) => {
+    const failure = request.failure();
+    if (failure) requestFailures.push(`${request.url()} :: ${failure.errorText}`);
+  });
 
   await page.goto("/");
-  await expect(page.locator(".app")).toBeVisible({ timeout: 20_000 });
+  try {
+    await expect(page.locator(".app")).toBeVisible({ timeout: 20_000 });
+  } catch (error) {
+    const body = (await page.locator("body").textContent().catch(() => ""))?.slice(0, 1200) || "";
+    throw new Error([
+      error instanceof Error ? error.message : String(error),
+      `pageErrors=${JSON.stringify(pageErrors)}`,
+      `consoleErrors=${JSON.stringify(severeConsole)}`,
+      `requestFailures=${JSON.stringify(requestFailures.slice(0, 12))}`,
+      `body=${body}`,
+    ].join("\n"));
+  }
   await expect(page.locator(".topbar nav")).toBeVisible();
   const guestModal = page.locator(".guest-limit-modal");
   if (await guestModal.isVisible().catch(() => false)) {
