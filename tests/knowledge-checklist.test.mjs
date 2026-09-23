@@ -17,7 +17,7 @@ test("Cẩm nang includes an interactive security checklist", async () => {
   assert.equal(new Set(groupIds).size, 12);
   assert.equal(itemIds.length, 48);
   assert.equal(new Set(itemIds).size, 48);
-  assert.equal((checklist.match(/priority: "/g) ?? []).length, 48);
+  assert.equal((checklist.match(/priority: "(?:Thiết yếu|Nên làm)" \}/g) ?? []).length, 48);
   assert.match(page, /Danh sách kiểm tra/);
   assert.doesNotMatch(page, /Personal Security Checklist/);
   assert.match(page, /role="progressbar"/);
