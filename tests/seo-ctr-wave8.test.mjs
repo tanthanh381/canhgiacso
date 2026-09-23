@@ -9,9 +9,11 @@ test("SEO CTR Wave 8 runs after intent shaping and before analytics", async () =
   const build = pkg.scripts["build:pages"];
   assert.match(build, /patch-seo-intent-wave7\.mjs/);
   assert.match(build, /patch-seo-ctr-wave8\.mjs/);
+  assert.match(build, /patch-content-growth-wave9\.mjs/);
   assert.match(build, /patch-realtime-analytics\.mjs/);
   assert.ok(build.indexOf("patch-seo-intent-wave7.mjs") < build.indexOf("patch-seo-ctr-wave8.mjs"));
-  assert.ok(build.indexOf("patch-seo-ctr-wave8.mjs") < build.indexOf("patch-realtime-analytics.mjs"));
+  assert.ok(build.indexOf("patch-seo-ctr-wave8.mjs") < build.indexOf("patch-content-growth-wave9.mjs"));
+  assert.ok(build.indexOf("patch-content-growth-wave9.mjs") < build.indexOf("patch-realtime-analytics.mjs"));
 });
 
 test("Wave 8 fixes count-to-content mismatches in SERP promises", async () => {
