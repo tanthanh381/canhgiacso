@@ -38,7 +38,7 @@ test("QC Wave 2 runs after SEO content generation and before downstream QC/analy
   assert.ok(stages.indexOf("patch-google-traffic-wave5.mjs") < stages.indexOf("patch-qc-wave2.mjs"));
   assert.ok(stages.indexOf("patch-qc-wave2.mjs") < stages.indexOf("patch-qc-wave3.mjs"));
   assert.ok(stages.indexOf("patch-qc-wave3.mjs") < stages.indexOf("patch-seo-authority-wave6.mjs"));
-  assert.ok(stages.indexOf("patch-content-growth-wave9.mjs") < stages.indexOf("patch-realtime-analytics.mjs"));
+  assert.ok(stages.indexOf("patch-content-growth-wave9.mjs") < stages.indexOf("instrument-content.mjs"));
   assert.match(packageJson.scripts["build:pages"], /content:compile/);
   assert.doesNotMatch(packageJson.scripts.build, /content:compile|patch-[a-z0-9-]+\\.mjs/);
   assert.doesNotMatch(packageJson.scripts.dev, /content:compile|patch-[a-z0-9-]+\\.mjs/);
