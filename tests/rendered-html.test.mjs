@@ -43,7 +43,7 @@ test("primary game navigation uses the Thử thách label without changing its r
 });
 
 test("ships product metadata and social artwork", async () => {
-  const [layout, page, admin, data, schema, contentRoles, packageJson, styles, ui, storage] = await Promise.all([
+  const [layout, page, admin, data, schema, contentRoles, packageJson, styles, ui, storage, presentation] = await Promise.all([
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/admin.tsx", import.meta.url), "utf8"),
@@ -54,6 +54,7 @@ test("ships product metadata and social artwork", async () => {
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../app/shared/ui-primitives.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/shared/browser-storage.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/domains/training/presentation.ts", import.meta.url), "utf8"),
   ]);
 
   assert.match(layout, /og\.png/);
@@ -84,8 +85,8 @@ test("ships product metadata and social artwork", async () => {
   assert.match(page, /supabase\.rpc\("submit_game_choice"/);
   assert.match(page, /supabase\.rpc\("get_game_state"/);
   assert.match(page, /get_ciso_dashboard/);
-  assert.match(page, /DefenseBadge/);
-  assert.match(page, /Chuyên gia Cảnh Giác Số/);
+  assert.match(presentation, /DefenseBadge/);
+  assert.match(presentation, /Chuyên gia Cảnh Giác Số/);
   assert.match(page, /achievement-progress/);
   assert.match(page, /defenseBadges\.length/);
   assert.match(page, /Đăng xuất/);
@@ -121,7 +122,7 @@ test("ships product metadata and social artwork", async () => {
   const scenarioIds = [...data.matchAll(/\bid:\s*(\d+),/g)].map((match) => Number(match[1]));
   assert.equal(new Set(scenarioIds).size, 42);
   assert.equal(Math.max(...scenarioIds), 42);
-  assert.match(page, /Thợ săn xu hướng mới/);
+  assert.match(presentation, /Thợ săn xu hướng mới/);
   assert.match(schema, /alter table public\.site_content enable row level security/);
   assert.match(schema, /site_content_public_read/);
   assert.match(schema, /private\.user_is_app_admin/);
