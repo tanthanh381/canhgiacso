@@ -7,6 +7,11 @@ test.beforeEach(async ({ page }) => {
 async function waitForApp(page) {
   await page.goto("/");
   await expect(page.locator(".app")).toBeVisible({ timeout: 20_000 });
+  const guestModal = page.locator(".guest-limit-modal");
+  if (await guestModal.isVisible().catch(() => false)) {
+    await guestModal.getByRole("button", { name: "Tiếp tục với tư cách khách" }).click();
+    await expect(guestModal).toBeHidden();
+  }
   await expect(page.locator(".choice").first()).toBeVisible({ timeout: 20_000 });
 }
 
@@ -206,7 +211,7 @@ test.describe("resilience and breakpoint boundaries", () => {
 });
 
 test.describe("public static content", () => {
-  for (const path of ["/kien-thuc/", "/tin-tuc/", "/gioi-thieu/", "/quyen-rieng-tu/", "/phuong-phap-kiem-chung/", "/sitemap/"]) {
+  for (const path of ["/kien-thuc/", "/tin-tuc/", "/gioi-thieu/", "/quyen-rieng-tu/", "/phuong-phap-kiem-chung/", "/sitemap/", "/cong-cu/", "/canh-bao-lua-dao-hom-nay/", "/co-phai-lua-dao-khong/", "/tu-dien-lua-dao/"]) {
     test(`${path} has responsive layout without horizontal overflow`, async ({ page }) => {
       await page.goto(path);
       await page.waitForLoadState("domcontentloaded");
@@ -253,4 +258,54 @@ test.describe("trust/system page consistency", () => {
       await expectNoHorizontalOverflow(page);
     });
   }
+});
+
+
+test.describe("Growth Wave 9 anti-scam tools", () => {
+  test("call triage returns a high-risk response without horizontal overflow", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop-chromium", "deterministic tool interaction run");
+    await page.goto("/cong-cu/kiem-tra-cuoc-goi-la/");
+    const tool = page.locator('[data-scam-tool="call-triage"]');
+    await tool.locator('select[name="claim"]').selectOption("police");
+    await tool.locator('select[name="request"]').selectOption("transfer");
+    await tool.locator('input[name="secrecy"]').check();
+    await tool.getByRole("button", { name: "Đánh giá tình huống" }).click();
+    const result = tool.locator("[data-tool-result]");
+    await expect(result).toBeVisible();
+    await expect(result).toHaveAttribute("data-level", "high");
+    await expect(result).toContainText("Rủi ro cao");
+    await expectNoHorizontalOverflow(page);
+  });
+
+  test("SMS checker analyzes locally and exposes risk signals", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop-chromium", "deterministic tool interaction run");
+    await page.goto("/cong-cu/kiem-tra-tin-nhan-dang-ngo/");
+    const tool = page.locator('[data-scam-tool="sms-check"]');
+    await tool.locator("textarea").fill("NGAN HANG: tai khoan se bi khoa. Bam https://example.top va nhap OTP de xac minh ngay.");
+    await tool.getByRole("button", { name: "Phân tích tín hiệu" }).click();
+    const result = tool.locator("[data-tool-result]");
+    await expect(result).toBeVisible();
+    await expect(result).toHaveAttribute("data-level", "high");
+    await expect(result).toContainText("đường link");
+    await expect(result).toContainText("xác thực");
+  });
+
+  test("scenario library filters 30 scenarios", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop-chromium", "deterministic tool interaction run");
+    await page.goto("/cong-cu/thu-vien-kich-ban-lua-dao/");
+    const cards = page.locator("[data-scenario-card]");
+    await expect(cards).toHaveCount(30);
+    await page.locator("[data-filter-input]").fill("điện lực");
+    await expect(page.locator("[data-scenario-card]:visible")).toHaveCount(1);
+    await expect(page.locator("[data-scenario-card]:visible")).toContainText("Điện lực");
+  });
+
+  test("new static pages honor the stored dark theme through the CSP-safe script", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop-chromium", "single theme integration run");
+    await page.addInitScript(() => localStorage.setItem("khien-so-theme", "dark"));
+    await page.goto("/cong-cu/");
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    await expect(page.locator(".seo-header")).toBeVisible();
+    await expect(page.locator(".seo-footer")).toBeVisible();
+  });
 });
