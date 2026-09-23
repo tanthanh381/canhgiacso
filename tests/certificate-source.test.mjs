@@ -3,13 +3,14 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 test("certificate feature is server-issued and downloadable as PDF", async () => {
-  const [page, certificate, sql] = await Promise.all([
+  const [page, gateway, certificate, sql] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/domains/training/gateway.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/certificate.ts", import.meta.url), "utf8"),
     readFile(new URL("../supabase/training_certificates.sql", import.meta.url), "utf8"),
   ]);
-  assert.match(page, /get_my_training_certificates/);
-  assert.match(page, /issue_training_certificate/);
+  assert.match(gateway, /get_my_training_certificates/);
+  assert.match(gateway, /issue_training_certificate/);
   assert.match(page, /Tải chứng nhận PDF/);
   assert.match(certificate, /new Uint8Array\(\[37, 80, 68, 70, 45, 49, 46, 52/);
   assert.match(certificate, /application\/pdf/);
