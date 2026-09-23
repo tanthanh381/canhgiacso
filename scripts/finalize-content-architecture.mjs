@@ -5,6 +5,8 @@ const ROOT = process.cwd();
 const PUBLIC = path.join(ROOT, "public");
 const HOME = path.join(ROOT, "github-pages", "index.html");
 const SITE = "https://canhgiacso.com";
+const SEO_CSS_VERSION = "20260923-logo-mask";
+const BRAND_MARKUP = '<span class="seo-brand-logo" aria-hidden="true"></span><span class="seo-brand-divider" aria-hidden="true"></span><span class="seo-product-lockup"><strong>CẢNH GIÁC SỐ</strong><small>IT SECURITY</small></span>';
 
 async function htmlFiles(dir) {
   const out = [];
@@ -36,6 +38,23 @@ function attrEscape(value) {
   return String(value).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
+function normalizeKnowledgeShell(html, file) {
+  if (!file.includes(`${path.sep}kien-thuc${path.sep}`)) return html;
+  return html
+    .replaceAll('href="/seo.css"', `href="/seo.css?v=${SEO_CSS_VERSION}"`)
+    .replaceAll("href='/seo.css'", `href='/seo.css?v=${SEO_CSS_VERSION}'`)
+    .replaceAll(`href="/seo.css?v=${SEO_CSS_VERSION}?v=${SEO_CSS_VERSION}"`, `href="/seo.css?v=${SEO_CSS_VERSION}"`)
+    .replaceAll(`href='/seo.css?v=${SEO_CSS_VERSION}?v=${SEO_CSS_VERSION}'`, `href='/seo.css?v=${SEO_CSS_VERSION}'`)
+    .replaceAll('<img src="/khien-so-logo.png" alt="Logo Cảnh Giác Số" width="42" height="42" /><span>Cảnh Giác Số</span>', BRAND_MARKUP)
+    .replaceAll('<img src="/khien-so-logo.png" alt="Logo Cảnh Giác Số" width="54" height="54" /><span>Cảnh Giác Số</span>', BRAND_MARKUP)
+    .replaceAll('<img src="/canh-giac-so-mark.svg" alt="Logo Cảnh Giác Số" width="42" height="42" /><span>Cảnh Giác Số</span>', BRAND_MARKUP)
+    .replaceAll('<img src="/canh-giac-so-mark.svg" alt="Logo Cảnh Giác Số" width="54" height="54" /><span>Cảnh Giác Số</span>', BRAND_MARKUP)
+    .replaceAll('<span class="seo-brand-logo" aria-hidden="true"></span><span class="seo-brand-lockup">Cảnh Giác Số</span>', BRAND_MARKUP)
+    .replaceAll('<span class="seo-brand-logo" role="img" aria-label="Logo Cảnh Giác Số"></span><span class="seo-brand-lockup">Cảnh Giác Số</span>', BRAND_MARKUP)
+    .replaceAll('<a href="/kien-thuc/">Kiến thức</a></nav>', '<a href="/kien-thuc/" aria-current="page">Cẩm nang</a></nav>')
+    .replaceAll('› <a href="/kien-thuc/">Kiến thức</a> ›', '› <a href="/kien-thuc/">Cẩm nang</a> ›');
+}
+
 function ensureSearchMetadata(html) {
   const canonical = match(html, /<link\s+rel=["']canonical["']\s+href=["']([^"']+)["']/i);
   const title = match(html, /<title>([\s\S]*?)<\/title>/i).replace(/\s+/g, " ");
@@ -62,6 +81,7 @@ function ensureSearchMetadata(html) {
 const records = [];
 for (const file of [HOME, ...(await htmlFiles(PUBLIC))]) {
   let html = await readFile(file, "utf8");
+  html = normalizeKnowledgeShell(html, file);
   const normalized = ensureSearchMetadata(html);
   if (normalized !== html) {
     await writeFile(file, normalized, "utf8");
