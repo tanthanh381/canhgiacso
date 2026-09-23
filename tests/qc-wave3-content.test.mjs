@@ -5,10 +5,10 @@ import { readFile } from "node:fs/promises";
 const packageJson = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
 const wave3 = await readFile(new URL("../scripts/patch-qc-wave3.mjs", import.meta.url), "utf8");
 
-test("QC Wave 3 runs immediately after Wave 2 in the Pages build", () => {
+test("QC Wave 3 runs immediately after Wave 2 before the SEO authority wave", () => {
   assert.match(
     packageJson.scripts["build:pages"],
-    /patch-qc-wave2\.mjs && node scripts\/patch-qc-wave3\.mjs && node scripts\/patch-realtime-analytics\.mjs/,
+    /patch-qc-wave2\.mjs && node scripts\/patch-qc-wave3\.mjs && node scripts\/patch-seo-authority-wave6\.mjs && node scripts\/patch-realtime-analytics\.mjs/,
   );
 });
 
