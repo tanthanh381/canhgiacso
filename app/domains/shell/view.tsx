@@ -115,7 +115,6 @@ export function AppFooter({
       <div className="footer-actions">
         <nav aria-label="Thông tin website">
           <a href="/gioi-thieu/">Giới thiệu</a>
-          <a href="/phuong-phap-kiem-chung/">Kiểm chứng</a>
           <a href="/quyen-rieng-tu/">Quyền riêng tư</a>
         </nav>
         <button onClick={onOpenGuide}>Hướng dẫn & trợ giúp</button>
