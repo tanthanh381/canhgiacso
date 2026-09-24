@@ -7,6 +7,7 @@ const HOME = path.join(ROOT, "github-pages", "index.html");
 const SITE = "https://canhgiacso.com";
 const SEO_CSS_VERSION = "20260924-design-system";
 const BRAND_MARKUP = '<span class="seo-brand-logo" aria-hidden="true"></span><span class="seo-brand-divider" aria-hidden="true"></span><span class="seo-product-lockup"><strong>CẢNH GIÁC SỐ</strong><small>IT SECURITY</small></span>';
+const SEO_FOOTER_NAV = '<nav class="seo-footer-links" aria-label="Thông tin website"><a href="/gioi-thieu/">Giới thiệu</a><a href="/quyen-rieng-tu/">Quyền riêng tư</a></nav>';
 
 function seoNavMarkup(file) {
   const normalized = file.split(path.sep).join("/");
@@ -36,6 +37,8 @@ function normalizeSeoFooter(html) {
   return html.replace(/<footer class="seo-footer">([\s\S]*?)<\/footer>/gi, (_, body) => {
     let next = body.replace(/<p class="seo-safety">[\s\S]*?(?:phuong-phap-kiem-chung|sitemap)[\s\S]*?<\/p>/gi, "");
     next = next.replace(/<a href="\/(?:phuong-phap-kiem-chung|sitemap)\/">[\s\S]*?<\/a>/gi, "");
+    next = next.replace(/<nav class="seo-footer-links"[^>]*>[\s\S]*?<\/nav>/gi, "");
+    next = next.replace(/(<strong>Cảnh Giác Số<\/strong>)/i, `$1${SEO_FOOTER_NAV}`);
     return `<footer class="seo-footer">${next}</footer>`;
   });
 }
