@@ -59,5 +59,5 @@ test('primary navigation stays complete and consistent across app and static pag
 test('deep-link routes are not reset to the challenge page during progress hydration', () => {
   assert.ok(page.includes('const route = routeFromHash(window.location.hash);'));
   assert.ok(page.includes('if (route.view === "game") setView("game");'));
-  assert.doesNotMatch(page, /window\\.location\\.hash !== "#\\/admin".*setView\\("game"\\)/s);
+  assert.ok(!page.includes('window.location.hash !== "#/admin"'));
 });
