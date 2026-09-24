@@ -1,4 +1,4 @@
-import { readdir, readFile, writeFile } from "node:fs/promises";
+import { readdir, readFile, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const ROOT = process.cwd();
@@ -36,6 +36,37 @@ function isIndexable(html) {
 
 function attrEscape(value) {
   return String(value).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+const RETIRED_METHODOLOGY_PATH = "/phuong-phap-kiem-chung/";
+
+function removeRetiredMethodologyReferences(html) {
+  return html
+    .replace(/<section[^>]+id=["']lookup-methodology-link["'][^>]*>[\\s\\S]*?<\\/section>/gi, "")
+    .replace(/\\s*(?:Xem|Xem thêm|Xem chi tiết tại)\\s*<a\\s+href=["'](?:https:\\/\\/canhgiacso\\.com)?\\/phuong-phap-kiem-chung\\/["'][^>]*>[\\s\\S]*?<\\/a>/gi, "")
+    .replace(/<a\\s+href=["'](?:https:\\/\\/canhgiacso\\.com)?\\/phuong-phap-kiem-chung\\/["'][^>]*>[\\s\\S]*?<\\/a>/gi, "")
+    .replace(/,?\\s*"publishingPrinciples"\\s*:\\s*"https:\\/\\/canhgiacso\\.com\\/phuong-phap-kiem-chung\\/"\\s*,?/gi, "");
+}
+
+async function removeRetiredMethodology() {
+  const files = [HOME, ...(await htmlFiles(PUBLIC))];
+  for (const file of files) {
+    let html;
+    try {
+      html = await readFile(file, "utf8");
+    } catch (error) {
+      if (error?.code === "ENOENT") continue;
+      throw error;
+    }
+    const next = removeRetiredMethodologyReferences(html);
+    if (next !== html) await writeFile(file, next, "utf8");
+  }
+
+  try {
+    await unlink(path.join(PUBLIC, RETIRED_METHODOLOGY_PATH.slice(1), "index.html"));
+  } catch (error) {
+    if (error?.code !== "ENOENT") throw error;
+  }
 }
 
 function normalizeKnowledgeShell(html, file) {
@@ -123,6 +154,7 @@ function ensureSearchMetadata(html) {
 }
 
 const records = [];
+await removeRetiredMethodology();
 for (const file of [HOME, ...(await htmlFiles(PUBLIC))]) {
   let html = await readFile(file, "utf8");
   const beforeNormalization = html;
