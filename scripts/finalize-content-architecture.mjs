@@ -57,13 +57,13 @@ function normalizeKnowledgeShell(html, file) {
 
 function normalizeFavicon(html) {
   let next = html
-    .replace(/<link\s+rel=["']icon["'][^>]*>/gi, '<link rel="icon" type="image/png" sizes="96x96" href="/favicon.png?v=20260924" />')
-    .replace(/<link\s+rel=["']apple-touch-icon["'][^>]*>/gi, '<link rel="apple-touch-icon" href="/favicon.png?v=20260924" />');
+    .replace(/<link\s+rel=["']icon["'][^>]*>/gi, '<link rel="icon" type="image/png" sizes="96x96" href="/khien-so-logo.png" />')
+    .replace(/<link\s+rel=["']apple-touch-icon["'][^>]*>/gi, '<link rel="apple-touch-icon" href="/khien-so-logo.png" />');
   if (!/rel=["']icon["']/i.test(next)) {
-    next = next.replace("</head>", '  <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png?v=20260924" />\n</head>');
+    next = next.replace("</head>", '  <link rel="icon" type="image/png" sizes="96x96" href="/khien-so-logo.png" />\n</head>');
   }
   if (!/rel=["']apple-touch-icon["']/i.test(next)) {
-    next = next.replace("</head>", '  <link rel="apple-touch-icon" href="/favicon.png?v=20260924" />\n</head>');
+    next = next.replace("</head>", '  <link rel="apple-touch-icon" href="/khien-so-logo.png" />\n</head>');
   }
   return next;
 }
@@ -75,7 +75,7 @@ function ensureSearchMetadata(html) {
   if (!canonical || !title || !description || !isIndexable(html)) return html;
 
   const additions = [];
-  if (!/rel=["']icon["']/i.test(html)) additions.push('<link rel="icon" type="image/png" sizes="96x96" href="/favicon.png?v=20260924" />');
+  if (!/rel=["']icon["']/i.test(html)) additions.push('<link rel="icon" type="image/png" sizes="96x96" href="/khien-so-logo.png" />');
   if (!/hreflang=["']vi-VN["']/i.test(html)) additions.push(`<link rel="alternate" hreflang="vi-VN" href="${attrEscape(canonical)}" />`);
   if (!/hreflang=["']x-default["']/i.test(html)) additions.push(`<link rel="alternate" hreflang="x-default" href="${attrEscape(canonical)}" />`);
   if (!/property=["']og:site_name["']/i.test(html)) additions.push('<meta property="og:site_name" content="Cảnh Giác Số" />');
