@@ -94,12 +94,12 @@ function ensureSearchMetadata(html) {
 const records = [];
 for (const file of [HOME, ...(await htmlFiles(PUBLIC))]) {
   let html = await readFile(file, "utf8");
+  const beforeNormalization = html;
   html = normalizeKnowledgeShell(html, file);
   html = normalizeFavicon(html);
-  const normalized = ensureSearchMetadata(html);
-  if (normalized !== html) {
-    await writeFile(file, normalized, "utf8");
-    html = normalized;
+  html = ensureSearchMetadata(html);
+  if (html !== beforeNormalization) {
+    await writeFile(file, html, "utf8");
   }
   if (!isIndexable(html)) continue;
   const canonical = match(html, /<link\s+rel=["']canonical["']\s+href=["']([^"']+)["']/i);
