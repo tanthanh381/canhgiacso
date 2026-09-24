@@ -254,7 +254,7 @@ test.describe("trust/system page consistency", () => {
       await expect(page.locator(".seo-brand-divider")).toBeVisible();
       await expect(page.locator(".seo-product-lockup")).toBeVisible();
       await expect(page.locator(".seo-footer")).toBeVisible();
-      await expect(page.locator(".seo-footer-links a")).toHaveCount(4);
+      await expect(page.locator(".seo-footer-links a")).toHaveCount(2);
       await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
       await expect(page.locator(".seo-nav-links a", { hasText: "Cẩm nang" })).toBeVisible();
       await expectNoHorizontalOverflow(page);
