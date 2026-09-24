@@ -118,8 +118,11 @@ if (await exists(knowledgeRoot)) {
   }
 }
 
-for (const required of [`${site}/gioi-thieu/`, `${site}/quyen-rieng-tu/`, `${site}/phuong-phap-kiem-chung/`]) {
+for (const required of [`${site}/gioi-thieu/`, `${site}/quyen-rieng-tu/`]) {
   if (!urls.includes(required)) fail(`${required}: trust page missing from sitemap`);
+}
+if (urls.includes(`${site}/phuong-phap-kiem-chung/`)) {
+  fail("Retired methodology page must not remain in sitemap");
 }
 
 const growthWave9Required = [
@@ -204,7 +207,6 @@ else ok(`Homepage has ${homeWords} crawlable words`);
 if (!home.includes("/kien-thuc/phong-chong-lua-dao-truc-tuyen/")) fail("Homepage missing anti-scam pillar link");
 if (!home.includes("/kien-thuc/an-toan-thong-tin-ca-nhan/")) fail("Homepage missing information-security pillar link");
 if (!home.includes("/gioi-thieu/")) fail("Homepage missing About/trust link");
-if (!home.includes("/phuong-phap-kiem-chung/")) fail("Homepage missing editorial-method link");
 if (!home.includes("/quyen-rieng-tu/")) fail("Homepage missing privacy link");
 
 if (!process.exitCode) console.log("SEO audit passed.");
