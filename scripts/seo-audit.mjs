@@ -82,7 +82,7 @@ for (const url of urls) {
   if (!/name=["']robots["'][^>]*index,follow/i.test(html)) fail(`${url}: missing index,follow robots`);
   if (!/rel=["']alternate["'][^>]*hreflang=["']vi-VN["']/i.test(html)) fail(`${url}: missing vi-VN hreflang`);
   if (!/rel=["']alternate["'][^>]*hreflang=["']x-default["']/i.test(html)) fail(`${url}: missing x-default hreflang`);
-  if (!/<link\s+rel=["']icon["'][^>]*href=["']\/favicon\.png\?v=20260924["'][^>]*>/i.test(html)) fail(`${url}: favicon must use stable /favicon.png?v=20260924`);
+  if (!/<link\s+rel=["']icon["'][^>]*href=["']\/khien-so-logo\.png["'][^>]*>/i.test(html)) fail(`${url}: favicon must use use original /khien-so-logo.png`);
   if (!/property=["']og:title["']/i.test(html)) fail(`${url}: missing Open Graph title`);
   if (!/name=["']twitter:card["']/i.test(html)) fail(`${url}: missing Twitter card`);
 
