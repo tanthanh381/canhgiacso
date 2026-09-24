@@ -82,7 +82,7 @@ for (const url of urls) {
   if (!/name=["']robots["'][^>]*index,follow/i.test(html)) fail(`${url}: missing index,follow robots`);
   if (!/rel=["']alternate["'][^>]*hreflang=["']vi-VN["']/i.test(html)) fail(`${url}: missing vi-VN hreflang`);
   if (!/rel=["']alternate["'][^>]*hreflang=["']x-default["']/i.test(html)) fail(`${url}: missing x-default hreflang`);
-  if (!/rel=["']icon["']/i.test(html)) fail(`${url}: missing favicon`);
+  if (!/<link\s+rel=["']icon["'][^>]*href=["']\/favicon\.png["'][^>]*>/i.test(html)) fail(`${url}: favicon must use stable /favicon.png`);
   if (!/property=["']og:title["']/i.test(html)) fail(`${url}: missing Open Graph title`);
   if (!/name=["']twitter:card["']/i.test(html)) fail(`${url}: missing Twitter card`);
 
@@ -177,6 +177,20 @@ for (const pathname of interactiveToolPaths) {
   if (!/http-equiv=["']Content-Security-Policy["']/i.test(html)) fail(`${site}${pathname}: missing Content Security Policy`);
   if (!/script-src[^;]*'self'/i.test(html)) fail(`${site}${pathname}: CSP does not allow same-origin tool scripts`);
   if (!/object-src[^;]*'none'/i.test(html)) fail(`${site}${pathname}: CSP does not block plugin objects`);
+}
+
+const faviconPath = path.join(root, "favicon.png");
+if (!(await exists(faviconPath))) {
+  fail("Missing favicon.png");
+} else {
+  const faviconBytes = await readFile(faviconPath);
+  const pngSignature = faviconBytes.subarray(0, 8).toString("hex");
+  const width = faviconBytes.length >= 24 ? faviconBytes.readUInt32BE(16) : 0;
+  const height = faviconBytes.length >= 24 ? faviconBytes.readUInt32BE(20) : 0;
+  if (pngSignature !== "89504e470d0a1a0a") fail("favicon.png is not a valid PNG");
+  if (width !== height) fail(`favicon.png must be square, found ${width}x${height}`);
+  if (width < 48) fail(`favicon.png must be at least 48x48, found ${width}x${height}`);
+  if (width === height && width >= 48) ok(`favicon.png is ${width}x${height} and Google Search eligible by size`);
 }
 
 const robots = await readFile(path.join(root, "robots.txt"), "utf8");
