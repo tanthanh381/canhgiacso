@@ -55,6 +55,27 @@ function normalizeKnowledgeShell(html, file) {
     .replaceAll('› <a href="/kien-thuc/">Kiến thức</a> ›', '› <a href="/kien-thuc/">Cẩm nang</a> ›');
 }
 
+function seoNavActiveKey(file) {
+  const relative = path.relative(PUBLIC, file).split(path.sep).join("/");
+  if (relative === "kien-thuc/index.html" || relative.startsWith("kien-thuc/")) return "knowledge";
+  if (relative === "tin-tuc/index.html" || relative.startsWith("tin-tuc/")) return "news";
+  return "";
+}
+
+function normalizeSeoNavigation(html, file) {
+  if (!/<nav\\s+class=["']seo-nav-links["'][^>]*>[\\s\\S]*?<\\/nav>/i.test(html)) return html;
+  const active = seoNavActiveKey(file);
+  const link = (href, label, key = "") => `<a href="${href}"${active === key ? ' aria-current="page"' : ""}>${label}</a>`;
+  const nav = `<nav class="seo-nav-links" aria-label="Điều hướng chính">${[
+    link("/", "Thử thách"),
+    link("/kien-thuc/", "Cẩm nang", "knowledge"),
+    link("/#/news", "Tin tức", "news"),
+    link("/#/quiz", "Thực hành"),
+    link("/#/stats", "Thành tích"),
+  ].join("")}</nav>`;
+  return html.replace(/<nav\\s+class=["']seo-nav-links["'][^>]*>[\\s\\S]*?<\\/nav>/i, nav);
+}
+
 function normalizeFavicon(html) {
   let next = html
     .replace(/<link\s+rel=["']icon["'][^>]*>/gi, '<link rel="icon" type="image/png" sizes="96x96" href="/khien-so-logo.png" />')
@@ -107,6 +128,7 @@ for (const file of [HOME, ...(await htmlFiles(PUBLIC))]) {
   let html = await readFile(file, "utf8");
   const beforeNormalization = html;
   html = normalizeKnowledgeShell(html, file);
+  html = normalizeSeoNavigation(html, file);
   html = normalizeSitemapSurface(html, file);
   html = normalizeFavicon(html);
   html = ensureSearchMetadata(html);
