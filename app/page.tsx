@@ -286,7 +286,8 @@ export default function Home() {
     setSelectedId(1);
     setDifficulty("Tất cả");
     setQuery("");
-    const route = routeFromHash(window.location.hash);\n    if (route.view === "game") setView("game");
+    const route = routeFromHash(window.location.hash);
+    if (route.view === "game") setView("game");
   }
 
   function loadGuestProgress() {
