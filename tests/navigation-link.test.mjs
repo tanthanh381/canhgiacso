@@ -4,6 +4,10 @@ import { readFile } from 'node:fs/promises';
 
 const source = await readFile(new URL('../app/domains/shell/view.tsx', import.meta.url), 'utf8');
 const css = await readFile(new URL('../app/globals.css', import.meta.url), 'utf8');
+const navigation = await readFile(new URL('../app/domains/shell/navigation.ts', import.meta.url), 'utf8');
+const ux = await readFile(new URL('../app/ux-refresh.css', import.meta.url), 'utf8');
+const finalizer = await readFile(new URL('../scripts/finalize-content-architecture.mjs', import.meta.url), 'utf8');
+
 
 test('Cẩm nang exposes both the canonical knowledge hub and the interactive checklist', () => {
   assert.ok(source.includes('className="knowledge-menu"'));
@@ -34,4 +38,16 @@ test('all top-level navigation controls share the same vertical rhythm', () => {
   assert.ok(css.includes('.knowledge-menu>summary{display:inline-flex;align-items:center;justify-content:center;height:42px'));
   assert.ok(css.includes('.topbar nav>button,.knowledge-menu>summary{height:40px;padding:0 12px}'));
   assert.ok(css.includes('.topbar nav>button,.knowledge-menu>summary{height:38px;padding:0 6px;font-size:12px}'));
+});
+
+test('primary navigation stays complete and consistent across app and static pages', () => {
+  assert.doesNotMatch(ux, /topbar nav button:nth-child\(4\)/);
+  for (const label of ['Thử thách', 'Cẩm nang', 'Tin tức', 'Thực hành', 'Thành tích']) {
+    assert.ok(finalizer.includes(label), `static navigation missing ${label}`);
+  }
+  assert.ok(finalizer.includes('href="/#/quiz"'));
+  assert.ok(finalizer.includes('href="/#/stats"'));
+  assert.ok(navigation.includes('hashByView'));
+  assert.ok(navigation.includes('if (hash === "#/quiz")'));
+  assert.ok(navigation.includes('if (hash === "#/stats")'));
 });
