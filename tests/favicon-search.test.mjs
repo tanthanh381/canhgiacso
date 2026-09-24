@@ -29,7 +29,7 @@ test("content finalizer preserves the original logo favicon", async () => {
 
 test("SEO audit rejects favicon regressions", async () => {
   const audit = await readText("scripts/seo-audit.mjs");
-  assert.match(audit, /favicon must use stable \/khien-so-logo\.png/);
+  assert.match(audit, /favicon must use original \/khien-so-logo\.png/);
   assert.match(audit, /favicon\.png must be square/);
   assert.match(audit, /at least 48x48/);
 });
