@@ -110,8 +110,8 @@ function articlePage(a) {
   <link rel="alternate" hreflang="vi-VN" href="${canonical}" />
   <link rel="alternate" hreflang="x-default" href="${canonical}" />
   <link rel="stylesheet" href="/seo.css" />
-  <link rel="icon" type="image/png" href="/khien-so-logo.png" />
-  <link rel="apple-touch-icon" href="/khien-so-logo.png" />
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/favicon.png" />
   <meta property="og:type" content="article" />
   <meta property="og:locale" content="vi_VN" />
   <meta property="og:site_name" content="Cảnh Giác Số" />
@@ -574,7 +574,7 @@ function standardHead({ title, description, canonical, schema }) {
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" /><meta name="referrer" content="strict-origin-when-cross-origin" />
   <title>${esc(title)}</title><meta name="description" content="${esc(description)}" /><meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
   <link rel="canonical" href="${canonical}" /><link rel="alternate" hreflang="vi-VN" href="${canonical}" /><link rel="alternate" hreflang="x-default" href="${canonical}" />
-  <link rel="stylesheet" href="/seo.css" /><link rel="icon" type="image/png" href="/khien-so-logo.png" /><link rel="apple-touch-icon" href="/khien-so-logo.png" />
+  <link rel="stylesheet" href="/seo.css" /><link rel="icon" type="image/png" sizes="96x96" href="/favicon.png" /><link rel="apple-touch-icon" href="/favicon.png" />
   <meta property="og:type" content="website" /><meta property="og:locale" content="vi_VN" /><meta property="og:site_name" content="Cảnh Giác Số" /><meta property="og:title" content="${esc(title)}" /><meta property="og:description" content="${esc(description)}" /><meta property="og:url" content="${canonical}" /><meta property="og:image" content="${SITE}/og.png" />
   <meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content="${esc(title)}" /><meta name="twitter:description" content="${esc(description)}" /><meta name="twitter:image" content="${SITE}/og.png" />
   <script type="application/ld+json">${schema}</script>
