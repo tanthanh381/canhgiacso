@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const source = await readFile(new URL('../app/domains/shell/view.tsx', import.meta.url), 'utf8');
+const page = await readFile(new URL('../app/page.tsx', import.meta.url), 'utf8');
 const css = await readFile(new URL('../app/globals.css', import.meta.url), 'utf8');
 const navigation = await readFile(new URL('../app/domains/shell/navigation.ts', import.meta.url), 'utf8');
 const ux = await readFile(new URL('../app/ux-refresh.css', import.meta.url), 'utf8');
@@ -52,4 +53,11 @@ test('primary navigation stays complete and consistent across app and static pag
   assert.ok(navigation.includes('hashByView'));
   assert.ok(navigation.includes('if (hash === "#/quiz")'));
   assert.ok(navigation.includes('if (hash === "#/stats")'));
+});
+
+
+test('deep-link routes are not reset to the challenge page during progress hydration', () => {
+  assert.ok(page.includes('const route = routeFromHash(window.location.hash);'));
+  assert.ok(page.includes('if (route.view === "game") setView("game");'));
+  assert.doesNotMatch(page, /window\\.location\\.hash !== "#\\/admin".*setView\\("game"\\)/s);
 });
