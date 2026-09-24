@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 
 function findPracticeButton() {
   return Array.from(document.querySelectorAll<HTMLButtonElement>(".topbar nav button"))
-    .find((button) => button.textContent?.trim() === "Thực hành tương tác") ?? null;
+    .find((button) => button.textContent?.trim() === "Thực hành") ?? null;
 }
 
 export function InteractivePracticeNav() {

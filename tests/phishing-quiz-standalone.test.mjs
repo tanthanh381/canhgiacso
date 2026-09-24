@@ -9,7 +9,7 @@ test("phishing quiz is a standalone primary navigation function", async () => {
     readFile(new URL("../app/domains/shell/navigation.ts", import.meta.url), "utf8"),
   ]);
   assert.match(navigation, /export type View = .*"quiz"/);
-  assert.match(shell, /onNavigate\("quiz"\).*Thực hành tương tác/);
+  assert.match(shell, /onNavigate\("quiz"\).*Thực hành/);
   assert.match(page, /view === "quiz"/);
   const knowledgeStart = page.indexOf('view === "knowledge"');
   const quizStart = page.indexOf('view === "quiz"');

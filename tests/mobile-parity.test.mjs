@@ -11,7 +11,7 @@ test("mobile keeps the same primary destinations as desktop", () => {
   assert.match(page, />Thử thách<\/button>/);
   assert.match(page, /<summary[\s\S]*?>Cẩm nang<\/summary>/);
   assert.match(page, />Tin tức<\/button>/);
-  assert.match(page, />Thực hành tương tác<\/button>/);
+  assert.match(page, />Thực hành<\/button>/);
   assert.match(page, />Thành tích<\/button>/);
   assert.match(practice, /grid-template-columns:\s*repeat\(5,\s*1fr\)/);
 });

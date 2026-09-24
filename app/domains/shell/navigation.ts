@@ -8,10 +8,7 @@ export type HashRoute = {
 export const SIMULATION_BANNER_VIEWS: ReadonlySet<View> = new Set(["game", "quiz"]);
 
 export function routeFromHash(hash: string): HashRoute {
-  if (hash === "#/game") return { view: "game", newsSlug: "" };
   if (hash === "#/admin") return { view: "admin", newsSlug: "" };
-  if (hash === "#/dashboard") return { view: "dashboard", newsSlug: "" };
-  if (hash === "#/knowledge") return { view: "knowledge", newsSlug: "" };
   if (hash === "#/quiz") return { view: "quiz", newsSlug: "" };
   if (hash === "#/stats") return { view: "stats", newsSlug: "" };
   if (hash.startsWith("#/news/")) return { view: "news", newsSlug: hash.slice(7) };
@@ -39,20 +36,19 @@ export function navigateBrowser(currentView: View, nextView: View) {
     && !window.dispatchEvent(new Event("admin-before-leave", { cancelable: true }))
   ) return false;
 
-  const hashByView: Partial<Record<View, string>> = {
-    game: "/game",
-    knowledge: "/knowledge",
-    news: "/news",
-    quiz: "/quiz",
-    stats: "/stats",
-    dashboard: "/dashboard",
-    admin: "/admin",
-  };
-  const nextHash = hashByView[nextView];
+  if (nextView === "news") {
+    window.location.hash = "/news";
+  } else if (nextView === "quiz") {
+    window.location.hash = "/quiz";
+  } else if (nextView === "stats") {
+    window.location.hash = "/stats";
+  } else if (window.location.hash.startsWith("#/news")) {
+    window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
+  }
 
-  if (nextHash) {
-    window.location.hash = nextHash;
-  } else if (window.location.hash) {
+  if (nextView === "admin") {
+    window.location.hash = "/admin";
+  } else if (window.location.hash === "#/admin") {
     window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
   }
 

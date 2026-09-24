@@ -10,6 +10,7 @@ import "../app/ux-refresh.css";
 import "../app/interactive-practice-nav.css";
 import "../app/visual-refresh.css";
 import "../app/security-hardening.css";
+import "../app/design-system.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

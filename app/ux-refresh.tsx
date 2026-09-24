@@ -180,7 +180,7 @@ export function UxRefresh() {
 
     {feedback && createPortal(<div className="ux-learning-moment"><div className="ux-learning-heading"><span aria-hidden="true">{feedbackDanger ? "⚠" : "✓"}</span><strong>{feedbackDanger ? "Dấu hiệu bạn cần ghi nhớ" : "Vì sao cách xử lý này an toàn"}</strong></div>{flags.length > 0 && <ul>{flags.map((flag) => <li key={flag}>{flag}</li>)}</ul>}{tip && <div className="ux-principle"><b>Nguyên tắc áp dụng ngoài đời</b><span>{tip}</span></div>}</div>, feedback)}
 
-    {knowledgeHero && createPortal(<button className="ux-practice-cta" onClick={() => navigate("Thực hành tương tác")}><span aria-hidden="true">▶</span> Luyện nhận diện phishing</button>, knowledgeHero)}
+    {knowledgeHero && createPortal(<button className="ux-practice-cta" onClick={() => navigate("Thực hành")}><span aria-hidden="true">▶</span> Luyện nhận diện phishing</button>, knowledgeHero)}
 
     <nav className="ux-bottom-nav" aria-label="Điều hướng di động">
       {PRIMARY_VIEWS.map((item) => (

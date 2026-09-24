@@ -1,12 +1,44 @@
-import { readdir, readFile, unlink, writeFile } from "node:fs/promises";
+import { readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const ROOT = process.cwd();
 const PUBLIC = path.join(ROOT, "public");
 const HOME = path.join(ROOT, "github-pages", "index.html");
 const SITE = "https://canhgiacso.com";
-const SEO_CSS_VERSION = "20260923-logo-mask";
+const SEO_CSS_VERSION = "20260924-design-system";
 const BRAND_MARKUP = '<span class="seo-brand-logo" aria-hidden="true"></span><span class="seo-brand-divider" aria-hidden="true"></span><span class="seo-product-lockup"><strong>CẢNH GIÁC SỐ</strong><small>IT SECURITY</small></span>';
+
+function seoNavMarkup(file) {
+  const normalized = file.split(path.sep).join("/");
+  const current = normalized.endsWith("/github-pages/index.html")
+    ? "/"
+    : normalized.includes("/public/kien-thuc/")
+      ? "/kien-thuc/"
+      : normalized.includes("/public/tin-tuc/")
+        ? "/tin-tuc/"
+        : "";
+  const links = [
+    ["/", "Thử thách"],
+    ["/kien-thuc/", "Cẩm nang"],
+    ["/tin-tuc/", "Tin tức"],
+    ["/#/quiz", "Thực hành"],
+    ["/#/stats", "Thành tích"],
+  ];
+  return `<nav class="seo-nav-links" aria-label="Điều hướng chính">${links.map(([href, label]) => `<a href="${href}"${href === current ? ' aria-current="page"' : ""}>${label}</a>`).join("")}</nav>`;
+}
+
+function normalizeSeoNavigation(html, file) {
+  const withBrand = html.replace(/<a class="seo-brand" href="\/">[\s\S]*?<\/a>(?=<nav class="seo-nav-links")/i, `<a class="seo-brand" href="/">${BRAND_MARKUP}</a>`);
+  return withBrand.replace(/<nav class="seo-nav-links"[^>]*>[\s\S]*?<\/nav>/i, seoNavMarkup(file));
+}
+
+function normalizeSeoFooter(html) {
+  return html.replace(/<footer class="seo-footer">([\s\S]*?)<\/footer>/gi, (_, body) => {
+    let next = body.replace(/<p class="seo-safety">[\s\S]*?(?:phuong-phap-kiem-chung|sitemap)[\s\S]*?<\/p>/gi, "");
+    next = next.replace(/<a href="\/(?:phuong-phap-kiem-chung|sitemap)\/">[\s\S]*?<\/a>/gi, "");
+    return `<footer class="seo-footer">${next}</footer>`;
+  });
+}
 
 async function htmlFiles(dir) {
   const out = [];
@@ -38,37 +70,6 @@ function attrEscape(value) {
   return String(value).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-const RETIRED_METHODOLOGY_PATH = "/phuong-phap-kiem-chung/";
-
-function removeRetiredMethodologyReferences(html) {
-  return html
-    .replace(/<section[^>]+id=["']lookup-methodology-link["'][^>]*>[\s\S]*?<\/section>/gi, "")
-    .replace(/\s*(?:Xem|Xem thêm|Xem chi tiết tại)\s*<a\s+href=["'](?:https:\/\/canhgiacso\.com)?\/phuong-phap-kiem-chung\/["'][^>]*>[\s\S]*?<\/a>/gi, "")
-    .replace(/<a\s+href=["'](?:https:\/\/canhgiacso\.com)?\/phuong-phap-kiem-chung\/["'][^>]*>[\s\S]*?<\/a>/gi, "")
-    .replace(/,?\s*"publishingPrinciples"\s*:\s*"https:\/\/canhgiacso\.com\/phuong-phap-kiem-chung\/"\s*,?/gi, "");
-}
-
-async function removeRetiredMethodology() {
-  const files = [HOME, ...(await htmlFiles(PUBLIC))];
-  for (const file of files) {
-    let html;
-    try {
-      html = await readFile(file, "utf8");
-    } catch (error) {
-      if (error?.code === "ENOENT") continue;
-      throw error;
-    }
-    const next = removeRetiredMethodologyReferences(html);
-    if (next !== html) await writeFile(file, next, "utf8");
-  }
-
-  try {
-    await unlink(path.join(PUBLIC, RETIRED_METHODOLOGY_PATH.slice(1), "index.html"));
-  } catch (error) {
-    if (error?.code !== "ENOENT") throw error;
-  }
-}
-
 function normalizeKnowledgeShell(html, file) {
   if (!file.includes(`${path.sep}kien-thuc${path.sep}`)) return html;
   return html
@@ -86,48 +87,17 @@ function normalizeKnowledgeShell(html, file) {
     .replaceAll('› <a href="/kien-thuc/">Kiến thức</a> ›', '› <a href="/kien-thuc/">Cẩm nang</a> ›');
 }
 
-function seoNavActiveKey(file) {
-  const relative = path.relative(PUBLIC, file).split(path.sep).join("/");
-  if (relative === "kien-thuc/index.html" || relative.startsWith("kien-thuc/")) return "knowledge";
-  if (relative === "tin-tuc/index.html" || relative.startsWith("tin-tuc/")) return "news";
-  return "";
-}
-
-function normalizeSeoNavigation(html, file) {
-  if (!/<nav\s+class=["']seo-nav-links["'][^>]*>[\s\S]*?<\/nav>/i.test(html)) return html;
-  const active = seoNavActiveKey(file);
-  const link = (href, label, key = "") => `<a href="${href}"${active === key ? ' aria-current="page"' : ""}>${label}</a>`;
-  const nav = `<nav class="seo-nav-links" aria-label="Điều hướng chính">${[
-    link("/#/game", "Thử thách"),
-    link("/kien-thuc/", "Cẩm nang", "knowledge"),
-    link("/#/news", "Tin tức", "news"),
-    link("/#/quiz", "Thực hành"),
-    link("/#/stats", "Thành tích"),
-  ].join("")}</nav>`;
-  return html.replace(/<nav\s+class=["']seo-nav-links["'][^>]*>[\s\S]*?<\/nav>/i, nav);
-}
 function normalizeFavicon(html) {
   let next = html
-    .replace(/<link\s+rel=["']icon["'][^>]*>/gi, '<link rel="icon" type="image/png" sizes="96x96" href="/khien-so-logo.png" />')
-    .replace(/<link\s+rel=["']apple-touch-icon["'][^>]*>/gi, '<link rel="apple-touch-icon" href="/khien-so-logo.png" />');
+    .replace(/<link\s+rel=["']icon["'][^>]*>/gi, '<link rel="icon" type="image/png" sizes="96x96" href="/favicon.png?v=20260924" />')
+    .replace(/<link\s+rel=["']apple-touch-icon["'][^>]*>/gi, '<link rel="apple-touch-icon" href="/favicon.png?v=20260924" />');
   if (!/rel=["']icon["']/i.test(next)) {
-    next = next.replace("</head>", '  <link rel="icon" type="image/png" sizes="96x96" href="/khien-so-logo.png" />\n</head>');
+    next = next.replace("</head>", '  <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png?v=20260924" />\n</head>');
   }
   if (!/rel=["']apple-touch-icon["']/i.test(next)) {
-    next = next.replace("</head>", '  <link rel="apple-touch-icon" href="/khien-so-logo.png" />\n</head>');
+    next = next.replace("</head>", '  <link rel="apple-touch-icon" href="/favicon.png?v=20260924" />\n</head>');
   }
   return next;
-}
-
-function normalizeSitemapSurface(html, file) {
-  const withoutVisibleLinks = html.replace(/<a\s+href=["']\/sitemap\/["'][^>]*>[\s\S]*?<\/a>/gi, "");
-  if (!file.endsWith(`${path.sep}sitemap${path.sep}index.html`)) return withoutVisibleLinks;
-
-  const robots = /<meta\s+name=["']robots["'][^>]*>/i;
-  if (robots.test(withoutVisibleLinks)) {
-    return withoutVisibleLinks.replace(robots, '<meta name="robots" content="noindex,follow" />');
-  }
-  return withoutVisibleLinks.replace("</head>", '  <meta name="robots" content="noindex,follow" />\n</head>');
 }
 
 function ensureSearchMetadata(html) {
@@ -137,7 +107,7 @@ function ensureSearchMetadata(html) {
   if (!canonical || !title || !description || !isIndexable(html)) return html;
 
   const additions = [];
-  if (!/rel=["']icon["']/i.test(html)) additions.push('<link rel="icon" type="image/png" sizes="96x96" href="/khien-so-logo.png" />');
+  if (!/rel=["']icon["']/i.test(html)) additions.push('<link rel="icon" type="image/png" sizes="96x96" href="/favicon.png?v=20260924" />');
   if (!/hreflang=["']vi-VN["']/i.test(html)) additions.push(`<link rel="alternate" hreflang="vi-VN" href="${attrEscape(canonical)}" />`);
   if (!/hreflang=["']x-default["']/i.test(html)) additions.push(`<link rel="alternate" hreflang="x-default" href="${attrEscape(canonical)}" />`);
   if (!/property=["']og:site_name["']/i.test(html)) additions.push('<meta property="og:site_name" content="Cảnh Giác Số" />');
@@ -154,13 +124,12 @@ function ensureSearchMetadata(html) {
 }
 
 const records = [];
-await removeRetiredMethodology();
 for (const file of [HOME, ...(await htmlFiles(PUBLIC))]) {
   let html = await readFile(file, "utf8");
   const beforeNormalization = html;
   html = normalizeKnowledgeShell(html, file);
   html = normalizeSeoNavigation(html, file);
-  html = normalizeSitemapSurface(html, file);
+  html = normalizeSeoFooter(html);
   html = normalizeFavicon(html);
   html = ensureSearchMetadata(html);
   if (html !== beforeNormalization) {
