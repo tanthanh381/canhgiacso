@@ -72,8 +72,8 @@ function pageShell({ title, description, canonical, type, h1, eyebrow, lead, bod
   <link rel="alternate" hreflang="vi-VN" href="${canonical}" />
   <link rel="alternate" hreflang="x-default" href="${canonical}" />
   <link rel="stylesheet" href="/seo.css" />
-  <link rel="icon" type="image/png" href="/khien-so-logo.png" />
-  <link rel="apple-touch-icon" href="/khien-so-logo.png" />
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/favicon.png" />
   <meta property="og:type" content="website" />
   <meta property="og:locale" content="vi_VN" />
   <meta property="og:site_name" content="Cảnh Giác Số" />
