@@ -341,7 +341,7 @@ export function AdminPage({
       {tab === "content" && <div className="content-management-hub">
         <div className="content-management-intro">
           <div><span className="eyebrow">KHO NỘI DUNG WEBSITE</span><h2>Quản lý nội dung bài viết</h2><p>Tập trung toàn bộ nội dung có thể chỉnh sửa trong một bản nháp duy nhất. Chọn một nhóm để cập nhật, sau đó lưu bản nháp hoặc xuất bản khi đã rà soát.</p></div>
-          <div className="content-management-summary"><strong>{draft.newsArticles.length + draft.knowledgeCards.length + draft.scenarios.length + 1}</strong><span>nhóm nội dung đang quản lý</span></div>
+          <div className="content-management-summary"><strong>5</strong><span>nhóm nội dung đang quản lý</span></div>
         </div>
         <div className="content-management-grid">
           <article className="content-management-card content-management-card-featured">
