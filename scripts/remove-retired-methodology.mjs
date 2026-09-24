@@ -22,8 +22,7 @@ function removeRetiredReferences(html) {
     .replace(/<section[^>]+id=["']lookup-methodology-link["'][^>]*>[\s\S]*?<\/section>/gi, "")
     .replace(/\s*(?:Xem|Xem thêm|Xem chi tiết tại)\s*<a\s+href=["'](?:https:\/\/canhgiacso\.com)?\/phuong-phap-kiem-chung\/["'][^>]*>[\s\S]*?<\/a>/gi, "")
     .replace(/<a\s+href=["'](?:https:\/\/canhgiacso\.com)?\/phuong-phap-kiem-chung\/["'][^>]*>[\s\S]*?<\/a>/gi, "")
-    .replace(/,?\s*"publishingPrinciples"\s*:\s*"https:\/\/canhgiacso\.com\/phuong-phap-kiem-chung\/"\s*,?/gi, "")
-    .replace(/\s{2,}/g, " ");
+    .replace(/,?\s*"publishingPrinciples"\s*:\s*"https:\/\/canhgiacso\.com\/phuong-phap-kiem-chung\/"\s*,?/gi, "");
 }
 
 const files = [HOME, ...(await htmlFiles(PUBLIC))];
