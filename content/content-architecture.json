@@ -56,6 +56,13 @@
       ]
     },
     {
+      "id": "retired-content",
+      "description": "Remove explicitly retired pages and their internal references before sitemap generation.",
+      "stages": [
+        "remove-retired-methodology.mjs"
+      ]
+    },
+    {
       "id": "finalize",
       "description": "Derive canonical index inventory and sitemap from final compiled artifacts.",
       "stages": [
