@@ -69,14 +69,14 @@ function normalizeFavicon(html) {
 }
 
 function normalizeSitemapSurface(html, file) {
-  const withoutVisibleLinks = html.replace(/<a\\s+href=["']\\/sitemap\\/["'][^>]*>[\\s\\S]*?<\\/a>/gi, "");
+  const withoutVisibleLinks = html.replace(/<a\s+href=["']\/sitemap\/["'][^>]*>[\s\S]*?<\/a>/gi, "");
   if (!file.endsWith(`${path.sep}sitemap${path.sep}index.html`)) return withoutVisibleLinks;
 
-  const robots = /<meta\\s+name=["']robots["'][^>]*>/i;
+  const robots = /<meta\s+name=["']robots["'][^>]*>/i;
   if (robots.test(withoutVisibleLinks)) {
     return withoutVisibleLinks.replace(robots, '<meta name="robots" content="noindex,follow" />');
   }
-  return withoutVisibleLinks.replace("</head>", '  <meta name="robots" content="noindex,follow" />\\n</head>');
+  return withoutVisibleLinks.replace("</head>", '  <meta name="robots" content="noindex,follow" />\n</head>');
 }
 
 function ensureSearchMetadata(html) {
