@@ -63,7 +63,7 @@ function seoNavActiveKey(file) {
 }
 
 function normalizeSeoNavigation(html, file) {
-  if (!/<nav\\s+class=["']seo-nav-links["'][^>]*>[\\s\\S]*?<\\/nav>/i.test(html)) return html;
+  if (!/<nav\s+class=["']seo-nav-links["'][^>]*>[\s\S]*?<\/nav>/i.test(html)) return html;
   const active = seoNavActiveKey(file);
   const link = (href, label, key = "") => `<a href="${href}"${active === key ? ' aria-current="page"' : ""}>${label}</a>`;
   const nav = `<nav class="seo-nav-links" aria-label="Điều hướng chính">${[
@@ -73,9 +73,8 @@ function normalizeSeoNavigation(html, file) {
     link("/#/quiz", "Thực hành"),
     link("/#/stats", "Thành tích"),
   ].join("")}</nav>`;
-  return html.replace(/<nav\\s+class=["']seo-nav-links["'][^>]*>[\\s\\S]*?<\\/nav>/i, nav);
+  return html.replace(/<nav\s+class=["']seo-nav-links["'][^>]*>[\s\S]*?<\/nav>/i, nav);
 }
-
 function normalizeFavicon(html) {
   let next = html
     .replace(/<link\s+rel=["']icon["'][^>]*>/gi, '<link rel="icon" type="image/png" sizes="96x96" href="/khien-so-logo.png" />')
