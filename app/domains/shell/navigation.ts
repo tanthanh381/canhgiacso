@@ -8,6 +8,7 @@ export type HashRoute = {
 export const SIMULATION_BANNER_VIEWS: ReadonlySet<View> = new Set(["game", "quiz"]);
 
 export function routeFromHash(hash: string): HashRoute {
+  if (hash === "#/game") return { view: "game", newsSlug: "" };
   if (hash === "#/admin") return { view: "admin", newsSlug: "" };
   if (hash === "#/quiz") return { view: "quiz", newsSlug: "" };
   if (hash === "#/stats") return { view: "stats", newsSlug: "" };
