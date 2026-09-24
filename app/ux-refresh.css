@@ -9,8 +9,7 @@
   --ux-danger: #be1128;
 }
 
-/* Primary navigation: keep only Thử thách, Cẩm nang, Tin tức, Thành tích. */
-.topbar nav button:nth-child(4),
+/* Primary navigation: keep the same five public destinations on desktop and mobile. */
 .topbar nav button:nth-child(6),
 .topbar nav button:nth-child(7) { display: none; }
 
