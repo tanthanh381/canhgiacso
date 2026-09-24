@@ -47,9 +47,9 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: "/khien-so-logo.png",
-    shortcut: "/khien-so-logo.png",
-    apple: "/khien-so-logo.png",
+    icon: "/favicon.png?v=20260924",
+    shortcut: "/favicon.png?v=20260924",
+    apple: "/favicon.png?v=20260924",
   },
   openGraph: {
     title: "Cảnh Giác Số: Nhận diện lừa đảo trực tuyến",
