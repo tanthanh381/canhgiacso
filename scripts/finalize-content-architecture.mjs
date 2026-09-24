@@ -55,6 +55,19 @@ function normalizeKnowledgeShell(html, file) {
     .replaceAll('› <a href="/kien-thuc/">Kiến thức</a> ›', '› <a href="/kien-thuc/">Cẩm nang</a> ›');
 }
 
+function normalizeFavicon(html) {
+  let next = html
+    .replace(/<link\s+rel=["']icon["'][^>]*>/gi, '<link rel="icon" type="image/png" sizes="96x96" href="/favicon.png" />')
+    .replace(/<link\s+rel=["']apple-touch-icon["'][^>]*>/gi, '<link rel="apple-touch-icon" href="/favicon.png" />');
+  if (!/rel=["']icon["']/i.test(next)) {
+    next = next.replace("</head>", '  <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png" />\n</head>');
+  }
+  if (!/rel=["']apple-touch-icon["']/i.test(next)) {
+    next = next.replace("</head>", '  <link rel="apple-touch-icon" href="/favicon.png" />\n</head>');
+  }
+  return next;
+}
+
 function ensureSearchMetadata(html) {
   const canonical = match(html, /<link\s+rel=["']canonical["']\s+href=["']([^"']+)["']/i);
   const title = match(html, /<title>([\s\S]*?)<\/title>/i).replace(/\s+/g, " ");
@@ -62,7 +75,7 @@ function ensureSearchMetadata(html) {
   if (!canonical || !title || !description || !isIndexable(html)) return html;
 
   const additions = [];
-  if (!/rel=["']icon["']/i.test(html)) additions.push('<link rel="icon" type="image/png" href="/khien-so-logo.png" />');
+  if (!/rel=["']icon["']/i.test(html)) additions.push('<link rel="icon" type="image/png" sizes="96x96" href="/favicon.png" />');
   if (!/hreflang=["']vi-VN["']/i.test(html)) additions.push(`<link rel="alternate" hreflang="vi-VN" href="${attrEscape(canonical)}" />`);
   if (!/hreflang=["']x-default["']/i.test(html)) additions.push(`<link rel="alternate" hreflang="x-default" href="${attrEscape(canonical)}" />`);
   if (!/property=["']og:site_name["']/i.test(html)) additions.push('<meta property="og:site_name" content="Cảnh Giác Số" />');
@@ -82,6 +95,7 @@ const records = [];
 for (const file of [HOME, ...(await htmlFiles(PUBLIC))]) {
   let html = await readFile(file, "utf8");
   html = normalizeKnowledgeShell(html, file);
+  html = normalizeFavicon(html);
   const normalized = ensureSearchMetadata(html);
   if (normalized !== html) {
     await writeFile(file, normalized, "utf8");
