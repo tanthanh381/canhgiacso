@@ -37,19 +37,21 @@ export function navigateBrowser(currentView: View, nextView: View) {
     && !window.dispatchEvent(new Event("admin-before-leave", { cancelable: true }))
   ) return false;
 
-  if (nextView === "news") {
-    window.location.hash = "/news";
-  } else if (nextView === "quiz") {
-    window.location.hash = "/quiz";
-  } else if (nextView === "stats") {
-    window.location.hash = "/stats";
+  const hashByView: Partial<Record<View, string>> = {
+    game: "/game",
+    news: "/news",
+    quiz: "/quiz",
+    stats: "/stats",
+    admin: "/admin",
+  };
+  const nextHash = hashByView[nextView];
+
+  if (nextHash) {
+    window.location.hash = nextHash;
   } else if (window.location.hash.startsWith("#/news")) {
     window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
   }
-
-  if (nextView === "admin") {
-    window.location.hash = "/admin";
-  } else if (window.location.hash === "#/admin") {
+  if (!nextHash && window.location.hash === "#/admin") {
     window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
   }
 
