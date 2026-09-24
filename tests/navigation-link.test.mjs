@@ -45,8 +45,8 @@ test('primary navigation stays complete and consistent across app and static pag
   for (const label of ['Thử thách', 'Cẩm nang', 'Tin tức', 'Thực hành', 'Thành tích']) {
     assert.ok(finalizer.includes(label), `static navigation missing ${label}`);
   }
-  assert.ok(finalizer.includes('href="/#/quiz"'));
-  assert.ok(finalizer.includes('href="/#/stats"'));
+  assert.ok(finalizer.includes('link("/#/quiz", "Thực hành"'));
+  assert.ok(finalizer.includes('link("/#/stats", "Thành tích"'));
   assert.ok(navigation.includes('hashByView'));
   assert.ok(navigation.includes('if (hash === "#/quiz")'));
   assert.ok(navigation.includes('if (hash === "#/stats")'));
