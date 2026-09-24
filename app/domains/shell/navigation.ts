@@ -8,6 +8,7 @@ export type HashRoute = {
 export const SIMULATION_BANNER_VIEWS: ReadonlySet<View> = new Set(["game", "quiz"]);
 
 export function routeFromHash(hash: string): HashRoute {
+  if (hash === "#/game") return { view: "game", newsSlug: "" };
   if (hash === "#/admin") return { view: "admin", newsSlug: "" };
   if (hash === "#/dashboard") return { view: "dashboard", newsSlug: "" };
   if (hash === "#/knowledge") return { view: "knowledge", newsSlug: "" };
@@ -39,6 +40,7 @@ export function navigateBrowser(currentView: View, nextView: View) {
   ) return false;
 
   const hashByView: Partial<Record<View, string>> = {
+    game: "/game",
     knowledge: "/knowledge",
     news: "/news",
     quiz: "/quiz",
