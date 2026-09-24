@@ -68,6 +68,17 @@ function normalizeFavicon(html) {
   return next;
 }
 
+function normalizeSitemapSurface(html, file) {
+  const withoutVisibleLinks = html.replace(/<a\\s+href=["']\\/sitemap\\/["'][^>]*>[\\s\\S]*?<\\/a>/gi, "");
+  if (!file.endsWith(`${path.sep}sitemap${path.sep}index.html`)) return withoutVisibleLinks;
+
+  const robots = /<meta\\s+name=["']robots["'][^>]*>/i;
+  if (robots.test(withoutVisibleLinks)) {
+    return withoutVisibleLinks.replace(robots, '<meta name="robots" content="noindex,follow" />');
+  }
+  return withoutVisibleLinks.replace("</head>", '  <meta name="robots" content="noindex,follow" />\\n</head>');
+}
+
 function ensureSearchMetadata(html) {
   const canonical = match(html, /<link\s+rel=["']canonical["']\s+href=["']([^"']+)["']/i);
   const title = match(html, /<title>([\s\S]*?)<\/title>/i).replace(/\s+/g, " ");
@@ -96,6 +107,7 @@ for (const file of [HOME, ...(await htmlFiles(PUBLIC))]) {
   let html = await readFile(file, "utf8");
   const beforeNormalization = html;
   html = normalizeKnowledgeShell(html, file);
+  html = normalizeSitemapSurface(html, file);
   html = normalizeFavicon(html);
   html = ensureSearchMetadata(html);
   if (html !== beforeNormalization) {
