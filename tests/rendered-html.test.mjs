@@ -155,7 +155,7 @@ test("ships product metadata and social artwork", async () => {
   await access(new URL("../public/khien-so-logo.png", import.meta.url));
   await assert.rejects(access(new URL("../public/favicon.svg", import.meta.url)));
   await assert.rejects(access(new URL("../public/hdbank-logo.png", import.meta.url)));
-  await assert.rejects(access(new URL("../public/favicon.png", import.meta.url)));
+  await access(new URL("../public/favicon.png", import.meta.url));
   assert.match(ui, /function BrandMark/);
   assert.match(styles, /khien-so-logo\.png/);
   assert.doesNotMatch(styles, /khien-logo-shield|khien-logo-signal/);
