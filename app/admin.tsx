@@ -13,7 +13,7 @@ type AdminState = "checking" | "ready" | "forbidden" | "error";
 type ContentRole = "admin" | "editor";
 type ManagedRole = ContentRole | "member";
 type ManagedUser = { id: string; email: string; username: string; displayName: string; createdAt: string; role: ManagedRole };
-type AdminTab = "general" | "certificate" | "scenarios" | "knowledge" | "news" | "traffic" | "users";
+type AdminTab = "content" | "general" | "certificate" | "scenarios" | "knowledge" | "news" | "traffic" | "users";
 
 const difficultyOptions: Difficulty[] = ["Dễ", "Trung bình", "Khó", "Rất khó"];
 
@@ -50,7 +50,7 @@ export function AdminPage({
   const [access, setAccess] = useState<AdminState>(account ? "checking" : "forbidden");
   const [draft, setDraft] = useState(() => cloneContent(publishedContent));
   const [published, setPublished] = useState(() => cloneContent(publishedContent));
-  const [tab, setTab] = useState<AdminTab>("general");
+  const [tab, setTab] = useState<AdminTab>("content");
   const [selectedScenarioId, setSelectedScenarioId] = useState(publishedContent.scenarios[0]?.id ?? 1);
   const [status, setStatus] = useState("");
   const [savedSnapshot, setSavedSnapshot] = useState(JSON.stringify(publishedContent));
@@ -328,6 +328,7 @@ export function AdminPage({
       <p className="news-save-state" role="status">{JSON.stringify(draft) === savedSnapshot ? "Đã lưu bản nháp" : "Có thay đổi chưa lưu"}</p>
       <fieldset className="admin-edit-fieldset" disabled={busy}>
       <div className="admin-tabs" role="tablist" aria-label="Nhóm nội dung">
+        <button role="tab" aria-selected={tab === "content"} className={tab === "content" ? "active" : ""} onClick={() => setTab("content")}>Quản lý nội dung</button>
         <button role="tab" aria-selected={tab === "general"} className={tab === "general" ? "active" : ""} onClick={() => setTab("general")}>Nội dung chung</button>
         <button role="tab" aria-selected={tab === "certificate"} className={tab === "certificate" ? "active" : ""} onClick={() => setTab("certificate")}>Chứng nhận</button>
         <button role="tab" aria-selected={tab === "scenarios"} className={tab === "scenarios" ? "active" : ""} onClick={() => setTab("scenarios")}>Tình huống ({draft.scenarios.length})</button>
@@ -336,6 +337,42 @@ export function AdminPage({
         {role === "admin" && <button role="tab" aria-selected={tab === "traffic"} className={tab === "traffic" ? "active" : ""} onClick={() => setTab("traffic")}>Thống kê truy cập</button>}
         {role === "admin" && <button role="tab" aria-selected={tab === "users"} className={tab === "users" ? "active" : ""} onClick={() => setTab("users")}>Phân quyền ({managedUsers.length})</button>}
       </div>
+
+      {tab === "content" && <div className="content-management-hub">
+        <div className="content-management-intro">
+          <div><span className="eyebrow">KHO NỘI DUNG WEBSITE</span><h2>Quản lý nội dung bài viết</h2><p>Tập trung toàn bộ nội dung có thể chỉnh sửa trong một bản nháp duy nhất. Chọn một nhóm để cập nhật, sau đó lưu bản nháp hoặc xuất bản khi đã rà soát.</p></div>
+          <div className="content-management-summary"><strong>{draft.newsArticles.length + draft.knowledgeCards.length + draft.scenarios.length + 1}</strong><span>nhóm nội dung đang quản lý</span></div>
+        </div>
+        <div className="content-management-grid">
+          <article className="content-management-card content-management-card-featured">
+            <div className="content-management-card-head"><span className="content-management-icon">✎</span><span className="content-management-count">{draft.newsArticles.length} bài</span></div>
+            <div><h3>Bài viết / Tin tức</h3><p>Soạn bài bằng trình biên tập rich-text, cập nhật ảnh, SEO, nguồn, trạng thái bản nháp và ngày xuất bản.</p></div>
+            <div className="content-management-meta"><span>{draft.newsArticles.filter((article) => article.status !== "draft").length} đã xuất bản</span><span>{draft.newsArticles.filter((article) => article.status === "draft").length} bản nháp</span></div>
+            <button className="admin-secondary" onClick={() => setTab("news")}>Mở quản lý bài viết →</button>
+          </article>
+          <article className="content-management-card">
+            <div className="content-management-card-head"><span className="content-management-icon">▤</span><span className="content-management-count">{draft.knowledgeCards.length} thẻ</span></div>
+            <div><h3>Cẩm nang</h3><p>Điều chỉnh các thẻ kiến thức ngắn, tiêu đề, biểu tượng và nội dung hướng dẫn an toàn.</p></div>
+            <button className="admin-secondary" onClick={() => setTab("knowledge")}>Mở Cẩm nang →</button>
+          </article>
+          <article className="content-management-card">
+            <div className="content-management-card-head"><span className="content-management-icon">◇</span><span className="content-management-count">{draft.scenarios.length} tình huống</span></div>
+            <div><h3>Tình huống</h3><p>Quản lý bối cảnh, dấu hiệu cảnh báo, lựa chọn, đáp án an toàn và phản hồi giải thích.</p></div>
+            <button className="admin-secondary" onClick={() => setTab("scenarios")}>Mở Tình huống →</button>
+          </article>
+          <article className="content-management-card">
+            <div className="content-management-card-head"><span className="content-management-icon">Aa</span><span className="content-management-count">Nội dung chung</span></div>
+            <div><h3>Thông tin website</h3><p>Chỉnh sửa tiêu đề, nhãn, lời giới thiệu của thư viện, Cẩm nang, Tin tức, Dashboard và chân trang.</p></div>
+            <button className="admin-secondary" onClick={() => setTab("general")}>Mở nội dung chung →</button>
+          </article>
+          <article className="content-management-card">
+            <div className="content-management-card-head"><span className="content-management-icon">▣</span><span className="content-management-count">1 mẫu</span></div>
+            <div><h3>Chứng nhận</h3><p>Tùy chỉnh mẫu PDF, nội dung hiển thị, nhãn dữ liệu và phần ghi chú cuối chứng nhận.</p></div>
+            <button className="admin-secondary" onClick={() => setTab("certificate")}>Mở Chứng nhận →</button>
+          </article>
+        </div>
+        <div className="content-management-publishing" role="note"><strong>Quy trình cập nhật</strong><span>Thay đổi được giữ trong cùng một bản nháp. “Lưu bản nháp” không làm thay đổi nội dung người dùng đang xem; chỉ “Xuất bản” mới cập nhật bản công khai và chỉ Quản trị viên có quyền này.</span></div>
+      </div>}
 
       {tab === "general" && <div className="admin-form-grid">
         {([
