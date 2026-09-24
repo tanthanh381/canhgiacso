@@ -67,7 +67,7 @@ function normalizeSeoNavigation(html, file) {
   const active = seoNavActiveKey(file);
   const link = (href, label, key = "") => `<a href="${href}"${active === key ? ' aria-current="page"' : ""}>${label}</a>`;
   const nav = `<nav class="seo-nav-links" aria-label="Điều hướng chính">${[
-    link("/", "Thử thách"),
+    link("/#/game", "Thử thách"),
     link("/kien-thuc/", "Cẩm nang", "knowledge"),
     link("/#/news", "Tin tức", "news"),
     link("/#/quiz", "Thực hành"),
