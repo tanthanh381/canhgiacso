@@ -50,8 +50,6 @@ export function AppHeader({
           <button aria-current={view === "news" ? "page" : undefined} className={view === "news" ? "active" : ""} onClick={() => onNavigate("news")}>Tin tức</button>
           <button aria-current={view === "quiz" ? "page" : undefined} className={view === "quiz" ? "active" : ""} onClick={() => onNavigate("quiz")}>Thực hành</button>
           <button aria-current={view === "stats" ? "page" : undefined} className={view === "stats" ? "active" : ""} onClick={() => onNavigate("stats")}>Thành tích</button>
-          <button aria-current={view === "dashboard" ? "page" : undefined} className={view === "dashboard" ? "active" : ""} onClick={() => onNavigate("dashboard")}>Dashboard</button>
-          {account && <button aria-current={view === "admin" ? "page" : undefined} className={view === "admin" ? "active" : ""} onClick={() => onNavigate("admin")}>Quản lý nội dung</button>}
         </nav>
         <div className="top-actions">
           <button className="icon-button" aria-pressed={dark} onClick={onToggleDark} aria-label="Đổi chế độ sáng tối">{dark ? "☀" : "☾"}</button>
