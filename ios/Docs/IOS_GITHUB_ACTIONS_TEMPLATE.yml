@@ -1,0 +1,38 @@
+name: iOS
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, feat/ios-native-p0]
+
+permissions:
+  contents: read
+
+jobs:
+  swift-core:
+    name: Swift core checks
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - name: Run portable Swift contract checks
+        run: swift run CanhGiacSoCoreChecks
+        working-directory: ios
+      - name: Run XCTest suite
+        run: swift test
+        working-directory: ios
+
+  app-build:
+    name: Build SwiftUI app
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - name: Build iOS simulator app without signing
+        run: |
+          xcodebuild \
+            -project ios/CanhGiacSo.xcodeproj \
+            -scheme CanhGiacSo \
+            -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            build
