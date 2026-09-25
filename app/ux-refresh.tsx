@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { supabase } from "./supabase";
 
 type PrimaryView = "Thử thách" | "Cẩm nang" | "Tin tức" | "Thành tích";
 
@@ -35,6 +36,7 @@ export function UxRefresh() {
   const [scenariosOpen, setScenariosOpen] = useState(false);
   const [utilityOpen, setUtilityOpen] = useState(false);
   const [mobileKnowledgeOpen, setMobileKnowledgeOpen] = useState(false);
+  const [managementRole, setManagementRole] = useState<"admin" | "editor" | null>(null);
   const [version, setVersion] = useState(0);
 
   useEffect(() => {
@@ -110,10 +112,23 @@ export function UxRefresh() {
   const feedback = domReady ? document.querySelector<HTMLElement>(".feedback") : null;
   const knowledgeHero = domReady ? document.querySelector<HTMLElement>(".knowledge-hero") : null;
   const signedIn = domReady && Boolean(document.querySelector(".profile-button"));
-  const hasAdmin = domReady && Boolean(navButton("Quản trị"));
+  const hasAdmin = managementRole === "admin";
   const completed = domReady ? document.querySelectorAll(".scenario-number.done, .scenario-number.attempted").length : 0;
   const totalText = domReady ? document.querySelector(".scenario-count")?.textContent ?? "" : "";
   const total = domReady ? Number(totalText.split("/")[1]) || document.querySelectorAll(".scenario-item").length : 0;
+
+  useEffect(() => {
+    let active = true;
+    if (!signedIn) {
+      setManagementRole(null);
+      return () => { active = false; };
+    }
+    void supabase.rpc("get_content_management_role").then(({ data }) => {
+      if (!active) return;
+      setManagementRole(data === "admin" || data === "editor" ? data : null);
+    });
+    return () => { active = false; };
+  }, [signedIn]);
 
   useEffect(() => {
     app?.classList.toggle("ux-insight-open", insightOpen);
@@ -127,6 +142,12 @@ export function UxRefresh() {
     setUtilityOpen(false);
     setMobileKnowledgeOpen(false);
     activate(label);
+  };
+
+  const openAdminTab = (tab: "content" | "traffic" | "users") => {
+    setUtilityOpen(false);
+    setMobileKnowledgeOpen(false);
+    window.location.hash = tab === "content" ? "#/admin" : `#/admin?tab=${tab}`;
   };
 
   const openKnowledgeArticles = () => {
@@ -167,7 +188,7 @@ export function UxRefresh() {
   return <>
     {topActions && createPortal(<>
       {bannerDismissed && <button className="ux-simulation-chip" onClick={restoreBanner}><span aria-hidden="true">🛡</span> Mô phỏng</button>}
-      {signedIn && <div className="ux-utility-menu"><button className="ux-utility-trigger" aria-expanded={utilityOpen} aria-haspopup="true" aria-label="Mở chức năng quản lý" onClick={() => { setMobileKnowledgeOpen(false); setUtilityOpen((value) => !value); }}>•••</button>{utilityOpen && <div className="ux-utility-popover ux-utility-popover-desktop" aria-label="Chức năng quản lý"><button onClick={() => navigate("Dashboard")}>Dashboard</button>{hasAdmin && <button onClick={() => navigate("Quản trị")}>Quản trị</button>}</div>}</div>}
+      {signedIn && <div className="ux-utility-menu"><button className="ux-utility-trigger" aria-expanded={utilityOpen} aria-haspopup="true" aria-label="Mở chức năng quản lý" onClick={() => { setMobileKnowledgeOpen(false); setUtilityOpen((value) => !value); }}>•••</button>{utilityOpen && <div className="ux-utility-popover ux-utility-popover-desktop" aria-label="Chức năng quản lý"><button onClick={() => navigate("Dashboard")}>Dashboard</button><button onClick={() => openAdminTab("content")}>Quản lý nội dung</button>{hasAdmin && <><button onClick={() => openAdminTab("traffic")}>Thống kê truy cập</button><button onClick={() => openAdminTab("users")}>Phân quyền</button></>}</div>}</div>}
     </>, topActions)}
 
     {banner && !bannerDismissed && createPortal(<button className="ux-banner-close" aria-label="Ẩn lưu ý môi trường mô phỏng" onClick={dismissBanner}>×</button>, banner)}
@@ -200,7 +221,7 @@ export function UxRefresh() {
 
     {utilityOpen && <button className="ux-utility-backdrop" aria-label="Đóng menu quản lý" onClick={() => setUtilityOpen(false)} />}
     {mobileKnowledgeOpen && <button className="ux-mobile-menu-backdrop" aria-label="Đóng menu Cẩm nang" onClick={() => setMobileKnowledgeOpen(false)} />}
-    {utilityOpen && signedIn && <div className="ux-utility-popover ux-utility-popover-mobile" aria-label="Chức năng quản lý"><button onClick={() => navigate("Dashboard")}>Dashboard</button>{hasAdmin && <button onClick={() => navigate("Quản trị")}>Quản trị</button>}</div>}
+    {utilityOpen && signedIn && <div className="ux-utility-popover ux-utility-popover-mobile" aria-label="Chức năng quản lý"><button onClick={() => navigate("Dashboard")}>Dashboard</button><button onClick={() => openAdminTab("content")}>Quản lý nội dung</button>{hasAdmin && <><button onClick={() => openAdminTab("traffic")}>Thống kê truy cập</button><button onClick={() => openAdminTab("users")}>Phân quyền</button></>}</div>}
     {mobileKnowledgeOpen && (
       <div id="ux-mobile-knowledge-menu" className="ux-mobile-knowledge-menu" role="group" aria-label="Cẩm nang">
         <button type="button" onClick={openKnowledgeArticles}>
