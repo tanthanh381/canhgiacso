@@ -329,33 +329,34 @@ export function AdminPage({
   if (access === "forbidden") return <AdminGate title="Tài khoản chưa có quyền quản trị" detail="Quyền được kiểm tra trực tiếp trên máy chủ. Hãy liên hệ quản trị viên hệ thống để được cấp quyền." />;
   if (access === "error") return <AdminGate title="Chưa thể mở trang quản trị" detail="Hãy kiểm tra kết nối và bảo đảm migration quản trị nội dung đã được áp dụng." />;
 
+  const isIndependentAdminTab = tab === "traffic" || tab === "users";
+  const independentTitle = tab === "traffic" ? "Thống kê truy cập" : "Phân quyền";
+
   return (
     <section className="content-page admin-page">
       <div className="admin-heading">
-        <div><span className="eyebrow">CẢNH GIÁC SỐ · QUẢN TRỊ NỘI DUNG</span><h1>Trung tâm nội dung</h1><p>Chỉnh sửa bản nháp, rà soát và xuất bản nội dung cho toàn bộ website.</p></div>
-        <div className="admin-actions"><button className="admin-secondary" disabled={busy} onClick={() => { if (!window.confirm("Thay toàn bộ bản nháp bằng nội dung đang đăng? Các bài Draft sẽ bị bỏ khỏi bản nháp đang sửa.")) return; setDraft(cloneContent(published)); setStatus("Đã khôi phục bản nháp từ nội dung đang xuất bản."); }}>Khôi phục bản đã đăng</button><button className="admin-secondary" disabled={busy} onClick={() => void save("draft")}>Lưu bản nháp</button>{role === "admin" && <button className="primary-button" disabled={busy} onClick={() => void save("publish")}>Xuất bản</button>}</div>
+        <div><span className="eyebrow">CẢNH GIÁC SỐ · {isIndependentAdminTab ? "QUẢN TRỊ HỆ THỐNG" : "QUẢN TRỊ NỘI DUNG"}</span><h1>{isIndependentAdminTab ? independentTitle : "Trung tâm nội dung"}</h1><p>{isIndependentAdminTab ? "Khu vực quản trị độc lập, chỉ dành cho Quản trị viên." : "Chỉnh sửa bản nháp, rà soát và xuất bản nội dung cho toàn bộ website."}</p></div>
+        {isIndependentAdminTab ? <button className="admin-secondary" onClick={() => { setTab("content"); window.location.hash = "#/admin"; }}>← Quản lý nội dung</button> : <div className="admin-actions"><button className="admin-secondary" disabled={busy} onClick={() => { if (!window.confirm("Thay toàn bộ bản nháp bằng nội dung đang đăng? Các bài Draft sẽ bị bỏ khỏi bản nháp đang sửa.")) return; setDraft(cloneContent(published)); setStatus("Đã khôi phục bản nháp từ nội dung đang xuất bản."); }}>Khôi phục bản đã đăng</button><button className="admin-secondary" disabled={busy} onClick={() => void save("draft")}>Lưu bản nháp</button>{role === "admin" && <button className="primary-button" disabled={busy} onClick={() => void save("publish")}>Xuất bản</button>}</div>}
       </div>
-      <div className="admin-meta"><span><b>{role === "admin" ? "Quản trị viên" : "Biên tập viên"}:</b> {account.displayName} · {account.email}</span><span><b>Cập nhật gần nhất:</b> {updatedAt ? new Date(updatedAt).toLocaleString("vi-VN") : "Chưa có"}</span></div>
+      {!isIndependentAdminTab && <><div className="admin-meta"><span><b>{role === "admin" ? "Quản trị viên" : "Biên tập viên"}:</b> {account.displayName} · {account.email}</span><span><b>Cập nhật gần nhất:</b> {updatedAt ? new Date(updatedAt).toLocaleString("vi-VN") : "Chưa có"}</span></div>
       <div className="publishing-guardrail" role="note"><strong>Kiểm soát trước khi xuất bản</strong><span>Kiểm tra nguồn khuyến cáo · Không đưa dữ liệu cá nhân vào kịch bản · Chỉ một đáp án an toàn · Diễn đạt trung lập, không gây hoang mang</span></div>
       {role === "editor" && <div className="admin-role-note" role="note"><strong>Quyền Biên tập viên</strong><span>Bạn có thể chỉnh sửa và lưu bản nháp. Chỉ Quản trị viên mới được xuất bản nội dung.</span></div>}
       {status && <div className="admin-status" role="status" aria-live="polite">{status}</div>}
-      <p className="news-save-state" role="status">{JSON.stringify(draft) === savedSnapshot ? "Đã lưu bản nháp" : "Có thay đổi chưa lưu"}</p>
+      <p className="news-save-state" role="status">{JSON.stringify(draft) === savedSnapshot ? "Đã lưu bản nháp" : "Có thay đổi chưa lưu"}</p></>}
       <fieldset className="admin-edit-fieldset" disabled={busy}>
-      <div className="admin-tabs" role="tablist" aria-label="Nhóm nội dung">
+      {!isIndependentAdminTab && <div className="admin-tabs" role="tablist" aria-label="Nhóm nội dung">
         <button role="tab" aria-selected={tab === "content"} className={tab === "content" ? "active" : ""} onClick={() => setTab("content")}>Quản lý nội dung</button>
         <button role="tab" aria-selected={tab === "general"} className={tab === "general" ? "active" : ""} onClick={() => setTab("general")}>Nội dung chung</button>
         <button role="tab" aria-selected={tab === "certificate"} className={tab === "certificate" ? "active" : ""} onClick={() => setTab("certificate")}>Chứng nhận</button>
         <button role="tab" aria-selected={tab === "scenarios"} className={tab === "scenarios" ? "active" : ""} onClick={() => setTab("scenarios")}>Tình huống ({draft.scenarios.length})</button>
         <button role="tab" aria-selected={tab === "knowledge"} className={tab === "knowledge" ? "active" : ""} onClick={() => setTab("knowledge")}>Cẩm nang ({draft.knowledgeCards.length})</button>
         <button role="tab" aria-selected={tab === "news"} className={tab === "news" ? "active" : ""} onClick={() => setTab("news")}>Tin tức ({draft.newsArticles.length})</button>
-        {role === "admin" && <button role="tab" aria-selected={tab === "traffic"} className={tab === "traffic" ? "active" : ""} onClick={() => setTab("traffic")}>Thống kê truy cập</button>}
-        {role === "admin" && <button role="tab" aria-selected={tab === "users"} className={tab === "users" ? "active" : ""} onClick={() => setTab("users")}>Phân quyền ({managedUsers.length})</button>}
-      </div>
+      </div>}
 
       {tab === "content" && <div className="content-management-hub">
         <div className="content-management-intro">
           <div><span className="eyebrow">KHO NỘI DUNG WEBSITE</span><h2>Quản lý nội dung bài viết</h2><p>Tập trung toàn bộ nội dung có thể chỉnh sửa trong một bản nháp duy nhất. Chọn một nhóm để cập nhật, sau đó lưu bản nháp hoặc xuất bản khi đã rà soát.</p></div>
-          <div className="content-management-summary"><strong>{role === "admin" ? 7 : 5}</strong><span>nhóm nội dung đang quản lý</span></div>
+          <div className="content-management-summary"><strong>5</strong><span>nhóm nội dung đang quản lý</span></div>
         </div>
         <div className="content-management-grid">
           <article className="content-management-card content-management-card-featured">
@@ -384,18 +385,6 @@ export function AdminPage({
             <div><h3>Chứng nhận</h3><p>Tùy chỉnh mẫu PDF, nội dung hiển thị, nhãn dữ liệu và phần ghi chú cuối chứng nhận.</p></div>
             <button className="admin-secondary" onClick={() => setTab("certificate")}>Mở Chứng nhận →</button>
           </article>
-          {role === "admin" && <>
-            <article className="content-management-card content-management-card-admin">
-              <div className="content-management-card-head"><span className="content-management-icon">⌁</span><span className="content-management-count">Google · realtime</span></div>
-              <div><h3>Thống kê truy cập</h3><p>Theo dõi lượt truy cập, nguồn Google, trang đang được xem và các chỉ số phục vụ tối ưu website.</p></div>
-              <button className="admin-secondary" onClick={() => setTab("traffic")}>Mở Thống kê truy cập →</button>
-            </article>
-            <article className="content-management-card content-management-card-admin">
-              <div className="content-management-card-head"><span className="content-management-icon">◎</span><span className="content-management-count">{managedUsers.length} tài khoản</span></div>
-              <div><h3>Phân quyền</h3><p>Quản lý tài khoản Quản trị viên, Biên tập viên và Thành viên theo đúng quyền truy cập hệ thống.</p></div>
-              <button className="admin-secondary" onClick={() => setTab("users")}>Mở Phân quyền →</button>
-            </article>
-          </>}
         </div>
         <div className="content-management-publishing" role="note"><strong>Quy trình cập nhật</strong><span>Thay đổi được giữ trong cùng một bản nháp. “Lưu bản nháp” không làm thay đổi nội dung người dùng đang xem; chỉ “Xuất bản” mới cập nhật bản công khai và chỉ Quản trị viên có quyền này.</span></div>
       </div>}
