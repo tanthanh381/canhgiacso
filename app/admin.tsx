@@ -15,6 +15,13 @@ type ManagedRole = ContentRole | "member";
 type ManagedUser = { id: string; email: string; username: string; displayName: string; createdAt: string; role: ManagedRole };
 type AdminTab = "content" | "general" | "certificate" | "scenarios" | "knowledge" | "news" | "traffic" | "users";
 
+function adminTabFromHash(): AdminTab {
+  if (typeof window === "undefined") return "content";
+  const query = window.location.hash.split("?")[1] ?? "";
+  const tab = new URLSearchParams(query).get("tab");
+  return tab === "traffic" || tab === "users" ? tab : "content";
+}
+
 const difficultyOptions: Difficulty[] = ["Dễ", "Trung bình", "Khó", "Rất khó"];
 
 function cloneContent(content: SiteContent): SiteContent {
@@ -50,7 +57,7 @@ export function AdminPage({
   const [access, setAccess] = useState<AdminState>(account ? "checking" : "forbidden");
   const [draft, setDraft] = useState(() => cloneContent(publishedContent));
   const [published, setPublished] = useState(() => cloneContent(publishedContent));
-  const [tab, setTab] = useState<AdminTab>("content");
+  const [tab, setTab] = useState<AdminTab>(adminTabFromHash);
   const [selectedScenarioId, setSelectedScenarioId] = useState(publishedContent.scenarios[0]?.id ?? 1);
   const [status, setStatus] = useState("");
   const [savedSnapshot, setSavedSnapshot] = useState(JSON.stringify(publishedContent));
@@ -61,6 +68,13 @@ export function AdminPage({
   const [changingUserId, setChangingUserId] = useState<string | null>(null);
   const [grantIdentity, setGrantIdentity] = useState("");
   const [grantRole, setGrantRole] = useState<ContentRole>("editor");
+
+  useEffect(() => {
+    const syncTabFromHash = () => setTab(adminTabFromHash());
+    syncTabFromHash();
+    window.addEventListener("hashchange", syncTabFromHash);
+    return () => window.removeEventListener("hashchange", syncTabFromHash);
+  }, []);
 
   useEffect(() => {
     if (!account) return;
