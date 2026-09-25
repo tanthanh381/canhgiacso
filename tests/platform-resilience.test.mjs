@@ -37,6 +37,10 @@ test("navigation popovers use native button keyboard semantics instead of incomp
   assert.doesNotMatch(ux, /aria-controls="ux-utility-popover"/);
   assert.doesNotMatch(shell, />Dashboard<\/button>/);
   assert.doesNotMatch(shell, />Quản lý nội dung<\/button>/);
+  assert.match(ux, /const hasContentManagement = managementRole === "admin" \|\| managementRole === "editor"/);
+  assert.match(ux, /const canUseManagementMenu = signedIn && hasContentManagement/);
+  assert.match(ux, /canUseManagementMenu && <div className="ux-utility-menu"/);
+  assert.match(ux, /hasAdmin && <button onClick=\{openDashboard\}>Dashboard<\/button>/);
   assert.match(ux, /openDashboard/);
   assert.match(ux, /openAdminTab\("traffic"\)/);
   assert.match(ux, /openAdminTab\("users"\)/);
