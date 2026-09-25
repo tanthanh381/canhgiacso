@@ -149,6 +149,11 @@ test.describe("mobile interaction states", () => {
 
   test("utility menu is mutually exclusive with Cẩm nang", async ({ page }) => {
     await waitForApp(page);
+    await page.route("**/rest/v1/rpc/get_content_management_role", (route) => route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify("admin"),
+    }));
 
     await page.evaluate(() => {
       const actions = document.querySelector(".top-actions");
