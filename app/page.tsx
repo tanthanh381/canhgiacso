@@ -287,7 +287,7 @@ export default function Home() {
     setDifficulty("Tất cả");
     setQuery("");
     const route = routeFromHash(window.location.hash);
-    if (route.view === "game" && window.location.hash !== "#/admin" && !window.location.hash.startsWith("#/admin?") && !window.location.hash.startsWith("#/news")) setView("game");
+    if (route.view === "game" && window.location.hash !== "#/admin") setView("game");
   }
 
   function loadGuestProgress() {
