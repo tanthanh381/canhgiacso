@@ -90,7 +90,8 @@ public struct SupabaseClient: Sendable {
         body: Body,
         accessToken: String?
     ) throws -> URLRequest {
-        var components = URLComponents(url: configuration.supabaseURL.appendingPathComponent(path), resolvingAgainstBaseURL: false)
+        let normalizedPath = path.split(separator: "/").joined(separator: "/")
+        var components = URLComponents(url: configuration.supabaseURL.appendingPathComponent(normalizedPath), resolvingAgainstBaseURL: false)
         components?.queryItems = queryItems.isEmpty ? nil : queryItems
         guard let url = components?.url else { throw SupabaseClientError.invalidResponse }
 
