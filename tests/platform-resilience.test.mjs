@@ -35,7 +35,9 @@ test("navigation popovers use native button keyboard semantics instead of incomp
   assert.match(ux, /id="ux-mobile-knowledge-menu" className="ux-mobile-knowledge-menu" role="group"/);
   assert.match(ux, /aria-haspopup="true"/);
   assert.doesNotMatch(ux, /aria-controls="ux-utility-popover"/);
-  assert.match(shell, />Quản lý nội dung<\/button>/);
+  assert.doesNotMatch(shell, />Dashboard<\/button>/);
+  assert.doesNotMatch(shell, />Quản lý nội dung<\/button>/);
+  assert.match(ux, /openDashboard/);
   assert.match(ux, /openAdminTab\("traffic"\)/);
   assert.match(ux, /openAdminTab\("users"\)/);
 });
