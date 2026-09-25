@@ -29,7 +29,7 @@ test("server renders the Cảnh Giác Số experience", async () => {
   assert.match(html, /Đăng nhập/);
   assert.match(html, /Đăng ký/);
   assert.match(html, /Đang tham gia với tư cách khách/);
-  assert.match(html, />Dashboard</);
+  assert.doesNotMatch(html, />Dashboard</);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/i);
 });
 
