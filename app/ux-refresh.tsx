@@ -112,7 +112,7 @@ export function UxRefresh() {
   const feedback = domReady ? document.querySelector<HTMLElement>(".feedback") : null;
   const knowledgeHero = domReady ? document.querySelector<HTMLElement>(".knowledge-hero") : null;
   const signedIn = domReady && Boolean(document.querySelector(".profile-button"));
-  const hasAdmin = managementRole === "admin";
+  const hasAdmin = signedIn && managementRole === "admin";
   const completed = domReady ? document.querySelectorAll(".scenario-number.done, .scenario-number.attempted").length : 0;
   const totalText = domReady ? document.querySelector(".scenario-count")?.textContent ?? "" : "";
   const total = domReady ? Number(totalText.split("/")[1]) || document.querySelectorAll(".scenario-item").length : 0;
@@ -120,7 +120,6 @@ export function UxRefresh() {
   useEffect(() => {
     let active = true;
     if (!signedIn) {
-      setManagementRole(null);
       return () => { active = false; };
     }
     void supabase.rpc("get_content_management_role").then(({ data }) => {
