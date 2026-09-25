@@ -865,7 +865,7 @@ export default function Home() {
                 <div className="scenario-title-row"><span className="scenario-hero-icon">{selected.icon}</span><div><span className="eyebrow">TÌNH HUỐNG {String(selected.id).padStart(2, "0")}</span><h2>{selected.title}</h2></div></div>
                 <div className="story-box"><span className="quote-mark">“</span><p>{selected.story}</p></div>
                 <div className="red-flags"><strong>Dấu hiệu cần quan sát</strong><div>{selected.redFlags.map((flag) => <span key={flag}>△ {flag}</span>)}</div></div>
-                <h3 className="decision-title">Bạn sẽ xử lý thế nào?</h3>
+                <h3 className="decision-title">Đâu là hành động an toàn nhất đầu tiên?</h3>
                 <div className="choice-list">
                   {selected.choices.map((choice, index) => {
                     const isChosen = selectedAnswer === index;

@@ -1,5 +1,6 @@
 import { newsErrors, type RichNode } from './news-content';
 import { defaultCertificateDesign, normalizeCertificateDesign, type CertificateDesign } from "./certificate-design";
+import { challengeDifficultyUpgrades } from "./domains/training/difficulty-upgrade";
 export type Difficulty = "Dễ" | "Trung bình" | "Khó" | "Rất khó";
 
 export type Choice = {
@@ -551,7 +552,12 @@ const scenarioDefinitions: Scenario[] = [
   },
 ];
 
-export const scenarios: Scenario[] = scenarioDefinitions;
+export const scenarios: Scenario[] = scenarioDefinitions.map((scenario) => {
+  const upgrade = challengeDifficultyUpgrades[scenario.id];
+  return upgrade
+    ? { ...scenario, choices: upgrade.choices.map((text) => ({ text })) }
+    : scenario;
+});
 
 export type KnowledgeCard = {
   icon: string;
