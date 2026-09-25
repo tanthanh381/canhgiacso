@@ -341,7 +341,7 @@ export function AdminPage({
       {tab === "content" && <div className="content-management-hub">
         <div className="content-management-intro">
           <div><span className="eyebrow">KHO NỘI DUNG WEBSITE</span><h2>Quản lý nội dung bài viết</h2><p>Tập trung toàn bộ nội dung có thể chỉnh sửa trong một bản nháp duy nhất. Chọn một nhóm để cập nhật, sau đó lưu bản nháp hoặc xuất bản khi đã rà soát.</p></div>
-          <div className="content-management-summary"><strong>5</strong><span>nhóm nội dung đang quản lý</span></div>
+          <div className="content-management-summary"><strong>{role === "admin" ? 7 : 5}</strong><span>nhóm nội dung đang quản lý</span></div>
         </div>
         <div className="content-management-grid">
           <article className="content-management-card content-management-card-featured">
@@ -370,6 +370,18 @@ export function AdminPage({
             <div><h3>Chứng nhận</h3><p>Tùy chỉnh mẫu PDF, nội dung hiển thị, nhãn dữ liệu và phần ghi chú cuối chứng nhận.</p></div>
             <button className="admin-secondary" onClick={() => setTab("certificate")}>Mở Chứng nhận →</button>
           </article>
+          {role === "admin" && <>
+            <article className="content-management-card content-management-card-admin">
+              <div className="content-management-card-head"><span className="content-management-icon">⌁</span><span className="content-management-count">Google · realtime</span></div>
+              <div><h3>Thống kê truy cập</h3><p>Theo dõi lượt truy cập, nguồn Google, trang đang được xem và các chỉ số phục vụ tối ưu website.</p></div>
+              <button className="admin-secondary" onClick={() => setTab("traffic")}>Mở Thống kê truy cập →</button>
+            </article>
+            <article className="content-management-card content-management-card-admin">
+              <div className="content-management-card-head"><span className="content-management-icon">◎</span><span className="content-management-count">{managedUsers.length} tài khoản</span></div>
+              <div><h3>Phân quyền</h3><p>Quản lý tài khoản Quản trị viên, Biên tập viên và Thành viên theo đúng quyền truy cập hệ thống.</p></div>
+              <button className="admin-secondary" onClick={() => setTab("users")}>Mở Phân quyền →</button>
+            </article>
+          </>}
         </div>
         <div className="content-management-publishing" role="note"><strong>Quy trình cập nhật</strong><span>Thay đổi được giữ trong cùng một bản nháp. “Lưu bản nháp” không làm thay đổi nội dung người dùng đang xem; chỉ “Xuất bản” mới cập nhật bản công khai và chỉ Quản trị viên có quyền này.</span></div>
       </div>}
