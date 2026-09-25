@@ -10,6 +10,7 @@ export const SIMULATION_BANNER_VIEWS: ReadonlySet<View> = new Set(["game", "quiz
 export function routeFromHash(hash: string): HashRoute {
   if (hash === "#/game") return { view: "game", newsSlug: "" };
   if (hash === "#/admin" || hash.startsWith("#/admin?")) return { view: "admin", newsSlug: "" };
+  if (hash === "#/dashboard") return { view: "dashboard", newsSlug: "" };
   if (hash === "#/quiz") return { view: "quiz", newsSlug: "" };
   if (hash === "#/stats") return { view: "stats", newsSlug: "" };
   if (hash.startsWith("#/news/")) return { view: "news", newsSlug: hash.slice(7) };
@@ -44,6 +45,7 @@ export function navigateBrowser(currentView: View, nextView: View) {
     news: "/news",
     quiz: "/quiz",
     stats: "/stats",
+    dashboard: "/dashboard",
     admin: "/admin",
   };
   const nextHash = hashByView[nextView];
