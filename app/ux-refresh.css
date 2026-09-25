@@ -9,7 +9,8 @@
   --ux-danger: #be1128;
 }
 
-/* Primary navigation: keep the same five public destinations on desktop and mobile. */
+/* Primary navigation: keep only Thử thách, Cẩm nang, Tin tức, Thành tích. */
+.topbar nav button:nth-child(4),
 .topbar nav button:nth-child(6),
 .topbar nav button:nth-child(7) { display: none; }
 
@@ -140,7 +141,7 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
 .ux-practice-cta { margin-top: 16px; border-color: var(--ux-brand-dark); background: var(--ux-brand-dark); color: #fff; width: max-content; }
 .ux-utility-menu { position: relative; }
 .ux-utility-trigger { width: 38px; height: 38px; border: 1px solid var(--line); border-radius: 50%; background: var(--surface); cursor: pointer; font-weight: 900; letter-spacing: 1px; }
-.ux-utility-popover { position: absolute; right: 0; top: calc(100% + 8px); z-index: 90; width: 150px; padding: 5px; border: 1px solid var(--line); border-radius: 11px; background: var(--surface); box-shadow: var(--shadow); }
+.ux-utility-popover { position: absolute; right: 0; top: calc(100% + 8px); z-index: 90; width: 220px; padding: 5px; border: 1px solid var(--line); border-radius: 11px; background: var(--surface); box-shadow: var(--shadow); }
 .ux-utility-popover button { width: 100%; border: 0; background: transparent; border-radius: 7px; padding: 9px 10px; text-align: left; font-size: 12px; cursor: pointer; }
 .ux-utility-popover button:hover { background: var(--paper); }
 .ux-utility-popover-mobile { display: none; }
