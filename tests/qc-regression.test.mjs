@@ -107,6 +107,8 @@ test("QC fixes keep destructive reset explicit and mobile text readable", async 
     read("../vite.github-pages.config.ts"),
   ]);
   assert.match(page, /resetConfirmOpen/);
+  assert.match(page, /Chơi lại từ đầu/);
+  assert.match(page, /setCompletionCertificate\(null\)/);
   assert.match(page, /Thao tác này không thể hoàn tác/);
   assert.match(page, /Xóa và bắt đầu lại/);
   assert.match(page, /Lịch sử lượt chơi/);

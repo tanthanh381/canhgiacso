@@ -497,7 +497,8 @@ export default function Home() {
         return;
       }
       applyGameState(data as GameState);
-      setAnswer(null); setAnswerOutcome(null); setLossNotice(null); setSelectedId(scenarios[0].id); setView("game");
+      setAnswer(null); setAnswerOutcome(null); setCompletionCertificate(null); setLossNotice(null);
+      setDifficulty("Tất cả"); setQuery(""); setSelectedId(scenarios[0]?.id ?? 1); setView("game");
       setResetBusy(false); setResetConfirmOpen(false);
       setDataStatus("Đã mở lượt chơi mới. Lịch sử lượt trước được giữ lại.");
       return;
@@ -510,7 +511,7 @@ export default function Home() {
     setAnswer(null);
     setAnswerOutcome(null);
     setLossNotice(null);
-    setSelectedId(1);
+    setDifficulty("Tất cả"); setQuery(""); setSelectedId(scenarios[0]?.id ?? 1);
     setView("game");
     setResetBusy(false);
     setResetConfirmOpen(false);
@@ -846,6 +847,10 @@ export default function Home() {
 
           <section className="stage">
             {!sessionAccount && <div className="guest-mode-note" role="note"><span><b>Đang tham gia với tư cách khách</b><small>Không cần tài khoản · Kết quả chỉ lưu trên thiết bị này</small></span><button onClick={() => openAuth("register")}>Đăng ký để lưu lượt chơi mới</button></div>}
+            <div className="game-toolbar" aria-label="Tùy chọn lượt chơi">
+              <span><strong>Muốn làm lại từ đầu?</strong><small>Tiến trình hiện tại sẽ được xác nhận trước khi đặt lại.</small></span>
+              <button className="reset-run-button" disabled={savingChoice || !!pendingChoice || resetBusy} onClick={() => setResetConfirmOpen(true)} aria-label="Chơi lại toàn bộ thử thách từ đầu">{resetBusy ? "Đang đặt lại…" : "↻ Chơi lại từ đầu"}</button>
+            </div>
             <div className="status-grid">
               <div className="status-card"><BadgeIcon>₫</BadgeIcon><span><small>Tài sản an toàn</small><strong>{money.format(balance)}đ</strong></span></div>
               <div className="status-card"><BadgeIcon>⌁</BadgeIcon><span className="status-value"><small>Mức cảnh giác</small><strong>{awareness}%</strong><span className="meter" aria-hidden="true"><i style={{ width: `${awareness}%` }} /></span></span></div>
