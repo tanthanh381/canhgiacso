@@ -9,7 +9,7 @@ export const SIMULATION_BANNER_VIEWS: ReadonlySet<View> = new Set(["game", "quiz
 
 export function routeFromHash(hash: string): HashRoute {
   if (hash === "#/game") return { view: "game", newsSlug: "" };
-  if (hash === "#/admin") return { view: "admin", newsSlug: "" };
+  if (hash === "#/admin" || hash.startsWith("#/admin?")) return { view: "admin", newsSlug: "" };
   if (hash === "#/quiz") return { view: "quiz", newsSlug: "" };
   if (hash === "#/stats") return { view: "stats", newsSlug: "" };
   if (hash.startsWith("#/news/")) return { view: "news", newsSlug: hash.slice(7) };
@@ -18,7 +18,9 @@ export function routeFromHash(hash: string): HashRoute {
 }
 
 export function canChangeHash(previousHash: string, nextHash: string) {
-  if (previousHash !== "#/admin" || nextHash === previousHash) return true;
+  const previousIsAdmin = previousHash === "#/admin" || previousHash.startsWith("#/admin?");
+  const nextIsAdmin = nextHash === "#/admin" || nextHash.startsWith("#/admin?");
+  if (!previousIsAdmin || nextIsAdmin || nextHash === previousHash) return true;
   return window.dispatchEvent(new Event("admin-before-leave", { cancelable: true }));
 }
 
