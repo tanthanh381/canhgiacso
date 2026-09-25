@@ -153,6 +153,9 @@ test.describe("mobile interaction states", () => {
     await page.evaluate(() => {
       const actions = document.querySelector(".top-actions");
       if (!actions || actions.querySelector(".profile-button")) return;
+      // Mirror the signed-in header rendered by AppHeader: authentication
+      // actions are replaced by the profile control rather than shown beside it.
+      actions.querySelector(".auth-actions")?.remove();
       const profile = document.createElement("button");
       profile.className = "profile-button";
       profile.textContent = "QC";
