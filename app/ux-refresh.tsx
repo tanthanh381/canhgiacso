@@ -113,6 +113,8 @@ export function UxRefresh() {
   const knowledgeHero = domReady ? document.querySelector<HTMLElement>(".knowledge-hero") : null;
   const signedIn = domReady && Boolean(document.querySelector(".profile-button"));
   const hasAdmin = signedIn && managementRole === "admin";
+  const hasContentManagement = managementRole === "admin" || managementRole === "editor";
+  const canUseManagementMenu = signedIn && hasContentManagement;
   const completed = domReady ? document.querySelectorAll(".scenario-number.done, .scenario-number.attempted").length : 0;
   const totalText = domReady ? document.querySelector(".scenario-count")?.textContent ?? "" : "";
   const total = domReady ? Number(totalText.split("/")[1]) || document.querySelectorAll(".scenario-item").length : 0;
@@ -193,7 +195,7 @@ export function UxRefresh() {
   return <>
     {topActions && createPortal(<>
       {bannerDismissed && <button className="ux-simulation-chip" onClick={restoreBanner}><span aria-hidden="true">🛡</span> Mô phỏng</button>}
-      {signedIn && <div className="ux-utility-menu"><button className="ux-utility-trigger" aria-expanded={utilityOpen} aria-haspopup="true" aria-label="Mở chức năng quản lý" onClick={() => { setMobileKnowledgeOpen(false); setUtilityOpen((value) => !value); }}>•••</button>{utilityOpen && <div className="ux-utility-popover ux-utility-popover-desktop" aria-label="Chức năng quản lý"><button onClick={openDashboard}>Dashboard</button><button onClick={() => openAdminTab("content")}>Quản lý nội dung</button>{hasAdmin && <><button onClick={() => openAdminTab("traffic")}>Thống kê truy cập</button><button onClick={() => openAdminTab("users")}>Phân quyền</button></>}</div>}</div>}
+      {canUseManagementMenu && <div className="ux-utility-menu"><button className="ux-utility-trigger" aria-expanded={utilityOpen} aria-haspopup="true" aria-label="Mở chức năng quản lý" onClick={() => { setMobileKnowledgeOpen(false); setUtilityOpen((value) => !value); }}>•••</button>{utilityOpen && <div className="ux-utility-popover ux-utility-popover-desktop" aria-label="Chức năng quản lý">{hasAdmin && <button onClick={openDashboard}>Dashboard</button>}<button onClick={() => openAdminTab("content")}>Quản lý nội dung</button>{hasAdmin && <><button onClick={() => openAdminTab("traffic")}>Thống kê truy cập</button><button onClick={() => openAdminTab("users")}>Phân quyền</button></>}</div>}</div>}
     </>, topActions)}
 
     {banner && !bannerDismissed && createPortal(<button className="ux-banner-close" aria-label="Ẩn lưu ý môi trường mô phỏng" onClick={dismissBanner}>×</button>, banner)}
@@ -226,7 +228,7 @@ export function UxRefresh() {
 
     {utilityOpen && <button className="ux-utility-backdrop" aria-label="Đóng menu quản lý" onClick={() => setUtilityOpen(false)} />}
     {mobileKnowledgeOpen && <button className="ux-mobile-menu-backdrop" aria-label="Đóng menu Cẩm nang" onClick={() => setMobileKnowledgeOpen(false)} />}
-    {utilityOpen && signedIn && <div className="ux-utility-popover ux-utility-popover-mobile" aria-label="Chức năng quản lý"><button onClick={openDashboard}>Dashboard</button><button onClick={() => openAdminTab("content")}>Quản lý nội dung</button>{hasAdmin && <><button onClick={() => openAdminTab("traffic")}>Thống kê truy cập</button><button onClick={() => openAdminTab("users")}>Phân quyền</button></>}</div>}
+    {utilityOpen && canUseManagementMenu && <div className="ux-utility-popover ux-utility-popover-mobile" aria-label="Chức năng quản lý">{hasAdmin && <button onClick={openDashboard}>Dashboard</button>}<button onClick={() => openAdminTab("content")}>Quản lý nội dung</button>{hasAdmin && <><button onClick={() => openAdminTab("traffic")}>Thống kê truy cập</button><button onClick={() => openAdminTab("users")}>Phân quyền</button></>}</div>}
     {mobileKnowledgeOpen && (
       <div id="ux-mobile-knowledge-menu" className="ux-mobile-knowledge-menu" role="group" aria-label="Cẩm nang">
         <button type="button" onClick={openKnowledgeArticles}>
