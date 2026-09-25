@@ -8,10 +8,12 @@ test("trang Quản trị có trung tâm quản lý nội dung bài viết", asyn
   assert.match(source, />Quản lý nội dung<\/button>/);
   assert.match(source, /<h2>Quản lý nội dung bài viết<\/h2>/);
   assert.match(source, /Mở quản lý bài viết/);
-  assert.match(source, /Thống kê truy cập/);
-  assert.match(source, /Mở Thống kê truy cập/);
   assert.match(source, /<h3>Chứng nhận<\/h3>/);
-  assert.match(source, /<h3>Phân quyền<\/h3>/);
-  assert.match(source, /Mở Phân quyền/);
+  assert.doesNotMatch(source, /content-management-card-admin/);
+  assert.doesNotMatch(source, /Mở Thống kê truy cập/);
+  assert.doesNotMatch(source, /Mở Phân quyền/);
+  assert.match(source, /isIndependentAdminTab/);
+  assert.match(source, /tab === "traffic" && role === "admin"/);
+  assert.match(source, /tab === "users" && role === "admin"/);
   assert.match(source, /save_managed_site_content/);
 });
