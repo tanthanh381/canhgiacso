@@ -64,6 +64,18 @@ private struct TrainingStatusCard: View {
             }
 
             if model.isSignedIn {
+                if let currentRunId = model.gameState?.runId.uuidString.lowercased(),
+                   let certificate = model.certificates.first(where: { $0.runId.lowercased() == currentRunId }) {
+                    CertificateSummary(certificate: certificate)
+                } else if (model.gameState?.results.count ?? 0) >= model.content.scenarios.count {
+                    Button {
+                        Task { await model.issueCurrentCertificate() }
+                    } label: {
+                        Label("Nhận chứng nhận", systemImage: "doc.badge.seal")
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+
                 Button(role: .destructive) {
                     Task { await model.restartGame() }
                 } label: {
@@ -77,6 +89,27 @@ private struct TrainingStatusCard: View {
             }
         }
         .padding(.vertical, 6)
+    }
+}
+
+private struct CertificateSummary: View {
+    let certificate: TrainingCertificate
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Label("Chứng nhận đã cấp", systemImage: "doc.badge.seal.fill")
+                .font(.headline)
+                .foregroundStyle(.green)
+            Text(certificate.certificateCode)
+                .font(.title3)
+                .fontWeight(.bold)
+            Text("\(certificate.correct)/\(certificate.scenarioTotal) đúng · \(certificate.accuracy)% · \(certificate.rating.rawValue)")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.green.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
     }
 }
 

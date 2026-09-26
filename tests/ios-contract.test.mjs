@@ -13,16 +13,36 @@ test("iOS client uses only the publishable Supabase boundary", () => {
   assert.match(client, /get_public_site_content/);
   assert.match(client, /get_game_state/);
   assert.match(client, /submit_game_choice/);
+  assert.match(client, /get_my_training_certificates/);
+  assert.match(client, /issue_training_certificate/);
   assert.match(client, /Bearer \\\(accessToken \?\? configuration\.publishableKey\)/);
 });
 
-test("iOS app persists sessions in Keychain instead of user defaults", () => {
+test("iOS app persists and refreshes sessions without user defaults", () => {
   const sessionStore = read("ios/CanhGiacSoApp/SessionStore.swift");
+  const model = read("ios/CanhGiacSoApp/AppModel.swift");
+  const client = read("ios/CanhGiacSoCore/SupabaseClient.swift");
 
   assert.match(sessionStore, /import Security/);
   assert.match(sessionStore, /kSecClassGenericPassword/);
   assert.match(sessionStore, /kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly/);
   assert.doesNotMatch(sessionStore, /UserDefaults/);
+  assert.match(client, /grant_type", value: "refresh_token"/);
+  assert.match(model, /refreshSessionIfNeeded/);
+  assert.match(model, /sessionStore\.save\(refreshed\)/);
+});
+
+test("iOS app exposes server-issued certificates", () => {
+  const models = read("ios/CanhGiacSoCore/Models.swift");
+  const model = read("ios/CanhGiacSoApp/AppModel.swift");
+  const training = read("ios/CanhGiacSoApp/TrainingView.swift");
+  const account = read("ios/CanhGiacSoApp/AccountView.swift");
+
+  assert.match(models, /struct TrainingCertificate/);
+  assert.match(model, /issueCurrentCertificate/);
+  assert.match(training, /Nhận chứng nhận/);
+  assert.match(training, /Chứng nhận đã cấp/);
+  assert.match(account, /Section\("Chứng nhận"\)/);
 });
 
 test("iOS CI template builds the app and runs Swift checks", () => {
@@ -43,6 +63,7 @@ test("iOS release docs cover security, TestFlight and App Store readiness", () =
   assert.match(readiness, /App Store Connect/);
   assert.match(readiness, /Privacy Nutrition Label/);
   assert.match(readiness, /workflow scope/);
+  assert.match(readiness, /refresh-token/);
   assert.match(security, /Row Level Security/);
   assert.match(security, /publishable key/);
   assert.match(security, /service_role/);

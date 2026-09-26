@@ -18,4 +18,23 @@ check(request.value(forHTTPHeaderField: "apikey")?.hasPrefix("sb_publishable_") 
 check(request.value(forHTTPHeaderField: "Authorization") == "Bearer \(AppConfiguration.production.publishableKey)", "anonymous RPCs should use the publishable bearer")
 check(request.value(forHTTPHeaderField: "Authorization")?.contains("service_role") == false, "service role keys must never ship to iOS")
 
+let certificatePayload = """
+{
+  "certificateId": "cert-1",
+  "certificateCode": "CGS-2026-ABCDEF1234",
+  "runId": "11111111-1111-1111-1111-111111111111",
+  "issuedAt": "2026-09-26T00:00:00Z",
+  "displayName": "Nguyễn Văn A",
+  "username": "nguyenvana",
+  "scenarioTotal": 42,
+  "completed": 42,
+  "correct": 40,
+  "accuracy": 95,
+  "score": 4880,
+  "rating": "XUẤT SẮC"
+}
+""".data(using: .utf8)!
+let certificate = try JSONDecoder().decode(TrainingCertificate.self, from: certificatePayload)
+check(certificate.rating == .excellent, "certificate rating must decode from Supabase RPC payload")
+
 print("CanhGiacSoCoreChecks passed")

@@ -14,8 +14,35 @@ struct AccountView: View {
                 if model.isSignedIn {
                     Section("Phiên đăng nhập") {
                         Label(model.authSession?.user?.email ?? "Đã đăng nhập", systemImage: "checkmark.seal.fill")
+                        Button {
+                            Task { await model.loadCertificates() }
+                        } label: {
+                            Label("Làm mới chứng nhận", systemImage: "arrow.clockwise")
+                        }
                         Button("Đăng xuất", role: .destructive) {
                             model.signOut()
+                        }
+                    }
+
+                    Section("Chứng nhận") {
+                        if model.certificates.isEmpty {
+                            Text("Hoàn thành toàn bộ thử thách để nhận chứng nhận server-issued.")
+                                .foregroundStyle(.secondary)
+                        } else {
+                            ForEach(model.certificates) { certificate in
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Text(certificate.certificateCode)
+                                        .font(.headline)
+                                    Text(certificate.displayName)
+                                    Text("\(certificate.correct)/\(certificate.scenarioTotal) đúng · \(certificate.accuracy)% · \(certificate.rating.rawValue)")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                    Text("Cấp ngày \(certificate.issuedAt)")
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                }
+                                .padding(.vertical, 4)
+                            }
                         }
                     }
                 } else {

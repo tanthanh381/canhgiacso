@@ -125,6 +125,29 @@ public struct SupabaseUser: Codable, Equatable, Sendable {
     public let email: String?
 }
 
+public enum CertificateRating: String, Codable, Sendable {
+    case basic = "ĐẠT CƠ BẢN"
+    case passed = "ĐẠT"
+    case good = "TỐT"
+    case excellent = "XUẤT SẮC"
+}
+
+public struct TrainingCertificate: Codable, Equatable, Sendable, Identifiable {
+    public var id: String { certificateId }
+    public let certificateId: String
+    public let certificateCode: String
+    public let runId: String
+    public let issuedAt: String
+    public let displayName: String
+    public let username: String
+    public let scenarioTotal: Int
+    public let completed: Int
+    public let correct: Int
+    public let accuracy: Int
+    public let score: Int
+    public let rating: CertificateRating
+}
+
 public struct AuthProfile: Codable, Equatable, Sendable {
     public let username: String
     public let displayName: String

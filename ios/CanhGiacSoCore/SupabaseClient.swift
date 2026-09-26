@@ -58,6 +58,17 @@ public struct SupabaseClient: Sendable {
         return try await send(request)
     }
 
+    public func refreshSession(refreshToken: String) async throws -> AuthSession {
+        let request = try request(
+            path: "/auth/v1/token",
+            queryItems: [URLQueryItem(name: "grant_type", value: "refresh_token")],
+            method: "POST",
+            body: RefreshTokenPayload(refreshToken: refreshToken),
+            accessToken: nil
+        )
+        return try await send(request)
+    }
+
     public func loadGameState(accessToken: String) async throws -> GameState {
         try await rpc("get_game_state", body: EmptyBody(), accessToken: accessToken)
     }
@@ -72,6 +83,14 @@ public struct SupabaseClient: Sendable {
 
     public func restartGame(runId: UUID, accessToken: String) async throws -> GameState {
         try await rpc("restart_game", body: RestartPayload(expectedRun: runId), accessToken: accessToken)
+    }
+
+    public func loadTrainingCertificates(accessToken: String) async throws -> [TrainingCertificate] {
+        try await rpc("get_my_training_certificates", body: EmptyBody(), accessToken: accessToken)
+    }
+
+    public func issueTrainingCertificate(runId: UUID, accessToken: String) async throws -> TrainingCertificate {
+        try await rpc("issue_training_certificate", body: RestartPayload(expectedRun: runId), accessToken: accessToken)
     }
 
     public func makeDebugRequest(path: String, method: String = "POST", accessToken: String? = nil) throws -> URLRequest {
@@ -128,6 +147,14 @@ private struct SignUpPayload: Encodable {
     let email: String
     let password: String
     let data: [String: String]
+}
+
+private struct RefreshTokenPayload: Encodable {
+    let refreshToken: String
+
+    enum CodingKeys: String, CodingKey {
+        case refreshToken = "refresh_token"
+    }
 }
 
 private struct SubmitChoicePayload: Encodable {

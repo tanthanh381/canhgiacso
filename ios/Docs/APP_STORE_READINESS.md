@@ -11,7 +11,8 @@ Minimum iOS: 17.0
 - Public content loading through `get_public_site_content` with bundled fallback content.
 - Email/password sign-in and sign-up using existing username/display-name metadata contract.
 - Authenticated training state loading, answer submission, and restart through server-side scoring RPCs.
-- Keychain session storage.
+- Keychain session storage with refresh-token retry for expired access tokens.
+- Server-issued certificate listing and certificate issuance from the current completed training run.
 - Swift core checks, XCTest files, Xcode project, and a GitHub Actions iOS workflow template.
 
 ## CI Activation Note
@@ -45,8 +46,7 @@ Minimum iOS: 17.0
 
 ## Production Hardening Follow-Ups
 
-- Add refresh-token rotation in iOS session handling.
 - Add UI tests for onboarding, content loading, answer submission, and restart.
 - Add App Attest or DeviceCheck if abuse pressure appears on public endpoints.
 - Add localized App Store metadata in Vietnamese and English.
-- Add certificate viewing/issuing to match the web completion flow.
+- Add native certificate PDF rendering/export to match the web download flow.
