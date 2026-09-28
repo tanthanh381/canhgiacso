@@ -5,10 +5,20 @@ import { createClient } from "@supabase/supabase-js";
 const SUPABASE_URL = "https://goietwyapiywrtibpkwo.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_ghj-H14bq2n1tSsH4u-adA_LoBtWKO4";
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,
-  },
-});
+// Singleton pattern to prevent multiple GoTrueClient instances
+let supabaseInstance: ReturnType<typeof createClient> | null = null;
+
+function getSupabaseClient() {
+  if (!supabaseInstance) {
+    supabaseInstance = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+      },
+    });
+  }
+  return supabaseInstance;
+}
+
+export const supabase = getSupabaseClient();
