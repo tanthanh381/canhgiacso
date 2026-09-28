@@ -1,0 +1,80 @@
+[
+  {
+    "slug": "phong-chong-lua-dao-truc-tuyen",
+    "title": "Chống lừa đảo trực tuyến: 12 cách phòng tránh hiệu quả",
+    "meta": "Hướng dẫn chống lừa đảo trực tuyến với 12 cách phòng tránh thực tế: xác minh danh tính, tên miền, OTP, QR, deepfake, chuyển tiền và ứng dụng giả.",
+    "eyebrow": "Phòng chống lừa đảo",
+    "h1": "Chống lừa đảo trực tuyến: 12 cách phòng tránh hiệu quả",
+    "lead": "Muốn chống lừa đảo hiệu quả, điều quan trọng nhất là tạo thói quen dừng lại và kiểm tra trước khi chuyển tiền, đăng nhập, quét mã QR, cài ứng dụng hoặc cung cấp thông tin cá nhân.",
+    "published": "2026-09-10",
+    "sections": [
+      ["12 cách phòng chống lừa đảo cần nhớ", "<ol class=\"seo-checklist\"><li>Không tin chỉ vì người liên hệ biết tên, số điện thoại hoặc một phần thông tin cá nhân của bạn.</li><li>Tự tìm số điện thoại, website hoặc ứng dụng chính thức để xác minh, không dùng kênh do người lạ cung cấp.</li><li>Không cung cấp OTP, mật khẩu, mã PIN, mã khôi phục hoặc mã xác thực cho người gọi đến.</li><li>Kiểm tra kỹ tên miền trước khi đăng nhập hoặc thanh toán; giao diện giống thật không chứng minh website là thật.</li><li>Không cài APK, phần mềm điều khiển từ xa hoặc ứng dụng lạ theo hướng dẫn qua điện thoại hay chat.</li><li>Không quét mã QR khi chưa biết rõ nguồn và địa chỉ đích.</li><li>Cảnh giác với yêu cầu chuyển tiền khẩn cấp, giữ bí mật hoặc né bước xác minh độc lập.</li><li>Xác minh yêu cầu vay tiền từ người thân bằng cuộc gọi hoặc câu hỏi riêng hai bên biết.</li><li>Không coi video, hình ảnh hoặc giọng nói là bằng chứng tuyệt đối vì nội dung có thể bị giả mạo bằng deepfake.</li><li>Đặt hạn mức giao dịch phù hợp và bật thông báo biến động số dư.</li><li>Dùng mật khẩu riêng cho từng tài khoản quan trọng và bật xác thực đa yếu tố.</li><li>Khi nghi ngờ, ưu tiên dừng giao dịch trước rồi mới xác minh.</li></ol>"],
+      ["Những kiểu lừa đảo cần cảnh giác", "<p>Các thủ đoạn thường gặp gồm giả mạo ngân hàng, công an hoặc cơ quan nhà nước; phishing qua email và SMS; website giả; lừa đảo đầu tư; tuyển cộng tác viên; giả mạo người thân bằng deepfake; lừa đảo qua mã QR; chiếm tài khoản mạng xã hội; và dụ cài ứng dụng độc hại.</p><p>Điểm chung của nhiều kịch bản là tạo cảm xúc mạnh như sợ hãi, khẩn cấp, tham lợi nhuận hoặc tin tưởng vào một danh tính quen thuộc. Vì vậy, kỹ năng quan trọng nhất là tách mình khỏi kênh đang bị đối tượng kiểm soát và kiểm tra lại qua một nguồn độc lập.</p>"],
+      ["Quy tắc 4 bước: Dừng — Kiểm tra — Xác minh — Báo cáo", "<p><strong>Dừng</strong> khi bị thúc ép. <strong>Kiểm tra</strong> tên miền, số điện thoại và yêu cầu. <strong>Xác minh</strong> qua kênh chính thức hoặc người thân. <strong>Báo cáo</strong> cho ngân hàng, nền tảng hoặc cơ quan chức năng khi phát hiện dấu hiệu lừa đảo.</p>"]
+    ],
+    "related": [["Dấu hiệu nhận diện lừa đảo trực tuyến", "/kien-thuc/nhan-dien-lua-dao-truc-tuyen/"], ["An toàn thông tin cá nhân", "/kien-thuc/an-toan-thong-tin-ca-nhan/"], ["Bị lừa chuyển tiền phải làm gì?", "/kien-thuc/xu-ly-khi-bi-lua-dao-chuyen-tien/"], ["Lừa đảo mã QR: cách nhận biết", "/kien-thuc/lua-dao-ma-qr/"]]
+  },
+  {
+    "slug": "an-toan-thong-tin-ca-nhan",
+    "title": "An toàn thông tin cá nhân: Bảo vệ tài khoản và dữ liệu",
+    "meta": "Hướng dẫn an toàn thông tin cá nhân: bảo vệ mật khẩu, MFA, email, điện thoại, dữ liệu, tài khoản ngân hàng và nhận diện nguy cơ phishing, giả mạo.",
+    "eyebrow": "An toàn thông tin",
+    "h1": "An toàn thông tin cá nhân: cách bảo vệ tài khoản và dữ liệu",
+    "lead": "An toàn thông tin cá nhân không chỉ là đặt mật khẩu mạnh. Bạn cần bảo vệ cả tài khoản, thiết bị, email, dữ liệu, phương thức khôi phục và thói quen xử lý liên kết, mã QR và yêu cầu xác minh.",
+    "published": "2026-09-10",
+    "sections": [
+      ["8 nguyên tắc an toàn thông tin quan trọng", "<ol class=\"seo-checklist\"><li>Dùng mật khẩu riêng cho từng tài khoản quan trọng và ưu tiên trình quản lý mật khẩu.</li><li>Bật xác thực đa yếu tố bằng passkey, ứng dụng xác thực hoặc khóa bảo mật nếu có.</li><li>Bảo vệ email chính vì đây thường là chìa khóa khôi phục các tài khoản khác.</li><li>Không chia sẻ OTP, mã khôi phục, mã PIN hoặc thông tin xác thực cho người gọi đến.</li><li>Cập nhật hệ điều hành, trình duyệt và ứng dụng để vá lỗ hổng đã biết.</li><li>Giới hạn thông tin cá nhân công khai trên mạng xã hội.</li><li>Chỉ đăng nhập từ ứng dụng hoặc tên miền chính thức, đặc biệt với ngân hàng và email.</li><li>Kiểm tra phiên đăng nhập, thiết bị lạ và thông báo bảo mật định kỳ.</li></ol>"],
+      ["An toàn thông tin và phòng chống lừa đảo liên quan thế nào?", "<p>Kẻ lừa đảo thường khai thác dữ liệu cá nhân, mật khẩu dùng lại, email bị chiếm quyền hoặc thói quen bấm link để tạo kịch bản đáng tin. Bảo vệ thông tin cá nhân giúp giảm cả khả năng bị giả mạo lẫn mức độ thiệt hại khi một tài khoản bị lộ.</p>"],
+      ["Những dữ liệu không nên cung cấp tùy tiện", "<ul class=\"seo-checklist\"><li>Mật khẩu, OTP, mã PIN và mã khôi phục.</li><li>Ảnh giấy tờ tùy thân khi không rõ mục đích và đơn vị tiếp nhận.</li><li>Thông tin thẻ thanh toán, CVV và dữ liệu đăng nhập ngân hàng.</li><li>Ảnh màn hình có thông tin tài khoản, mã QR hoặc dữ liệu nhạy cảm.</li><li>Lịch trình, địa chỉ và thông tin người thân ở chế độ công khai.</li></ul>"]
+    ],
+    "related": [["Chống lừa đảo trực tuyến", "/kien-thuc/phong-chong-lua-dao-truc-tuyen/"], ["Nhận diện email phishing", "/kien-thuc/nhan-dien-email-phishing/"], ["Tài khoản bị hack phải làm gì?", "/kien-thuc/tai-khoan-bi-hack-phai-lam-gi/"]]
+  },
+  {
+    "slug": "nhan-dien-lua-dao-truc-tuyen",
+    "title": "10 dấu hiệu nhận diện lừa đảo trực tuyến | Cảnh Giác Số",
+    "meta": "10 dấu hiệu lừa đảo trực tuyến thường gặp và cách kiểm tra trước khi chuyển tiền, cung cấp OTP, cài ứng dụng hoặc đăng nhập vào liên kết lạ.",
+    "eyebrow": "Nhận diện lừa đảo",
+    "h1": "10 dấu hiệu nhận diện lừa đảo trực tuyến trước khi mất tiền",
+    "lead": "Lừa đảo trực tuyến thường bắt đầu bằng việc khiến nạn nhân vội, sợ, tham hoặc tin tưởng sai người. Nhận ra tín hiệu cảnh báo sớm giúp bạn dừng giao dịch trước khi thiệt hại xảy ra.",
+    "published": "2026-09-10",
+    "sections": [
+      ["10 dấu hiệu cảnh báo lừa đảo trực tuyến", "<ol class=\"seo-checklist\"><li><strong>Thúc ép hành động ngay.</strong> Tài khoản sắp khóa, đang bị điều tra, người thân gặp nạn hoặc ưu đãi sắp hết.</li><li><strong>Yêu cầu giữ bí mật.</strong> Đối tượng không muốn bạn hỏi người thân, ngân hàng hoặc cơ quan chức năng.</li><li><strong>Đòi OTP, mật khẩu, PIN hoặc mã khôi phục.</strong> Đây là dữ liệu xác thực không nên cung cấp cho người gọi đến.</li><li><strong>Yêu cầu chuyển tiền vào tài khoản lạ.</strong> Tên người nhận không phù hợp hoặc liên tục thay đổi.</li><li><strong>Gửi link đăng nhập từ SMS, email hoặc mạng xã hội.</strong> Trang giả có thể sao chép gần như toàn bộ giao diện thật.</li><li><strong>Yêu cầu cài APK hoặc phần mềm điều khiển từ xa.</strong> Quyền trợ năng hoặc chia sẻ màn hình có thể bị lợi dụng.</li><li><strong>Lợi nhuận quá cao hoặc việc nhẹ lương cao.</strong> Nhiều kịch bản cho rút tiền nhỏ rồi buộc nạp thêm.</li><li><strong>Mạo danh người có thẩm quyền.</strong> Logo, ảnh đại diện, số gọi đến và cả giọng nói đều có thể bị giả mạo.</li><li><strong>Thông tin người gửi có chi tiết bất thường.</strong> Tên hiển thị đúng nhưng tên miền, URL hoặc tài khoản thực tế không khớp.</li><li><strong>Không cho bạn thời gian kiểm tra độc lập.</strong> Phản ứng mạnh khi bạn muốn gọi lại qua kênh chính thức là dấu hiệu rủi ro.</li></ol>"],
+      ["Quy trình kiểm tra 60 giây trước khi tin", "<p>Dừng cuộc gọi hoặc cuộc chat, sau đó tự tìm số điện thoại, website hoặc ứng dụng chính thức của tổ chức. Nếu liên quan người thân hoặc đồng nghiệp, gọi lại bằng số đã lưu từ trước. Trước khi chuyển tiền, kiểm tra ít nhất ba yếu tố: người yêu cầu là ai, lý do có hợp lý không, và tài khoản nhận có đúng chủ thể không.</p><div class=\"seo-note\"><strong>Dừng — Kiểm tra — Xác minh bằng kênh độc lập.</strong><p>Không dùng chính số điện thoại, QR code hoặc đường link do người đang bị nghi ngờ cung cấp để xác minh.</p></div>"],
+      ["Các kịch bản thường gặp", "<p>Những kịch bản phổ biến gồm mạo danh ngân hàng hoặc cơ quan nhà nước, lừa đảo đầu tư và cộng tác viên, giả giọng người thân bằng deepfake, giả mạo giao hàng, hoàn tiền, dịch vụ khách hàng và chiếm tài khoản mạng xã hội. Tên gọi thay đổi nhưng mô hình tâm lý thường giống nhau: tạo niềm tin, tạo áp lực và buộc nạn nhân hành động trước khi kiểm tra.</p>"],
+      ["5 nguyên tắc bảo vệ tài khoản và tiền", "<ul class=\"seo-checklist\"><li>Dùng mật khẩu riêng cho từng dịch vụ quan trọng và bật MFA.</li><li>Không cung cấp OTP, PIN, mật khẩu hoặc mã khôi phục.</li><li>Không cài ứng dụng ngoài kho chính thức theo hướng dẫn qua điện thoại.</li><li>Tự mở app ngân hàng hoặc website chính thức thay vì dùng link nhận được.</li><li>Khi có dấu hiệu bất thường, ưu tiên bảo toàn tiền và tài khoản trước.</li></ul>"]
+    ],
+    "related": [["Chống lừa đảo trực tuyến", "/kien-thuc/phong-chong-lua-dao-truc-tuyen/"], ["Nhận diện email phishing", "/kien-thuc/nhan-dien-email-phishing/"], ["Giả mạo ngân hàng: dấu hiệu và cách xử lý", "/kien-thuc/gia-mao-ngan-hang/"]]
+  },
+  {
+    "slug": "nhan-dien-email-phishing",
+    "title": "Cách nhận diện email phishing và link giả mạo | Cảnh Giác Số",
+    "meta": "Hướng dẫn nhận diện email phishing: kiểm tra người gửi, tên miền, liên kết, file đính kèm, trang đăng nhập giả và cách xử lý email đáng ngờ an toàn.",
+    "eyebrow": "Phishing & giả mạo",
+    "h1": "Cách nhận diện email phishing và link đăng nhập giả mạo",
+    "lead": "Email phishing được thiết kế để bạn tự bấm link, mở file, nhập mật khẩu, cung cấp mã xác thực hoặc chuyển tiền. Cách phòng vệ tốt nhất là kiểm tra từng lớp trước khi tương tác.",
+    "published": "2026-09-10",
+    "sections": [
+      ["Checklist 7 điểm để nhận diện email phishing", "<ol class=\"seo-checklist\"><li><strong>Đọc địa chỉ email thật, không chỉ tên hiển thị.</strong> Phần sau dấu @ mới là thông tin quan trọng.</li><li><strong>Đánh giá yêu cầu có bất thường không.</strong> Đổi số tài khoản, xác minh mật khẩu, thanh toán khẩn hoặc tải file lạ cần kiểm tra độc lập.</li><li><strong>Kiểm tra ngữ cảnh.</strong> Bạn có thực sự yêu cầu đặt lại mật khẩu hoặc đang chờ tài liệu này không?</li><li><strong>Kiểm tra link trước khi bấm.</strong> Tập trung vào tên miền thực tế, không chỉ phần chữ hiển thị.</li><li><strong>Cẩn thận với file đính kèm.</strong> HTML, ZIP, file thực thi hoặc Office yêu cầu bật macro có thể chứa mã độc hoặc dẫn tới trang giả.</li><li><strong>Không để sự khẩn cấp thay thế kiểm chứng.</strong> Đồng hồ đếm ngược và đe dọa khóa tài khoản là mô típ phổ biến.</li><li><strong>Không phụ thuộc vào lỗi chính tả.</strong> Phishing hiện đại có thể viết tự nhiên, dùng logo chuẩn và nội dung cá nhân hóa.</li></ol>"],
+      ["Cách kiểm tra tên miền và liên kết đáng ngờ", "<p>Khi đọc URL, hãy tập trung vào tên miền đăng ký thực tế. Kẻ xấu có thể đưa tên thương hiệu vào subdomain hoặc đường dẫn để đánh lạc hướng. HTTPS và biểu tượng ổ khóa chỉ cho biết kết nối tới website đó được mã hóa, không chứng minh website thuộc tổ chức mà bạn đang nghĩ tới.</p>"],
+      ["Dấu hiệu trang đăng nhập giả mạo", "<ul class=\"seo-checklist\"><li>URL không đúng tên miền chính thức hoặc gần giống.</li><li>Trang đăng nhập xuất hiện từ link lạ dù bạn đang có phiên đăng nhập bình thường.</li><li>Trang yêu cầu nhiều thông tin hơn quy trình thông thường, như cả mật khẩu, OTP và dữ liệu thẻ.</li><li>Trình quản lý mật khẩu không tự điền trên trang vốn từng tự điền.</li><li>Sau đăng nhập trang báo lỗi chung chung rồi chuyển hướng bất thường.</li></ul>"],
+      ["Nên làm gì khi nhận email đáng ngờ?", "<ol class=\"seo-checklist\"><li>Không bấm link, không mở file và không trả lời ngay.</li><li>Xác minh người gửi bằng kênh khác đã biết từ trước.</li><li>Nếu là email công việc, dùng chức năng báo phishing hoặc báo bộ phận ATTT.</li><li>Nếu đã nhập mật khẩu, đổi mật khẩu từ website/app chính thức và kiểm tra phiên đăng nhập.</li><li>Nếu đã cung cấp thông tin tài chính, liên hệ ngân hàng ngay.</li></ol>"]
+    ],
+    "related": [["Kiểm tra link giả mạo trước khi bấm", "/kien-thuc/kiem-tra-link-gia-mao/"], ["Lừa đảo OTP và chiếm tài khoản", "/kien-thuc/lua-dao-otp-chiem-doat-tai-khoan/"], ["10 dấu hiệu lừa đảo trực tuyến", "/kien-thuc/nhan-dien-lua-dao-truc-tuyen/"]]
+  },
+  {
+    "slug": "xu-ly-khi-bi-lua-dao-chuyen-tien",
+    "title": "Bị lừa chuyển tiền phải làm gì ngay? | Cảnh Giác Số",
+    "meta": "Bị lừa chuyển tiền cần làm gì? Dừng giao dịch, liên hệ ngân hàng, khóa tài khoản liên quan, lưu bằng chứng và trình báo cơ quan chức năng càng sớm càng tốt.",
+    "eyebrow": "Ứng phó sự cố",
+    "h1": "Bị lừa chuyển tiền phải làm gì ngay?",
+    "lead": "Khi phát hiện vừa chuyển tiền cho đối tượng lừa đảo, thời gian rất quan trọng. Mục tiêu đầu tiên là ngăn thiệt hại tiếp tục, báo ngay cho ngân hàng và bảo toàn bằng chứng.",
+    "published": "2026-09-10",
+    "sections": [
+      ["5 bước cần làm ngay sau khi bị lừa chuyển tiền", "<ol class=\"seo-checklist\"><li><strong>Dừng liên lạc và không chuyển thêm tiền.</strong> Không nộp thêm phí mở khóa, thuế, phí hoàn tiền hoặc tiền cho dịch vụ hứa thu hồi tiền.</li><li><strong>Liên hệ ngân hàng càng sớm càng tốt.</strong> Dùng app, hotline hoặc điểm giao dịch chính thức; chuẩn bị thời gian, số tiền, tài khoản nhận và nội dung giao dịch.</li><li><strong>Bảo vệ tài khoản có nguy cơ bị chiếm quyền.</strong> Nếu đã lộ mật khẩu, OTP, mã khôi phục hoặc cài app lạ, xử lý ngay từ thiết bị an toàn.</li><li><strong>Lưu toàn bộ bằng chứng.</strong> Tin nhắn, email, lịch sử cuộc gọi, URL, QR, biên lai chuyển tiền và tài khoản mạng xã hội đều có thể cần thiết.</li><li><strong>Trình báo cơ quan chức năng.</strong> Cung cấp diễn biến và bằng chứng theo thứ tự thời gian.</li></ol>"],
+      ["Nếu đã lộ mật khẩu, OTP hoặc cài ứng dụng lạ", "<p>Dùng thiết bị tin cậy để đổi mật khẩu và đăng xuất phiên lạ. Nếu cùng mật khẩu được dùng ở nhiều nơi, ưu tiên email chính, ngân hàng và mạng xã hội. Nếu đã cung cấp OTP hoặc cài ứng dụng điều khiển từ xa, liên hệ ngay tổ chức cung cấp dịch vụ và ngắt quyền truy cập không cần thiết.</p>"],
+      ["Những bằng chứng nên lưu", "<ul class=\"seo-checklist\"><li>Biên lai hoặc lịch sử giao dịch.</li><li>Số điện thoại, email, username và link hồ sơ của đối tượng.</li><li>Nội dung chat, email, SMS, lịch sử cuộc gọi và file được gửi.</li><li>Website, tên miền, QR code hoặc ứng dụng được yêu cầu sử dụng.</li><li>Ảnh chụp màn hình yêu cầu nộp thêm tiền hoặc lời hứa hoàn tiền.</li></ul>"],
+      ["Có thể lấy lại tiền không?", "<p>Không có quy trình nào bảo đảm chắc chắn thu hồi được tiền. Khả năng xử lý phụ thuộc vào thời điểm báo, trạng thái dòng tiền và sự phối hợp giữa các bên. Vì vậy, hành động sớm có ý nghĩa hơn việc tiếp tục thương lượng với kẻ lừa đảo. Đặc biệt cảnh giác với dịch vụ thu hồi tiền yêu cầu đóng phí trước.</p>"]
+    ],
+    "related": [["10 dấu hiệu nhận diện lừa đảo", "/kien-thuc/nhan-dien-lua-dao-truc-tuyen/"], ["Tài khoản bị hack phải làm gì?", "/kien-thuc/tai-khoan-bi-hack-phai-lam-gi/"], ["Giả mạo ngân hàng", "/kien-thuc/gia-mao-ngan-hang/"]]
+  }
+]

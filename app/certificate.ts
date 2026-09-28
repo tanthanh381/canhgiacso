@@ -1,4 +1,16 @@
+import { certificateParts, type CertificateDesign } from "./certificate-design";
 import type { CertificateTemplate } from "./data";
+
+const imageCache = new Map<string, Promise<HTMLImageElement>>();
+function certificateImage(src: string) {
+  let image = imageCache.get(src);
+  if (!image) {
+    image = (async () => { const value = new Image(); value.src = src; await value.decode(); return value; })();
+    imageCache.set(src, image);
+    image.catch(() => imageCache.delete(src));
+  }
+  return image;
+}
 
 export type TrainingCertificate = {
   certificateId: string;
@@ -153,13 +165,18 @@ function formatIssuedDate(value: string) {
   return Number.isNaN(date.valueOf()) ? value : date.toLocaleDateString("vi-VN");
 }
 
-async function renderCertificateCanvas(certificate: TrainingCertificate, template: CertificateTemplate) {
+export async function renderCertificateCanvas(certificate: TrainingCertificate, template: CertificateTemplate) {
   if ("fonts" in document) await document.fonts.ready;
   const canvas = document.createElement("canvas");
   canvas.width = 1754;
   canvas.height = 1240;
   const context = canvas.getContext("2d");
-  if (!context) throw new Error("Trình duyệt không hỗ trợ tạo chứng chỉ.");
+  if (!context) throw new Error("Trình duyệt không hỗ trợ tạo chứng nhận.");
+
+  if (template.design) {
+    await renderDesignedCertificate(context, certificate, template, template.design);
+    return canvas;
+  }
 
   const background = context.createLinearGradient(0, 0, canvas.width, canvas.height);
   background.addColorStop(0, "#fffaf0");
@@ -193,7 +210,7 @@ async function renderCertificateCanvas(certificate: TrainingCertificate, templat
   context.fillText(template.organizationName, 410, 145);
   context.fillStyle = "#334155";
   context.font = "700 22px Arial, Helvetica, sans-serif";
-  context.fillText(template.departmentName, 410, 184);
+  context.fillText(template.departmentName, 410, 184, 900);
 
   context.fillStyle = "#9a3e00";
   context.textAlign = "center";
@@ -273,7 +290,7 @@ async function renderCertificateCanvas(certificate: TrainingCertificate, templat
   context.fillStyle = "#64748b";
   context.font = "15px Arial, Helvetica, sans-serif";
   context.fillText(certificate.certificateCode.startsWith("CGS-GUEST-")
-    ? "Bản ghi nhận chế độ khách - không phải chứng chỉ nội bộ đã xác minh."
+    ? "Bản ghi nhận chế độ khách - không phải chứng nhận nội bộ đã xác minh."
     : template.footerNote, 877, 1150);
   return canvas;
 }
@@ -283,7 +300,7 @@ export async function downloadTrainingCertificatePdf(certificate: TrainingCertif
   const jpegBlob = await new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((blob) => {
       if (blob) resolve(blob);
-      else reject(new Error("Không thể kết xuất chứng chỉ."));
+      else reject(new Error("Không thể kết xuất chứng nhận."));
     }, "image/jpeg", 0.96);
   });
   const jpegBytes = new Uint8Array(await jpegBlob.arrayBuffer());
@@ -300,4 +317,99 @@ export async function downloadTrainingCertificatePdf(certificate: TrainingCertif
   } finally {
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
+}
+
+async function renderDesignedCertificate(context: CanvasRenderingContext2D, certificate: TrainingCertificate, template: CertificateTemplate, design: CertificateDesign) {
+  context.fillStyle = design.background;
+  context.fillRect(0, 0, 1754, 1240);
+  const cyber = design.theme === 'cyber';
+  if (cyber) {
+    const background = await certificateImage('/certificate-cyber-background.png');
+    context.drawImage(background, 0, 0, 1754, 1240);
+    context.fillStyle = '#c3e4ff'; context.textAlign = 'left'; context.font = '500 20px Arial';
+    context.fillText('NÂNG CAO NHẬN THỨC', 604, 118);
+    context.fillText('BẢO VỆ TƯƠNG LAI', 604, 151);
+    context.textAlign = 'center';
+    context.fillText('CON NGƯỜI LÀ TUYẾN PHÒNG THỦ', 1412, 113);
+    context.fillText('QUAN TRỌNG NHẤT', 1412, 146);
+    context.font = 'italic 37px Georgia';
+    context.fillText('An toàn hơn mỗi ngày', 1440, 804);
+    context.font = '700 21px Arial';
+    context.fillText('CÙNG XÂY DỰNG', 1435, 1001);
+    context.fillText('KHÔNG GIAN SỐ AN TOÀN', 1435, 1035);
+    context.font = '21px Arial'; context.fillText('canhgiacso.com', 1435, 1072);
+    context.strokeStyle = '#19baff';context.lineWidth = 1.5;
+    context.beginPath();context.moveTo(195,753);context.lineTo(1100,753);context.stroke();
+  } else {
+  context.strokeStyle = design.border;
+  context.lineWidth = 4;
+  context.setLineDash([12, 8]);
+  context.beginPath(); context.roundRect(76, 34, 1602, 1168, 24); context.stroke();
+  context.setLineDash([]);
+  }
+  const text = {
+    ...template, logo: 'HD', hdbankLogo: '', recipient: cyber ? certificate.displayName : certificate.displayName.toLocaleUpperCase('vi-VN'),
+    account: cyber ? `${template.accountLabel}: @${certificate.username}` : `${template.accountLabel}: @${certificate.username} | ${template.codeLabel}: ${certificate.certificateCode}`,
+    description: applyCertificateTemplate(template.description, certificate, template),
+    rating: `${template.ratingLabel}\n${certificate.rating}\n${certificate.score} PTS · ${certificate.accuracy}% đúng`,
+    issued: `${template.issuedDateLabel}: ${formatIssuedDate(certificate.issuedAt)}${cyber ? '\n' : ' | '}${template.codeLabel}: ${certificate.certificateCode}`,
+    footerNote: certificate.certificateCode.startsWith('CGS-GUEST-') ? 'Bản ghi nhận chế độ khách - không phải chứng nhận nội bộ đã xác minh.' : template.footerNote,
+  };
+  for (const key of certificateParts) {
+    // HDBank branding is intentionally not rendered on certificates.
+    // Keep the legacy design field only for backwards-compatible stored templates.
+    if (key === 'hdbankLogo') continue;
+    const e = design.elements[key];
+    context.save();
+    context.beginPath(); context.rect(e.x, e.y, e.width, e.height); context.clip();
+    if (key === 'logo') {
+      if (design.logo || cyber) {
+        const image = await certificateImage(design.logo || '/khien-so-logo.png');
+        const scale = Math.min(e.width / image.naturalWidth, e.height / image.naturalHeight);
+        // Color only the default shield interior, leaving its exterior transparent.
+        // Uploaded logos retain their own silhouette and colors.
+        if (cyber && !design.logo) {
+          context.save();
+          context.translate(e.x + (e.width - image.naturalWidth * scale) / 2, e.y + (e.height - image.naturalHeight * scale) / 2);
+          context.scale(image.naturalWidth * scale / 800, image.naturalHeight * scale / 800);
+          const shieldFill = context.createLinearGradient(0, 130, 0, 620);
+          shieldFill.addColorStop(0, '#0b5684');
+          shieldFill.addColorStop(1, '#03243f');
+          context.fillStyle = shieldFill;
+          context.beginPath();
+          context.moveTo(401, 105);
+          context.quadraticCurveTo(235, 211, 146, 216);
+          context.bezierCurveTo(179, 390, 276, 542, 401, 627);
+          context.bezierCurveTo(526, 542, 623, 390, 657, 216);
+          context.quadraticCurveTo(567, 211, 401, 105);
+          context.closePath(); context.fill();
+          context.restore();
+        }
+        context.drawImage(image, e.x + (e.width - image.naturalWidth * scale) / 2, e.y + (e.height - image.naturalHeight * scale) / 2, image.naturalWidth * scale, image.naturalHeight * scale);
+      } else {
+        context.fillStyle=e.color; context.fillRect(e.x,e.y,e.width,e.height);
+        context.fillStyle='#ffffff';context.font=`bold ${Math.min(e.fontSize,e.height*.6)}px Georgia`;context.textAlign='center';context.textBaseline='middle';context.fillText('HD',e.x+e.width/2,e.y+e.height/2,e.width);
+      }
+      context.restore(); continue;
+    }
+    if (key==='rating' && !cyber) { context.fillStyle='#f5e3bf';context.fillRect(e.x,e.y,e.width,e.height); }
+    let size=e.fontSize; let lines:string[]=[];
+    const family=key==='title'||key==='recipient' ? 'Georgia' : 'Arial';
+    do {
+      context.font=`${key==='description'||key==='footerNote'||key==='issued'?400:700} ${size}px ${family}`;
+      lines=[];
+      for(const paragraph of text[key].split('\n')) {
+        let line='';
+        for(const word of paragraph.split(/\s+/)) {const next=line?`${line} ${word}`:word;if(context.measureText(next).width>e.width-12&&line){lines.push(line);line=word;}else line=next;}
+        lines.push(line);
+      }
+      if(lines.length*size*1.3<=e.height-6||size<=10)break;
+      size--;
+    }while(size>=10);
+    context.fillStyle=e.color;context.textAlign=e.align;context.textBaseline='middle';
+    const x=e.align==='center'?e.x+e.width/2:e.align==='right'?e.x+e.width-6:e.x+6;
+    lines.forEach((line,index)=>context.fillText(line,x,e.y+e.height/2+(index-(lines.length-1)/2)*size*1.3,e.width-12));
+    context.restore();
+  }
+
 }

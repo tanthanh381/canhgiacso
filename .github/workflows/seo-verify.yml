@@ -1,0 +1,65 @@
+name: SEO Verify
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'github-pages/**'
+      - 'public/**'
+      - 'seo/**'
+      - 'app/layout.tsx'
+      - 'scripts/generate-seo-content.mjs'
+      - 'scripts/seo-audit.mjs'
+      - 'package.json'
+      - 'vite.github-pages.config.ts'
+      - '.github/workflows/seo-verify.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'github-pages/**'
+      - 'public/**'
+      - 'seo/**'
+      - 'app/layout.tsx'
+      - 'scripts/generate-seo-content.mjs'
+      - 'scripts/seo-audit.mjs'
+      - 'package.json'
+      - 'vite.github-pages.config.ts'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Setup pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+        with:
+          version: 10
+      - name: Setup Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build GitHub Pages production target
+        run: pnpm run build:pages
+      - name: Run sitemap-driven SEO audit
+        run: pnpm run seo:audit
+      - name: Verify crawlable SEO assets
+        run: |
+          test -f docs/robots.txt
+          test -f docs/sitemap.xml
+          test -f docs/kien-thuc/index.html
+          test -f docs/kien-thuc/phong-chong-lua-dao-truc-tuyen/index.html
+          test -f docs/kien-thuc/an-toan-thong-tin-ca-nhan/index.html
+          test -f docs/kien-thuc/lua-dao-ma-qr/index.html
+          test -f docs/kien-thuc/gia-mao-ngan-hang/index.html
+          test -f docs/kien-thuc/kiem-tra-link-gia-mao/index.html
+          test -f docs/seo-images/lua-dao-ma-qr.svg
+          grep -q 'Sitemap: https://canhgiacso.com/sitemap.xml' docs/robots.txt
+          grep -q 'application/ld+json' docs/index.html
+          grep -q '<h1>Cảnh giác lừa đảo trực tuyến' docs/index.html

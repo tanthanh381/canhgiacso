@@ -1,0 +1,3 @@
+-- Canonical migration: supabase/migrations/20260914142826_realtime_web_analytics.sql
+-- Applied to project goietwyapiywrtibpkwo as migration realtime_web_analytics.
+-- Kept as a pointer only to avoid maintaining two copies of the SQL.

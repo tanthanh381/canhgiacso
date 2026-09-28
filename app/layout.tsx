@@ -1,72 +1,238 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./design-system.css";
+
+const siteUrl = "https://canhgiacso.com";
+const siteTitle = "Cảnh Giác Số: Nhận diện lừa đảo trực tuyến | HDBank";
+const siteDescription =
+  "Học cách nhận diện lừa đảo trực tuyến, phishing và giả mạo qua các tình huống mô phỏng tương tác. Rèn phản xạ an toàn số cùng Cảnh Giác Số.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://canhgiacso.com"),
-  title: "Cảnh Giác Số | HDBank - IT Security",
-  description: "Chương trình mô phỏng tương tác của HDBank - IT Security, giúp nhận diện và xử lý các kịch bản lừa đảo trực tuyến phổ biến.",
-  keywords: "an toàn thông tin, phòng chống lừa đảo, lừa đảo trực tuyến, mô phỏng, đào tạo, HDBank, IT Security",
-  authors: [{ name: "HDBank IT Security Team" }],
-  creator: "HDBank IT Security",
+  metadataBase: new URL(siteUrl),
+  applicationName: "Cảnh Giác Số",
+  title: siteTitle,
+  description: siteDescription,
+  keywords: [
+    "Cảnh Giác Số",
+    "lừa đảo trực tuyến",
+    "phòng chống lừa đảo",
+    "nhận diện phishing",
+    "kiểm tra link lừa đảo",
+    "báo cáo lừa đảo trực tuyến",
+    "số điện thoại lừa đảo",
+    "OTP là gì",
+    "an toàn thông tin",
+    "đào tạo nhận thức an toàn số",
+    "HDBank IT Security",
+  ],
+  authors: [{ name: "IT Security Team - HDBank", url: siteUrl }],
+  creator: "IT Security Team - HDBank",
   publisher: "HDBank",
-  formatDetection: {
-    email: false,
-    telephone: false,
-    address: false,
+  category: "Cybersecurity awareness",
+  alternates: {
+    canonical: "/",
+    languages: {
+      "vi-VN": "/",
+      "x-default": "/",
+    },
   },
-  alternates: { canonical: "/" },
-  icons: { icon: "/khien-so-logo.png", shortcut: "/khien-so-logo.png" },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  icons: {
+    icon: "/favicon.png?v=20260924",
+    shortcut: "/favicon.png?v=20260924",
+    apple: "/favicon.png?v=20260924",
+  },
   openGraph: {
-    title: "Cảnh Giác Số | HDBank - IT Security",
-    description: "Học để không thành con mồi — thử sức với các tình huống lừa đảo và xây dựng phản xạ phòng vệ số.",
+    title: "Cảnh Giác Số: Nhận diện lừa đảo trực tuyến",
+    description:
+      "Rèn phản xạ nhận diện lừa đảo, phishing và giả mạo qua các tình huống tương tác.",
     type: "website",
-    locale: "vi_VN",
-    url: "https://canhgiacso.com/",
     siteName: "Cảnh Giác Số",
-    images: [{ url: "/og.png", width: 1731, height: 909, alt: "Cảnh Giác Số — học để không thành con mồi" }],
+    locale: "vi_VN",
+    url: "/",
+    images: [
+      {
+        url: "/og.png",
+        width: 1731,
+        height: 909,
+        type: "image/png",
+        alt: "Cảnh Giác Số — chống lừa đảo và bảo vệ an toàn thông tin",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Cảnh Giác Số | HDBank - IT Security",
-    description: "Học để không thành con mồi — chương trình mô phỏng giúp xây dựng phản xạ phòng vệ số.",
+    title: "Cảnh Giác Số: Nhận diện lừa đảo trực tuyến",
+    description:
+      "Rèn phản xạ nhận diện lừa đảo, phishing và giả mạo qua các tình huống tương tác.",
     images: ["/og.png"],
   },
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const schemaMarkup = {
-    "@context": "https://schema.org",
-    "@type": "EducationalWebApplication",
-    name: "Cảnh Giác Số",
-    description: "Chương trình mô phỏng tương tác giúp nhận diện và xử lý các kịch bản lừa đảo trực tuyến",
-    url: "https://canhgiacso.com",
-    applicationCategory: "EducationalApplication",
-    publisher: {
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
       "@type": "Organization",
-      name: "HDBank",
-      logo: "https://canhgiacso.com/khien-so-logo.png",
+      "@id": `${siteUrl}/#organization`,
+      name: "Cảnh Giác Số",
+      url: siteUrl,
+      logo: `${siteUrl}/khien-so-logo.png`,
+      parentOrganization: {
+        "@type": "Organization",
+        name: "HDBank",
+      },
     },
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "VND",
-      availability: "https://schema.org/InStock",
+    {
+      "@type": "WebSite",
+      "@id": `${siteUrl}/#website`,
+      name: "Cảnh Giác Số",
+      url: siteUrl,
+      inLanguage: "vi-VN",
+      publisher: { "@id": `${siteUrl}/#organization` },
+      potentialAction: [
+        {
+          "@type": "ReadAction",
+          target: [
+            `${siteUrl}/kien-thuc/`,
+            `${siteUrl}/kien-thuc/lua-dao-truc-tuyen-la-gi/`,
+            `${siteUrl}/kien-thuc/cach-kiem-tra-link-lua-dao/`,
+            `${siteUrl}/kien-thuc/bao-cao-lua-dao-truc-tuyen/`,
+            `${siteUrl}/tin-tuc/`,
+          ],
+        },
+      ],
     },
-  };
+    {
+      "@type": "WebApplication",
+      "@id": `${siteUrl}/#webapp`,
+      name: "Cảnh Giác Số",
+      url: siteUrl,
+      applicationCategory: "EducationalApplication",
+      operatingSystem: "Web",
+      inLanguage: "vi-VN",
+      description: siteDescription,
+      publisher: { "@id": `${siteUrl}/#organization` },
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "VND",
+      },
+    },
+  ],
+};
 
+const bootStyles = `
+  #refresh-shell { visibility: hidden; }
+  #refresh-loader {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483647;
+    display: grid;
+    place-items: center;
+    background: #f7f9fc;
+    color: #0f172a;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 140ms ease, visibility 0s linear 140ms;
+  }
+  #refresh-loader-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font: 700 20px/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    letter-spacing: -0.02em;
+  }
+  #refresh-loader-mark {
+    width: 22px;
+    height: 22px;
+    border: 2px solid rgba(15, 23, 42, 0.18);
+    border-top-color: #0f172a;
+    border-radius: 999px;
+    animation: refresh-loader-spin 700ms linear infinite;
+  }
+  body.refresh-ready #refresh-shell { visibility: visible; }
+  body.refresh-ready #refresh-loader {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  @keyframes refresh-loader-spin { to { transform: rotate(360deg); } }
+  @media (prefers-color-scheme: dark) {
+    #refresh-loader { background: #0b1220; color: #f8fafc; }
+    #refresh-loader-mark { border-color: rgba(248, 250, 252, 0.2); border-top-color: #f8fafc; }
+  }
+`;
+
+const bootScript = `
+  (function () {
+    var body = document.body;
+    var shell = document.getElementById('refresh-shell');
+    var observer;
+    var done = false;
+
+    function reveal() {
+      if (done) return;
+      done = true;
+      if (observer) observer.disconnect();
+      body.classList.add('refresh-ready');
+    }
+
+    function revealWhenReady() {
+      if (!shell) return reveal();
+      var choice = shell.querySelector('.choice-list .choice');
+      if (!choice || !choice.hasAttribute('disabled')) reveal();
+    }
+
+    if (shell && 'MutationObserver' in window) {
+      observer = new MutationObserver(revealWhenReady);
+      observer.observe(shell, {
+        subtree: true,
+        childList: true,
+        attributes: true,
+        attributeFilter: ['disabled', 'class']
+      });
+    }
+
+    requestAnimationFrame(function () {
+      requestAnimationFrame(revealWhenReady);
+    });
+
+    window.setTimeout(reveal, 2200);
+  })();
+`;
+
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="vi">
-      <head>
-        <meta name="theme-color" content="#6d0615" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <html lang="vi-VN">
+      <body className="refresh-boot">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaMarkup) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
-      </head>
-      <body>{children}</body>
+        <style>{bootStyles}</style>
+        <div id="refresh-loader" role="status" aria-label="Đang tải Cảnh giác số">
+          <div id="refresh-loader-inner">
+            <span id="refresh-loader-mark" aria-hidden="true" />
+            <span>Cảnh giác số</span>
+          </div>
+        </div>
+        <div id="refresh-shell">{children}</div>
+        <noscript>
+          <style>{`#refresh-shell{visibility:visible!important}#refresh-loader{display:none!important}`}</style>
+        </noscript>
+        <script dangerouslySetInnerHTML={{ __html: bootScript }} />
+      </body>
     </html>
   );
 }

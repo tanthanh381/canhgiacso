@@ -1,0 +1,47 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import test from "node:test";
+
+const read = (file) => readFile(new URL(`../${file}`, import.meta.url), "utf8");
+
+test("SEO wave 5 targets high-intent Google queries without creating new URLs", async () => {
+  const patch = await read("scripts/patch-google-traffic-wave5.mjs");
+  assert.match(patch, /kiem-tra-so-dien-thoai-lua-dao/);
+  assert.match(patch, /tra-cuu-so-tai-khoan-lua-dao/);
+  assert.match(patch, /tra-cuu-lua-dao/);
+  assert.match(patch, /kiem-tra-link-gia-mao/);
+  assert.match(patch, /Cách kiểm tra số điện thoại lừa đảo nhanh và an toàn/);
+  assert.match(patch, /Cách tra cứu số tài khoản lừa đảo trước khi chuyển tiền/);
+  assert.match(patch, /Tra cứu lừa đảo nên kiểm tra những dữ kiện nào/);
+  assert.match(patch, /Kiểm tra link lừa đảo trong 30 giây/);
+  assert.match(patch, /google-discovery-wave5/);
+  assert.match(patch, /google-priority-tools/);
+  assert.match(patch, /Không có kết quả cảnh báo không đồng nghĩa an toàn/);
+  assert.doesNotMatch(patch, /<url>\s*<loc>https:\/\/canhgiacso\.com\/kien-thuc\/[^$]/);
+});
+
+test("Content compiler runs SEO wave 5 after indexation enrichment", async () => {
+  const architecture = JSON.parse(await read("content/content-architecture.json"));
+  const stages = architecture.phases.flatMap((phase) => phase.stages);
+  assert.ok(stages.indexOf("patch-indexation-wave4.mjs") < stages.indexOf("patch-google-traffic-wave5.mjs"));
+  assert.ok(stages.indexOf("patch-google-traffic-wave5.mjs") < stages.indexOf("instrument-content.mjs"));
+});
+
+test("Knowledge hub uses the shared Cảnh Giác Số visual system", async () => {
+  const [hub, styles, finalizer] = await Promise.all([
+    read("public/kien-thuc/index.html"),
+    read("public/seo.css"),
+    read("scripts/finalize-content-architecture.mjs"),
+  ]);
+
+  assert.match(hub, /<link rel="stylesheet" href="\/seo\.css(?:\?v=[^"]+)?"/);
+  assert.match(finalizer, /SEO_CSS_VERSION = "\d{8}-[a-z0-9-]+"/);
+  assert.match(finalizer, /\/seo\.css\?v=\$\{SEO_CSS_VERSION\}/);
+  assert.match(hub, /class="seo-header"/);
+  assert.match(hub, /class="seo-brand-logo"/);
+  assert.match(hub, /id="google-priority-tools"/);
+  assert.match(styles, /\.seo-header\s*\{[\s\S]*position: sticky/);
+  assert.match(styles, /\.seo-brand-logo\s*\{[\s\S]*khien-so-logo\.png/);
+  assert.match(styles, /#google-priority-tools\s*\{[\s\S]*box-shadow: 0 0 0 100vmax/);
+  assert.match(styles, /\.seo-card\s*\{[\s\S]*border-radius: 8px/);
+});

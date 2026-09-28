@@ -71,3 +71,7 @@ Trong Supabase Authentication → URL Configuration, đặt Site URL là `https:
 ## Lưu ý
 
 Đây là sản phẩm giáo dục mô phỏng. Khi đã phát sinh thiệt hại, hãy liên hệ ngân hàng để khoá giao dịch, lưu bằng chứng và trình báo cơ quan công an gần nhất.
+
+## Trình soạn thảo Tin tức
+
+Trang quản trị Tin tức hỗ trợ rich text, ảnh đại diện/ảnh trong bài có alt text, slug, SEO, preview và trạng thái từng bài. Xem [hướng dẫn sử dụng và báo cáo nâng cấp](NEWS_EDITOR.md) để biết cách lưu bản nháp, xuất bản và giới hạn ảnh/SEO hiện tại.

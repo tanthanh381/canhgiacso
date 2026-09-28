@@ -21,73 +21,100 @@ test("server renders the Cảnh Giác Số experience", async () => {
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
   const html = await response.text();
-  assert.match(html, /Cảnh Giác Số \| HDBank - IT Security/);
+  assert.match(html, /<title>Cảnh Giác Số: Nhận diện lừa đảo trực tuyến \| HDBank<\/title>/);
   assert.match(html, /HDBANK · IT SECURITY/);
   assert.match(html, /THƯ VIỆN TÌNH HUỐNG/);
   assert.match(html, /Cuộc gọi ‘điều tra khẩn cấp’/);
-  assert.match(html, /Mô phỏng/);
+  assert.match(html, />Thử thách<\/button>/);
   assert.match(html, /Đăng nhập/);
   assert.match(html, /Đăng ký/);
   assert.match(html, /Đang tham gia với tư cách khách/);
-  assert.match(html, />Dashboard</);
+  assert.doesNotMatch(html, />Dashboard</);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/i);
 });
 
+test("primary game navigation uses the Thử thách label without changing its route", async () => {
+  const shell = await readFile(new URL("../app/domains/shell/view.tsx", import.meta.url), "utf8");
+  const gameNavigation = /onClick=\{\(\) => onNavigate\("game"\)\}>([^<]+)<\/button>/g;
+  const labels = [...shell.matchAll(gameNavigation)].map((match) => match[1]);
+
+  assert.ok(labels.includes("Thử thách"));
+  assert.ok(!labels.includes("Mô phỏng"));
+});
+
 test("ships product metadata and social artwork", async () => {
-  const [layout, page, admin, data, schema, contentRoles, packageJson, styles] = await Promise.all([
+  const [layout, page, dashboardView, knowledgeView, accountDialogs, shellView, authGateway, trainingGateway, dashboardGateway, contentGateway, admin, data, schema, contentRoles, packageJson, styles, ui, storage, presentation, authModel] = await Promise.all([
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/domains/dashboard/view.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/domains/security-awareness/view.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/domains/auth/dialogs.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/domains/shell/view.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/domains/auth/gateway.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/domains/training/gateway.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/domains/dashboard/gateway.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/domains/content/gateway.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/admin.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/data.ts", import.meta.url), "utf8"),
     readFile(new URL("../supabase/schema.sql", import.meta.url), "utf8"),
     readFile(new URL("../supabase/content_roles.sql", import.meta.url), "utf8"),
     readFile(new URL("../package.json", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    readFile(new URL("../app/shared/ui-primitives.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/shared/browser-storage.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/domains/training/presentation.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/domains/auth/model.ts", import.meta.url), "utf8"),
   ]);
+  const appSource = `${page}\n${dashboardView}\n${knowledgeView}\n${accountDialogs}\n${shellView}\n${authGateway}\n${trainingGateway}\n${dashboardGateway}\n${contentGateway}`;
 
   assert.match(layout, /og\.png/);
-  assert.match(layout, /HDBank - IT Security/);
-  assert.match(layout, /lang="vi"/);
-  assert.match(page, /localStorage/);
-  assert.match(page, /CẢNH GIÁC SỐ/);
-  assert.match(page, /FooterNotice/);
-  assert.match(page, /footer-warning/);
-  assert.match(page, /split\(\/\\n\+\//);
-  assert.match(page, /event\.key === "Escape"/);
-  assert.match(page, /aria-pressed/);
-  assert.match(page, /role="status"/);
+  assert.match(layout, /const siteTitle = "Cảnh Giác Số: Nhận diện lừa đảo trực tuyến \| HDBank"/);
+  assert.match(layout, /lang="vi-VN"/);
+  assert.match(storage, /localStorage/);
+  assert.match(appSource, /CẢNH GIÁC SỐ/);
+  assert.match(appSource, /FooterNotice/);
+  assert.match(ui, /footer-warning/);
+  assert.match(ui, /split\(\/\\n\+\//);
+  assert.match(ui, /event\.key === "Escape"/);
+  assert.match(appSource, /aria-pressed/);
+  assert.match(appSource, /role="status"/);
   assert.match(page, /readStoredProgress/);
-  assert.match(page, /supabase\.auth\.signUp/);
-  assert.match(page, /emailRedirectTo: PUBLIC_SITE_URL/);
-  assert.match(page, /USERNAME_PATTERN/);
-  assert.match(page, /PASSWORD_PATTERN/);
-  assert.match(page, /Mật khẩu cần 8–72 ký tự/);
-  assert.match(page, /supabase\.auth\.signInWithPassword/);
-  assert.match(page, /supabase\.auth\.signOut\(\{ scope: "local" \}\)/);
+  assert.match(appSource, /supabase\.auth\.signUp/);
+  assert.match(appSource, /data: \{ username, display_name: displayName \}/);
+  assert.match(page, /validateAuthSubmission/);
+  assert.match(authModel, /USERNAME_PATTERN/);
+  assert.match(authModel, /PASSWORD_PATTERN/);
+  assert.match(authModel, /Mật khẩu cần 8–72 ký tự/);
+  assert.match(appSource, /supabase\.auth\.signInWithPassword/);
+  assert.match(appSource, /supabase\.auth\.signOut\(\{ scope: "local" \}\)/);
   assert.match(page, /continueAsGuest/);
-  assert.match(page, /Tiếp tục với tư cách khách/);
-  assert.match(page, /supabase\.rpc\("submit_game_choice"/);
-  assert.match(page, /supabase\.rpc\("get_game_state"/);
-  assert.match(page, /get_ciso_dashboard/);
-  assert.match(page, /DefenseBadge/);
-  assert.match(page, /Chuyên gia Cảnh Giác Số/);
-  assert.match(page, /achievement-progress/);
-  assert.match(page, /defenseBadges\.length/);
-  assert.match(page, /Đăng xuất/);
+  assert.match(appSource, /Tiếp tục với tư cách khách/);
+  assert.match(page, /guestLimitOpen, setGuestLimitOpen\] = useState\(true\)/);
+  assert.match(appSource, /guest-badge-button/);
+  assert.match(appSource, /Bạn đang sử dụng với tính năng giới hạn/);
+  assert.match(appSource, /Đồng bộ tiến trình, lưu lịch sử lượt chơi/);
+  assert.match(appSource, /supabase\.rpc\("submit_game_choice"/);
+  assert.match(appSource, /supabase\.rpc\("get_game_state"/);
+  assert.match(appSource, /get_ciso_dashboard/);
+  assert.match(presentation, /DefenseBadge/);
+  assert.match(presentation, /Chuyên gia Cảnh Giác Số/);
+  assert.match(appSource, /achievement-progress/);
+  assert.match(appSource, /defenseBadges\.length/);
+  assert.match(appSource, /Đăng xuất/);
   assert.match(page, /Tài sản vừa bị tổn thất/);
   assert.match(page, /Đã hiểu hậu quả/);
-  assert.match(page, /khien-so-progress:\$\{username/);
+  assert.match(storage, /khien-so-progress:\$\{username/);
   assert.match(page, /resetAuthForm/);
   assert.match(page, /loadRemoteAccount/);
   assert.match(page, /exportCisoReport/);
   assert.match(data, /Dashboard rủi ro nhận thức/);
-  assert.match(page, /Môi trường mô phỏng/);
-  assert.match(page, /Phân loại sử dụng nội bộ/);
+  assert.match(appSource, /Môi trường mô phỏng/);
+  assert.match(appSource, /Phân loại sử dụng nội bộ/);
   assert.match(page, /156 hoặc 5656/);
   assert.match(admin, /Kiểm soát trước khi xuất bản/);
   assert.match(data, /Website được quản lý và vận hành bởi: IT Security Team - HDBank/);
   assert.match(data, /nâng cao nhận thức cộng đồng về phòng chống tội phạm lừa đảo trực tuyến/);
-  assert.match(page, /site_content/);
+  assert.match(appSource, /get_public_site_content/);
   assert.match(page, /#\/admin/);
   assert.match(page, /AdminPage/);
   assert.match(admin, /Lưu bản nháp/);
@@ -102,11 +129,11 @@ test("ships product metadata and social artwork", async () => {
   assert.match(admin, /Cấp quyền/);
   assert.match(admin, /Người dùng cần đăng ký và xác nhận email/);
   assert.match(data, /normalizeSiteContent/);
-  assert.match(data, /ANSWER_POSITION_PATTERN/);
+  assert.doesNotMatch(data.slice(data.indexOf("const scenarioDefinitions"), data.indexOf("export const scenarios")), /correct:\s*(?:true|false)|moneyDelta:|awarenessDelta:|feedback:/);
   const scenarioIds = [...data.matchAll(/\bid:\s*(\d+),/g)].map((match) => Number(match[1]));
   assert.equal(new Set(scenarioIds).size, 42);
   assert.equal(Math.max(...scenarioIds), 42);
-  assert.match(page, /Thợ săn xu hướng mới/);
+  assert.match(presentation, /Thợ săn xu hướng mới/);
   assert.match(schema, /alter table public\.site_content enable row level security/);
   assert.match(schema, /site_content_public_read/);
   assert.match(schema, /private\.user_is_app_admin/);
@@ -128,8 +155,8 @@ test("ships product metadata and social artwork", async () => {
   await access(new URL("../public/khien-so-logo.png", import.meta.url));
   await assert.rejects(access(new URL("../public/favicon.svg", import.meta.url)));
   await assert.rejects(access(new URL("../public/hdbank-logo.png", import.meta.url)));
-  await assert.rejects(access(new URL("../public/favicon.png", import.meta.url)));
-  assert.match(page, /function BrandMark/);
+  await access(new URL("../public/favicon.png", import.meta.url));
+  assert.match(ui, /function BrandMark/);
   assert.match(styles, /khien-so-logo\.png/);
   assert.doesNotMatch(styles, /khien-logo-shield|khien-logo-signal/);
   assert.doesNotMatch(page, /hdbank-logo\.png|alt="HDBank"|className="hdbank-logo"/);

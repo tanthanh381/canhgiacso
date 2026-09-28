@@ -1,0 +1,63 @@
+name: Security Analysis
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 2 * * 1"
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  codeql:
+    name: CodeQL
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@faaca9a8f6edddba5725ffe5adefdab6669a2eca
+        with:
+          languages: javascript-typescript
+          queries: security-extended
+      - name: Analyze
+        uses: github/codeql-action/analyze@faaca9a8f6edddba5725ffe5adefdab6669a2eca
+        with:
+          category: /language:javascript-typescript
+
+  osv:
+    name: OSV full dependency visibility
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - name: Scan complete dependency graph
+        continue-on-error: true
+        uses: google/osv-scanner-action/osv-scanner-action@40a8940a65eab1544a6af759e43d936201a131a2
+        with:
+          scan-args: |-
+            --recursive
+            ./
+      - name: Production dependency release gate
+        run: |
+          echo "Production dependencies are fail-closed by 'pnpm audit --prod --audit-level low' in the Verify workflow."
+          echo "OSV intentionally scans the complete build graph here as an advisory signal, including dev-only tooling not shipped to production."
+
+  sbom:
+    name: Generate SBOM
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - name: Generate CycloneDX SBOM
+        uses: anchore/sbom-action@f8bdd1d8ac5e901a77a92f111440fdb1b593736b
+        with:
+          path: .
+          format: cyclonedx-json
+          artifact-name: canhgiacso-sbom.cdx.json
+          output-file: canhgiacso-sbom.cdx.json
+          upload-artifact: true
+          upload-release-assets: false

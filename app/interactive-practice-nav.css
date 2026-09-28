@@ -1,0 +1,19 @@
+/* Keep interactive practice as a first-class navigation destination. */
+.topbar nav button:nth-child(4) {
+  display: block;
+}
+
+/* The standalone navigation item makes the in-guide CTA redundant. */
+.ux-practice-cta {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .ux-bottom-nav {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  .ux-bottom-nav .ux-practice-nav-item {
+    min-width: 0;
+  }
+}

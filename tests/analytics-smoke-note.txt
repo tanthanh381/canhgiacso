@@ -1,0 +1,1 @@
+Collector RPC smoke-tested in a rolled-back transaction with Origin https://canhgiacso.com: 1 session row and 1 pageview row were produced before rollback.

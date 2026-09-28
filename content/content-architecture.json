@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "name": "CanhGiacSo Content Architecture",
+  "sourceOfTruth": {
+    "application": [
+      "app/data.ts",
+      "app/news-content.ts"
+    ],
+    "staticContent": [
+      "public/kien-thuc",
+      "public/tin-tuc",
+      "github-pages/index.html"
+    ],
+    "policy": "Source content may be authored in application/static content sources. Generated docs/ is never a source of truth."
+  },
+  "output": {
+    "root": "docs",
+    "generatedOnly": true
+  },
+  "phases": [
+    {
+      "id": "generate",
+      "description": "Generate canonical SEO and organic content.",
+      "stages": [
+        "generate-seo-content.mjs",
+        "generate-organic-growth.mjs",
+        "generate-fresh-seo.mjs"
+      ]
+    },
+    {
+      "id": "discoverability",
+      "description": "Apply deterministic internal-link, SERP and trust architecture.",
+      "stages": [
+        "patch-priority-discovery.mjs",
+        "patch-serp-intent-wave3.mjs",
+        "patch-indexation-wave4.mjs",
+        "patch-google-traffic-wave5.mjs"
+      ]
+    },
+    {
+      "id": "quality",
+      "description": "Normalize quality, terminology and evidence.",
+      "stages": [
+        "patch-qc-wave2.mjs",
+        "patch-qc-wave3.mjs"
+      ]
+    },
+    {
+      "id": "growth",
+      "description": "Compile authority, intent, CTR and content-growth waves.",
+      "stages": [
+        "patch-seo-authority-wave6.mjs",
+        "patch-seo-intent-wave7.mjs",
+        "patch-seo-ctr-wave8.mjs",
+        "patch-content-growth-wave9.mjs"
+      ]
+    },
+    {
+      "id": "finalize",
+      "description": "Derive canonical index inventory and sitemap from final compiled artifacts.",
+      "stages": [
+        "finalize-content-architecture.mjs"
+      ]
+    },
+    {
+      "id": "instrumentation",
+      "description": "Attach first-party analytics and GA4 after content is final.",
+      "stages": [
+        "instrument-content.mjs"
+      ]
+    }
+  ],
+  "invariants": [
+    "Every stage must be idempotent.",
+    "No stage may write outside app/, public/, github-pages/ or docs/.",
+    "docs/ is generated and must never be manually authored.",
+    "SEO audit runs only after compilation and Vite build.",
+    "Production analytics instrumentation runs after content normalization.",
+    "Legacy build transforms must be retired once their output is canonical in source or the finalizer."
+  ]
+}

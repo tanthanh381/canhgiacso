@@ -1,12 +1,5 @@
-# robots.txt for canhgiacso.com
 User-agent: *
 Allow: /
-Disallow: /admin
-Disallow: /*.json
-Disallow: /api/*
+Disallow: /api/
 
-# Sitemaps
 Sitemap: https://canhgiacso.com/sitemap.xml
-
-# Crawl delay (in seconds)
-Crawl-delay: 1

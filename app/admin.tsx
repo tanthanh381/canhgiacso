@@ -1,15 +1,26 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { CertificateTemplate, Difficulty, KnowledgeCard, Scenario, SiteContent, normalizeSiteContent } from "./data";
+import { CertificateTemplate, Difficulty, KnowledgeCard, Scenario, SiteContent, normalizeManagedSiteContent } from "./data";
+import { CertificateEditor, CertificateThumbnail } from "./certificate-editor";
+import { NewsEditor } from './news-editor';
+import { newsErrors, publicNews } from './news-content';
 import { supabase } from "./supabase";
+import { AdminTrafficAnalytics } from "./admin-traffic-analytics";
 
 type AdminAccount = { id: string; displayName: string; email: string };
 type AdminState = "checking" | "ready" | "forbidden" | "error";
 type ContentRole = "admin" | "editor";
 type ManagedRole = ContentRole | "member";
 type ManagedUser = { id: string; email: string; username: string; displayName: string; createdAt: string; role: ManagedRole };
-type AdminTab = "general" | "certificate" | "scenarios" | "knowledge" | "users";
+type AdminTab = "content" | "general" | "certificate" | "scenarios" | "knowledge" | "news" | "traffic" | "users";
+
+function adminTabFromHash(): AdminTab {
+  if (typeof window === "undefined") return "content";
+  const query = window.location.hash.split("?")[1] ?? "";
+  const tab = new URLSearchParams(query).get("tab");
+  return tab === "traffic" || tab === "users" ? tab : "content";
+}
 
 const difficultyOptions: Difficulty[] = ["Dễ", "Trung bình", "Khó", "Rất khó"];
 
@@ -27,7 +38,7 @@ function parseManagementContext(value: unknown): { role: ContentRole; users: Man
     if (typeof user.id !== "string" || typeof user.email !== "string" || typeof user.username !== "string"
       || typeof user.display_name !== "string" || typeof user.created_at !== "string"
       || (user.role !== "admin" && user.role !== "editor" && user.role !== "member")) return [];
-    return [{ id: user.id, email: user.email, username: user.username, displayName: user.display_name, createdAt: user.created_at, role: user.role }];
+    return [{ id: user.id, email: user.email, username: user.username, displayName: user.display_name, createdAt: user.created_at, role: user.role as ManagedRole }];
   }) : [];
   return { role: record.role, users };
 }
@@ -46,9 +57,10 @@ export function AdminPage({
   const [access, setAccess] = useState<AdminState>(account ? "checking" : "forbidden");
   const [draft, setDraft] = useState(() => cloneContent(publishedContent));
   const [published, setPublished] = useState(() => cloneContent(publishedContent));
-  const [tab, setTab] = useState<AdminTab>("general");
+  const [tab, setTab] = useState<AdminTab>(adminTabFromHash);
   const [selectedScenarioId, setSelectedScenarioId] = useState(publishedContent.scenarios[0]?.id ?? 1);
   const [status, setStatus] = useState("");
+  const [savedSnapshot, setSavedSnapshot] = useState(JSON.stringify(publishedContent));
   const [busy, setBusy] = useState(false);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const [role, setRole] = useState<ContentRole | null>(null);
@@ -56,6 +68,13 @@ export function AdminPage({
   const [changingUserId, setChangingUserId] = useState<string | null>(null);
   const [grantIdentity, setGrantIdentity] = useState("");
   const [grantRole, setGrantRole] = useState<ContentRole>("editor");
+
+  useEffect(() => {
+    const syncTabFromHash = () => setTab(adminTabFromHash());
+    syncTabFromHash();
+    window.addEventListener("hashchange", syncTabFromHash);
+    return () => window.removeEventListener("hashchange", syncTabFromHash);
+  }, []);
 
   useEffect(() => {
     if (!account) return;
@@ -79,28 +98,36 @@ export function AdminPage({
       }
       setRole(context.role);
       setManagedUsers(context.users);
-      const { data, error } = await supabase
-        .from("site_content")
-        .select("slug, content, updated_at")
-        .in("slug", ["main", "main-draft"]);
+      const { data, error } = await supabase.rpc("get_managed_site_content");
       if (!active) return;
       if (error) {
         setAccess("error");
         return;
       }
-      const rows = data ?? [];
+      const rows = Array.isArray(data) ? data as Array<{ slug: string; content: unknown; updated_at: string }> : [];
       const publishedRow = rows.find((row) => row.slug === "main");
       const draftRow = rows.find((row) => row.slug === "main-draft");
-      const normalizedPublished = normalizeSiteContent(publishedRow?.content) ?? publishedContent;
-      const normalizedDraft = normalizeSiteContent(draftRow?.content) ?? normalizedPublished;
+      const normalizedPublished = normalizeManagedSiteContent(publishedRow?.content) ?? publishedContent;
+      const normalizedDraft = normalizeManagedSiteContent(draftRow?.content) ?? normalizedPublished;
       setPublished(cloneContent(normalizedPublished));
       setDraft(cloneContent(normalizedDraft));
+      setSavedSnapshot(JSON.stringify(normalizedDraft));
       setSelectedScenarioId(normalizedDraft.scenarios[0]?.id ?? 1);
       setUpdatedAt(draftRow?.updated_at ?? publishedRow?.updated_at ?? null);
       setAccess("ready");
     })();
     return () => { active = false; };
   }, [account, publishedContent]);
+
+  const dirty = access === 'ready' && JSON.stringify(draft) !== savedSnapshot;
+  useEffect(() => {
+    if (!dirty) return;
+    const beforeUnload = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ''; };
+    const beforeNavigate = (event: Event) => { if (!window.confirm('Bạn có thay đổi chưa lưu. Rời trang và bỏ các thay đổi này?')) event.preventDefault(); };
+    window.addEventListener('beforeunload', beforeUnload);
+    window.addEventListener('admin-before-leave', beforeNavigate);
+    return () => { window.removeEventListener('beforeunload', beforeUnload); window.removeEventListener('admin-before-leave', beforeNavigate); };
+  }, [dirty]);
 
   const selectedScenario = useMemo(
     () => draft.scenarios.find((scenario) => scenario.id === selectedScenarioId) ?? draft.scenarios[0],
@@ -111,7 +138,7 @@ export function AdminPage({
     setDraft((current) => ({ ...current, copy: { ...current.copy, [key]: value } }));
   }
 
-  function changeCertificateTemplate(key: keyof CertificateTemplate, value: string) {
+  function changeCertificateTemplate(key: Exclude<keyof CertificateTemplate, "design">, value: string) {
     setDraft((current) => ({
       ...current,
       certificateTemplate: { ...current.certificateTemplate, [key]: value },
@@ -203,48 +230,49 @@ export function AdminPage({
       setStatus("Biên tập viên chỉ có thể lưu bản nháp. Hãy gửi nội dung cho Quản trị viên để xuất bản.");
       return;
     }
-    const normalized = normalizeSiteContent(draft);
+    const newsIssues = draft.newsArticles.flatMap(article => newsErrors(article, draft.newsArticles, target === 'publish' && article.status !== 'draft').map(error => `${article.title}: ${error}`));
+    if (newsIssues.length) { setStatus(newsIssues.join(' ')); setTab('news'); return; }
+    if (new TextEncoder().encode(JSON.stringify(draft)).length > 850000) { setStatus('Kho nội dung quá lớn. Hãy dùng URL HTTPS cho một số ảnh hoặc giảm số ảnh trước khi lưu (giới hạn an toàn 850 KB).'); return; }
+    const normalized = normalizeManagedSiteContent(draft);
     if (!normalized) {
-      setStatus("Nội dung chưa hợp lệ. Mỗi tình huống cần đúng 3 lựa chọn và chỉ 1 đáp án đúng.");
+      setStatus("Nội dung chưa hợp lệ. Kiểm tra tình huống, ngày đăng và URL nguồn HTTPS của mục Tin tức.");
       return;
     }
-    if (target === "publish" && !window.confirm("Xác nhận xuất bản? Hãy bảo đảm nội dung đã được kiểm tra nguồn, không chứa dữ liệu cá nhân và mỗi tình huống chỉ có một đáp án an toàn.")) return;
+    if (target === "publish" && !window.confirm("Xác nhận xuất bản nội dung")) return;
     setBusy(true);
     setStatus(target === "publish" ? "Đang xuất bản…" : "Đang lưu bản nháp…");
     const now = new Date().toISOString();
-    const draftResult = await supabase.from("site_content").upsert({
-      slug: "main-draft",
-      content: normalized,
-      published: false,
-      updated_by: account.id,
-      updated_at: now,
-    }, { onConflict: "slug" });
+    try {
+    const draftResult = await supabase.rpc("save_managed_site_content", {
+      target_slug: "main-draft",
+      target_content: normalized,
+    });
     if (draftResult.error) {
       setBusy(false);
       setStatus("Không thể lưu. Vui lòng kiểm tra quyền quản trị và cấu hình cơ sở dữ liệu.");
       return;
     }
+    setSavedSnapshot(JSON.stringify(normalized));
     if (target === "publish") {
-      const publishResult = await supabase.from("site_content").upsert({
-        slug: "main",
-        content: normalized,
-        published: true,
-        updated_by: account.id,
-        updated_at: now,
-      }, { onConflict: "slug" });
+      const publicContent = { ...normalized, newsArticles: publicNews(normalized.newsArticles) };
+      const publishResult = await supabase.rpc("save_managed_site_content", {
+        target_slug: "main",
+        target_content: publicContent,
+      });
       if (publishResult.error) {
         setBusy(false);
         setStatus("Bản nháp đã lưu nhưng chưa thể xuất bản.");
         return;
       }
-      setPublished(cloneContent(normalized));
-      onPublished(normalized);
+      setPublished(cloneContent(publicContent));
+      onPublished(publicContent);
       setStatus("Đã xuất bản nội dung mới. Người dùng tải lại trang sẽ thấy thay đổi.");
     } else {
       setStatus("Đã lưu bản nháp. Nội dung công khai chưa thay đổi.");
     }
     setUpdatedAt(now);
-    setBusy(false);
+    } catch { setStatus('Mất kết nối khi lưu. Nội dung đang sửa vẫn còn; hãy thử lưu lại.'); }
+    finally { setBusy(false); }
   }
 
   async function changeUserRole(user: ManagedUser, nextRole: ManagedRole) {
@@ -301,75 +329,99 @@ export function AdminPage({
   if (access === "forbidden") return <AdminGate title="Tài khoản chưa có quyền quản trị" detail="Quyền được kiểm tra trực tiếp trên máy chủ. Hãy liên hệ quản trị viên hệ thống để được cấp quyền." />;
   if (access === "error") return <AdminGate title="Chưa thể mở trang quản trị" detail="Hãy kiểm tra kết nối và bảo đảm migration quản trị nội dung đã được áp dụng." />;
 
+  const isIndependentAdminTab = tab === "traffic" || tab === "users";
+  const independentTitle = tab === "traffic" ? "Thống kê truy cập" : "Phân quyền";
+
   return (
     <section className="content-page admin-page">
       <div className="admin-heading">
-        <div><span className="eyebrow">CẢNH GIÁC SỐ · QUẢN TRỊ NỘI DUNG</span><h1>Trung tâm nội dung</h1><p>Chỉnh sửa bản nháp, rà soát và xuất bản nội dung cho toàn bộ website.</p></div>
-        <div className="admin-actions"><button className="admin-secondary" disabled={busy} onClick={() => { setDraft(cloneContent(published)); setStatus("Đã khôi phục bản nháp từ nội dung đang xuất bản."); }}>Khôi phục bản đã đăng</button><button className="admin-secondary" disabled={busy} onClick={() => void save("draft")}>Lưu bản nháp</button>{role === "admin" && <button className="primary-button" disabled={busy} onClick={() => void save("publish")}>Xuất bản</button>}</div>
+        <div><span className="eyebrow">CẢNH GIÁC SỐ · {isIndependentAdminTab ? "QUẢN TRỊ HỆ THỐNG" : "QUẢN TRỊ NỘI DUNG"}</span><h1>{isIndependentAdminTab ? independentTitle : "Trung tâm nội dung"}</h1><p>{isIndependentAdminTab ? "Khu vực quản trị độc lập, chỉ dành cho Quản trị viên." : "Chỉnh sửa bản nháp, rà soát và xuất bản nội dung cho toàn bộ website."}</p></div>
+        {isIndependentAdminTab ? <button className="admin-secondary" onClick={() => { setTab("content"); window.location.hash = "#/admin"; }}>← Quản lý nội dung</button> : <div className="admin-actions"><button className="admin-secondary" disabled={busy} onClick={() => { if (!window.confirm("Thay toàn bộ bản nháp bằng nội dung đang đăng? Các bài Draft sẽ bị bỏ khỏi bản nháp đang sửa.")) return; setDraft(cloneContent(published)); setStatus("Đã khôi phục bản nháp từ nội dung đang xuất bản."); }}>Khôi phục bản đã đăng</button><button className="admin-secondary" disabled={busy} onClick={() => void save("draft")}>Lưu bản nháp</button>{role === "admin" && <button className="primary-button" disabled={busy} onClick={() => void save("publish")}>Xuất bản</button>}</div>}
       </div>
-      <div className="admin-meta"><span><b>{role === "admin" ? "Quản trị viên" : "Biên tập viên"}:</b> {account.displayName} · {account.email}</span><span><b>Cập nhật gần nhất:</b> {updatedAt ? new Date(updatedAt).toLocaleString("vi-VN") : "Chưa có"}</span></div>
+      {!isIndependentAdminTab && <><div className="admin-meta"><span><b>{role === "admin" ? "Quản trị viên" : "Biên tập viên"}:</b> {account.displayName} · {account.email}</span><span><b>Cập nhật gần nhất:</b> {updatedAt ? new Date(updatedAt).toLocaleString("vi-VN") : "Chưa có"}</span></div>
       <div className="publishing-guardrail" role="note"><strong>Kiểm soát trước khi xuất bản</strong><span>Kiểm tra nguồn khuyến cáo · Không đưa dữ liệu cá nhân vào kịch bản · Chỉ một đáp án an toàn · Diễn đạt trung lập, không gây hoang mang</span></div>
       {role === "editor" && <div className="admin-role-note" role="note"><strong>Quyền Biên tập viên</strong><span>Bạn có thể chỉnh sửa và lưu bản nháp. Chỉ Quản trị viên mới được xuất bản nội dung.</span></div>}
       {status && <div className="admin-status" role="status" aria-live="polite">{status}</div>}
-      <div className="admin-tabs" role="tablist" aria-label="Nhóm nội dung">
+      <p className="news-save-state" role="status">{JSON.stringify(draft) === savedSnapshot ? "Đã lưu bản nháp" : "Có thay đổi chưa lưu"}</p></>}
+      <fieldset className="admin-edit-fieldset" disabled={busy}>
+      {!isIndependentAdminTab && <div className="admin-tabs" role="tablist" aria-label="Nhóm nội dung">
+        <button role="tab" aria-selected={tab === "content"} className={tab === "content" ? "active" : ""} onClick={() => setTab("content")}>Quản lý nội dung</button>
         <button role="tab" aria-selected={tab === "general"} className={tab === "general" ? "active" : ""} onClick={() => setTab("general")}>Nội dung chung</button>
-        <button role="tab" aria-selected={tab === "certificate"} className={tab === "certificate" ? "active" : ""} onClick={() => setTab("certificate")}>Chứng chỉ</button>
+        <button role="tab" aria-selected={tab === "certificate"} className={tab === "certificate" ? "active" : ""} onClick={() => setTab("certificate")}>Chứng nhận</button>
         <button role="tab" aria-selected={tab === "scenarios"} className={tab === "scenarios" ? "active" : ""} onClick={() => setTab("scenarios")}>Tình huống ({draft.scenarios.length})</button>
         <button role="tab" aria-selected={tab === "knowledge"} className={tab === "knowledge" ? "active" : ""} onClick={() => setTab("knowledge")}>Cẩm nang ({draft.knowledgeCards.length})</button>
-        {role === "admin" && <button role="tab" aria-selected={tab === "users"} className={tab === "users" ? "active" : ""} onClick={() => setTab("users")}>Phân quyền ({managedUsers.length})</button>}
-      </div>
+        <button role="tab" aria-selected={tab === "news"} className={tab === "news" ? "active" : ""} onClick={() => setTab("news")}>Tin tức ({draft.newsArticles.length})</button>
+      </div>}
+
+      {tab === "content" && <div className="content-management-hub">
+        <div className="content-management-intro">
+          <div><span className="eyebrow">KHO NỘI DUNG WEBSITE</span><h2>Quản lý nội dung bài viết</h2><p>Tập trung toàn bộ nội dung có thể chỉnh sửa trong một bản nháp duy nhất. Chọn một nhóm để cập nhật, sau đó lưu bản nháp hoặc xuất bản khi đã rà soát.</p></div>
+          <div className="content-management-summary"><strong>5</strong><span>nhóm nội dung đang quản lý</span></div>
+        </div>
+        <div className="content-management-grid">
+          <article className="content-management-card content-management-card-featured">
+            <div className="content-management-card-head"><span className="content-management-icon">✎</span><span className="content-management-count">{draft.newsArticles.length} bài</span></div>
+            <div><h3>Bài viết / Tin tức</h3><p>Soạn bài bằng trình biên tập rich-text, cập nhật ảnh, SEO, nguồn, trạng thái bản nháp và ngày xuất bản.</p></div>
+            <div className="content-management-meta"><span>{draft.newsArticles.filter((article) => article.status !== "draft").length} đã xuất bản</span><span>{draft.newsArticles.filter((article) => article.status === "draft").length} bản nháp</span></div>
+            <button className="admin-secondary" onClick={() => setTab("news")}>Mở quản lý bài viết →</button>
+          </article>
+          <article className="content-management-card">
+            <div className="content-management-card-head"><span className="content-management-icon">▤</span><span className="content-management-count">{draft.knowledgeCards.length} thẻ</span></div>
+            <div><h3>Cẩm nang</h3><p>Điều chỉnh các thẻ kiến thức ngắn, tiêu đề, biểu tượng và nội dung hướng dẫn an toàn.</p></div>
+            <button className="admin-secondary" onClick={() => setTab("knowledge")}>Mở Cẩm nang →</button>
+          </article>
+          <article className="content-management-card">
+            <div className="content-management-card-head"><span className="content-management-icon">◇</span><span className="content-management-count">{draft.scenarios.length} tình huống</span></div>
+            <div><h3>Tình huống</h3><p>Quản lý bối cảnh, dấu hiệu cảnh báo, lựa chọn, đáp án an toàn và phản hồi giải thích.</p></div>
+            <button className="admin-secondary" onClick={() => setTab("scenarios")}>Mở Tình huống →</button>
+          </article>
+          <article className="content-management-card">
+            <div className="content-management-card-head"><span className="content-management-icon">Aa</span><span className="content-management-count">Nội dung chung</span></div>
+            <div><h3>Thông tin website</h3><p>Chỉnh sửa tiêu đề, nhãn, lời giới thiệu của thư viện, Cẩm nang, Tin tức, Dashboard và chân trang.</p></div>
+            <button className="admin-secondary" onClick={() => setTab("general")}>Mở nội dung chung →</button>
+          </article>
+          <article className="content-management-card">
+            <div className="content-management-card-head"><span className="content-management-icon">▣</span><span className="content-management-count">1 mẫu</span></div>
+            <div><h3>Chứng nhận</h3><p>Tùy chỉnh mẫu PDF, nội dung hiển thị, nhãn dữ liệu và phần ghi chú cuối chứng nhận.</p></div>
+            <button className="admin-secondary" onClick={() => setTab("certificate")}>Mở Chứng nhận →</button>
+          </article>
+        </div>
+        <div className="content-management-publishing" role="note"><strong>Quy trình cập nhật</strong><span>Thay đổi được giữ trong cùng một bản nháp. “Lưu bản nháp” không làm thay đổi nội dung người dùng đang xem; chỉ “Xuất bản” mới cập nhật bản công khai và chỉ Quản trị viên có quyền này.</span></div>
+      </div>}
 
       {tab === "general" && <div className="admin-form-grid">
         {([
           ["productName", "Tên sản phẩm"], ["departmentName", "Tên đơn vị"], ["libraryEyebrow", "Nhãn thư viện"],
           ["libraryTitle", "Tiêu đề thư viện"], ["coachEyebrow", "Nhãn thẻ ghi nhớ"], ["knowledgeEyebrow", "Nhãn cẩm nang"],
           ["knowledgeTitle", "Tiêu đề cẩm nang"], ["knowledgeIntro", "Giới thiệu cẩm nang"], ["dashboardEyebrow", "Nhãn Dashboard"],
+          ["newsEyebrow", "Nhãn Tin tức"], ["newsTitle", "Tiêu đề Tin tức"], ["newsIntro", "Giới thiệu Tin tức"],
           ["dashboardTitle", "Tiêu đề Dashboard"], ["dashboardIntro", "Giới thiệu Dashboard"], ["footerTagline", "Dòng giới thiệu chân trang"],
           ["footerNotice", "Thông báo chân trang"],
         ] as Array<[keyof SiteContent["copy"], string]>).map(([key, label]) => <label key={key} className={key.endsWith("Intro") || key === "footerNotice" ? "admin-wide" : ""}><span>{label}</span>{key.endsWith("Intro") || key === "footerNotice" ? <textarea value={draft.copy[key]} onChange={(event) => changeCopy(key, event.target.value)} /> : <input value={draft.copy[key]} onChange={(event) => changeCopy(key, event.target.value)} />}</label>)}
       </div>}
 
       {tab === "certificate" && <div className="certificate-admin-layout">
-        <div className="admin-section-title"><div><span className="eyebrow">MẪU CHỨNG CHỈ PDF</span><h2>Tùy chỉnh nội dung chứng chỉ</h2><p>Các biến trong ngoặc nhọn sẽ được thay bằng dữ liệu kết quả thực tế khi người dùng tải PDF.</p></div></div>
+        <div className="admin-section-title"><div><span className="eyebrow">MẪU CHỨNG CHỈ PDF</span><h2>Tùy chỉnh nội dung chứng nhận</h2><p>Các biến trong ngoặc nhọn sẽ được thay bằng dữ liệu kết quả thực tế khi người dùng tải PDF.</p></div></div>
+        <CertificateEditor template={draft.certificateTemplate} onChange={(certificateTemplate) => setDraft((current) => ({ ...current, certificateTemplate }))} />
+        <div className="certificate-custom-preview-layout"><div>
         <div className="certificate-token-note" role="note"><strong>Biến hỗ trợ</strong><span>{"{courseName}"} · {"{scenarioTotal}"} · {"{completed}"} · {"{correct}"} · {"{accuracy}"} · {"{score}"} · {"{rating}"} · {"{displayName}"} · {"{username}"} · {"{certificateCode}"}</span></div>
         <div className="admin-form-grid">
           {([
             ["organizationName", "Tên tổ chức", false],
             ["departmentName", "Đơn vị phụ trách", false],
-            ["eyebrow", "Dòng tiêu đề nhỏ", false],
-            ["title", "Tiêu đề chứng chỉ", false],
+            ["eyebrow", "Dòng tiêu đề nhỏ", true],
+            ["title", "Tiêu đề chứng nhận", false],
             ["recipientIntro", "Lời trao chứng nhận", false],
             ["courseName", "Tên chương trình / khóa đào tạo", false],
             ["ratingLabel", "Nhãn xếp loại", false],
             ["accountLabel", "Nhãn tài khoản", false],
-            ["codeLabel", "Nhãn mã chứng chỉ", false],
+            ["codeLabel", "Nhãn mã chứng nhận", false],
             ["issuedDateLabel", "Nhãn ngày cấp", false],
             ["description", "Nội dung mô tả", true],
-            ["footerNote", "Ghi chú cuối chứng chỉ", true],
-          ] as Array<[keyof CertificateTemplate, string, boolean]>).map(([key, label, multiline]) => <label key={key} className={multiline ? "admin-wide" : ""}><span>{label}</span>{multiline ? <textarea rows={4} value={draft.certificateTemplate[key]} onChange={(event) => changeCertificateTemplate(key, event.target.value)} /> : <input value={draft.certificateTemplate[key]} onChange={(event) => changeCertificateTemplate(key, event.target.value)} />}</label>)}
+            ["footerNote", "Ghi chú cuối chứng nhận", true],
+          ] as Array<[Exclude<keyof CertificateTemplate, "design">, string, boolean]>).map(([key, label, multiline]) => <label key={key} className={multiline ? "admin-wide" : ""}><span>{label}</span>{multiline ? <textarea rows={4} value={draft.certificateTemplate[key]} onChange={(event) => changeCertificateTemplate(key, event.target.value)} /> : <input value={draft.certificateTemplate[key]} onChange={(event) => changeCertificateTemplate(key, event.target.value)} />}</label>)}
         </div>
-        <article className="certificate-admin-preview" aria-label="Xem trước nội dung chứng chỉ">
-          <span className="eyebrow">XEM TRƯỚC NỘI DUNG</span>
-          <strong>{draft.certificateTemplate.organizationName}</strong>
-          <small>{draft.certificateTemplate.departmentName}</small>
-          <em>{draft.certificateTemplate.eyebrow}</em>
-          <h3>{draft.certificateTemplate.title}</h3>
-          <p>{draft.certificateTemplate.recipientIntro}</p>
-          <b>NGUYỄN VĂN A</b>
-          <p>{draft.certificateTemplate.description
-            .replaceAll("{courseName}", draft.certificateTemplate.courseName)
-            .replaceAll("{scenarioTotal}", String(draft.scenarios.length))
-            .replaceAll("{completed}", String(draft.scenarios.length))
-            .replaceAll("{correct}", String(Math.round(draft.scenarios.length * .9)))
-            .replaceAll("{accuracy}", "90")
-            .replaceAll("{score}", String(Math.round(draft.scenarios.length * 120 * .9)))
-            .replaceAll("{rating}", "XUẤT SẮC")
-            .replaceAll("{displayName}", "NGUYỄN VĂN A")
-            .replaceAll("{username}", "nguyenvana")
-            .replaceAll("{certificateCode}", "CGS-2026-DEMO")}</p>
-          <div><span>{draft.certificateTemplate.ratingLabel}</span><strong>XUẤT SẮC</strong></div>
-          <small>{draft.certificateTemplate.footerNote}</small>
-        </article>
+        </div><CertificateThumbnail template={draft.certificateTemplate} /></div>
       </div>}
 
       {tab === "scenarios" && selectedScenario && <div className="scenario-admin-layout">
@@ -393,6 +445,10 @@ export function AdminPage({
 
       {tab === "knowledge" && <div className="knowledge-admin"><div className="admin-section-title"><div><span className="eyebrow">CẨM NANG AN TOÀN</span><h2>Thẻ kiến thức</h2></div><button className="admin-secondary" onClick={addKnowledge}>+ Thêm thẻ</button></div><div className="knowledge-admin-grid">{draft.knowledgeCards.map((card, index) => <article key={index}><div className="knowledge-admin-head"><b>{String(index + 1).padStart(2, "0")}</b><button onClick={() => removeKnowledge(index)} aria-label={`Xóa ${card.title}`}>×</button></div><label><span>Biểu tượng</span><input value={card.icon} maxLength={12} onChange={(event) => changeKnowledge(index, { icon: event.target.value })} /></label><label><span>Tiêu đề</span><input value={card.title} onChange={(event) => changeKnowledge(index, { title: event.target.value })} /></label><label><span>Nội dung</span><textarea rows={5} value={card.text} onChange={(event) => changeKnowledge(index, { text: event.target.value })} /></label></article>)}</div></div>}
 
+      {tab === "news" && <NewsEditor disabled={busy} articles={draft.newsArticles} canPublish={role === 'admin'} onChange={newsArticles => setDraft(current => ({ ...current, newsArticles }))} />}
+
+      {tab === "traffic" && role === "admin" && <AdminTrafficAnalytics />}
+
       {tab === "users" && role === "admin" && <div className="role-management">
         <div className="admin-section-title"><div><span className="eyebrow">PHÂN QUYỀN HỆ THỐNG</span><h2>Tài khoản và nhóm quyền</h2><p>Quản trị viên có toàn quyền; Biên tập viên chỉ soạn và lưu bản nháp.</p></div></div>
         <form className="role-grant-form" onSubmit={grantRoleByIdentity}>
@@ -403,6 +459,7 @@ export function AdminPage({
         <p className="role-grant-help">Chỉ tài khoản đã đăng ký và xác nhận email mới có thể được cấp quyền. Có thể thu hồi quyền về “Thành viên” trong danh sách bên dưới.</p>
         <div className="role-table-wrap"><table><thead><tr><th>Tài khoản</th><th>Ngày đăng ký</th><th>Nhóm quyền</th></tr></thead><tbody>{managedUsers.map((user) => <tr key={user.id}><td><strong>{user.displayName}</strong><small>@{user.username} · {user.email}</small></td><td>{new Date(user.createdAt).toLocaleDateString("vi-VN")}</td><td><select aria-label={`Nhóm quyền của ${user.displayName}`} value={user.role} disabled={user.id === account.id || changingUserId === user.id} onChange={(event) => void changeUserRole(user, event.target.value as ManagedRole)}><option value="member">Thành viên</option><option value="editor">Biên tập viên</option><option value="admin">Quản trị</option></select>{user.id === account.id && <small className="self-role-note">Tài khoản hiện tại</small>}</td></tr>)}</tbody></table></div>
       </div>}
+      </fieldset>
     </section>
   );
 }

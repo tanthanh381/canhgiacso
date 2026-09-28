@@ -1,0 +1,20 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import test from "node:test";
+
+test("phishing quiz is a standalone primary navigation function", async () => {
+  const [page, shell, navigation] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/domains/shell/view.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/domains/shell/navigation.ts", import.meta.url), "utf8"),
+  ]);
+  assert.match(navigation, /export type View = .*"quiz"/);
+  assert.match(shell, /onNavigate\("quiz"\).*Thực hành/);
+  assert.match(page, /view === "quiz"/);
+  const knowledgeStart = page.indexOf('view === "knowledge"');
+  const quizStart = page.indexOf('view === "quiz"');
+  assert.ok(knowledgeStart >= 0 && quizStart >= 0);
+  const knowledgeSection = page.slice(knowledgeStart, quizStart);
+  assert.doesNotMatch(knowledgeSection, /phishing-quiz-shell/);
+  assert.match(page, /src=\{PHISHING_QUIZ_URL\}/);
+});

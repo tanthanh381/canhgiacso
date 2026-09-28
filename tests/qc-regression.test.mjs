@@ -6,13 +6,11 @@ const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
 
 test("scenario library has 42 valid three-choice scenarios", async () => {
   const data = await read("../app/data.ts");
-  const definitions = data.slice(data.indexOf("const scenarioDefinitions"), data.indexOf("const ANSWER_POSITION_PATTERN"));
+  const definitions = data.slice(data.indexOf("const scenarioDefinitions"), data.indexOf("export const scenarios"));
   const ids = [...definitions.matchAll(/\bid:\s*(\d+),/g)].map((match) => Number(match[1]));
   assert.deepEqual(ids, Array.from({ length: 42 }, (_, index) => index + 1));
-  assert.equal((definitions.match(/correct:\s*true/g) ?? []).length, 42);
-  assert.equal((definitions.match(/correct:\s*false/g) ?? []).length, 84);
-  assert.match(data, /ANSWER_POSITION_PATTERN\s*=\s*\[1, 2, 1, 0/);
-  for (const position of [0, 1, 2]) assert.match(data, new RegExp(`ANSWER_POSITION_PATTERN[^;]*\\b${position}\\b`));
+  assert.equal((definitions.match(/\{ text:/g) ?? []).length, 126);
+  assert.doesNotMatch(definitions, /correct:\s*(?:true|false)|moneyDelta:|awarenessDelta:|feedback:/);
 });
 
 test("all public data tables have RLS and ownership policies", async () => {
@@ -28,23 +26,72 @@ test("all public data tables have RLS and ownership policies", async () => {
 });
 
 test("browser bundle contains no server secret and keeps auth validation", async () => {
-  const [client, page] = await Promise.all([read("../app/supabase.ts"), read("../app/page.tsx")]);
+  const [client, page, auth, authGateway, contentGateway] = await Promise.all([
+    read("../app/supabase.ts"),
+    read("../app/page.tsx"),
+    read("../app/domains/auth/model.ts"),
+    read("../app/domains/auth/gateway.ts"),
+    read("../app/domains/content/gateway.ts"),
+  ]);
+  const browserSource = `${page}\n${authGateway}\n${contentGateway}`;
   assert.match(client, /SUPABASE_PUBLISHABLE_KEY/);
   assert.doesNotMatch(client, /service_role|SUPABASE_SECRET_KEY/i);
-  assert.match(page, /PASSWORD_PATTERN/);
-  assert.match(page, /USERNAME_PATTERN/);
-  assert.match(page, /signOut\(\{ scope: "local" \}\)/);
+  assert.match(auth, /PASSWORD_PATTERN/);
+  assert.match(auth, /USERNAME_PATTERN/);
+  assert.match(page, /validateAuthSubmission/);
+  assert.match(browserSource, /signOut\(\{ scope: "local" \}\)/);
+  assert.match(client, /guestSupabase = guestClient/);
+  assert.match(browserSource, /get_public_site_content/);
+  assert.match(page, /Guest gameplay is intentionally local/);
+  assert.doesNotMatch(page, /supabase\.rpc\("evaluate_guest_choice"/);
+  assert.doesNotMatch(page, /scenario_snapshot/);
   assert.doesNotMatch(page, /persistFullProgress|khien-so-migrated/);
   assert.match(page, /progressKey\(null\)/);
 });
 
+test("answer keys are redacted and content management uses protected RPCs", async () => {
+  const [migration, page, admin, data] = await Promise.all([
+    read("../supabase/harden_gameplay_content.sql"),
+    read("../app/page.tsx"),
+    read("../app/admin.tsx"),
+    read("../app/data.ts"),
+  ]);
+  assert.match(migration, /private\.redact_site_content/);
+  assert.match(migration, /choice_item - array\['correct', 'moneyDelta', 'awarenessDelta', 'feedback'\]/);
+  assert.match(migration, /public\.get_managed_site_content/);
+  assert.match(migration, /public\.save_managed_site_content/);
+  assert.match(page, /Guest gameplay is intentionally local/);
+  assert.doesNotMatch(page, /supabase\.rpc\("evaluate_guest_choice"/);
+  assert.match(admin, /save_managed_site_content/);
+  const definitions = data.slice(data.indexOf("const scenarioDefinitions"), data.indexOf("export const scenarios"));
+  assert.doesNotMatch(definitions, /correct:\s*(?:true|false)|moneyDelta:|awarenessDelta:|feedback:/);
+});
+
+test("guest choice scoring is local and obsolete privileged RPC access is revoked", async () => {
+  const [page, model, hardening] = await Promise.all([
+    read("../app/page.tsx"),
+    read("../app/domains/training/model.ts"),
+    read("../supabase/migrations/20260923085000_enterprise_security_hardening_p0.sql"),
+  ]);
+  assert.match(page, /evaluateGuestChoice\(selected, index\)/);
+  assert.match(model, /export function evaluateGuestChoice/);
+  assert.match(hardening, /revoke all on function public\.evaluate_guest_choice\(integer,integer\)/);
+  assert.doesNotMatch(page, /supabase\.rpc\("evaluate_guest_choice"/);
+});
+
 test("critical UI states are accessible and responsive", async () => {
-  const [page, styles] = await Promise.all([read("../app/page.tsx"), read("../app/globals.css")]);
-  assert.match(page, /aria-live="polite"/);
-  assert.match(page, /role="dialog"/);
-  assert.match(page, /aria-modal="true"/);
-  assert.match(page, /event\.key === "Escape"/);
-  assert.match(page, /aria-current=/);
+  const [page, shell, styles, ui] = await Promise.all([
+    read("../app/page.tsx"),
+    read("../app/domains/shell/view.tsx"),
+    read("../app/globals.css"),
+    read("../app/shared/ui-primitives.tsx"),
+  ]);
+  const uiSource = `${page}\n${shell}`;
+  assert.match(uiSource, /aria-live="polite"/);
+  assert.match(ui, /role="dialog"/);
+  assert.match(ui, /aria-modal="true"/);
+  assert.match(ui, /event\.key === "Escape"/);
+  assert.match(uiSource, /aria-current=/);
   assert.match(styles, /:focus-visible/);
   assert.match(styles, /@media \(max-width: 820px\)/);
   assert.match(styles, /@media \(max-width: 520px\)/);
@@ -53,16 +100,19 @@ test("critical UI states are accessible and responsive", async () => {
 });
 
 test("QC fixes keep destructive reset explicit and mobile text readable", async () => {
-  const [page, styles, config] = await Promise.all([
+  const [page, trainingGateway, styles, config] = await Promise.all([
     read("../app/page.tsx"),
+    read("../app/domains/training/gateway.ts"),
     read("../app/globals.css"),
     read("../vite.github-pages.config.ts"),
   ]);
   assert.match(page, /resetConfirmOpen/);
+  assert.match(page, /Chơi lại từ đầu/);
+  assert.match(page, /setCompletionCertificate\(null\)/);
   assert.match(page, /Thao tác này không thể hoàn tác/);
   assert.match(page, /Xóa và bắt đầu lại/);
   assert.match(page, /Lịch sử lượt chơi/);
-  assert.match(page, /supabase\.rpc\("restart_game"/);
+  assert.match(trainingGateway, /supabase\.rpc\("restart_game"/);
   assert.match(styles, /\.topbar nav button \{ font-size: 12px/);
   assert.match(styles, /footer-brand small \{ font-size: 12px/);
   assert.match(config, /manualChunks\(id\)/);
@@ -74,7 +124,11 @@ test("GitHub Pages metadata and deployment target are consistent", async () => {
     read("../vite.github-pages.config.ts"),
     read("../.github/workflows/pages.yml"),
   ]);
-  assert.match(html, /42 tình huống tương tác/);
+  assert.match(html, /Content-Security-Policy/);
+  const gaTags = html.match(/https:\/\/www\.googletagmanager\.com\/gtag\/js\?id=G-HH04Q7FYHM/g) ?? [];
+  assert.equal(gaTags.length, 1);
+  assert.match(html, /\/google-analytics-init\.js/);
+  assert.match(html, /https:\/\/www\.google-analytics\.com/);
   assert.match(html, /\/khien-so-logo\.png/);
   assert.match(config, /base:\s*"\/"/);
   assert.match(html, /https:\/\/canhgiacso\.com\/og\.png/);

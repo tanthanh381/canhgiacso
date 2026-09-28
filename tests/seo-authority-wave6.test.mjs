@@ -1,0 +1,64 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import test from "node:test";
+
+const read = (file) => readFile(new URL(`../${file}`, import.meta.url), "utf8");
+
+test("SEO authority wave adds trust pages and reconciles sitemap coverage", async () => {
+  const script = await read("scripts/patch-seo-authority-wave6.mjs");
+  assert.match(script, /gioi-thieu\/index\.html/);
+  assert.match(script, /quyen-rieng-tu\/index\.html/);
+  assert.match(script, /publishingPrinciples/);
+  assert.match(script, /seo-footer-links/);
+  assert.match(script, /generated article missing from sitemap|ensureUrl/);
+  assert.match(script, /refreshLastmod/);
+  assert.match(script, /search-logo\.svg/);
+  assert.match(script, /function ensureLegacyArticleSeo/);
+  assert.match(script, /BreadcrumbList/);
+  assert.match(script, /twitter:card/);
+  assert.match(script, /THEME_INIT/);
+  assert.match(script, /seo-brand-divider/);
+  assert.match(script, /Sơ đồ nội dung/);
+});
+
+test("Content compiler runs SEO authority wave after QC content passes", async () => {
+  const architecture = JSON.parse(await read("content/content-architecture.json"));
+  const stages = architecture.phases.flatMap((phase) => phase.stages);
+  assert.ok(stages.includes("patch-qc-wave3.mjs"));
+  assert.ok(stages.includes("patch-seo-authority-wave6.mjs"));
+  assert.ok(stages.indexOf("patch-qc-wave3.mjs") < stages.indexOf("patch-seo-authority-wave6.mjs"));
+  assert.ok(stages.indexOf("patch-seo-authority-wave6.mjs") < stages.indexOf("instrument-content.mjs"));
+});
+
+test("Verify workflow enforces generated-site SEO audit", async () => {
+  const workflow = await read(".github/workflows/verify.yml");
+  assert.match(workflow, /pnpm run build:pages/);
+  assert.match(workflow, /pnpm run seo:audit/);
+  assert.ok(workflow.indexOf("pnpm run build:pages") < workflow.indexOf("pnpm run seo:audit"));
+});
+
+test("Homepage exposes trust links and publishing principles", async () => {
+  const home = await read("github-pages/index.html");
+  assert.match(home, /publishingPrinciples/);
+  assert.match(home, /search-logo\.svg/);
+  assert.match(home, /\/gioi-thieu\//);
+  assert.match(home, /\/phuong-phap-kiem-chung\//);
+  assert.match(home, /\/quyen-rieng-tu\//);
+});
+
+
+test("trust and system pages use the shared visual shell", async () => {
+  const script = await read("scripts/patch-seo-authority-wave6.mjs");
+  for (const marker of [
+    'class="seo-header"',
+    'class="seo-brand"',
+    'class="seo-brand-logo"',
+    'class="seo-brand-divider"',
+    'class="seo-product-lockup"',
+    'class="seo-footer"',
+    'seo-footer-links',
+    'Cẩm nang',
+  ]) assert.ok(script.includes(marker), `missing shared shell marker: ${marker}`);
+  assert.match(script, /phuong-phap-kiem-chung\/index\.html/);
+  assert.match(script, /sitemap\/index\.html/);
+});
