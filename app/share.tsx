@@ -6,7 +6,7 @@ interface ShareConfig {
   url: string;
 }
 
-export function ShareButtons({ certificateCode, accuracy, completedScenarios }: { certificateCode?: string; accuracy?: number; completedScenarios?: number }) {
+export function ShareButtons({ accuracy, completedScenarios }: { accuracy?: number; completedScenarios?: number }) {
   const shareText = `Tôi vừa hoàn thành khóa đào tạo Cảnh Giác Số! ${accuracy ? `Độ chính xác: ${accuracy}%` : ''} ${completedScenarios ? `Đã hoàn thành: ${completedScenarios} tình huống` : ''} - Hãy kiểm tra kỹ năng phòng vệ số của bạn!`;
   const shareUrl = 'https://canhgiacso.com';
 

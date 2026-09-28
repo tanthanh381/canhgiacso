@@ -9,8 +9,8 @@ export function OnboardingTutorial() {
   useEffect(() => {
     const hasSeenTutorial = localStorage.getItem('canhgiacso-tutorial-seen');
     if (!hasSeenTutorial) {
-      setShowTutorial(true);
       localStorage.setItem('canhgiacso-tutorial-seen', 'true');
+      setShowTutorial(true);
     }
   }, []);
 
