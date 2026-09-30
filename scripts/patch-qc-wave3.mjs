@@ -9,6 +9,44 @@ const REVIEW_DATE = "2026-09-17";
 const REVIEW_DISPLAY = "17/09/2026";
 const SITE = "https://canhgiacso.com";
 const EXPECTED_TOPIC_COUNT = 36;
+const GOVERNED_TOPIC_SLUGS = new Set([
+  "25-kich-ban-lua-dao-2026",
+  "an-toan-thong-tin-ca-nhan",
+  "bao-cao-lua-dao-truc-tuyen",
+  "cach-kiem-tra-link-lua-dao",
+  "cach-nhan-biet-so-dien-thoai-lua-dao",
+  "deepfake-gia-giong-nguoi-than",
+  "deepfake-lua-dao",
+  "gia-mao-cong-an",
+  "gia-mao-cong-an-co-quan-nha-nuoc",
+  "gia-mao-ngan-hang",
+  "kiem-tra-link-gia-mao",
+  "kiem-tra-so-dien-thoai-lua-dao",
+  "lua-dao-bao-hiem-xa-hoi-vssid",
+  "lua-dao-cong-tac-vien-viec-nhe-luong-cao",
+  "lua-dao-dat-phong-du-lich",
+  "lua-dao-dau-tu-online",
+  "lua-dao-hoan-tien-don-hang",
+  "lua-dao-ma-qr",
+  "lua-dao-ngan-hang",
+  "lua-dao-otp-chiem-doat-tai-khoan",
+  "lua-dao-phat-nguoi-qua-sms",
+  "lua-dao-shipper-giao-hang",
+  "lua-dao-tien-dien-gia-mao-evn",
+  "lua-dao-truc-tuyen-la-gi",
+  "lua-dao-tuyen-dung-online",
+  "lua-dao-vay-tien-online",
+  "lua-dao-viec-nhe-luong-cao",
+  "lua-dao-vneid-gia-mao",
+  "nhan-dien-email-phishing",
+  "nhan-dien-lua-dao-truc-tuyen",
+  "otp-la-gi",
+  "phong-chong-lua-dao-truc-tuyen",
+  "tai-khoan-bi-hack-phai-lam-gi",
+  "tra-cuu-lua-dao",
+  "tra-cuu-so-tai-khoan-lua-dao",
+  "xu-ly-khi-bi-lua-dao-chuyen-tien",
+]);
 
 const TIER_1_DOMAINS = new Set([
   "bocongan.gov.vn",
@@ -211,6 +249,7 @@ async function main() {
 
   for (const entry of articleDirs) {
     const slug = entry.name;
+    if (!GOVERNED_TOPIC_SLUGS.has(slug)) continue;
     const file = path.join(KNOWLEDGE_ROOT, slug, "index.html");
     let html;
     try {

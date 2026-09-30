@@ -46,6 +46,10 @@ test("admin analytics dashboard is organized as a professional end-to-end analyt
   assert.match(component, /Landing page/);
   assert.match(component, /Exit page/);
   assert.match(component, /Traffic từ Google \(referrer\)/);
+  assert.match(component, /Google \/ Direct \/ Other/);
+  assert.match(component, /Organic landing tổng hợp/);
+  assert.match(component, /referrerMix/);
+  assert.match(component, /organicLandingPages/);
   assert.match(component, /không phải số liệu GA4/);
   assert.match(component, /chưa kết nối GA4 Data API/);
   assert.match(component, /Google Search Console/);
@@ -75,6 +79,7 @@ test("database analytics remains private, separates legacy data and exposes prof
   const accuracySql = await read("supabase/migrations/20260915073000_analytics_session_accuracy.sql");
   const googleSql = await read("supabase/migrations/20260915082000_google_traffic_dashboard.sql");
   const professionalSql = await read("supabase/migrations/20260915153000_professional_analytics_dashboard.sql");
+  const postPhase3Sql = await read("supabase/migrations/20260930153000_post_phase3_organic_attribution.sql");
   assert.match(baseSql, /private\.web_analytics_sessions/);
   assert.match(baseSql, /private\.web_analytics_pageviews/);
   assert.match(baseSql, /private\.user_is_app_admin\(\)/);
@@ -102,4 +107,12 @@ test("database analytics remains private, separates legacy data and exposes prof
   assert.match(professionalSql, /durationBuckets/);
   assert.match(professionalSql, /private\.user_is_app_admin\(\)/);
   assert.match(professionalSql, /revoke all on function public\.get_web_analytics_insights.*from public, anon/s);
+  assert.match(postPhase3Sql, /private\.is_google_organic_source/);
+  assert.match(postPhase3Sql, /private\.analytics_referrer_group/);
+  assert.match(postPhase3Sql, /Google/);
+  assert.match(postPhase3Sql, /Direct \/ Unknown/);
+  assert.match(postPhase3Sql, /Other/);
+  assert.match(postPhase3Sql, /organicLandingPages/);
+  assert.match(postPhase3Sql, /referrerMix/);
+  assert.match(postPhase3Sql, /lower\(coalesce\(p_utm_source, ''\)\) = 'google'/);
 });

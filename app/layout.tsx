@@ -87,7 +87,21 @@ const structuredData = {
       "@id": `${siteUrl}/#organization`,
       name: "Cảnh Giác Số",
       url: siteUrl,
-      logo: `${siteUrl}/khien-so-logo.png`,
+      description: "Nền tảng giáo dục an toàn số giúp nhận diện lừa đảo trực tuyến, xác minh thông tin và rèn kỹ năng phòng tránh rủi ro.",
+      logo: {
+        "@type": "ImageObject",
+        url: `${siteUrl}/search-logo.svg`,
+        width: 800,
+        height: 800,
+      },
+      publishingPrinciples: `${siteUrl}/phuong-phap-kiem-chung/`,
+      ethicsPolicy: `${siteUrl}/chinh-sach-bien-tap/`,
+      contactPoint: {
+        "@type": "ContactPoint",
+        contactType: "editorial and security contact",
+        url: `${siteUrl}/lien-he/`,
+        availableLanguage: ["vi-VN"],
+      },
       parentOrganization: {
         "@type": "Organization",
         name: "HDBank",

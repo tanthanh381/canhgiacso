@@ -2,12 +2,33 @@
   "schemaVersion": 1,
   "capturedAt": "2026-09-23",
   "phase": "Phase 3 - CTR & Ranking Optimization",
+  "measurement": {
+    "requestedWindowDays": 30,
+    "actualCoverageStart": "2026-09-15",
+    "actualCoverageDays": 8.54,
+    "baselineSnapshotTimeZone": "Asia/Ho_Chi_Minh",
+    "comparisonPolicy": "Use equal-length pre/post windows bounded by actualCoverageStart; do not compare a partial 8.54-day first-party baseline against a nominal 30-day window.",
+    "recommendedPostWindowDays": 7,
+    "notes": [
+      "Search Console was unavailable, so this baseline uses first-party click/session data only.",
+      "Review snapshots should record requestedWindowDays, actualCoverageStart, actualCoverageDays, and the concrete pre/post timestamps used.",
+      "Exclude or annotate QA/internal sessions when they can be identified."
+    ]
+  },
   "searchConsole": {
     "status": "unavailable",
     "reason": "GSC Wizard subscription/trial inactive",
     "implication": "No account-level impressions, CTR or average-position data used in this wave"
   },
   "firstPartyWindowDays": 30,
+  "firstPartyActualCoverageStart": "2026-09-15",
+  "firstPartyActualCoverageDays": 8.54,
+  "prePostComparison": {
+    "windowMode": "equal-length",
+    "postWindowAnchor": "phase3 deployment timestamp",
+    "fallbackWindowDays": 7,
+    "warning": "firstPartyWindowDays is the requested lookback, not the actual collector coverage."
+  },
   "priorityPages": [
     {
       "path": "/kien-thuc/lua-dao-cong-tac-vien-viec-nhe-luong-cao/",

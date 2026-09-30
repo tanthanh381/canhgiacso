@@ -241,6 +241,25 @@ if (await exists(HOME)) {
       '<li><a href="/kien-thuc/deepfake-gia-giong-nguoi-than/">Deepfake giả giọng người thân</a></li><li><a href="/kien-thuc/lua-dao-cong-tac-vien-viec-nhe-luong-cao/">Lừa đảo cộng tác viên online, việc nhẹ lương cao</a></li>',
     );
   }
+  if (!home.includes('data-phase3-priority-links')) {
+    home = home.replace(
+      '</section>\n        <section aria-labelledby="seo-purpose">',
+      `</section>
+        <section aria-labelledby="seo-phase3-priority" data-phase3-priority-links>
+          <h2 id="seo-phase3-priority">Hướng dẫn ưu tiên cần đọc khi đang gặp rủi ro</h2>
+          <p>Các trang này trả lời trực tiếp các nhu cầu tìm kiếm phổ biến và được liên kết ngay từ trang chủ để người đọc và crawler có thể tiếp cận trong một lượt nhấp.</p>
+          <ul>
+            <li><a href="/kien-thuc/lua-dao-cong-tac-vien-viec-nhe-luong-cao/">Lừa đảo cộng tác viên online, việc nhẹ lương cao</a></li>
+            <li><a href="/kien-thuc/kiem-tra-so-dien-thoai-lua-dao/">Kiểm tra số điện thoại lừa đảo: 7 cách tra cứu số lạ</a></li>
+            <li><a href="/kien-thuc/gia-mao-ngan-hang/">Giả mạo ngân hàng: 6 dấu hiệu và cách xử lý an toàn</a></li>
+            <li><a href="/kien-thuc/kiem-tra-link-gia-mao/">Kiểm tra link lừa đảo: 6 dấu hiệu trước khi bấm</a></li>
+            <li><a href="/kien-thuc/xu-ly-khi-bi-lua-dao-chuyen-tien/">Bị lừa chuyển tiền: 5 bước cần làm ngay</a></li>
+            <li><a href="/kien-thuc/phishing-la-gi/">Phishing là gì? 8 dấu hiệu và cách phòng tránh</a></li>
+          </ul>
+        </section>
+        <section aria-labelledby="seo-purpose">`,
+    );
+  }
   await writeFile(HOME, home, "utf8");
 }
 

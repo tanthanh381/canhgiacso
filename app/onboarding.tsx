@@ -10,7 +10,8 @@ export function OnboardingTutorial() {
     const hasSeenTutorial = localStorage.getItem('canhgiacso-tutorial-seen');
     if (!hasSeenTutorial) {
       localStorage.setItem('canhgiacso-tutorial-seen', 'true');
-      setShowTutorial(true);
+      const timer = window.setTimeout(() => setShowTutorial(true), 0);
+      return () => window.clearTimeout(timer);
     }
   }, []);
 

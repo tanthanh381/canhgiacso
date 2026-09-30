@@ -14,6 +14,7 @@ test("QC Wave 3 runs immediately after Wave 2 before the SEO authority wave", ()
 test("QC Wave 3 enforces evidence traceability and trust floor", () => {
   for (const phrase of [
     "EXPECTED_TOPIC_COUNT = 36",
+    "GOVERNED_TOPIC_SLUGS",
     "expected at least two topic-specific sources",
     "evidence floor not met",
     "data-source-tier",

@@ -7,7 +7,19 @@ const HOME = path.join(ROOT, "github-pages", "index.html");
 const SITE = "https://canhgiacso.com";
 const SEO_CSS_VERSION = "20260924-design-system";
 const BRAND_MARKUP = '<span class="seo-brand-logo" aria-hidden="true"></span><span class="seo-brand-divider" aria-hidden="true"></span><span class="seo-product-lockup"><strong>CẢNH GIÁC SỐ</strong><small>IT SECURITY</small></span>';
-const SEO_FOOTER_NAV = '<nav class="seo-footer-links" aria-label="Thông tin website"><a href="/gioi-thieu/">Giới thiệu</a><a href="/quyen-rieng-tu/">Quyền riêng tư</a></nav>';
+const SEO_FOOTER_NAV = '<nav class="seo-footer-links" aria-label="Thông tin website"><a href="/gioi-thieu/">Giới thiệu</a><a href="/chinh-sach-bien-tap/">Biên tập</a><a href="/phuong-phap-kiem-chung/">Kiểm chứng</a><a href="/lien-he/">Liên hệ</a><a href="/quyen-rieng-tu/">Quyền riêng tư</a><a href="/bao-mat/">Bảo mật</a><a href="/sitemap/">Sơ đồ nội dung</a></nav>';
+const EDITORIAL_REVIEWER = {
+  "@type": "Organization",
+  "@id": `${SITE}/#editorial-team`,
+  name: "Ban biên tập Cảnh Giác Số",
+  url: `${SITE}/chinh-sach-bien-tap/`,
+};
+const TRUST_CONTACT = {
+  "@type": "ContactPoint",
+  contactType: "Editorial and security contact",
+  url: `${SITE}/lien-he/`,
+  availableLanguage: ["vi-VN"],
+};
 
 function seoNavMarkup(file) {
   const normalized = file.split(path.sep).join("/");
@@ -35,9 +47,7 @@ function normalizeSeoNavigation(html, file) {
 
 function normalizeSeoFooter(html) {
   return html.replace(/<footer class="seo-footer">([\s\S]*?)<\/footer>/gi, (_, body) => {
-    let next = body.replace(/<p class="seo-safety">[\s\S]*?(?:phuong-phap-kiem-chung|sitemap)[\s\S]*?<\/p>/gi, "");
-    next = next.replace(/<a href="\/(?:phuong-phap-kiem-chung|sitemap)\/">[\s\S]*?<\/a>/gi, "");
-    next = next.replace(/<nav class="seo-footer-links"[^>]*>[\s\S]*?<\/nav>/gi, "");
+    let next = body.replace(/<nav class="seo-footer-links"[^>]*>[\s\S]*?<\/nav>/gi, "");
     next = next.replace(/(<strong>Cảnh Giác Số<\/strong>)/i, `$1${SEO_FOOTER_NAV}`);
     return `<footer class="seo-footer">${next}</footer>`;
   });
@@ -126,6 +136,47 @@ function ensureSearchMetadata(html) {
   return additions.length ? html.replace("</head>", `  ${additions.join("\n  ")}\n</head>`) : html;
 }
 
+function normalizeStructuredTrust(html) {
+  return html.replace(/<script\s+type=["']application\/ld\+json["']>([\s\S]*?)<\/script>/gi, (full, rawJson) => {
+    let data;
+    try {
+      data = JSON.parse(rawJson);
+    } catch {
+      return full;
+    }
+
+    const nodes = Array.isArray(data["@graph"]) ? data["@graph"] : [data];
+    for (const node of nodes) {
+      if (!node || typeof node !== "object") continue;
+      const types = Array.isArray(node["@type"]) ? node["@type"] : [node["@type"]];
+      if (types.includes("Article")) {
+        node.author ??= { "@id": `${SITE}/#organization` };
+        node.publisher ??= { "@id": `${SITE}/#organization` };
+        node.reviewedBy ??= { "@id": `${SITE}/#editorial-team` };
+      }
+      if (types.includes("Organization") && node["@id"] === `${SITE}/#organization`) {
+        node.logo ??= { "@type": "ImageObject", url: `${SITE}/search-logo.svg`, width: 800, height: 800 };
+        node.publishingPrinciples ??= `${SITE}/phuong-phap-kiem-chung/`;
+        node.ethicsPolicy ??= `${SITE}/chinh-sach-bien-tap/`;
+        node.contactPoint ??= TRUST_CONTACT;
+      }
+      if (types.includes("WebSite")) {
+        node.publisher ??= { "@id": `${SITE}/#organization` };
+      }
+    }
+
+    if (!nodes.some((node) => node && typeof node === "object" && node["@id"] === `${SITE}/#editorial-team`)) {
+      nodes.push(EDITORIAL_REVIEWER);
+    }
+
+    if (Array.isArray(data["@graph"])) {
+      data["@graph"] = nodes;
+    }
+
+    return `<script type="application/ld+json">${JSON.stringify(data)}</script>`;
+  });
+}
+
 const records = [];
 for (const file of [HOME, ...(await htmlFiles(PUBLIC))]) {
   let html = await readFile(file, "utf8");
@@ -135,13 +186,13 @@ for (const file of [HOME, ...(await htmlFiles(PUBLIC))]) {
   html = normalizeSeoFooter(html);
   html = normalizeFavicon(html);
   html = ensureSearchMetadata(html);
+  html = normalizeStructuredTrust(html);
   if (html !== beforeNormalization) {
     await writeFile(file, html, "utf8");
   }
   if (!isIndexable(html)) continue;
   const canonical = match(html, /<link\s+rel=["']canonical["']\s+href=["']([^"']+)["']/i);
   if (!canonical || !canonical.startsWith(SITE)) continue;
-  if (canonical === `${SITE}/phuong-phap-kiem-chung/`) continue;
   const title = match(html, /<title>([\s\S]*?)<\/title>/i).replace(/\s+/g, " ");
   const description = match(html, /<meta\s+name=["']description["']\s+content=["']([^"']*)["']/i);
   if (!title) throw new Error(`${canonical}: missing title during content finalization`);

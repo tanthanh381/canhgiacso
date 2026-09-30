@@ -7,8 +7,13 @@ const read = (file) => readFile(new URL(`../${file}`, import.meta.url), "utf8");
 test("SEO authority wave adds trust pages and reconciles sitemap coverage", async () => {
   const script = await read("scripts/patch-seo-authority-wave6.mjs");
   assert.match(script, /gioi-thieu\/index\.html/);
+  assert.match(script, /chinh-sach-bien-tap\/index\.html/);
+  assert.match(script, /lien-he\/index\.html/);
   assert.match(script, /quyen-rieng-tu\/index\.html/);
+  assert.match(script, /bao-mat\/index\.html/);
   assert.match(script, /publishingPrinciples/);
+  assert.match(script, /ethicsPolicy/);
+  assert.match(script, /ContactPoint/);
   assert.match(script, /seo-footer-links/);
   assert.match(script, /generated article missing from sitemap|ensureUrl/);
   assert.match(script, /refreshLastmod/);
@@ -42,6 +47,7 @@ test("Homepage exposes trust links and publishing principles", async () => {
   assert.match(home, /publishingPrinciples/);
   assert.match(home, /search-logo\.svg/);
   assert.match(home, /\/gioi-thieu\//);
+  assert.match(home, /publishingPrinciples/);
   assert.match(home, /\/phuong-phap-kiem-chung\//);
   assert.match(home, /\/quyen-rieng-tu\//);
 });
@@ -59,6 +65,12 @@ test("trust and system pages use the shared visual shell", async () => {
     'seo-footer-links',
     'Cẩm nang',
   ]) assert.ok(script.includes(marker), `missing shared shell marker: ${marker}`);
+  const finalizer = await read("scripts/finalize-content-architecture.mjs");
+  assert.match(finalizer, /normalizeStructuredTrust/);
+  assert.match(finalizer, /reviewedBy/);
   assert.match(script, /phuong-phap-kiem-chung\/index\.html/);
   assert.match(script, /sitemap\/index\.html/);
+  assert.match(script, /chinh-sach-bien-tap/);
+  assert.match(script, /lien-he/);
+  assert.match(script, /bao-mat/);
 });

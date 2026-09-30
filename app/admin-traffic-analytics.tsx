@@ -14,6 +14,7 @@ type LivePage = { path: string; active_visitors: number; active_users: number; l
 type DimensionRow = { name: string; users: number; sessions: number; views: number };
 type GoogleTrafficPoint = { bucket: string; views: number; sessions: number; users: number };
 type GoogleLandingPage = { path: string; views: number; sessions: number; users: number; legacy_sessions: number };
+type ReferrerMixRow = { source: string; sessions: number; users: number; views: number; legacy_sessions: number };
 type BehaviorMetrics = { pagesPerSession: number; avgSessionDurationSeconds: number; engagedSessions: number; engagementRate: number; bounceRate: number; sessions: number };
 type PreviousPeriod = { users: number; sessions: number; pageviews: number; pagesPerSession: number; avgSessionDurationSeconds: number; engagedSessions: number; engagementRate: number };
 type LandingInsight = { path: string; sessions: number; users: number; views: number; engaged_sessions: number; avg_duration_seconds: number };
@@ -62,6 +63,8 @@ type GoogleTrafficDashboard = {
   googleReturningUsers: number;
   googleSeries: GoogleTrafficPoint[];
   googleLandingPages: GoogleLandingPage[];
+  organicLandingPages: GoogleLandingPage[];
+  referrerMix: ReferrerMixRow[];
   googleBrowsers: DimensionRow[];
   googleOperatingSystems: DimensionRow[];
   googleDevices: DimensionRow[];
@@ -191,6 +194,20 @@ function parseGoogleDashboard(value: unknown): GoogleTrafficDashboard | null {
       views: number(row.views),
       sessions: number(row.sessions),
       users: number(row.users),
+      legacy_sessions: number(row.legacy_sessions),
+    })),
+    organicLandingPages: rows("organicLandingPages").map((row) => ({
+      path: String(row.path ?? "/"),
+      views: number(row.views),
+      sessions: number(row.sessions),
+      users: number(row.users),
+      legacy_sessions: number(row.legacy_sessions),
+    })),
+    referrerMix: rows("referrerMix").map((row) => ({
+      source: String(row.source ?? "Other"),
+      sessions: number(row.sessions),
+      users: number(row.users),
+      views: number(row.views),
       legacy_sessions: number(row.legacy_sessions),
     })),
     googleBrowsers: dimensions("googleBrowsers"),
@@ -365,6 +382,7 @@ export function AdminTrafficAnalytics() {
   const chartMax = useMemo(() => Math.max(1, ...(data?.series.map((point) => point.views) ?? [1])), [data]);
   const sourceMax = useMemo(() => Math.max(1, ...(data?.sources.map((source) => source.sessions) ?? [1])), [data]);
   const googleChartMax = useMemo(() => Math.max(1, ...(googleData?.googleSeries.map((point) => point.views) ?? [1])), [googleData]);
+  const referrerMixMax = useMemo(() => Math.max(1, ...(googleData?.referrerMix.map((row) => row.sessions) ?? [1])), [googleData]);
   const channelMax = useMemo(() => Math.max(1, ...(insights?.channels.map((row) => row.sessions) ?? [1])), [insights]);
   const durationMax = useMemo(() => Math.max(1, ...(insights?.durationBuckets.map((row) => row.sessions) ?? [1])), [insights]);
 
@@ -453,8 +471,14 @@ export function AdminTrafficAnalytics() {
               <div className="traffic-google-subpanel"><h4>Xu hướng Google traffic</h4><p>Lượt xem theo {windowKey === "24h" ? "giờ" : "ngày"}.</p>
                 {googleData.googleSeries.length ? <div className="traffic-chart traffic-google-chart" role="img" aria-label="Biểu đồ traffic từ Google">{googleData.googleSeries.map((point) => <div className="traffic-bar-column" key={point.bucket} title={`${point.bucket}: ${point.views} lượt xem · ${point.sessions} phiên · ${point.users} người dùng`}><div className="traffic-bar-value">{point.views}</div><div className="traffic-bar-track"><span style={{ height: `${Math.max(5, point.views / googleChartMax * 100)}%` }} /></div><small>{bucketLabel(point.bucket, windowKey)}</small></div>)}</div> : <div className="traffic-empty compact">Không ghi nhận phiên có referrer Google trong {WINDOW_LABELS[windowKey]}. Hãy thử 30/90 ngày để xem lịch sử.</div>}
               </div>
+              <div className="traffic-google-subpanel"><h4>Google / Direct / Other</h4><p>QA attribution để phân biệt mất referrer với thiếu organic traffic.</p>
+                {googleData.referrerMix.length ? <div className="traffic-sources compact-sources">{googleData.referrerMix.map((row) => <div key={row.source}><span className="traffic-source-name">{row.source}</span><span className="traffic-source-track"><i style={{ width: `${Math.max(3, row.sessions / referrerMixMax * 100)}%` }} /></span><strong>{compact(row.sessions)}</strong><small>{compact(row.users)} user · {compact(row.views)} view{row.legacy_sessions ? ` · ${compact(row.legacy_sessions)} legacy` : ""}</small></div>)}</div> : <div className="traffic-empty compact">Chưa có dữ liệu referrer mix trong kỳ.</div>}
+              </div>
               <div className="traffic-google-subpanel"><h4>Landing page từ Google</h4><p>Trang đầu tiên của phiên có nguồn Google.</p>
                 {googleData.googleLandingPages.length ? <div className="traffic-table-wrap"><table><thead><tr><th>Landing page</th><th>View</th><th>User</th><th>Phiên</th></tr></thead><tbody>{googleData.googleLandingPages.map((page) => <tr key={page.path}><td title={page.path}><strong>{pathLabel(page.path)}</strong><small>{page.path}</small></td><td>{compact(page.views)}</td><td>{compact(page.users)}</td><td>{compact(page.sessions)}</td></tr>)}</tbody></table></div> : <div className="traffic-empty compact">Chưa có landing page từ Google.</div>}
+              </div>
+              <div className="traffic-google-subpanel"><h4>Organic landing tổng hợp</h4><p>Bao gồm Google organic và referrer search khác được phân loại organic.</p>
+                {googleData.organicLandingPages.length ? <div className="traffic-table-wrap"><table><thead><tr><th>Landing page</th><th>View</th><th>User</th><th>Phiên</th></tr></thead><tbody>{googleData.organicLandingPages.map((page) => <tr key={page.path}><td title={page.path}><strong>{pathLabel(page.path)}</strong><small>{page.path}</small></td><td>{compact(page.views)}</td><td>{compact(page.users)}</td><td>{compact(page.sessions)}</td></tr>)}</tbody></table></div> : <div className="traffic-empty compact">Chưa có organic landing page trong kỳ.</div>}
               </div>
             </div>
             <p className="traffic-google-note"><strong>Lưu ý nguồn dữ liệu:</strong> Khối này dùng collector first-party và HTTP referrer, không đọc Google Analytics Data API. GA4 vẫn chạy song song trên website để đối chiếu bên ngoài. Từ khóa, impression, CTR và vị trí tìm kiếm phải đọc từ Google Search Console.</p>

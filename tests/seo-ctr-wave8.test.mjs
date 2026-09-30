@@ -58,6 +58,10 @@ test("Phase 3 baseline records the data limitation and measurable starting point
   assert.equal(baseline.phase, "Phase 3 - CTR & Ranking Optimization");
   assert.equal(baseline.searchConsole.status, "unavailable");
   assert.equal(baseline.firstPartyWindowDays, 30);
+  assert.equal(baseline.measurement.requestedWindowDays, 30);
+  assert.equal(baseline.measurement.actualCoverageStart, "2026-09-15");
+  assert.equal(baseline.measurement.comparisonPolicy.includes("equal-length pre/post windows"), true);
+  assert.equal(baseline.prePostComparison.windowMode, "equal-length");
   assert.equal(baseline.priorityPages.length, 6);
   assert.ok(baseline.optimizationHypotheses.length >= 5);
 });

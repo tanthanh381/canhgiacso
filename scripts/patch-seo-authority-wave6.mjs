@@ -7,7 +7,7 @@ const SITE = "https://canhgiacso.com";
 const UPDATED = "2026-09-23";
 const BRAND = '<span class="seo-brand-logo" aria-hidden="true"></span><span class="seo-brand-divider" aria-hidden="true"></span><span class="seo-product-lockup"><strong>CẢNH GIÁC SỐ</strong><small>IT SECURITY</small></span>';
 const THEME_INIT = '<script>try{if(localStorage.getItem("khien-so-theme")==="dark")document.documentElement.dataset.theme="dark"}catch{}</script>';
-const TRUST_NAV = '<nav class="seo-footer-links" aria-label="Thông tin website"><a href="/gioi-thieu/">Giới thiệu</a><a href="/phuong-phap-kiem-chung/">Phương pháp kiểm chứng</a><a href="/quyen-rieng-tu/">Quyền riêng tư</a><a href="/sitemap/">Sơ đồ nội dung</a></nav>';
+const TRUST_NAV = '<nav class="seo-footer-links" aria-label="Thông tin website"><a href="/gioi-thieu/">Giới thiệu</a><a href="/chinh-sach-bien-tap/">Biên tập</a><a href="/phuong-phap-kiem-chung/">Kiểm chứng</a><a href="/lien-he/">Liên hệ</a><a href="/quyen-rieng-tu/">Quyền riêng tư</a><a href="/bao-mat/">Bảo mật</a><a href="/sitemap/">Sơ đồ nội dung</a></nav>';
 
 async function write(relative, content) {
   const file = path.join(PUBLIC, relative);
@@ -38,6 +38,8 @@ function pageShell({ title, description, canonical, type, h1, eyebrow, lead, bod
         description: "Nền tảng giáo dục an toàn số giúp nhận diện lừa đảo trực tuyến, xác minh thông tin và rèn kỹ năng phòng tránh rủi ro.",
         logo: { "@type": "ImageObject", url: `${SITE}/search-logo.svg`, width: 800, height: 800 },
         publishingPrinciples: `${SITE}/phuong-phap-kiem-chung/`,
+        ethicsPolicy: `${SITE}/chinh-sach-bien-tap/`,
+        contactPoint: { "@type": "ContactPoint", contactType: "editorial and security contact", url: `${SITE}/lien-he/`, availableLanguage: ["vi-VN"] },
         knowsAbout: ["lừa đảo trực tuyến", "phishing", "an toàn thông tin", "bảo vệ tài khoản", "xác minh thông tin"],
       },
       {
@@ -133,8 +135,55 @@ const privacy = pageShell({
 <section><h2>Giới hạn của dữ liệu thống kê</h2><p>Referrer có thể bị trình duyệt, ứng dụng hoặc cơ chế riêng tư lược bỏ; dữ liệu quốc gia chỉ là ước tính kỹ thuật từ timezone/locale và không phải GPS. Vì vậy các số liệu nguồn truy cập và vị trí không nên được hiểu là dữ liệu định danh chính xác.</p></section>`,
 });
 
+const editorial = pageShell({
+  title: "Chính sách biên tập | Cảnh Giác Số",
+  description: "Nguyên tắc biên tập, rà soát nguồn, sửa sai và tách biệt tín hiệu rủi ro với kết luận khi Cảnh Giác Số viết về lừa đảo trực tuyến.",
+  canonical: `${SITE}/chinh-sach-bien-tap/`,
+  type: "WebPage",
+  h1: "Chính sách biên tập",
+  eyebrow: "EDITORIAL POLICY",
+  lead: "Cảnh Giác Số biên tập nội dung chống lừa đảo theo hướng thực hành, minh bạch nguồn và thận trọng với mọi kết luận có thể ảnh hưởng đến cá nhân hoặc tổ chức cụ thể.",
+  body: `
+<section><h2>Ưu tiên nguồn chính thức</h2><p>Khi viết về thủ đoạn, quy trình xử lý hoặc cảnh báo mới, nội dung ưu tiên nguồn từ cơ quan nhà nước, cơ quan công an, tổ chức an ninh mạng, ngân hàng, nhà cung cấp dịch vụ và báo chí có danh tính rõ ràng.</p></section>
+<section><h2>Không biến tín hiệu thành kết luận tuyệt đối</h2><p>Một số điện thoại, tài khoản, website hoặc mẫu tin nhắn có thể mang nhiều tín hiệu rủi ro, nhưng Cảnh Giác Số tránh kết luận chắc chắn về một chủ thể nếu chưa có căn cứ phù hợp. Các công cụ và bài viết hướng người dùng tới hành động an toàn và xác minh độc lập.</p></section>
+<section><h2>Sửa sai và cập nhật</h2><p>Khi nguồn thay đổi, liên kết hỏng hoặc thông tin không còn phù hợp, nội dung cần được rà soát và cập nhật. Những thay đổi quan trọng về hướng dẫn an toàn được ưu tiên hơn chỉnh sửa câu chữ nhỏ.</p></section>
+<section><h2>Tác giả và người rà soát</h2><p>Nội dung công khai được ghi nhận dưới thực thể biên tập Cảnh Giác Số / IT Security. Với bài viết nhạy cảm, structured data dùng Organization làm author/publisher để tránh gán thẩm quyền cá nhân không cần thiết và giữ trách nhiệm ở cấp hệ thống biên tập.</p></section>`,
+});
+
+const contact = pageShell({
+  title: "Liên hệ | Cảnh Giác Số",
+  description: "Cách liên hệ Cảnh Giác Số về góp ý nội dung, báo lỗi kỹ thuật, yêu cầu sửa thông tin hoặc vấn đề bảo mật của website.",
+  canonical: `${SITE}/lien-he/`,
+  type: "ContactPage",
+  h1: "Liên hệ Cảnh Giác Số",
+  eyebrow: "CONTACT",
+  lead: "Nếu cần góp ý nội dung, báo lỗi kỹ thuật hoặc phản ánh vấn đề bảo mật của website, hãy chuẩn bị đường dẫn trang, mô tả ngắn và bằng chứng có thể đối chiếu.",
+  body: `
+<section><h2>Góp ý nội dung</h2><p>Với yêu cầu chỉnh sửa, bổ sung nguồn hoặc báo nội dung đã lỗi thời, hãy nêu rõ URL, đoạn cần kiểm tra và nguồn mới nếu có. Cảnh Giác Số ưu tiên các phản hồi có thể xác minh độc lập.</p></section>
+<section><h2>Báo lỗi kỹ thuật hoặc bảo mật</h2><p>Không gửi mật khẩu, OTP, mã khôi phục, số thẻ hoặc dữ liệu ngân hàng thật. Với lỗi bảo mật, vui lòng mô tả tác động, bước tái hiện ở mức cần thiết và tránh khai thác vượt quá phạm vi chứng minh.</p></section>
+<section><h2>Khi bạn đang là nạn nhân</h2><p>Nếu đã chuyển tiền, mất tài khoản hoặc bị đe dọa, hãy ưu tiên liên hệ ngân hàng/nền tảng/cơ quan chức năng qua kênh chính thức. Cảnh Giác Số không thay thế quy trình tiếp nhận tố giác hoặc hỗ trợ khẩn cấp của các đơn vị đó.</p></section>`,
+});
+
+const security = pageShell({
+  title: "Bảo mật website | Cảnh Giác Số",
+  description: "Tín hiệu bảo mật, giới hạn thu thập dữ liệu, nguyên tắc báo lỗi và cách Cảnh Giác Số giảm rủi ro khi cung cấp công cụ chống lừa đảo.",
+  canonical: `${SITE}/bao-mat/`,
+  type: "WebPage",
+  h1: "Bảo mật website",
+  eyebrow: "SECURITY",
+  lead: "Cảnh Giác Số xử lý chủ đề chống lừa đảo nên ưu tiên giảm dữ liệu nhạy cảm, minh bạch về analytics và tách công cụ tra cứu khỏi yêu cầu nhập bí mật cá nhân.",
+  body: `
+<section><h2>Không yêu cầu bí mật đăng nhập</h2><p>Website không yêu cầu nhập OTP, PIN, CVV, mật khẩu ngân hàng hoặc mã khôi phục vào nội dung công cụ tra cứu. Nếu một trang yêu cầu các dữ liệu này, hãy rời khỏi trang và tự mở kênh chính thức của tổ chức liên quan.</p></section>
+<section><h2>Analytics và quyền riêng tư</h2><p>First-party analytics chỉ phục vụ thống kê traffic ở cấp tổng hợp như đường dẫn, referrer host, thiết bị và UTM allowlist. Xem thêm <a href="/quyen-rieng-tu/">quyền riêng tư & dữ liệu người dùng</a>.</p></section>
+<section><h2>Báo cáo lỗ hổng</h2><p>Khi phát hiện lỗi bảo mật, hãy báo cáo theo nguyên tắc tối thiểu hóa dữ liệu: không truy cập, tải xuống hoặc chia sẻ dữ liệu không thuộc về bạn; chỉ cung cấp thông tin đủ để đội vận hành xác minh và khắc phục.</p></section>
+<section><h2>Tài nguyên bảo mật công khai</h2><p>Website có tệp <a href="/security.txt">security.txt</a> để hỗ trợ quy trình báo cáo kỹ thuật khi được triển khai bởi môi trường hosting.</p></section>`,
+});
+
 await write("gioi-thieu/index.html", about);
 await write("quyen-rieng-tu/index.html", privacy);
+await write("chinh-sach-bien-tap/index.html", editorial);
+await write("lien-he/index.html", contact);
+await write("bao-mat/index.html", security);
 
 async function htmlFiles(dir) {
   const out = [];
@@ -242,7 +291,7 @@ for (const file of await htmlFiles(knowledgeDir)) {
     html = html.replace(/(<footer class="seo-footer"><div class="seo-shell"><strong>[^<]+<\/strong>)/, `$1${TRUST_NAV}`);
   }
   if (!html.includes('/gioi-thieu/')) {
-    html = html.replace('<section class="seo-related">', `<section class="seo-trust-note seo-note"><strong>Vì sao có thể tin nội dung này?</strong><p>Xem <a href="/gioi-thieu/">Giới thiệu Cảnh Giác Số</a>, <a href="/phuong-phap-kiem-chung/">phương pháp kiểm chứng</a> và <a href="/quyen-rieng-tu/">nguyên tắc quyền riêng tư</a>.</p></section><section class="seo-related">`);
+    html = html.replace('<section class="seo-related">', `<section class="seo-trust-note seo-note"><strong>Vì sao có thể tin nội dung này?</strong><p>Xem <a href="/gioi-thieu/">Giới thiệu Cảnh Giác Số</a>, <a href="/chinh-sach-bien-tap/">chính sách biên tập</a>, <a href="/phuong-phap-kiem-chung/">phương pháp kiểm chứng</a>, <a href="/quyen-rieng-tu/">quyền riêng tư</a> và <a href="/bao-mat/">bảo mật website</a>.</p></section><section class="seo-related">`);
   }
   await writeFile(file, html, "utf8");
   patched += 1;
@@ -312,12 +361,18 @@ const refreshLastmod = (url) => {
 };
 
 ensureUrl(`${SITE}/gioi-thieu/`, "0.7");
+ensureUrl(`${SITE}/chinh-sach-bien-tap/`, "0.7");
+ensureUrl(`${SITE}/lien-he/`, "0.6");
 ensureUrl(`${SITE}/quyen-rieng-tu/`, "0.6");
+ensureUrl(`${SITE}/bao-mat/`, "0.6");
 ensureUrl(`${SITE}/phuong-phap-kiem-chung/`, "0.8");
 refreshLastmod(`${SITE}/`);
 refreshLastmod(`${SITE}/kien-thuc/`);
 refreshLastmod(`${SITE}/gioi-thieu/`);
+refreshLastmod(`${SITE}/chinh-sach-bien-tap/`);
+refreshLastmod(`${SITE}/lien-he/`);
 refreshLastmod(`${SITE}/quyen-rieng-tu/`);
+refreshLastmod(`${SITE}/bao-mat/`);
 refreshLastmod(`${SITE}/phuong-phap-kiem-chung/`);
 
 for (const file of await htmlFiles(knowledgeDir)) {
