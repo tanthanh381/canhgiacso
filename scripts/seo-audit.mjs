@@ -95,6 +95,7 @@ for (const url of urls) {
     if (!html.includes('class="seo-search-cluster"')) fail(`${url}: missing contextual search cluster`);
     if (!/property=["']article:modified_time["']/i.test(html)) fail(`${url}: missing article:modified_time`);
     if (!/<time\s+datetime=["']\d{4}-\d{2}-\d{2}["']/i.test(html)) fail(`${url}: missing visible updated date`);
+    if (!/data-phase4-search-expansion/i.test(html)) fail(`${url}: missing Phase 4 next-step search expansion`);
   }
 
   if (url.includes("/kien-thuc/") && url !== `${site}/kien-thuc/`) {
@@ -205,5 +206,9 @@ if (!home.includes("/kien-thuc/phong-chong-lua-dao-truc-tuyen/")) fail("Homepage
 if (!home.includes("/kien-thuc/an-toan-thong-tin-ca-nhan/")) fail("Homepage missing information-security pillar link");
 if (!home.includes("/gioi-thieu/")) fail("Homepage missing About/trust link");
 if (!home.includes("/quyen-rieng-tu/")) fail("Homepage missing privacy link");
+if (!home.includes("data-phase4-home")) fail("Homepage missing Phase 4 priority path section");
+
+const knowledgeHub = await readFile(path.join(root, "kien-thuc", "index.html"), "utf8");
+if (!knowledgeHub.includes("data-phase4-hub")) fail("Knowledge hub missing Phase 4 priority monitor section");
 
 if (!process.exitCode) console.log("SEO audit passed.");

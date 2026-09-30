@@ -32,6 +32,7 @@ test("admin analytics dashboard is organized as a professional end-to-end analyt
   const component = await read("app/admin-traffic-analytics.tsx");
   assert.match(component, /get_web_analytics_dashboard/);
   assert.match(component, /get_google_traffic_dashboard/);
+  assert.match(component, /get_phase4_seo_monitor/);
   assert.match(component, /get_web_analytics_insights/);
   assert.match(component, /10_000/);
   assert.match(component, /TỔNG QUAN/);
@@ -48,8 +49,11 @@ test("admin analytics dashboard is organized as a professional end-to-end analyt
   assert.match(component, /Traffic từ Google \(referrer\)/);
   assert.match(component, /Google \/ Direct \/ Other/);
   assert.match(component, /Organic landing tổng hợp/);
+  assert.match(component, /Phase 4 SEO monitor/);
+  assert.match(component, /Equal-window organic monitor/);
   assert.match(component, /referrerMix/);
   assert.match(component, /organicLandingPages/);
+  assert.match(component, /comparisonWindowDays/);
   assert.match(component, /không phải số liệu GA4/);
   assert.match(component, /chưa kết nối GA4 Data API/);
   assert.match(component, /Google Search Console/);
@@ -80,6 +84,7 @@ test("database analytics remains private, separates legacy data and exposes prof
   const googleSql = await read("supabase/migrations/20260915082000_google_traffic_dashboard.sql");
   const professionalSql = await read("supabase/migrations/20260915153000_professional_analytics_dashboard.sql");
   const postPhase3Sql = await read("supabase/migrations/20260930153000_post_phase3_organic_attribution.sql");
+  const phase4Sql = await read("supabase/migrations/20260930170000_phase4_seo_monitor.sql");
   assert.match(baseSql, /private\.web_analytics_sessions/);
   assert.match(baseSql, /private\.web_analytics_pageviews/);
   assert.match(baseSql, /private\.user_is_app_admin\(\)/);
@@ -115,4 +120,18 @@ test("database analytics remains private, separates legacy data and exposes prof
   assert.match(postPhase3Sql, /organicLandingPages/);
   assert.match(postPhase3Sql, /referrerMix/);
   assert.match(postPhase3Sql, /lower\(coalesce\(p_utm_source, ''\)\) = 'google'/);
+  assert.match(phase4Sql, /get_phase4_seo_monitor/);
+  assert.match(phase4Sql, /comparisonWindowDays/);
+  assert.match(phase4Sql, /actualCoverageStart/);
+  assert.match(phase4Sql, /priorityPages/);
+  assert.match(phase4Sql, /equal-length current vs previous windows/);
+  assert.match(phase4Sql, /private\.analytics_channel_group/);
+  assert.match(phase4Sql, /private\.is_google_organic_source/);
+});
+
+test("admin analytics edge endpoint includes Phase 4 monitor", async () => {
+  const edge = await read("supabase/functions/admin-analytics/index.ts");
+  assert.match(edge, /get_phase4_seo_monitor/);
+  assert.match(edge, /phase4/);
+  assert.match(edge, /2026-09-30-phase4/);
 });

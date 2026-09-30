@@ -108,9 +108,10 @@ Deno.serve(async (req) => {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
   });
 
-  const [dashboard, google, insights, country] = await Promise.all([
+  const [dashboard, google, phase4, insights, country] = await Promise.all([
     serviceClient.rpc("get_web_analytics_dashboard", { p_window: windowKey }),
     serviceClient.rpc("get_google_traffic_dashboard", { p_window: windowKey }),
+    serviceClient.rpc("get_phase4_seo_monitor", { p_window: windowKey }),
     serviceClient.rpc("get_web_analytics_insights", { p_window: windowKey }),
     serviceClient.rpc("get_country_traffic_dashboard", { p_window: windowKey }),
   ]);
@@ -118,6 +119,7 @@ Deno.serve(async (req) => {
   const failures = [
     ["dashboard", dashboard.error],
     ["google", google.error],
+    ["phase4", phase4.error],
     ["insights", insights.error],
     ["country", country.error],
   ].filter(([, error]) => Boolean(error));
@@ -141,11 +143,12 @@ Deno.serve(async (req) => {
   }));
 
   return json(origin, 200, {
-    apiVersion: "2026-09-23",
+    apiVersion: "2026-09-30-phase4",
     generatedAt: new Date().toISOString(),
     window: windowKey,
     dashboard: dashboard.data,
     google: google.data,
+    phase4: phase4.data,
     insights: insights.data,
     country: country.data,
   });

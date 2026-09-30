@@ -15,6 +15,8 @@ type DimensionRow = { name: string; users: number; sessions: number; views: numb
 type GoogleTrafficPoint = { bucket: string; views: number; sessions: number; users: number };
 type GoogleLandingPage = { path: string; views: number; sessions: number; users: number; legacy_sessions: number };
 type ReferrerMixRow = { source: string; sessions: number; users: number; views: number; legacy_sessions: number };
+type Phase4SeoTotals = { sessions: number; users: number; views: number; organicSessions: number; directSessions: number; previousSessions: number; previousOrganicSessions: number; organicDelta: number };
+type Phase4PriorityPage = { path: string; label: string; sessions: number; users: number; views: number; organicSessions: number; googleSessions: number; directSessions: number; previousSessions: number; previousOrganicSessions: number; organicDelta: number };
 type BehaviorMetrics = { pagesPerSession: number; avgSessionDurationSeconds: number; engagedSessions: number; engagementRate: number; bounceRate: number; sessions: number };
 type PreviousPeriod = { users: number; sessions: number; pageviews: number; pagesPerSession: number; avgSessionDurationSeconds: number; engagedSessions: number; engagementRate: number };
 type LandingInsight = { path: string; sessions: number; users: number; views: number; engaged_sessions: number; avg_duration_seconds: number };
@@ -68,6 +70,20 @@ type GoogleTrafficDashboard = {
   googleBrowsers: DimensionRow[];
   googleOperatingSystems: DimensionRow[];
   googleDevices: DimensionRow[];
+};
+
+type Phase4SeoMonitor = {
+  generatedAt: string;
+  window: WindowKey;
+  requestedWindowDays: number;
+  actualCoverageStart: string;
+  actualCoverageDays: number;
+  comparisonWindowDays: number;
+  comparisonPolicy: string;
+  currentWindowStart: string;
+  previousWindowStart: string;
+  totals: Phase4SeoTotals;
+  priorityPages: Phase4PriorityPage[];
 };
 
 type AnalyticsInsights = {
@@ -216,6 +232,47 @@ function parseGoogleDashboard(value: unknown): GoogleTrafficDashboard | null {
   };
 }
 
+function parsePhase4Monitor(value: unknown): Phase4SeoMonitor | null {
+  if (!value || typeof value !== "object") return null;
+  const item = value as Record<string, unknown>;
+  const totals = item.totals && typeof item.totals === "object" ? item.totals as Record<string, unknown> : {};
+  const rows = Array.isArray(item.priorityPages) ? item.priorityPages as Array<Record<string, unknown>> : [];
+  return {
+    generatedAt: typeof item.generatedAt === "string" ? item.generatedAt : new Date().toISOString(),
+    window: normalizedWindow(item.window),
+    requestedWindowDays: number(item.requestedWindowDays),
+    actualCoverageStart: typeof item.actualCoverageStart === "string" ? item.actualCoverageStart : "",
+    actualCoverageDays: number(item.actualCoverageDays),
+    comparisonWindowDays: number(item.comparisonWindowDays),
+    comparisonPolicy: String(item.comparisonPolicy ?? ""),
+    currentWindowStart: typeof item.currentWindowStart === "string" ? item.currentWindowStart : "",
+    previousWindowStart: typeof item.previousWindowStart === "string" ? item.previousWindowStart : "",
+    totals: {
+      sessions: number(totals.sessions),
+      users: number(totals.users),
+      views: number(totals.views),
+      organicSessions: number(totals.organicSessions),
+      directSessions: number(totals.directSessions),
+      previousSessions: number(totals.previousSessions),
+      previousOrganicSessions: number(totals.previousOrganicSessions),
+      organicDelta: number(totals.organicDelta),
+    },
+    priorityPages: rows.map((row) => ({
+      path: String(row.path ?? "/"),
+      label: String(row.label ?? row.path ?? "Priority page"),
+      sessions: number(row.sessions),
+      users: number(row.users),
+      views: number(row.views),
+      organicSessions: number(row.organicSessions),
+      googleSessions: number(row.googleSessions),
+      directSessions: number(row.directSessions),
+      previousSessions: number(row.previousSessions),
+      previousOrganicSessions: number(row.previousOrganicSessions),
+      organicDelta: number(row.organicDelta),
+    })),
+  };
+}
+
 function parseInsights(value: unknown): AnalyticsInsights | null {
   if (!value || typeof value !== "object") return null;
   const item = value as Record<string, unknown>;
@@ -316,16 +373,19 @@ export function AdminTrafficAnalytics() {
   const [windowKey, setWindowKey] = useState<WindowKey>("24h");
   const [data, setData] = useState<AnalyticsDashboard | null>(null);
   const [googleData, setGoogleData] = useState<GoogleTrafficDashboard | null>(null);
+  const [phase4Data, setPhase4Data] = useState<Phase4SeoMonitor | null>(null);
   const [insights, setInsights] = useState<AnalyticsInsights | null>(null);
   const [googleMessage, setGoogleMessage] = useState("");
+  const [phase4Message, setPhase4Message] = useState("");
   const [insightsMessage, setInsightsMessage] = useState("");
   const [state, setState] = useState<LoadState>("loading");
   const [message, setMessage] = useState("");
 
   const load = useCallback(async () => {
-    const [result, googleResult, insightsResult] = await Promise.all([
+    const [result, googleResult, phase4Result, insightsResult] = await Promise.all([
       supabase.rpc("get_web_analytics_dashboard", { p_window: windowKey }),
       supabase.rpc("get_google_traffic_dashboard", { p_window: windowKey }),
+      supabase.rpc("get_phase4_seo_monitor", { p_window: windowKey }),
       supabase.rpc("get_web_analytics_insights", { p_window: windowKey }),
     ]);
 
@@ -353,6 +413,15 @@ export function AdminTrafficAnalytics() {
       const parsedGoogle = parseGoogleDashboard(googleResult.data);
       setGoogleData(parsedGoogle);
       setGoogleMessage(parsedGoogle ? "" : "Dữ liệu Google trả về chưa đúng định dạng.");
+    }
+
+    if (phase4Result.error) {
+      setPhase4Data(null);
+      setPhase4Message("Không thể tải Phase 4 SEO monitor ở thời điểm này.");
+    } else {
+      const parsedPhase4 = parsePhase4Monitor(phase4Result.data);
+      setPhase4Data(parsedPhase4);
+      setPhase4Message(parsedPhase4 ? "" : "Dữ liệu Phase 4 SEO monitor chưa đúng định dạng.");
     }
 
     if (insightsResult.error) {
@@ -482,6 +551,23 @@ export function AdminTrafficAnalytics() {
               </div>
             </div>
             <p className="traffic-google-note"><strong>Lưu ý nguồn dữ liệu:</strong> Khối này dùng collector first-party và HTTP referrer, không đọc Google Analytics Data API. GA4 vẫn chạy song song trên website để đối chiếu bên ngoài. Từ khóa, impression, CTR và vị trí tìm kiếm phải đọc từ Google Search Console.</p>
+          </>}
+        </section>
+
+        <section className="traffic-panel traffic-google-panel">
+          <div className="traffic-google-heading">
+            <div><span className="traffic-google-badge">PHASE 4 · SEO MONITOR</span><h3>Equal-window organic monitor</h3><p>So sánh cửa sổ hiện tại với cửa sổ trước đó cùng độ dài, tự giới hạn theo coverage first-party thực tế.</p></div><small>{phase4Data ? `${phase4Data.comparisonWindowDays} ngày` : WINDOW_LABELS[windowKey]}</small>
+          </div>
+          {phase4Message && <div className="traffic-error compact" role="alert">{phase4Message}</div>}
+          {phase4Data && <>
+            <div className="traffic-user-metrics traffic-google-metrics">
+              <div><span>Organic hiện tại</span><strong>{compact(phase4Data.totals.organicSessions)}</strong><small>{trend(phase4Data.totals.organicSessions, phase4Data.totals.previousOrganicSessions, "").text} so với kỳ trước</small></div>
+              <div><span>Tổng phiên monitor</span><strong>{compact(phase4Data.totals.sessions)}</strong><small>{compact(phase4Data.totals.previousSessions)} phiên kỳ trước</small></div>
+              <div><span>Direct / Unknown</span><strong>{compact(phase4Data.totals.directSessions)}</strong><small>{percent(phase4Data.totals.directSessions, phase4Data.totals.sessions)} phiên hiện tại</small></div>
+              <div><span>Coverage thực tế</span><strong>{phase4Data.actualCoverageDays.toFixed(1)} ngày</strong><small>requested {phase4Data.requestedWindowDays} ngày</small></div>
+            </div>
+            <div className="traffic-table-wrap"><table><thead><tr><th>Priority page</th><th>Organic</th><th>Google</th><th>Direct</th><th>Phiên</th></tr></thead><tbody>{phase4Data.priorityPages.map((page) => <tr key={page.path}><td title={page.path}><strong>{page.label}</strong><small>{page.path}</small></td><td>{compact(page.organicSessions)} <small>{page.organicDelta >= 0 ? "+" : ""}{compact(page.organicDelta)}</small></td><td>{compact(page.googleSessions)}</td><td>{compact(page.directSessions)}</td><td>{compact(page.sessions)} <small>{compact(page.previousSessions)} trước</small></td></tr>)}</tbody></table></div>
+            <p className="traffic-google-note"><strong>Phase 4 policy:</strong> {phase4Data.comparisonPolicy}. Search Console vẫn là nguồn bắt buộc cho impression, CTR và ranking query-level.</p>
           </>}
         </section>
 

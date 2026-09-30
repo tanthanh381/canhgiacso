@@ -8,6 +8,7 @@ test("Content Growth Wave 9 runs after CTR optimization and before analytics", a
   const architecture = JSON.parse(await read("content/content-architecture.json"));
   const stages = architecture.phases.flatMap((phase) => phase.stages);
   assert.ok(stages.indexOf("patch-seo-ctr-wave8.mjs") < stages.indexOf("patch-content-growth-wave9.mjs"));
+  assert.ok(stages.indexOf("patch-content-growth-wave9.mjs") < stages.indexOf("patch-phase4-search-expansion.mjs"));
   assert.ok(stages.indexOf("patch-content-growth-wave9.mjs") < stages.indexOf("instrument-content.mjs"));
 });
 
@@ -95,6 +96,9 @@ test("SEO audit requires all Wave 9 indexable URLs and tool scripts", async () =
   assert.match(audit, /missing Content Security Policy/);
   assert.match(audit, /CSP does not allow same-origin tool scripts/);
   assert.match(audit, /CSP does not block plugin objects/);
+  assert.match(audit, /missing Phase 4 next-step search expansion/);
+  assert.match(audit, /data-phase4-home/);
+  assert.match(audit, /data-phase4-hub/);
 });
 
 

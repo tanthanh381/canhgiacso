@@ -52,7 +52,8 @@
         "patch-seo-authority-wave6.mjs",
         "patch-seo-intent-wave7.mjs",
         "patch-seo-ctr-wave8.mjs",
-        "patch-content-growth-wave9.mjs"
+        "patch-content-growth-wave9.mjs",
+        "patch-phase4-search-expansion.mjs"
       ]
     },
     {

@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "phase": "Phase 4 - Measurement & Search Expansion",
+  "createdAt": "2026-09-30",
+  "status": "implemented",
+  "measurement": {
+    "source": "first-party Supabase analytics",
+    "rpc": "public.get_phase4_seo_monitor",
+    "comparisonPolicy": "Use equal-length current vs previous windows bounded by actual first-party coverage.",
+    "windows": ["24h", "7d", "30d", "90d"],
+    "fields": [
+      "requestedWindowDays",
+      "actualCoverageStart",
+      "actualCoverageDays",
+      "comparisonWindowDays",
+      "priorityPages",
+      "totals"
+    ],
+    "gscStatus": "not connected; Search Console metrics still require external access"
+  },
+  "searchExpansion": {
+    "stage": "patch-phase4-search-expansion.mjs",
+    "strategy": "Add contextual next-step links from priority pages to incident, tool and related-intent pages without bulk title/meta changes.",
+    "priorityPages": [
+      "/kien-thuc/lua-dao-cong-tac-vien-viec-nhe-luong-cao/",
+      "/kien-thuc/kiem-tra-so-dien-thoai-lua-dao/",
+      "/kien-thuc/gia-mao-ngan-hang/",
+      "/kien-thuc/kiem-tra-link-gia-mao/",
+      "/kien-thuc/xu-ly-khi-bi-lua-dao-chuyen-tien/",
+      "/kien-thuc/phishing-la-gi/"
+    ]
+  },
+  "safeguards": [
+    "Do not bulk-change titles or meta descriptions without Google Search Console data.",
+    "Keep Phase 4 links contextual and useful for users handling a live scam-risk situation.",
+    "Keep organic reporting first-party and label GSC-only metrics explicitly."
+  ]
+}
