@@ -17,6 +17,7 @@ test("mobile primary navigation renders six destinations including Giới thiệ
   assert.match(uxSource, /className="ux-about-nav-item"[\s\S]*?Giới thiệu/);
   assert.match(practiceCss, /grid-template-columns:\s*repeat\(6,\s*1fr\)/);
   assert.match(uxCss, /grid-template-columns:\s*repeat\(6,\s*1fr\)/);
+  assert.match(uxCss, /\.ux-bottom-nav \.ux-about-nav-item\s*\{\s*order:\s*6;/);
 });
 
 test("mobile navigation stays below header and never falls back to bottom navigation", () => {

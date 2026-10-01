@@ -268,6 +268,7 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
   .ux-bottom-nav button > span { font-size: 17px; line-height: 1; }
   .ux-bottom-nav small { font-size: 10px; font-weight: 750; }
   .ux-bottom-nav button.active { color: var(--ux-brand); background: color-mix(in srgb, var(--ux-brand) 7%, var(--surface)); }
+  .ux-bottom-nav .ux-about-nav-item { order: 6; }
 
   .content-page { padding-bottom: 32px; }
 }
