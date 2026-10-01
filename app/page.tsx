@@ -1,7 +1,7 @@
 "use client";
 
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { defaultSiteContent, Difficulty, normalizeSiteContent, SiteContent } from "./data";
+import { defaultSiteContent, Difficulty, normalizeSiteContent, repoNewsArticles, SiteContent } from "./data";
 import { loadPublishedSiteContent } from "./domains/content/gateway";
 import { NewsArticleView } from './news-article';
 import { publicNews, safeImage } from './news-content';
@@ -146,7 +146,7 @@ export default function Home() {
       if (!active) return;
       const normalized = normalizeSiteContent(data);
       if (normalized) {
-        setSiteContent(normalized);
+        setSiteContent({ ...normalized, newsArticles: repoNewsArticles });
       } else if (error) {
         setDataStatus("Không tải được nội dung cập nhật; đang dùng thư viện tích hợp sẵn.");
       }

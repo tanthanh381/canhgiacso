@@ -22,14 +22,23 @@ function load(name) {
       compilerOptions: {
         module: ts.ModuleKind.CommonJS,
         target: ts.ScriptTarget.ES2022,
+        esModuleInterop: true,
       },
     }).outputText,
-  )(exports, (path) => load(path.replace("./", "")));
+  )(exports, (path) => path.endsWith(".json")
+    ? JSON.parse(readFileSync(new URL(path, import.meta.url), "utf8"))
+    : load(path.replace("./", "")));
   modules.set(name, exports);
   return exports;
 }
 
 const { defaultSiteContent, normalizeSiteContent } = load("data");
+
+test("tin tức trong repo là nguồn nội dung có thể kiểm tra và triển khai", async () => {
+  const repoNews = JSON.parse(await readFile(new URL("../content/news-articles.json", import.meta.url), "utf8"));
+  assert.deepEqual(repoNews, defaultSiteContent.newsArticles);
+  assert.equal(repoNews.filter((article) => article.featured).length, 1);
+});
 
 test("nội dung mặc định có tin từ nguồn HTTPS và một bài nổi bật", () => {
   assert.ok(defaultSiteContent.newsArticles.length >= 6);

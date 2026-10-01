@@ -1,0 +1,72 @@
+[
+  {
+    "id": "25-kich-ban-lua-dao-2026",
+    "title": "Cảnh giác trước 25 kịch bản lừa đảo trên không gian mạng năm 2026",
+    "summary": "Các thủ đoạn được chia thành 5 nhóm, nổi bật với giả mạo cơ quan, chiếm đoạt tài khoản và sử dụng AI, deepfake, deepvoice để tạo lòng tin. Không truy cập liên kết lạ, quét QR không rõ nguồn hoặc cung cấp OTP.",
+    "category": "Cảnh báo lừa đảo",
+    "publishedAt": "2026-09-08",
+    "sourceName": "Bộ Công an",
+    "sourceUrl": "https://www.bocongan.gov.vn/bai-viet/nang-cao-canh-giac-truoc-25-kich-ban-lua-dao-tren-khong-gian-mang-nam-2026-1788865614",
+    "featured": true
+  },
+  {
+    "id": "cat-ghep-hinh-anh-cuong-doat",
+    "title": "Cảnh báo thủ đoạn cắt ghép hình ảnh nhạy cảm để cưỡng đoạt tài sản",
+    "summary": "Đối tượng thu thập ảnh và thông tin công khai, tạo hình ảnh giả rồi đe dọa phát tán để ép chuyển tiền. Người dùng nên hạn chế công khai dữ liệu cá nhân, lưu lại bằng chứng và trình báo cơ quan công an.",
+    "category": "Cảnh báo lừa đảo",
+    "publishedAt": "2026-09-07",
+    "sourceName": "Bộ Công an",
+    "sourceUrl": "https://www.bocongan.gov.vn/bai-viet/canh-bao-tinh-trang-quay-tro-lai-thu-doan-cat-ghep-hinh-anh-nhay-cam-nham-cuong-doat-tai-san-1788770637",
+    "featured": false
+  },
+  {
+    "id": "lua-dao-mua-tuu-truong",
+    "title": "Nhận diện lừa đảo nhắm vào học sinh, tân sinh viên mùa tựu trường",
+    "summary": "Cần đề phòng tin cho thuê trọ giá rẻ yêu cầu đặt cọc gấp và thông báo giả mạo nhà trường về học phí, học bổng. Luôn xác minh qua website, số điện thoại hoặc đơn vị chức năng chính thức của trường.",
+    "category": "Cảnh báo lừa đảo",
+    "publishedAt": "2026-08-25",
+    "sourceName": "Bộ Công an",
+    "sourceUrl": "https://bocongan.gov.vn/bai-viet/catp-hai-phong-canh-bao-cac-thu-doan-lua-dao-bua-vay-hoc-sinh-tan-sinh-vien-mua-tuu-truong-1787629964",
+    "featured": false
+  },
+  {
+    "id": "lua-dao-hop-dong-ky-nghi",
+    "title": "Khoảng 2.500 đơn tố giác liên quan lừa đảo hợp đồng kỳ nghỉ",
+    "summary": "Cơ quan chức năng cảnh báo các lời mời sở hữu kỳ nghỉ, ưu đãi du lịch và cam kết sinh lời thiếu minh bạch. Hãy đọc kỹ điều khoản, kiểm tra pháp nhân và không chuyển tiền khi bị thúc ép ký nhanh.",
+    "category": "Cảnh báo lừa đảo",
+    "publishedAt": "2026-07-04",
+    "sourceName": "Bộ Công an",
+    "sourceUrl": "https://bocongan.gov.vn/bai-viet/lua-dao-hop-dong-ky-nghi-tiep-nhan-2-500-don-to-giac-so-tien-chiem-doat-khoang-2-600-ty-dong-1783146602",
+    "featured": false
+  },
+  {
+    "id": "viec-nhe-luong-cao-xuat-canh",
+    "title": "Tránh bẫy “việc nhẹ lương cao” và dịch vụ xuất cảnh nhanh",
+    "summary": "Các tài khoản ẩn danh quảng cáo việc làm thu nhập cao, làm visa nhanh rồi yêu cầu chuyển tiền qua tài khoản trung gian. Chỉ làm việc với tổ chức được cấp phép và tự kiểm tra thông tin qua kênh chính thống.",
+    "category": "An toàn số",
+    "publishedAt": "2026-06-19",
+    "sourceName": "Bộ Công an",
+    "sourceUrl": "https://bocongan.gov.vn/chinh-sach-phap-luat/bai-viet/tranh-tro-thanh-nan-nhan-cua-hoat-dong-to-chuc-cho-nguoi-khac-xuat-nhap-canh-di-cu-trai-phep-1781854747",
+    "featured": false
+  },
+  {
+    "id": "bao-ve-du-lieu-ca-nhan",
+    "title": "Cảnh báo nguy cơ lộ, lọt dữ liệu cá nhân trên không gian mạng",
+    "summary": "Dữ liệu cá nhân có thể bị thu thập, trao đổi trong các nhóm kín và dùng cho lừa đảo. Nên hạn chế cấp quyền cho ứng dụng lạ, dùng mật khẩu mạnh, bật xác thực đa yếu tố và cập nhật phần mềm thường xuyên.",
+    "category": "Bảo vệ dữ liệu",
+    "publishedAt": "2026-06-10",
+    "sourceName": "Bộ Công an",
+    "sourceUrl": "https://www.bocongan.gov.vn/bai-viet/canh-bao-nguy-co-lo-lot-du-lieu-ca-nhan-tren-khong-gian-mang-1781085500",
+    "featured": false
+  },
+  {
+    "id": "bao-cao-an-ninh-mang-2025",
+    "title": "Báo cáo an ninh mạng 2025: tổ chức, doanh nghiệp tiếp tục là mục tiêu lớn",
+    "summary": "Báo cáo ghi nhận khoảng 552.000 cuộc tấn công, 52,30% tổ chức bị ảnh hưởng và 47,72% đơn vị chưa có nhân sự chuyên trách. Năng lực con người, quản trị dữ liệu và ứng phó với AI là các ưu tiên cần củng cố.",
+    "category": "An toàn thông tin",
+    "publishedAt": "2026-01-20",
+    "sourceName": "Hiệp hội An ninh mạng Quốc gia",
+    "sourceUrl": "https://www.nca.org.vn/news/detail/bao-cao-tong-ket-an-ninh-mang-nam-2025-khu-vuc-to-chuc-doanh-nghiep--1769392766125?l=vi",
+    "featured": false
+  }
+]
