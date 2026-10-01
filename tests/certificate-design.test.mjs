@@ -9,7 +9,7 @@ function load(name) {
   if (modules.has(name)) return modules.get(name);
   const source = readFileSync(new URL(`../app/${name}.ts`, import.meta.url), 'utf8');
   const exports = {};
-  new Function('exports', 'require', ts.transpileModule(source, {compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText)(exports, path => load(path.replace('./', '')));
+  new Function('exports', 'require', ts.transpileModule(source, {compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText)(exports, path => path.endsWith('.json') ? { default: JSON.parse(readFileSync(new URL(path, import.meta.url), 'utf8')) } : load(path.replace(/^\.\//, '')));
   modules.set(name, exports);
   return exports;
 }
