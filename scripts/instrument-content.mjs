@@ -86,7 +86,8 @@ let changed = 0;
 for (const relativeRoot of ["public", "github-pages"]) {
   const root = path.join(ROOT, relativeRoot);
   for (const file of await htmlFiles(root)) {
-    if (path.normalize(file) === path.join(ROOT, "public", "gioi-thieu", "index.html")) continue;
+    // Embedded in /gioi-thieu/ via iframe; tracking it would double-count the page view.
+    if (path.normalize(file) === path.join(ROOT, "public", "gioi-thieu", "hoat-hinh.html")) continue;
     checked += 1;
     let html = await readFile(file, "utf8");
     const before = html;

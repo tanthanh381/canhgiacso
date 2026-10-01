@@ -787,3 +787,76 @@ a:hover { text-decoration-thickness: 2px; }
   .seo-article p,
   .seo-article li { font-size: 16px; }
 }
+
+/* Giới thiệu: animation hero embedded from /gioi-thieu/hoat-hinh.html */
+.about-hero {
+  container-type: inline-size;
+  width: min(1120px, calc(100vw - 48px));
+  margin: 30px 0 10px calc(50% - min(560px, 50vw - 24px));
+}
+.about-hero-frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--seo-line);
+  border-radius: 16px;
+  background: #0a0e18;
+  box-shadow: var(--seo-shadow);
+}
+.about-hero-frame iframe {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+@container (max-width: 720px) {
+  .about-hero-frame {
+    aspect-ratio: auto;
+    height: min(620px, 78svh);
+  }
+}
+.about-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+.about-hero-actions a,
+.about-hero-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 750;
+  text-decoration: none;
+  cursor: pointer;
+}
+.about-hero-cta {
+  border: 1px solid var(--seo-accent-dark);
+  background: var(--seo-accent-dark);
+  color: #ffffff;
+}
+.about-hero-cta:hover { background: color-mix(in srgb, var(--seo-accent-dark) 86%, #000000); }
+.about-hero-toggle {
+  border: 1px solid var(--seo-line);
+  background: var(--seo-surface);
+  color: var(--seo-ink);
+}
+.about-hero-toggle:hover { border-color: var(--seo-accent); }
+.about-hero-actions a:focus-visible,
+.about-hero-actions button:focus-visible {
+  outline: 3px solid var(--seo-mint);
+  outline-offset: 2px;
+}
+.about-hero-actions small {
+  flex: 1 1 220px;
+  color: var(--seo-muted);
+  font-size: 14px;
+}

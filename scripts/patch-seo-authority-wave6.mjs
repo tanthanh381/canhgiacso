@@ -8,20 +8,6 @@ const UPDATED = "2026-09-23";
 const BRAND = '<span class="seo-brand-logo" aria-hidden="true"></span><span class="seo-brand-divider" aria-hidden="true"></span><span class="seo-product-lockup"><strong>CẢNH GIÁC SỐ</strong><small>IT SECURITY</small></span>';
 const THEME_INIT = '<script>try{if(localStorage.getItem("khien-so-theme")==="dark")document.documentElement.dataset.theme="dark"}catch{}</script>';
 const TRUST_NAV = '<nav class="seo-footer-links" aria-label="Thông tin website"><a href="/gioi-thieu/">Giới thiệu</a><a href="/chinh-sach-bien-tap/">Biên tập</a><a href="/phuong-phap-kiem-chung/">Kiểm chứng</a><a href="/lien-he/">Liên hệ</a><a href="/quyen-rieng-tu/">Quyền riêng tư</a><a href="/bao-mat/">Bảo mật</a><a href="/sitemap/">Sơ đồ nội dung</a></nav>';
-const ABOUT_ANIMATION_SEO_HEAD = `<title>Giới thiệu Cảnh Giác Số | Chống lừa đảo &amp; an toàn số</title>
-  <meta name="description" content="Giới thiệu Cảnh Giác Số — nền tảng giáo dục cộng đồng về nhận diện lừa đảo, bảo vệ tài khoản và an toàn thông tin số." />
-  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
-  <link rel="canonical" href="${SITE}/gioi-thieu/" />
-  <link rel="alternate" hreflang="vi-VN" href="${SITE}/gioi-thieu/" />
-  <link rel="alternate" hreflang="x-default" href="${SITE}/gioi-thieu/" />
-  <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png?v=20260924" />
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="Giới thiệu Cảnh Giác Số | Chống lừa đảo &amp; an toàn số" />
-  <meta property="og:description" content="Giới thiệu Cảnh Giác Số — nền tảng giáo dục cộng đồng về nhận diện lừa đảo, bảo vệ tài khoản và an toàn thông tin số." />
-  <meta property="og:url" content="${SITE}/gioi-thieu/" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Giới thiệu Cảnh Giác Số | Chống lừa đảo &amp; an toàn số" />
-  <meta name="twitter:description" content="Giới thiệu Cảnh Giác Số — nền tảng giáo dục cộng đồng về nhận diện lừa đảo, bảo vệ tài khoản và an toàn thông tin số." />`;
 
 async function write(relative, content) {
   const file = path.join(PUBLIC, relative);
@@ -118,11 +104,6 @@ function pageShell({ title, description, canonical, type, h1, eyebrow, lead, bod
 </html>`;
 }
 
-function prepareAboutAnimation(html) {
-  const withSeoHead = html.replace(/<head>/i, `<head>\n  ${ABOUT_ANIMATION_SEO_HEAD}`);
-  return withSeoHead.replace(/<body>/i, '<body><h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Giới thiệu Cảnh Giác Số</h1>');
-}
-
 const about = pageShell({
   title: "Giới thiệu Cảnh Giác Số | Chống lừa đảo & an toàn số",
   description: "Tìm hiểu mục tiêu, phạm vi nội dung, cách Cảnh Giác Số xây dựng cẩm nang chống lừa đảo và nguyên tắc giúp người dùng xác minh thông tin an toàn.",
@@ -132,14 +113,13 @@ const about = pageShell({
   eyebrow: "VỀ CẢNH GIÁC SỐ",
   lead: "Cảnh Giác Số là nền tảng giáo dục an toàn số, tập trung giúp người dùng nhận diện dấu hiệu lừa đảo, xác minh thông tin độc lập và chọn hành động an toàn trước khi chuyển tiền, đăng nhập, cài ứng dụng hoặc chia sẻ dữ liệu.",
   body: `
+<section class="about-hero" aria-label="Hoạt hình giới thiệu Cảnh Giác Số"><div class="about-hero-frame"><iframe src="/gioi-thieu/hoat-hinh.html" title="Hoạt hình giới thiệu Cảnh Giác Số: các chiêu lừa đảo thường gặp và 4 nguyên tắc Dừng lại, Kiểm tra, Xác minh, Báo cáo"></iframe></div><div class="about-hero-actions"><a class="about-hero-cta" href="/">Bắt đầu thử thách</a><button type="button" class="about-hero-toggle" data-about-anim-toggle hidden>Tạm dừng</button><small>Hoạt hình tự lặp lại; bạn có thể tạm dừng bất cứ lúc nào.</small></div></section>
+<script src="/about-hero.js" defer></script>
 <section><h2>Website này giúp bạn làm gì?</h2><p>Nội dung được tổ chức theo các tình huống người dùng thường gặp: cuộc gọi mạo danh, phishing, website giả, lừa đảo ngân hàng, QR, OTP, deepfake, tuyển dụng, đầu tư và yêu cầu chuyển tiền khẩn cấp. Mỗi hướng dẫn ưu tiên các bước có thể thực hiện ngay thay vì chỉ mô tả thủ đoạn.</p></section>
 <section><h2>Nguyên tắc cốt lõi: Dừng — Kiểm tra — Xác minh — Báo cáo</h2><p>Khi có dấu hiệu bất thường, người dùng không cần tiếp tục tương tác để “thử xem có lừa đảo hay không”. Hướng dẫn mặc định là dừng thao tác có rủi ro, tự tìm kênh chính thức, xác minh qua nguồn độc lập và báo cáo khi có căn cứ phù hợp.</p></section>
 <section><h2>Nội dung được xây dựng và cập nhật như thế nào?</h2><p>Cảnh Giác Số ưu tiên nguồn từ cơ quan có thẩm quyền, tổ chức an ninh mạng, ngân hàng, nhà cung cấp dịch vụ và báo chí có danh tính rõ ràng. Các bài viết được gắn nguồn theo chủ đề, cập nhật khi thủ đoạn thay đổi và phân biệt rõ tín hiệu rủi ro với kết luận. Xem chi tiết tại <a href="/phuong-phap-kiem-chung/">phương pháp kiểm chứng & nguyên tắc biên tập</a>.</p></section>
 <section><h2>Phạm vi và giới hạn</h2><p>Cảnh Giác Số phục vụ giáo dục, tra cứu và nâng cao nhận thức. Nội dung không thay thế xác minh trực tiếp từ ngân hàng, cơ quan chức năng hoặc tổ chức có thẩm quyền trong từng vụ việc. Khi đã xảy ra thiệt hại tài chính hoặc mất quyền kiểm soát tài khoản, hãy ưu tiên khóa tài khoản, liên hệ đơn vị liên quan và lưu bằng chứng.</p></section>`,
 });
-void about;
-
-const aboutAnimation = await readFile(path.join(PUBLIC, "gioi-thieu", "index.html"), "utf8");
 
 const privacy = pageShell({
   title: "Quyền riêng tư & dữ liệu người dùng | Cảnh Giác Số",
@@ -201,7 +181,7 @@ const security = pageShell({
 <section><h2>Tài nguyên bảo mật công khai</h2><p>Website có tệp <a href="/security.txt">security.txt</a> để hỗ trợ quy trình báo cáo kỹ thuật khi được triển khai bởi môi trường hosting.</p></section>`,
 });
 
-await write("gioi-thieu/index.html", prepareAboutAnimation(aboutAnimation));
+await write("gioi-thieu/index.html", about);
 await write("quyen-rieng-tu/index.html", privacy);
 await write("chinh-sach-bien-tap/index.html", editorial);
 await write("lien-he/index.html", contact);

@@ -202,7 +202,7 @@ test.describe("resilience and breakpoint boundaries", () => {
       await expectNoHorizontalOverflow(page);
       if (width <= 900) {
         await expect(page.locator(".ux-bottom-nav")).toBeVisible();
-        await expect(page.locator(".ux-bottom-nav > button")).toHaveCount(5);
+        await expect(page.locator(".ux-bottom-nav > button")).toHaveCount(6);
       } else {
         await expect(page.locator(".topbar nav")).toBeVisible();
         await expect(page.locator(".ux-bottom-nav")).toBeHidden();
