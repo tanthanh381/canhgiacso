@@ -22,6 +22,11 @@ test('Cẩm nang exposes both the canonical knowledge hub and the interactive ch
   assert.ok(css.includes('.knowledge-submenu'));
 });
 
+test('homepage navigation links to the Giới thiệu page', () => {
+  assert.ok(source.includes('window.location.assign("/gioi-thieu/")'));
+  assert.ok(source.includes('>Giới thiệu</button>'));
+});
+
 test('Cẩm nang dropdown stays compact and visually aligned with the navbar', () => {
   assert.ok(css.includes('width:232px'));
   assert.ok(css.includes('top:calc(100% + 5px)'));

@@ -47,6 +47,7 @@ export function AppHeader({
               }}><strong>Danh sách kiểm tra</strong><small>Tự kiểm tra an toàn số và lưu tiến độ</small></button>
             </div>
           </details>
+          <button type="button" onClick={() => window.location.assign("/gioi-thieu/")}>Giới thiệu</button>
           <button aria-current={view === "news" ? "page" : undefined} className={view === "news" ? "active" : ""} onClick={() => onNavigate("news")}>Tin tức</button>
           <button aria-current={view === "quiz" ? "page" : undefined} className={view === "quiz" ? "active" : ""} onClick={() => onNavigate("quiz")}>Thực hành</button>
           <button aria-current={view === "stats" ? "page" : undefined} className={view === "stats" ? "active" : ""} onClick={() => onNavigate("stats")}>Thành tích</button>
