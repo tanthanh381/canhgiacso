@@ -137,6 +137,7 @@ const about = pageShell({
 <section><h2>Nội dung được xây dựng và cập nhật như thế nào?</h2><p>Cảnh Giác Số ưu tiên nguồn từ cơ quan có thẩm quyền, tổ chức an ninh mạng, ngân hàng, nhà cung cấp dịch vụ và báo chí có danh tính rõ ràng. Các bài viết được gắn nguồn theo chủ đề, cập nhật khi thủ đoạn thay đổi và phân biệt rõ tín hiệu rủi ro với kết luận. Xem chi tiết tại <a href="/phuong-phap-kiem-chung/">phương pháp kiểm chứng & nguyên tắc biên tập</a>.</p></section>
 <section><h2>Phạm vi và giới hạn</h2><p>Cảnh Giác Số phục vụ giáo dục, tra cứu và nâng cao nhận thức. Nội dung không thay thế xác minh trực tiếp từ ngân hàng, cơ quan chức năng hoặc tổ chức có thẩm quyền trong từng vụ việc. Khi đã xảy ra thiệt hại tài chính hoặc mất quyền kiểm soát tài khoản, hãy ưu tiên khóa tài khoản, liên hệ đơn vị liên quan và lưu bằng chứng.</p></section>`,
 });
+void about;
 
 const aboutAnimation = await readFile(path.join(PUBLIC, "gioi-thieu", "index.html"), "utf8");
 
