@@ -86,6 +86,7 @@ let changed = 0;
 for (const relativeRoot of ["public", "github-pages"]) {
   const root = path.join(ROOT, relativeRoot);
   for (const file of await htmlFiles(root)) {
+    if (path.normalize(file) === path.join(ROOT, "public", "gioi-thieu", "index.html")) continue;
     checked += 1;
     let html = await readFile(file, "utf8");
     const before = html;

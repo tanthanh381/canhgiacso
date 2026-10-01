@@ -119,6 +119,8 @@ const about = pageShell({
 <section><h2>Phạm vi và giới hạn</h2><p>Cảnh Giác Số phục vụ giáo dục, tra cứu và nâng cao nhận thức. Nội dung không thay thế xác minh trực tiếp từ ngân hàng, cơ quan chức năng hoặc tổ chức có thẩm quyền trong từng vụ việc. Khi đã xảy ra thiệt hại tài chính hoặc mất quyền kiểm soát tài khoản, hãy ưu tiên khóa tài khoản, liên hệ đơn vị liên quan và lưu bằng chứng.</p></section>`,
 });
 
+const aboutAnimation = await readFile(path.join(PUBLIC, "gioi-thieu", "index.html"), "utf8");
+
 const privacy = pageShell({
   title: "Quyền riêng tư & dữ liệu người dùng | Cảnh Giác Số",
   description: "Cách Cảnh Giác Số xử lý dữ liệu khi truy cập, đăng nhập, dùng công cụ tra cứu và thống kê truy cập; phân biệt analytics first-party và Google Analytics.",
@@ -179,7 +181,7 @@ const security = pageShell({
 <section><h2>Tài nguyên bảo mật công khai</h2><p>Website có tệp <a href="/security.txt">security.txt</a> để hỗ trợ quy trình báo cáo kỹ thuật khi được triển khai bởi môi trường hosting.</p></section>`,
 });
 
-await write("gioi-thieu/index.html", about);
+await write("gioi-thieu/index.html", aboutAnimation);
 await write("quyen-rieng-tu/index.html", privacy);
 await write("chinh-sach-bien-tap/index.html", editorial);
 await write("lien-he/index.html", contact);
