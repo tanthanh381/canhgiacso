@@ -5,7 +5,7 @@
   --cgs-brand: #b1122f;
   --cgs-brand-strong: #7d0b20;
   --cgs-ink: #17212b;
-  --cgs-muted: #667085;
+  --cgs-muted: #5d6679;
   --cgs-paper: #f5f7f9;
   --cgs-surface: #ffffff;
   --cgs-line: #dfe4ea;
@@ -61,8 +61,11 @@ body { font-size: 16px; }
 .topbar {
   height: 74px;
   min-height: 74px;
-  grid-template-columns: minmax(220px, 1fr) auto minmax(220px, 1fr);
   padding-inline: clamp(16px, 3vw, 36px);
+}
+
+@media (min-width: 1181px) {
+  .topbar { grid-template-columns: minmax(220px, 1fr) auto minmax(220px, 1fr); }
 }
 
 .brand-logo { width: 52px; height: 52px; background-size: 54px 54px; }
@@ -218,4 +221,85 @@ body { font-size: 16px; }
 
 @media (prefers-reduced-motion: reduce) {
   .news-card { transition: none; }
+}
+
+/* Skip link: hidden until focused by keyboard. */
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 2147483000;
+  padding: 10px 16px;
+  border-radius: var(--cgs-radius-control);
+  background: var(--cgs-brand-strong);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 750;
+  text-decoration: none;
+  transform: translateY(-160%);
+}
+.skip-link:focus { transform: none; outline: 3px solid var(--cgs-highlight); outline-offset: 2px; }
+.skip-target { scroll-margin-top: calc(var(--cgs-mobile-header-height) + var(--cgs-mobile-nav-height)); }
+.skip-target:focus { outline: none; }
+
+/* Readability floor: no user-facing text below 11px; body-level helper text at 12px. */
+.product-lockup small,
+.eyebrow,
+.security-awareness-banner strong,
+.section-title small,
+.ring small,
+.auth-or,
+.loss-summary small,
+.ux-bottom-nav small { font-size: 11px; }
+
+.guest-badge,
+.difficulty-filter button,
+.scenario-number,
+.red-flags span,
+.game-toolbar small,
+.reset-run-button,
+.coach-card button,
+.section-title button,
+.mini-stats span,
+.emergency-card small,
+.feedback button,
+.checklist-overall > span,
+.checklist-group-progress small,
+.checklist-items small,
+.news-disclaimer,
+.footer-warning,
+.footer-actions button,
+.guest-continue,
+.export-button,
+.auth-form label > span,
+.profile-name-field > span,
+.ux-mobile-knowledge-menu small,
+.security-awareness-banner,
+.security-awareness-banner span { font-size: 12px; }
+
+.profile-note { font-size: 12px !important; }
+.topbar .auth-actions .login-button,
+.topbar .auth-actions .signup-button { font-size: 12px; }
+
+/* Touch targets: at least 24px for inline links, 40px+ for buttons. */
+.footer-actions a { display: inline-flex; align-items: center; min-height: 32px; }
+.section-title button { min-height: 32px; padding-inline: 6px; }
+
+@media (max-width: 900px) {
+  .reset-run-button,
+  .coach-card button,
+  .footer-actions button,
+  .guest-continue { min-height: 44px; }
+  .topbar .auth-actions .login-button,
+  .topbar .auth-actions .signup-button { min-height: 40px; }
+}
+
+@media (max-width: 560px) {
+  .ux-bottom-nav { padding-inline: 2px; }
+  .ux-bottom-nav button { padding-inline: 1px; }
+  .ux-bottom-nav small { letter-spacing: -.03em; font-weight: 700; }
+}
+
+@media (max-width: 360px) {
+  .ux-bottom-nav small { font-size: 10px; }
 }

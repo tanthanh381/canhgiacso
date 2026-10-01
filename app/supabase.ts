@@ -13,11 +13,21 @@ const client = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   },
 });
 
+const guestMemoryStorage = new Map<string, string>();
+
+// A distinct storage key keeps this client from sharing the account session's
+// GoTrue storage slot (which triggers "Multiple GoTrueClient instances").
 const guestClient = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     autoRefreshToken: false,
     persistSession: false,
     detectSessionInUrl: false,
+    storageKey: "cgs-guest-isolated",
+    storage: {
+      getItem: (key) => guestMemoryStorage.get(key) ?? null,
+      setItem: (key, value) => { guestMemoryStorage.set(key, value); },
+      removeItem: (key) => { guestMemoryStorage.delete(key); },
+    },
   },
 });
 

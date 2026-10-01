@@ -785,6 +785,15 @@ export default function Home() {
 
   return (
     <main className={dark ? "app dark" : "app"}>
+      <a
+        className="skip-link"
+        href="#main-content"
+        onClick={(event) => {
+          // Routing is hash-based, so focus the target directly instead of changing the hash.
+          event.preventDefault();
+          document.getElementById("main-content")?.focus();
+        }}
+      >Bỏ qua đến nội dung chính</a>
       <AppHeader
         view={view}
         copy={siteContent.copy}
@@ -803,6 +812,7 @@ export default function Home() {
         saving={savingChoice}
         onRetry={() => { if (pendingChoice) void syncChoice(pendingChoice); }}
       />
+      <div id="main-content" className="skip-target" tabIndex={-1} />
 
       {view === "game" && (
         <div className="game-shell">
