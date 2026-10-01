@@ -4,6 +4,7 @@ import test from "node:test";
 
 const read = (path) => readFileSync(path, "utf8");
 const page = `${read("app/page.tsx")}\n${read("app/domains/shell/view.tsx")}`;
+const uxSource = read("app/ux-refresh.tsx");
 const ux = read("app/ux-refresh.css");
 const practice = read("app/interactive-practice-nav.css");
 
@@ -13,7 +14,8 @@ test("mobile keeps the same primary destinations as desktop", () => {
   assert.match(page, />Tin tức<\/button>/);
   assert.match(page, />Thực hành<\/button>/);
   assert.match(page, />Thành tích<\/button>/);
-  assert.match(practice, /grid-template-columns:\s*repeat\(5,\s*1fr\)/);
+  assert.match(uxSource, /className="ux-about-nav-item"[\s\S]*?Giới thiệu/);
+  assert.match(practice, /grid-template-columns:\s*repeat\(6,\s*1fr\)/);
 });
 
 test("mobile exposes both sign-in and sign-up actions", () => {

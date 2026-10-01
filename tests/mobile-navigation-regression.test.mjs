@@ -10,12 +10,13 @@ const practiceSource = read("app/interactive-practice-nav.tsx");
 const practiceCss = read("app/interactive-practice-nav.css");
 const visualCss = read("app/visual-refresh.css");
 
-test("mobile primary navigation renders exactly five destinations without duplicate practice", () => {
+test("mobile primary navigation renders six destinations including Giới thiệu without duplicate practice", () => {
   assert.match(uxSource, /const PRIMARY_VIEWS: PrimaryView\[\] = \["Thử thách", "Cẩm nang", "Tin tức", "Thành tích"\]/);
   assert.doesNotMatch(uxSource, /PRIMARY_VIEWS[^\n]+Thực hành/);
   assert.match(practiceSource, /className=\{active \? "active ux-practice-nav-item" : "ux-practice-nav-item"\}/);
-  assert.match(practiceCss, /grid-template-columns:\s*repeat\(5,\s*1fr\)/);
-  assert.match(uxCss, /grid-template-columns:\s*repeat\(5,\s*1fr\)/);
+  assert.match(uxSource, /className="ux-about-nav-item"[\s\S]*?Giới thiệu/);
+  assert.match(practiceCss, /grid-template-columns:\s*repeat\(6,\s*1fr\)/);
+  assert.match(uxCss, /grid-template-columns:\s*repeat\(6,\s*1fr\)/);
 });
 
 test("mobile navigation stays below header and never falls back to bottom navigation", () => {

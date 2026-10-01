@@ -42,7 +42,8 @@ test.describe("cross-platform shell and responsive navigation", () => {
     if (width <= 900) {
       await expect(desktopNav).toBeHidden();
       await expect(mobileNav).toBeVisible();
-      await expect(mobileNav.locator(":scope > button")).toHaveCount(5);
+      await expect(mobileNav.locator(":scope > button")).toHaveCount(6);
+      await expect(mobileNav.getByRole("button", { name: "Giới thiệu", exact: true })).toBeVisible();
       const box = await mobileNav.boundingBox();
       expect(box).not.toBeNull();
       expect(Math.round(box!.y)).toBeGreaterThanOrEqual(62);

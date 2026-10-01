@@ -145,6 +145,14 @@ export function UxRefresh() {
     activate(label);
   };
 
+  const openAbout = () => {
+    setInsightOpen(false);
+    setScenariosOpen(false);
+    setUtilityOpen(false);
+    setMobileKnowledgeOpen(false);
+    window.location.assign("/gioi-thieu/");
+  };
+
   const openAdminTab = (tab: "content" | "traffic" | "users") => {
     setUtilityOpen(false);
     setMobileKnowledgeOpen(false);
@@ -224,6 +232,10 @@ export function UxRefresh() {
           <small>{item}</small>
         </button>
       ))}
+      <button type="button" className="ux-about-nav-item" onClick={openAbout}>
+        <span aria-hidden="true">ⓘ</span>
+        <small>Giới thiệu</small>
+      </button>
     </nav>
 
     {utilityOpen && <button className="ux-utility-backdrop" aria-label="Đóng menu quản lý" onClick={() => setUtilityOpen(false)} />}
