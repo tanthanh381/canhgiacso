@@ -8,6 +8,20 @@ const UPDATED = "2026-09-23";
 const BRAND = '<span class="seo-brand-logo" aria-hidden="true"></span><span class="seo-brand-divider" aria-hidden="true"></span><span class="seo-product-lockup"><strong>CẢNH GIÁC SỐ</strong><small>IT SECURITY</small></span>';
 const THEME_INIT = '<script>try{if(localStorage.getItem("khien-so-theme")==="dark")document.documentElement.dataset.theme="dark"}catch{}</script>';
 const TRUST_NAV = '<nav class="seo-footer-links" aria-label="Thông tin website"><a href="/gioi-thieu/">Giới thiệu</a><a href="/chinh-sach-bien-tap/">Biên tập</a><a href="/phuong-phap-kiem-chung/">Kiểm chứng</a><a href="/lien-he/">Liên hệ</a><a href="/quyen-rieng-tu/">Quyền riêng tư</a><a href="/bao-mat/">Bảo mật</a><a href="/sitemap/">Sơ đồ nội dung</a></nav>';
+const ABOUT_ANIMATION_SEO_HEAD = `<title>Giới thiệu Cảnh Giác Số | Chống lừa đảo &amp; an toàn số</title>
+  <meta name="description" content="Giới thiệu Cảnh Giác Số — nền tảng giáo dục cộng đồng về nhận diện lừa đảo, bảo vệ tài khoản và an toàn thông tin số." />
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+  <link rel="canonical" href="${SITE}/gioi-thieu/" />
+  <link rel="alternate" hreflang="vi-VN" href="${SITE}/gioi-thieu/" />
+  <link rel="alternate" hreflang="x-default" href="${SITE}/gioi-thieu/" />
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png?v=20260924" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Giới thiệu Cảnh Giác Số | Chống lừa đảo &amp; an toàn số" />
+  <meta property="og:description" content="Giới thiệu Cảnh Giác Số — nền tảng giáo dục cộng đồng về nhận diện lừa đảo, bảo vệ tài khoản và an toàn thông tin số." />
+  <meta property="og:url" content="${SITE}/gioi-thieu/" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Giới thiệu Cảnh Giác Số | Chống lừa đảo &amp; an toàn số" />
+  <meta name="twitter:description" content="Giới thiệu Cảnh Giác Số — nền tảng giáo dục cộng đồng về nhận diện lừa đảo, bảo vệ tài khoản và an toàn thông tin số." />`;
 
 async function write(relative, content) {
   const file = path.join(PUBLIC, relative);
@@ -104,6 +118,11 @@ function pageShell({ title, description, canonical, type, h1, eyebrow, lead, bod
 </html>`;
 }
 
+function prepareAboutAnimation(html) {
+  const withSeoHead = html.replace(/<head>/i, `<head>\n  ${ABOUT_ANIMATION_SEO_HEAD}`);
+  return withSeoHead.replace(/<body>/i, '<body><h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Giới thiệu Cảnh Giác Số</h1>');
+}
+
 const about = pageShell({
   title: "Giới thiệu Cảnh Giác Số | Chống lừa đảo & an toàn số",
   description: "Tìm hiểu mục tiêu, phạm vi nội dung, cách Cảnh Giác Số xây dựng cẩm nang chống lừa đảo và nguyên tắc giúp người dùng xác minh thông tin an toàn.",
@@ -181,7 +200,7 @@ const security = pageShell({
 <section><h2>Tài nguyên bảo mật công khai</h2><p>Website có tệp <a href="/security.txt">security.txt</a> để hỗ trợ quy trình báo cáo kỹ thuật khi được triển khai bởi môi trường hosting.</p></section>`,
 });
 
-await write("gioi-thieu/index.html", aboutAnimation);
+await write("gioi-thieu/index.html", prepareAboutAnimation(aboutAnimation));
 await write("quyen-rieng-tu/index.html", privacy);
 await write("chinh-sach-bien-tap/index.html", editorial);
 await write("lien-he/index.html", contact);
