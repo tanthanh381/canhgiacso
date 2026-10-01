@@ -1,12 +1,5 @@
-Contact: security@hdbank.com.vn
-Expires: 2027-09-28T00:00:00.000Z
-Preferred-Languages: vi, en
+Contact: https://github.com/tanthanh381/canhgiacso/security/policy
 Canonical: https://canhgiacso.com/.well-known/security.txt
-
-Policy: https://canhgiacso.com/quyen-rieng-tu/
-
-# Security Information
-# For responsible disclosure of security vulnerabilities,
-# please contact security@hdbank.com.vn
-
-Acknowledgments: https://canhgiacso.com/gioi-thieu/
+Policy: https://github.com/tanthanh381/canhgiacso/security/policy
+Preferred-Languages: vi, en
+Expires: 2027-09-11T00:00:00Z
