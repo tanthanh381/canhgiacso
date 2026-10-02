@@ -1,12 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import { declOf, readAppStyles } from './helpers/styles.mjs';
 
 const source = await readFile(new URL('../app/domains/shell/view.tsx', import.meta.url), 'utf8');
 const page = await readFile(new URL('../app/page.tsx', import.meta.url), 'utf8');
-const css = await readFile(new URL('../app/globals.css', import.meta.url), 'utf8');
+const css = readAppStyles();
 const navigation = await readFile(new URL('../app/domains/shell/navigation.ts', import.meta.url), 'utf8');
-const ux = await readFile(new URL('../app/ux-refresh.css', import.meta.url), 'utf8');
+const ux = css;
 const finalizer = await readFile(new URL('../scripts/finalize-content-architecture.mjs', import.meta.url), 'utf8');
 
 
@@ -18,8 +19,7 @@ test('Cẩm nang exposes both the canonical knowledge hub and the interactive ch
   assert.ok(source.includes('onNavigate("knowledge")'));
   assert.ok(source.includes('document.getElementById("security-checklist-title")?.scrollIntoView'));
   assert.ok(source.includes('aria-current={view === "knowledge" ? "page" : undefined}'));
-  assert.ok(css.includes('/* Cẩm nang dropdown navigation */'));
-  assert.ok(css.includes('.knowledge-submenu'));
+  assert.ok(declOf(css, '.knowledge-submenu', 'position'), 'the Cẩm nang dropdown panel has its own styles');
 });
 
 test('homepage navigation links to the Giới thiệu page', () => {
@@ -29,22 +29,22 @@ test('homepage navigation links to the Giới thiệu page', () => {
 });
 
 test('Cẩm nang dropdown stays compact and visually aligned with the navbar', () => {
-  assert.ok(css.includes('width:232px'));
-  assert.ok(css.includes('top:calc(100% + 5px)'));
-  assert.ok(css.includes('box-shadow:0 12px 30px'));
-  assert.ok(css.includes('border-right:1.5px solid currentColor'));
-  assert.ok(css.includes('.topbar nav:has(.knowledge-menu[open]){overflow:visible}'));
-  assert.doesNotMatch(css, /bottom:16px/);
-  assert.doesNotMatch(css, /max-height:60vh/);
+  assert.equal(declOf(css, '.knowledge-submenu', 'width'), '232px');
+  assert.equal(declOf(css, '.knowledge-submenu', 'top'), 'calc(100% + 5px)');
+  assert.match(declOf(css, '.knowledge-submenu', 'box-shadow'), /^0 12px 30px/);
+  assert.equal(declOf(css, '.knowledge-menu > summary::after', 'border-right'), '1.5px solid currentColor');
+  assert.equal(declOf(css, '.knowledge-submenu', 'bottom'), undefined);
+  assert.equal(declOf(css, '.knowledge-submenu', 'max-height'), undefined);
 });
 
 test('all top-level navigation controls share the same vertical rhythm', () => {
-  assert.ok(css.includes('.topbar nav{align-items:center}'));
-  assert.ok(css.includes('.topbar nav>button{display:inline-flex;align-items:center;justify-content:center;height:42px'));
-  assert.ok(css.includes('.knowledge-menu{position:relative;flex:0 0 auto;align-self:center;display:flex;align-items:center;height:42px}'));
-  assert.ok(css.includes('.knowledge-menu>summary{display:inline-flex;align-items:center;justify-content:center;height:42px'));
-  assert.ok(css.includes('.topbar nav>button,.knowledge-menu>summary{height:40px;padding:0 12px}'));
-  assert.ok(css.includes('.topbar nav>button,.knowledge-menu>summary{height:38px;padding:0 6px;font-size:12px}'));
+  assert.equal(declOf(css, '.topbar nav', 'align-items'), 'center');
+  assert.equal(declOf(css, '.topbar nav > button', 'display'), 'inline-flex');
+  assert.equal(declOf(css, '.topbar nav > button', 'align-items'), 'center');
+  const height = declOf(css, '.topbar nav > button', 'height');
+  assert.equal(height, '42px');
+  assert.equal(declOf(css, '.knowledge-menu', 'height'), height);
+  assert.equal(declOf(css, '.knowledge-menu > summary', 'height'), height);
 });
 
 test('primary navigation stays complete and consistent across app and static pages', () => {

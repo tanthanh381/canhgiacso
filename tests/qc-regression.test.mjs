@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { declOf, readAppStyles } from "./helpers/styles.mjs";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
 
@@ -93,7 +94,7 @@ test("critical UI states are accessible and responsive", async () => {
   const [page, shell, styles, ui] = await Promise.all([
     read("../app/page.tsx"),
     read("../app/domains/shell/view.tsx"),
-    read("../app/globals.css"),
+    readAppStyles(),
     read("../app/shared/ui-primitives.tsx"),
   ]);
   const uiSource = `${page}\n${shell}`;
@@ -113,7 +114,7 @@ test("QC fixes keep destructive reset explicit and mobile text readable", async 
   const [page, trainingGateway, styles, config] = await Promise.all([
     read("../app/page.tsx"),
     read("../app/domains/training/gateway.ts"),
-    read("../app/globals.css"),
+    readAppStyles(),
     read("../vite.github-pages.config.ts"),
   ]);
   assert.match(page, /resetConfirmOpen/);
@@ -123,8 +124,8 @@ test("QC fixes keep destructive reset explicit and mobile text readable", async 
   assert.match(page, /Xóa và bắt đầu lại/);
   assert.match(page, /Lịch sử lượt chơi/);
   assert.match(trainingGateway, /supabase\.rpc\("restart_game"/);
-  assert.match(styles, /\.topbar nav button \{ font-size: 12px/);
-  assert.match(styles, /footer-brand small \{ font-size: 12px/);
+  assert.ok(parseFloat(declOf(styles, ".topbar nav button", "font-size")) >= 12);
+  assert.ok(parseFloat(declOf(styles, ".footer-brand small", "font-size")) >= 12);
   assert.match(config, /manualChunks\(id\)/);
 });
 

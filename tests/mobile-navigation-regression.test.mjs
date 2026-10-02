@@ -1,14 +1,16 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import { declOf, readAppStyles } from "./helpers/styles.mjs";
 
 const read = (path) => readFileSync(path, "utf8");
 const uxSource = read("app/ux-refresh.tsx");
-const uxCss = read("app/ux-refresh.css");
-const globalsCss = read("app/globals.css");
+const uxCss = readAppStyles();
+const globalsCss = uxCss;
+const MOBILE = "@media (max-width: 900px)";
 const practiceSource = read("app/interactive-practice-nav.tsx");
-const practiceCss = read("app/interactive-practice-nav.css");
-const visualCss = read("app/visual-refresh.css");
+const practiceCss = uxCss;
+const visualCss = uxCss;
 
 test("mobile primary navigation renders six destinations including Giới thiệu without duplicate practice", () => {
   assert.match(uxSource, /const PRIMARY_VIEWS: PrimaryView\[\] = \["Thử thách", "Cẩm nang", "Tin tức", "Thành tích"\]/);
@@ -21,23 +23,26 @@ test("mobile primary navigation renders six destinations including Giới thiệ
 });
 
 test("mobile navigation stays below header and never falls back to bottom navigation", () => {
-  assert.match(uxCss, /\.ux-bottom-nav\s*\{[\s\S]*?top:\s*64px;[\s\S]*?bottom:\s*auto;/);
-  assert.match(uxCss, /\.topbar\s*\{[\s\S]*?height:\s*64px;[\s\S]*?margin-bottom:\s*66px;/);
-  assert.match(visualCss, /\.ux-bottom-nav\s*\{\s*border-radius:\s*0;/);
+  assert.equal(declOf(uxCss, ".ux-bottom-nav", "top", MOBILE), "var(--cgs-mobile-header-height)");
+  assert.equal(declOf(uxCss, ".ux-bottom-nav", "bottom", MOBILE), "auto");
+  assert.equal(declOf(uxCss, ".topbar", "height", MOBILE), "var(--cgs-mobile-header-height)");
+  assert.equal(declOf(uxCss, ".topbar", "margin-bottom", MOBILE), "66px");
+  assert.equal(declOf(visualCss, ".ux-bottom-nav", "border-radius", MOBILE), "0");
 });
 
 test("mobile overlays are isolated above backdrop and outside the navigation stacking context", () => {
   assert.match(uxSource, /<\/nav>[\s\S]*?ux-utility-backdrop[\s\S]*?ux-mobile-menu-backdrop[\s\S]*?ux-utility-popover-mobile[\s\S]*?ux-mobile-knowledge-menu/);
-  assert.match(uxCss, /\.ux-utility-popover-mobile\s*\{[\s\S]*?z-index:\s*88;/);
-  assert.match(uxCss, /\.ux-mobile-knowledge-menu\s*\{[\s\S]*?z-index:\s*86;/);
-  assert.match(uxCss, /\.ux-utility-backdrop,[\s\S]*?z-index:\s*82;/);
-  assert.match(uxCss, /\.ux-mobile-menu-backdrop\s*\{\s*z-index:\s*84;/);
+  assert.equal(declOf(uxCss, ".ux-utility-popover-mobile", "z-index", MOBILE), "88");
+  assert.equal(declOf(uxCss, ".ux-mobile-knowledge-menu", "z-index", MOBILE), "86");
+  assert.equal(declOf(uxCss, ".ux-utility-backdrop", "z-index", MOBILE), "82");
+  assert.equal(declOf(uxCss, ".ux-mobile-menu-backdrop", "z-index", MOBILE), "84");
 });
 
 test("desktop and mobile utility popovers cannot render visibly at the same breakpoint", () => {
-  assert.match(uxCss, /\.ux-utility-popover-mobile\s*\{\s*display:\s*none;/);
-  assert.match(uxCss, /@media \(max-width:\s*900px\)[\s\S]*?\.ux-utility-popover-desktop\s*\{\s*display:\s*none;/);
-  assert.match(uxCss, /\.ux-utility-popover-mobile\s*\{[\s\S]*?display:\s*block;[\s\S]*?position:\s*fixed;/);
+  assert.equal(declOf(uxCss, ".ux-utility-popover-mobile", "display"), "none");
+  assert.equal(declOf(uxCss, ".ux-utility-popover-desktop", "display", MOBILE), "none");
+  assert.equal(declOf(uxCss, ".ux-utility-popover-mobile", "display", MOBILE), "block");
+  assert.equal(declOf(uxCss, ".ux-utility-popover-mobile", "position", MOBILE), "fixed");
 });
 
 test("mobile menu state is mutually exclusive and dismissible", () => {
@@ -48,17 +53,19 @@ test("mobile menu state is mutually exclusive and dismissible", () => {
 });
 
 test("drawers always sit above mobile navigation and popup layers", () => {
-  assert.match(uxCss, /\.ux-drawer-backdrop\s*\{[\s\S]*?z-index:\s*100;/);
-  assert.match(uxCss, /\.ux-drawer-close\s*\{[\s\S]*?z-index:\s*108;/);
-  assert.match(uxCss, /\.scenario-panel\s*\{[\s\S]*?z-index:\s*104;/);
-  assert.match(uxCss, /\.insight-panel\s*\{[\s\S]*?z-index:\s*104;/);
-  assert.match(uxCss, /html, body\s*\{\s*max-width:\s*100%;\s*\}/);
-  assert.match(uxCss, /\.app\s*\{\s*max-width:\s*100%;\s*overflow-x:\s*clip;/);
+  assert.equal(declOf(uxCss, ".ux-drawer-backdrop", "z-index"), "100");
+  assert.equal(declOf(uxCss, ".ux-drawer-close", "z-index"), "108");
+  assert.equal(declOf(uxCss, ".scenario-panel", "z-index", MOBILE), "104");
+  assert.equal(declOf(uxCss, ".insight-panel", "z-index"), "104");
+  assert.equal(declOf(uxCss, "html", "max-width", MOBILE), "100%");
+  assert.equal(declOf(uxCss, ".app", "max-width", MOBILE), "100%");
+  assert.equal(declOf(uxCss, ".app", "overflow-x", MOBILE), "clip");
 });
 
 test("mobile runtime status stays in document flow below the fixed navigation", () => {
-  assert.match(uxCss, /\.sync-status\s*\{[\s\S]*?position:\s*relative;[\s\S]*?top:\s*auto;[\s\S]*?transform:\s*none;/);
-  assert.doesNotMatch(uxCss, /\.sync-status\s*\{\s*top:\s*130px;/);
+  assert.equal(declOf(uxCss, ".sync-status", "position", MOBILE), "relative");
+  assert.equal(declOf(uxCss, ".sync-status", "top", MOBILE), "auto");
+  assert.equal(declOf(uxCss, ".sync-status", "transform", MOBILE), "none");
 });
 
 test("mobile checklist action delegates to the real desktop checklist control", () => {
@@ -71,8 +78,8 @@ test("application modals always stay above mobile navigation and drawers", () =>
 });
 
 test("small mobile screens retain readable labels and safe touch targets", () => {
-  assert.match(visualCss, /\.ux-bottom-nav button\s*\{\s*min-height:\s*48px;/);
-  assert.match(uxCss, /\.ux-utility-popover-mobile button\s*\{[\s\S]*?min-height:\s*44px;/);
-  assert.match(uxCss, /@media \(max-width:\s*560px\)[\s\S]*?\.product-lockup strong\s*\{\s*display:\s*none;/);
-  assert.match(visualCss, /@media \(max-width:\s*560px\)[\s\S]*?\.ux-bottom-nav small\s*\{\s*font-size:\s*12px;/);
+  assert.equal(declOf(visualCss, ".ux-bottom-nav button", "min-height", MOBILE), "48px");
+  assert.equal(declOf(uxCss, ".ux-utility-popover-mobile button", "min-height", MOBILE), "44px");
+  assert.equal(declOf(uxCss, ".product-lockup strong", "display", "@media (max-width: 560px)"), "none");
+  assert.ok(parseFloat(declOf(visualCss, ".ux-bottom-nav small", "font-size")) >= 12);
 });

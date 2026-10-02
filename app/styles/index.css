@@ -1,0 +1,18 @@
+/* Single stylesheet entry of the application (GitHub Pages bundle and vinext layout import this file).
+   The order below is the cascade order: reset -> tokens -> base -> shared primitives -> shell -> dialogs ->
+   screens -> late overrides -> admin. Every selector is declared in exactly one of these files. */
+@import "./reset.css";
+@import "./tokens.css";
+@import "./base.css";
+@import "./primitives.css";
+@import "./shell.css";
+@import "./mobile-nav.css";
+@import "./dialogs.css";
+@import "./game.css";
+@import "./knowledge.css";
+@import "./news.css";
+@import "./quiz.css";
+@import "./stats.css";
+@import "./dashboard.css";
+@import "./late.css";
+@import "./admin.css";

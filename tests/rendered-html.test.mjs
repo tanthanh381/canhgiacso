@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { access, readFile } from "node:fs/promises";
 import test from "node:test";
+import { readAppStyles } from "./helpers/styles.mjs";
 
 const root = new URL("../", import.meta.url);
 
@@ -60,7 +61,7 @@ test("ships product metadata and social artwork", async () => {
     readFile(new URL("../supabase/schema.sql", import.meta.url), "utf8"),
     readFile(new URL("../supabase/content_roles.sql", import.meta.url), "utf8"),
     readFile(new URL("../package.json", import.meta.url), "utf8"),
-    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    readAppStyles(),
     readFile(new URL("../app/shared/ui-primitives.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/shared/browser-storage.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/domains/training/presentation.ts", import.meta.url), "utf8"),

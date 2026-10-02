@@ -1,28 +1,26 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { readAppStyles } from "./helpers/styles.mjs";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("focus ring uses tokens defined for both themes (dual outline + halo)", async () => {
-  const globals = await read("app/globals.css");
+  const globals = readAppStyles();
   const seo = await read("public/seo.css");
   assert.match(globals, /--focus-ring:\s*#[0-9a-f]{6}/i);
   assert.match(globals, /--focus-halo:\s*#[0-9a-f]{6}/i);
-  assert.match(globals, /\.app\.dark,\s*:root\[data-theme="dark"\]\s*\{[^}]*--focus-ring:/s);
+  assert.match(globals, /:root\[data-theme="dark"\]\s*\{[^}]*--focus-ring:/s);
   assert.match(globals, /:focus-visible\s*\{\s*outline:\s*3px solid var\(--focus-ring\);\s*outline-offset:\s*2px;\s*box-shadow:\s*0 0 0 7px var\(--focus-halo\)/);
   assert.match(seo, /outline:\s*3px solid var\(--seo-focus/);
   assert.match(seo, /:root\[data-theme="dark"\][^}]*--seo-focus:/s);
 });
 
 test("no CSS declares a font size below 12px", async () => {
-  const files = [
-    "app/globals.css", "app/design-system.css", "app/ux-refresh.css", "app/visual-refresh.css",
-    "app/interactive-practice-nav.css", "app/security-hardening.css", "public/seo.css", "public/seo-tools.css",
-  ];
-  for (const file of files) {
-    let css;
-    try { css = await read(file); } catch { continue; }
+  const sources = {
+    "app/styles/*.css": readAppStyles(), "public/seo.css": await read("public/seo.css"), "public/seo-tools.css": await read("public/seo-tools.css"),
+  };
+  for (const [file, css] of Object.entries(sources)) {
     for (const match of css.matchAll(/font-size:\s*(\d+(?:\.\d+)?)px/g)) {
       assert.ok(Number(match[1]) >= 12, `${file}: font-size ${match[1]}px is below 12px`);
     }
@@ -31,7 +29,7 @@ test("no CSS declares a font size below 12px", async () => {
 
 test("reduced motion is honoured by CSS, the boot loader and the about animation", async () => {
   const [globals, seo, layout, animation] = await Promise.all([
-    read("app/globals.css"), read("public/seo.css"), read("app/layout.tsx"), read("public/gioi-thieu/hoat-hinh.html"),
+    readAppStyles(), read("public/seo.css"), read("app/layout.tsx"), read("public/gioi-thieu/hoat-hinh.html"),
   ]);
   assert.match(globals, /prefers-reduced-motion:\s*reduce[\s\S]*animation:\s*none\s*!important[\s\S]*transition:\s*none\s*!important/);
   assert.match(seo, /prefers-reduced-motion:\s*reduce/);

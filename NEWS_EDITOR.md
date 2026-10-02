@@ -37,7 +37,7 @@ Chủ đề được hỗ trợ theo trường `category` sẵn có. Không thê
 - `app/admin.tsx`: tích hợp editor, lưu/xuất bản, cảnh báo chưa lưu, bắt lỗi kết nối và giới hạn dung lượng.
 - `app/data.ts`: mở rộng kiểu bài và validation tương thích dữ liệu cũ.
 - `app/page.tsx`: ảnh thumbnail, đọc bài theo slug, metadata và bảo vệ điều hướng khỏi admin.
-- `app/globals.css`: bố cục responsive, toolbar, vùng soạn, ảnh và dialog theo màu admin hiện tại.
+- `app/styles/admin.css` và `app/styles/news.css`: bố cục responsive, toolbar, vùng soạn, ảnh và dialog theo màu admin hiện tại.
 - `package.json`, `pnpm-lock.yaml`: Tiptap 3.31.3 và các extension liên quan, phiên bản cố định.
 - `vite.github-pages.config.ts`: giữ trình soạn thảo trong phần tải khi mở admin, tránh gom nhầm `@tiptap/react` vào gói React chung.
 - `tests/news-content.test.mjs`: kiểm tra dữ liệu cũ, Draft, slug, ngày, nội dung không an toàn và round trip.
@@ -66,4 +66,4 @@ Các file fixture/kiểm tra tạm không nằm trong bản giao. CI hiện có 
 - Kiểm tra mới: build vinext và build GitHub Pages đạt; 36/36 tests đạt; lint không lỗi, 8 cảnh báo ảnh như trước. TypeScript toàn dự án còn lỗi khai báo Cloudflare có sẵn, không có lỗi ở phần app.
 - Chrome với dữ liệu mẫu cục bộ: sửa bài có sẵn, tạo bài mới, slug, nhập rich text, chèn ảnh/alt/chú thích, upload PNG từ máy thành WebP cho ảnh đại diện, giờ xuất bản, preview, chuyển qua lại bài giữ dữ liệu, màn hình 390 px không tràn ngang đều đạt.
 - Chưa xác minh lưu/xuất bản với tài khoản quản trị thật trên Supabase; chưa push/deploy và không ghi dữ liệu sản xuất.
-- File sửa trong lần này: `app/news-editor.tsx`, `app/news-content.ts`, `app/news-article.tsx`, `app/data.ts`, `app/globals.css`, `tests/news-content.test.mjs`, `NEWS_EDITOR.md`.
+- File sửa trong lần này: `app/news-editor.tsx`, `app/news-content.ts`, `app/news-article.tsx`, `app/data.ts`, `app/styles/*.css`, `tests/news-content.test.mjs`, `NEWS_EDITOR.md`.
