@@ -7,6 +7,8 @@ Các giá trị Auth ở mục 1–3 cũng có trong [`supabase/config.toml`](..
 Ký hiệu: `[ ]` chưa làm, `[x]` đã làm. Hãy ghi ngày và người thực hiện cạnh từng mục khi hoàn tất.
 
 > Thứ tự thực hiện tổng thể (migration, deploy, post-deploy, các mục dưới đây) nằm trong [REMEDIATION-2026-10.md](REMEDIATION-2026-10.md), mục "Thứ tự áp dụng". **Mục 1 (Confirm email) phải làm đúng vị trí trong thứ tự đó.**
+>
+> Đợt D2 (xóa/tải dữ liệu tài khoản, quên mật khẩu, xác minh chứng nhận) thêm 3 migration `20261002130000`, `20261002131000`, `20261002132000` (áp dụng sau `20261002104000`, theo đúng thứ tự tên tệp) và cần các thiết lập ở **mục 3 (Redirect URLs cho đặt lại mật khẩu), mục 6 (mẫu thư Reset Password) và mục 15 (kiểm thử trên staging)**.
 
 ---
 
@@ -36,6 +38,7 @@ Ký hiệu: `[ ]` chưa làm, `[x]` đã làm. Hãy ghi ngày và người thự
   - `https://canhgiacso.com/**`
   - `https://www.canhgiacso.com/**`
   - `https://tanthanh381.github.io/chongluadao/**` (tạm giữ giai đoạn chuyển miền để liên kết xác nhận cũ còn dùng được; **gỡ bỏ** khi không còn thư xác nhận cũ chưa dùng)
+- **Đặt lại mật khẩu (D2):** giao diện gửi `redirectTo = https://canhgiacso.com/` (gốc của trang; hộp thoại "Đặt mật khẩu mới" mở khi người dùng quay lại). Địa chỉ này phải khớp một mục trong Redirect URLs (mẫu `https://canhgiacso.com/**` ở trên đã bao phủ). Nếu không khớp, Supabase thay bằng Site URL (vẫn an toàn, nhưng người dùng về đúng trang chủ mà không có hash khôi phục khi Site URL khác). Khi chạy thử cục bộ/staging, thêm riêng địa chỉ thử (ví dụ `http://localhost:5173/**`) **chỉ trên dự án thử**, không thêm vào production.
 - Vì sao: Site URL sai làm liên kết trong thư xác nhận trỏ nhầm miền; redirect rộng (`**` trên miền không thuộc quyền kiểm soát) mở đường cho chuyển hướng độc hại.
 - Kiểm tra: gửi thư xác nhận thử và mở liên kết, trang đích phải là `https://canhgiacso.com/`.
 
@@ -58,6 +61,16 @@ Ký hiệu: `[ ]` chưa làm, `[x]` đã làm. Hãy ghi ngày và người thự
 - [ ] **Dùng SMTP riêng (nhà cung cấp thư giao dịch) thay vì SMTP tích hợp sẵn.** SMTP tích hợp bị giới hạn rất thấp và không dành cho production; khi bật Confirm email, thư xác nhận có thể bị trễ/không gửi được.
 - [ ] Cấu hình SPF, DKIM, DMARC cho miền gửi thư; đặt người gửi dễ nhận biết (ví dụ `no-reply@canhgiacso.com`).
 - [ ] Kiểm tra mẫu thư (Authentication → Email Templates) có tiếng Việt, liên kết dùng `{{ .ConfirmationURL }}` và không lộ thông tin nhạy cảm.
+- [ ] **Mẫu "Reset Password" (D2):** đặt tiêu đề "Đặt lại mật khẩu Cảnh Giác Số" và nội dung tiếng Việt dưới đây (giữ nguyên `{{ .ConfirmationURL }}`; không thêm theo dõi mở thư/liên kết; không đưa mật khẩu hay mã vào thư):
+  ```html
+  <h2>Đặt lại mật khẩu Cảnh Giác Số</h2>
+  <p>Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản dùng địa chỉ email này.</p>
+  <p><a href="{{ .ConfirmationURL }}">Đặt mật khẩu mới</a></p>
+  <p>Liên kết chỉ dùng được một lần và sẽ hết hạn. Nếu bạn không yêu cầu, hãy bỏ qua thư này: mật khẩu hiện tại vẫn giữ nguyên.</p>
+  <p>Cảnh Giác Số sẽ không bao giờ hỏi mật khẩu, mã OTP hay thông tin thẻ qua email.</p>
+  ```
+  Thời hạn liên kết lấy từ `Email OTP Expiration` (Authentication → Sign In / Providers → Email; `config.toml`: `otp_expiry = 3600`, tức 1 giờ). Đặt ngắn nhất có thể chấp nhận được; không đặt lâu hơn 1 giờ.
+- [ ] Mẫu "Confirm signup" cũng cần tiếng Việt và cùng nguyên tắc ở trên (xem mục 1).
 - Không đưa mật khẩu SMTP vào repo.
 
 ## 7. Authentication → Sessions
@@ -111,5 +124,21 @@ Ký hiệu: `[ ]` chưa làm, `[x]` đã làm. Hãy ghi ngày và người thự
 
 ## 14. Chạy lại bộ kiểm tra sau khi cấu hình
 
-- [ ] Dashboard → Advisors → Security Advisor: chạy lại, đối chiếu cảnh báo còn lại (ví dụ Leaked Password Protection trên gói Free, hàm `anon` có thể thực thi theo thiết kế: `get_public_site_content`, `evaluate_guest_choice`, `record_web_analytics_event_v4`).
+- [ ] Dashboard → Advisors → Security Advisor: chạy lại, đối chiếu cảnh báo còn lại (ví dụ Leaked Password Protection trên gói Free, hàm `anon` có thể thực thi theo thiết kế: `get_public_site_content`, `evaluate_guest_choice`, `record_web_analytics_event_v4`, `verify_training_certificate`).
 - [ ] Chạy `supabase/verification/production-checks.sql` và lưu kết quả cùng ngày.
+
+## 15. Kiểm thử đợt D2 trên staging (trước khi mở cho người dùng thật)
+
+Các thiết lập dưới đây không thể kiểm bằng mã; hãy làm trên một dự án staging có SMTP thật và cùng cấu hình Auth với production.
+
+- [ ] Redirect URLs (mục 3) và mẫu thư Reset Password (mục 6) đã đặt; gửi "Quên mật khẩu" cho một email thật và một email không tồn tại: giao diện hiện **cùng** thông báo; chỉ email thật nhận thư.
+- [ ] Mở liên kết trong thư: về `https://canhgiacso.com/` (hoặc miền staging), hộp thoại "Đặt mật khẩu mới" hiện, thanh địa chỉ không còn `#access_token=…`. Đổi mật khẩu rồi đăng nhập lại; thiết bị/trình duyệt khác phải bị đăng xuất.
+- [ ] Mở lại cùng liên kết (đã dùng) hoặc để quá hạn: giao diện báo "Không mở được liên kết" và đề nghị nhận liên kết mới.
+- [ ] Tài khoản có TOTP đã xác minh: đặt lại mật khẩu yêu cầu mã 6 số (Auth trả `insufficient_aal` rồi giao diện hỏi mã).
+- [ ] **Secure password change** (mục 1) BẬT: phiên khôi phục vừa tạo vẫn đổi được mật khẩu; nếu gặp `reauthentication_needed`, ghi nhận và báo lại.
+- [ ] Xóa tài khoản thường: nhập đúng mật khẩu và tên đăng nhập, sau đó kiểm tra trong SQL Editor rằng `auth.users`, `public.profiles`, `public.user_progress`, `public.test_attempts`, `private.training_certificates` không còn dòng của tài khoản và `private.security_audit_log` có đúng một dòng `ACCOUNT_DELETED` **không** chứa email/tên/IP.
+- [ ] Xóa tài khoản Quản trị/Biên tập: bị chặn (CG005) và không xóa gì; sau khi hạ quyền thì xóa được. Quản trị viên cuối cùng bị chặn với thông báo riêng.
+- [ ] Chạy truy vấn khóa ngoại ở REMEDIATION-2026-10 mục 7.4(8); không có bảng nào chặn xóa `auth.users`.
+- [ ] Xác minh chứng nhận: mã thật, mã sai, mã khách; lượt tra cứu thứ 31 trong 5 phút từ cùng IP bị từ chối (429) và trang báo "Tra cứu quá nhiều lần". Kiểm tra `select count(*) from private.api_rate_limits where route = 'rpc/verify_training_certificate'` tăng (nếu luôn bằng 0, xem mục 9 về header IP).
+- [ ] Thời hạn sao lưu: ghi lại thời hạn sao lưu thực tế của dự án để cập nhật trang Quyền riêng tư nếu cần (dữ liệu đã xóa có thể còn trong bản sao lưu đến khi hết hạn).
+- [ ] Chạy lại `supabase/verification/production-checks.sql`: các dòng 21–25 phải `TỐT`.
