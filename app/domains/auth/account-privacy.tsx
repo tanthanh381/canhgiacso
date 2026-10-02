@@ -1,6 +1,5 @@
 "use client";
 
-import "../../account-privacy.css";
 import { useState, type FormEvent } from "react";
 import { downloadJsonFile } from "../../shared/browser-download";
 import { Icon } from "../../shared/icons";

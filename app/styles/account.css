@@ -22,12 +22,12 @@
 }
 
 .privacy-danger-link {
-  color: var(--red);
+  color: var(--brand);
 }
 
 .auth-forgot-link:focus-visible,
 .privacy-danger-link:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--red) 55%, transparent);
+  outline: 3px solid color-mix(in srgb, var(--brand) 55%, transparent);
   outline-offset: 2px;
   border-radius: 6px;
 }
@@ -69,9 +69,9 @@
   gap: 10px;
   margin: 14px 0 16px;
   padding: 14px;
-  border: 1px solid color-mix(in srgb, var(--red) 35%, var(--line));
+  border: 1px solid color-mix(in srgb, var(--brand) 35%, var(--line));
   border-radius: 10px;
-  background: color-mix(in srgb, var(--red) 6%, var(--surface));
+  background: color-mix(in srgb, var(--brand) 6%, var(--surface));
 }
 
 .privacy-consequences strong {
@@ -82,7 +82,8 @@
   display: grid;
   gap: 6px;
   margin: 0;
-  padding-left: 18px;
+  padding-left: 20px;
+  list-style: disc;
   color: var(--ink);
   font-size: 13px;
   line-height: 1.5;
@@ -123,4 +124,10 @@
 .password-recovery-modal .auth-form,
 .password-recovery-modal .auth-intro {
   margin-top: 0;
+}
+
+/* Danh sách hậu quả trong hộp thoại xóa là danh sách gạch đầu dòng thường, không phải thẻ bước như .modal ol. */
+.privacy-consequences li {
+  padding: 0;
+  background: none;
 }

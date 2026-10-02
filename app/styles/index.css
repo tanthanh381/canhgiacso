@@ -16,6 +16,7 @@
 @import "./shell.css" layer(components);
 @import "./mobile-nav.css" layer(components);
 @import "./dialogs.css" layer(components);
+@import "./account.css" layer(components);
 @import "./game.css" layer(components);
 @import "./knowledge.css" layer(components);
 @import "./news.css" layer(components);

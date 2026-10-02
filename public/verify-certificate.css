@@ -26,7 +26,7 @@
   width: 100%;
   min-height: 48px;
   padding: 0 14px;
-  border: 1px solid var(--seo-line);
+  border: 1px solid var(--seo-control-line);
   border-radius: 10px;
   background: var(--seo-soft);
   color: var(--seo-ink);
@@ -48,7 +48,7 @@
   padding: 0 26px;
   border: 0;
   border-radius: 10px;
-  background: var(--seo-accent-dark);
+  background: var(--seo-brand-fill);
   color: #ffffff;
   font: inherit;
   font-weight: 800;

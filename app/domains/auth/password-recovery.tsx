@@ -1,6 +1,5 @@
 "use client";
 
-import "../../account-privacy.css";
 import { useEffect, useState, type FormEvent } from "react";
 import { passwordUpdateErrorMessage } from "../../auth-error";
 import { Icon } from "../../shared/icons";

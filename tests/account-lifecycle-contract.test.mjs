@@ -153,14 +153,16 @@ test("auth UI: forgot password, recovery dialog, export and deletion are wired t
   assert.match(model, /PASSWORD_PATTERN\.test\(password\)/);
 });
 
-test("D2 styles live in their own file and the shared UI files owned by the parallel stream are untouched", async () => {
-  const css = await read("app/account-privacy.css");
+test("account/privacy styles live in the cascade-layer stylesheet and only use defined tokens", async () => {
+  const [css, index, tokens] = await Promise.all([read("app/styles/account.css"), read("app/styles/index.css"), read("app/styles/tokens.css")]);
   assert.match(css, /\.privacy-panel/);
   assert.match(css, /\.auth-forgot-link/);
+  assert.match(index, /@import "\.\/account\.css" layer\(components\);/);
+  for (const name of new Set([...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((match) => match[1]))) {
+    assert.match(tokens, new RegExp(`${name}\\s*:`), `${name} must be defined in app/styles/tokens.css`);
+  }
   const [privacy, recovery] = await Promise.all([read("app/domains/auth/account-privacy.tsx"), read("app/domains/auth/password-recovery.tsx")]);
-  assert.match(privacy, /import "\.\.\/\.\.\/account-privacy\.css"/);
-  assert.match(recovery, /import "\.\.\/\.\.\/account-privacy\.css"/);
-  assert.doesNotMatch(await read("github-pages/main.tsx"), /account-privacy/);
+  assert.doesNotMatch(privacy + recovery, /\.css"/, "styles come from the shared layered entry, not per-component imports");
 });
 
 test("runbook and checklist document apply order, Redirect URLs, e-mail template and manual staging checks", async () => {

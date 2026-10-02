@@ -59,7 +59,7 @@
   gap: 10px;
 }
 
-.modal li {
+.modal ol > li {
   display: grid;
   grid-template-columns: 42px 1fr;
   gap: 12px;
@@ -68,11 +68,11 @@
   padding: 14px;
 }
 
-.modal li strong {
+.modal ol > li strong {
   font-size: 12px;
 }
 
-.modal li p {
+.modal ol > li p {
   color: var(--muted);
   font-size: 12px;
   line-height: 1.5;
@@ -348,7 +348,7 @@
   margin-top: 22px;
 }
 
-.modal li b {
+.modal ol > li b {
   color: var(--brand);
   font: 20px Georgia, serif;
   font-family: "Segoe UI", "Noto Sans", Arial, sans-serif;
