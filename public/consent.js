@@ -22,7 +22,6 @@
   const GA_INIT_URL = '/google-analytics-init.js';
   const TRACKER_URL = '/web-analytics.js';
   const STYLESHEET_URL = '/consent.css';
-  const PRIVACY_URL = '/quyen-rieng-tu/';
   const COOKIE_ANCHOR_URL = '/quyen-rieng-tu/#cookie';
   const THEME_KEY = 'khien-so-theme';
   const ANALYTICS_STORAGE_KEYS = ['canhgiacso-analytics-visitor-v1', 'canhgiacso-analytics-session-v2'];

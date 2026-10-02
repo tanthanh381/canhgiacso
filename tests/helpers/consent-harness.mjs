@@ -29,8 +29,8 @@ export async function loadPlaywright() {
   for (const candidate of candidates) {
     try {
       const specifier = candidate.startsWith("/") ? pathToFileURL(candidate).href : candidate;
-      const module = await import(specifier);
-      const chromium = module.chromium ?? module.default?.chromium;
+      const loaded = await import(specifier);
+      const chromium = loaded.chromium ?? loaded.default?.chromium;
       if (chromium) return chromium;
     } catch {
       // thử ứng viên tiếp theo

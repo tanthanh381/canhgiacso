@@ -1,0 +1,18 @@
+# Cloudflare Worker đặt header bảo mật cho canhgiacso.com (GitHub Pages không cho đặt header).
+# Triển khai: xem README.md trong thư mục này.
+name = "canhgiacso-security-headers"
+main = "worker.js"
+compatibility_date = "2026-09-01"
+workers_dev = false
+
+# Chế độ Route (khuyến nghị): Worker chạy trên route của chính tên miền, DNS đã proxy tới GitHub Pages.
+# Bỏ chú thích và sửa zone_name theo tài khoản Cloudflare của chủ dự án.
+# routes = [
+#   { pattern = "canhgiacso.com/*", zone_name = "canhgiacso.com" },
+#   { pattern = "www.canhgiacso.com/*", zone_name = "canhgiacso.com" },
+# ]
+
+[vars]
+# ORIGIN rỗng = chế độ Route (fetch(request) tới origin trong DNS, giữ nguyên Host).
+# Chỉ đặt ORIGIN (ví dụ "https://tanthanh381.github.io") khi chạy ở hostname khác, như bản thử trên workers.dev.
+ORIGIN = ""
