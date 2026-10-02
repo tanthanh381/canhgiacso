@@ -224,6 +224,9 @@ function normalizeArticle(html, slug) {
   html = html.replace(/(<meta property="article:modified_time" content=")[^"]+("\s*\/?>)/g, `$1${UPDATED_ISO}$2`);
   html = html.replace(/("dateModified"\s*:\s*")[^"]+("\s*[},])/g, `$1${UPDATED_ISO}$2`);
   html = html.replace(/<p class="seo-safety"><a href="\/phuong-phap-kiem-chung\/">Cách nội dung được kiểm chứng<\/a> · Rà soát \d{2}\/\d{2}\/\d{4}\.<\/p>/g, "");
+  // Removed blocks leave their surrounding newlines behind; collapse blank-line
+  // runs so repeated builds reach a fixed point instead of growing whitespace.
+  html = html.replace(/(?:[ \t]*\n){3,}/g, "\n\n");
   html = html.replace(/<\/div><\/footer>/, `<p class="seo-safety"><a href="/phuong-phap-kiem-chung/">Cách nội dung được kiểm chứng</a> · Rà soát ${UPDATED_DISPLAY}.</p></div></footer>`);
   return html;
 }

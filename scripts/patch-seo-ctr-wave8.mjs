@@ -29,6 +29,32 @@ function replaceTag(html, pattern, replacement) {
   return pattern.test(html) ? html.replace(pattern, replacement) : html;
 }
 
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Idempotent anchor rewrite. When `after` extends `before` (for example
+ * "Kiểm tra số điện thoại lừa đảo" -> "Kiểm tra số điện thoại lừa đảo: 7 cách..."),
+ * a plain String.replace would append the suffix again on every run. This helper
+ * only rewrites occurrences that are not already followed by the suffix and
+ * collapses any repeats left behind by earlier runs.
+ */
+function rewriteAnchor(html, before, after) {
+  const index = html.indexOf(before);
+  if (index === -1) return html;
+  if (!after.startsWith(before)) return html.replace(before, after);
+  const suffix = after.slice(before.length);
+  const tail = index + before.length;
+  // First occurrence only (same scope as the original String.replace), skipped
+  // when it already carries the suffix.
+  const next = html.startsWith(suffix, tail)
+    ? html
+    : `${html.slice(0, index)}${after}${html.slice(tail)}`;
+  const repeated = new RegExp(`(?:${escapeRegExp(suffix)}){2,}`, "g");
+  return next.replace(repeated, suffix);
+}
+
 function syncHead(html, config) {
   html = replaceTag(html, /<title>[\s\S]*?<\/title>/i, `<title>${config.title}</title>`);
   html = replaceTag(
@@ -234,7 +260,7 @@ if (await exists(HOME)) {
     ["Bị lừa chuyển tiền phải làm gì ngay?", "Bị lừa chuyển tiền: 5 bước cần làm ngay"],
     ["Kiểm tra số điện thoại lừa đảo", "Kiểm tra số điện thoại lừa đảo: 7 cách tra cứu số lạ"],
   ];
-  for (const [before, after] of anchors) home = home.replace(before, after);
+  for (const [before, after] of anchors) home = rewriteAnchor(home, before, after);
   if (!home.includes("/kien-thuc/lua-dao-cong-tac-vien-viec-nhe-luong-cao/")) {
     home = home.replace(
       '<li><a href="/kien-thuc/deepfake-gia-giong-nguoi-than/">Deepfake giả giọng người thân</a></li>',
