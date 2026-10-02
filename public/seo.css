@@ -949,3 +949,8 @@ li > a:only-child {
 :root[data-theme="dark"] .about-hero-cta { border-color: #cc1a33; background: #cc1a33; color: #ffffff; }
 :root[data-theme="dark"] .about-hero-cta:hover { background: #b1122f; border-color: #b1122f; }
 :root[data-theme="dark"] .scam-tool-panel button { background: #cc1a33; color: #ffffff; }
+
+/* Mobile header links scroll sideways: leave room so the focus ring is not clipped. */
+@media (max-width: 760px) {
+  .seo-nav > .seo-nav-links { width: auto; padding: 7px; margin: -7px; }
+}

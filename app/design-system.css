@@ -563,3 +563,23 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]) { min-heig
 /* Locked-group rows: a little more room for "Trung bình · 8 tình huống" in the 260px sidebar. */
 .scenario-lock-toggle { grid-template-columns: 36px minmax(0, 1fr) 18px; gap: 8px; padding: 8px; }
 .scenario-lock-copy strong { letter-spacing: -.005em; }
+
+/* Locked achievements: dim the artwork, never the text (an opacity on the card pushed labels under 4.5:1). */
+.achievement-grid article { opacity: 1; }
+.achievement-grid article:not(.unlocked) .achievement-icon,
+.achievement-grid article:not(.unlocked) .achievement-progress i { opacity: .72; }
+
+/* Dark theme: filled chips and toolbars keep AA contrast (generic brand tint is too light for white text). */
+.app.dark .news-filters button.active,
+:root[data-theme="dark"] .news-filters button.active { border-color: #cc1a33; background: #cc1a33; color: #ffffff; }
+.app.dark .phishing-quiz-toolbar,
+:root[data-theme="dark"] .phishing-quiz-toolbar { background: var(--surface); }
+
+/* Focus rings need ~7px of room: scroll containers pad their content and pull the padding back with a negative margin,
+   so layout is unchanged but outlines/halos on the first, last and edge items are no longer clipped. */
+.scenario-list { padding: 7px 10px 7px 7px; margin: -7px -7px -7px -7px; }
+.news-filters { padding: 7px; margin: -7px; }
+@media (max-width: 760px) {
+  .ux-banner-close { right: 8px; }
+  .security-awareness-banner { padding-right: 60px; }
+}
