@@ -49,8 +49,6 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build:pages
-      - name: Install Playwright runtime
-        run: pnpm add -D --ignore-scripts @playwright/test@1.55.0
       - name: Install selected browser
         run: pnpm exec playwright install ${{ matrix.browser }}
       - name: Run OS/browser smoke

@@ -14,6 +14,7 @@
     "test": "pnpm run build && node --test tests/*.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "seo:audit": "node scripts/seo-audit.mjs docs",
+    "test:e2e": "pnpm run build:pages && playwright test --config=playwright.platform.config.ts",
     "content:compile": "node scripts/content-compiler.mjs",
     "health:production": "node scripts/production-health.mjs"
   },
@@ -31,6 +32,7 @@
     "@cloudflare/vite-plugin": "1.37.1",
     "@eslint/js": "9.39.4",
     "@next/eslint-plugin-next": "16.2.6",
+    "@playwright/test": "1.55.0",
     "@tailwindcss/postcss": "4.2.1",
     "@types/node": "22.19.19",
     "@types/react": "19.2.14",

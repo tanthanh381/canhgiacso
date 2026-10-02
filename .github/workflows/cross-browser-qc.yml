@@ -33,8 +33,6 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build:pages
-      - name: Install Playwright test runtime
-        run: pnpm add -D --ignore-scripts @playwright/test@1.55.0
       - name: Install browser engines
         run: pnpm exec playwright install --with-deps chromium firefox webkit
       - name: Start static server
