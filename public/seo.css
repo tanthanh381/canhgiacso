@@ -52,9 +52,11 @@ body {
 a { color: var(--seo-link); text-underline-offset: 3px; }
 a:hover { text-decoration-thickness: 2px; }
 :focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--seo-mint) 78%, #ffffff);
-  outline-offset: 3px;
+  outline: 3px solid var(--seo-focus, #0b4a7d);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 7px var(--seo-focus-halo, #ffffff) !important;
 }
+@media (forced-colors: active) { :focus-visible { outline-color: Highlight; box-shadow: none !important; } }
 
 .seo-header {
   position: sticky;
@@ -120,7 +122,7 @@ a:hover { text-decoration-thickness: 2px; }
   display: block;
   margin-top: 3px;
   color: var(--seo-accent);
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: .11em;
 }
@@ -166,7 +168,7 @@ a:hover { text-decoration-thickness: 2px; }
   gap: 8px;
   margin-bottom: 12px;
   color: var(--seo-accent);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 850;
   letter-spacing: .12em;
   text-transform: uppercase;
@@ -255,7 +257,7 @@ a:hover { text-decoration-thickness: 2px; }
   align-items: center;
   gap: 7px;
   color: var(--seo-accent);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 850;
   letter-spacing: .08em;
   line-height: 1.35;
@@ -461,7 +463,7 @@ a:hover { text-decoration-thickness: 2px; }
   width: 100%;
   min-height: 44px;
   padding: 10px 12px;
-  border: 1px solid var(--seo-line);
+  border: 1px solid var(--seo-control-line);
   border-radius: 10px;
   background: var(--seo-bg);
   color: var(--seo-ink);
@@ -673,7 +675,7 @@ a:hover { text-decoration-thickness: 2px; }
   --seo-brand-strong: #7d0b20;
   --seo-ink: #17212b;
   --seo-body: #344054;
-  --seo-muted: #667085;
+  --seo-muted: #5d6679;
   --seo-bg: #f5f7f9;
   --seo-surface: #ffffff;
   --seo-soft: #f8fafc;
@@ -684,6 +686,10 @@ a:hover { text-decoration-thickness: 2px; }
   --seo-mint: #f3c400;
   --seo-link: #0b5684;
   --seo-shadow: 0 8px 24px rgba(23, 33, 43, .06);
+  /* Accessibility tokens (WCAG 2.2 AA): focus ring + halo, and the boundary colour of form controls. */
+  --seo-focus: #0b4a7d;
+  --seo-focus-halo: #ffffff;
+  --seo-control-line: #75808e;
 }
 
 :root[data-theme="dark"] {
@@ -700,6 +706,11 @@ a:hover { text-decoration-thickness: 2px; }
   --seo-mint: #ffe15a;
   --seo-link: #8ec5e5;
   --seo-shadow: 0 12px 30px rgba(0, 0, 0, .2);
+  --seo-focus: #ffe15a;
+  --seo-focus-halo: #0d1620;
+  --seo-control-line: #74859a;
+  --seo-brand: #ff7184;
+  --seo-brand-strong: #e54c62;
 }
 
 .seo-header { background: color-mix(in srgb, var(--seo-surface) 96%, transparent); }
@@ -845,18 +856,101 @@ a:hover { text-decoration-thickness: 2px; }
 }
 .about-hero-cta:hover { background: color-mix(in srgb, var(--seo-accent-dark) 86%, #000000); }
 .about-hero-toggle {
-  border: 1px solid var(--seo-line);
+  border: 1px solid var(--seo-control-line);
   background: var(--seo-surface);
   color: var(--seo-ink);
 }
 .about-hero-toggle:hover { border-color: var(--seo-accent); }
 .about-hero-actions a:focus-visible,
 .about-hero-actions button:focus-visible {
-  outline: 3px solid var(--seo-mint);
+  outline: 3px solid var(--seo-focus);
   outline-offset: 2px;
 }
 .about-hero-actions small {
   flex: 1 1 220px;
   color: var(--seo-muted);
   font-size: 14px;
+}
+
+/* Target size (WCAG 2.2 SC 2.5.8): standalone links are >= 24px tall on desktop, 44px on touch / narrow screens.
+   Links inside running text keep their natural size (inline exception). */
+.seo-breadcrumb a,
+.seo-footer-links a,
+.seo-resources a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+}
+li > a:only-child {
+  display: inline-block;
+  padding-block: 2px;
+}
+.seo-nav-links a,
+.seo-brand { min-height: 44px; }
+.scam-tool-panel label:has(input[type="checkbox"]),
+.scam-tool-panel label:has(input[type="radio"]) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+}
+.scam-tool-panel input[type="checkbox"],
+.scam-tool-panel input[type="radio"] {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  accent-color: var(--seo-accent-dark);
+}
+@media (pointer: coarse), (max-width: 760px) {
+  .seo-breadcrumb a,
+  .seo-footer-links a,
+  .seo-resources a { min-height: 44px; }
+  li > a:only-child { padding-block: 11px; }
+  .seo-footer-links { gap: 0 8px; }
+}
+
+/* Reduced motion: no animation, no transition, no smooth scroll, no hover lift. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  .seo-card:hover,
+  .seo-intent-grid a:hover,
+  .seo-intent-grid a:focus-visible { transform: none !important; }
+}
+
+/* Theme toggle (inserted by /theme-init.js into .seo-nav): 44px target, ring comes from the global :focus-visible rule. */
+.seo-theme-toggle {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--seo-control-line);
+  border-radius: 50%;
+  background: var(--seo-surface);
+  color: var(--seo-ink);
+  cursor: pointer;
+}
+.seo-theme-toggle:hover { border-color: var(--seo-ink); }
+.seo-theme-toggle .seo-theme-sun { display: none; }
+:root[data-theme="dark"] .seo-theme-toggle .seo-theme-moon { display: none; }
+:root[data-theme="dark"] .seo-theme-toggle .seo-theme-sun { display: block; }
+.seo-nav-links { margin-left: auto; }
+@media (max-width: 760px) {
+  .seo-nav { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px 12px; }
+  .seo-nav > .seo-brand { grid-column: 1; grid-row: 1; justify-self: start; }
+  .seo-nav > .seo-theme-toggle { grid-column: 2; grid-row: 1; }
+  .seo-nav > .seo-nav-links { grid-column: 1 / -1; grid-row: 2; margin-left: 0; }
+}
+
+/* Dark theme: the about-page CTA keeps white text at >= 4.5:1 (the generic accent is a light tint in dark mode). */
+:root[data-theme="dark"] .about-hero-cta { border-color: #cc1a33; background: #cc1a33; color: #ffffff; }
+:root[data-theme="dark"] .about-hero-cta:hover { background: #b1122f; border-color: #b1122f; }
+:root[data-theme="dark"] .scam-tool-panel button { background: #cc1a33; color: #ffffff; }
+
+/* Mobile header links scroll sideways: leave room so the focus ring is not clipped. */
+@media (max-width: 760px) {
+  .seo-nav > .seo-nav-links { width: auto; padding: 7px; margin: -7px; }
 }

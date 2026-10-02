@@ -1,4 +1,5 @@
 import type { SiteContent } from "../../data";
+import { GlyphIcon } from "../../shared/icons";
 import { BadgeIcon } from "../../shared/ui-primitives";
 import { securityChecklistGroups, securityChecklistItemIds } from "./checklist";
 
@@ -31,7 +32,7 @@ export function KnowledgeView({
       <div className="knowledge-grid">
         {knowledgeCards.map((card, index) => (
           <article key={card.title}>
-            <span>{String(index + 1).padStart(2, "0")}</span>
+            <span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
             <BadgeIcon>{card.icon}</BadgeIcon>
             <h2>{card.title}</h2>
             <p>{card.text}</p>
@@ -49,7 +50,7 @@ export function KnowledgeView({
           <div className="checklist-overall" aria-label={`Đã hoàn thành ${checklistCompleted} trên ${checklistTotal} mục`}>
             <strong>{checklistProgress}%</strong>
             <span>{checklistCompleted}/{checklistTotal} hoàn thành</span>
-            <div className="checklist-progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={checklistProgress}>
+            <div className="checklist-progress" role="progressbar" aria-label="Tiến độ danh sách kiểm tra" aria-valuemin={0} aria-valuemax={100} aria-valuenow={checklistProgress}>
               <i style={{ width: `${checklistProgress}%` }} />
             </div>
           </div>
@@ -61,7 +62,7 @@ export function KnowledgeView({
             return (
               <details className="checklist-group" key={group.id}>
                 <summary>
-                  <span className="checklist-icon" aria-hidden="true">{group.icon}</span>
+                  <span className="checklist-icon" aria-hidden="true"><GlyphIcon glyph={group.icon} size={22} /></span>
                   <span className="checklist-group-copy"><strong>{group.title}</strong><small>{group.description}</small></span>
                   <span className="checklist-group-progress"><b>{progress}%</b><small>{completed}/{group.items.length} mục</small></span>
                 </summary>

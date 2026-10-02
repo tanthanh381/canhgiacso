@@ -28,7 +28,8 @@ test("server renders the Cảnh Giác Số experience", async () => {
   assert.match(html, />Thử thách<\/button>/);
   assert.match(html, /Đăng nhập/);
   assert.match(html, /Đăng ký/);
-  assert.match(html, /Đang tham gia với tư cách khách/);
+  // First visit must not be blocked by a dialog: the guest notice is a non-blocking region rendered after hydration.
+  assert.doesNotMatch(html, /guest-limit-modal|role="dialog"/);
   assert.doesNotMatch(html, />Dashboard</);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/i);
 });
@@ -89,7 +90,8 @@ test("ships product metadata and social artwork", async () => {
   assert.match(appSource, /supabase\.auth\.signOut\(\{ scope: "local" \}\)/);
   assert.match(page, /continueAsGuest/);
   assert.match(appSource, /Tiếp tục với tư cách khách/);
-  assert.match(page, /guestLimitOpen, setGuestLimitOpen\] = useState\(true\)/);
+  assert.match(page, /guestLimitOpen, setGuestLimitOpen\] = useState\(false\)/);
+  assert.match(page, /<GuestNotice/);
   assert.match(appSource, /guest-badge-button/);
   assert.match(appSource, /Bạn đang sử dụng với tính năng giới hạn/);
   assert.match(appSource, /Đồng bộ tiến trình, lưu lịch sử lượt chơi/);
@@ -112,7 +114,7 @@ test("ships product metadata and social artwork", async () => {
   assert.match(appSource, /Phân loại sử dụng nội bộ/);
   assert.match(page, /156 hoặc 5656/);
   assert.match(admin, /Kiểm soát trước khi xuất bản/);
-  assert.match(data, /Website được quản lý và vận hành bởi: IT Security Team - HDBank/);
+  assert.match(data, /Website được quản lý và vận hành bởi IT Security Team - HDBank/);
   assert.match(data, /nâng cao nhận thức cộng đồng về phòng chống tội phạm lừa đảo trực tuyến/);
   assert.match(appSource, /get_public_site_content/);
   assert.match(page, /#\/admin/);
@@ -161,6 +163,6 @@ test("ships product metadata and social artwork", async () => {
   assert.doesNotMatch(styles, /khien-logo-shield|khien-logo-signal/);
   assert.doesNotMatch(page, /hdbank-logo\.png|alt="HDBank"|className="hdbank-logo"/);
   assert.match(styles, /\.app \{[^}]*color: var\(--ink\)/);
-  assert.match(styles, /\.app\.dark \{[^}]*color-scheme: dark/);
+  assert.match(styles, /\.app\.dark,\s*:root\[data-theme="dark"\] \{[^}]*color-scheme: dark/);
   await assert.rejects(access(new URL("../app/_sites-preview", root)));
 });

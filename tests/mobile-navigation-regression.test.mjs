@@ -74,5 +74,5 @@ test("small mobile screens retain readable labels and safe touch targets", () =>
   assert.match(visualCss, /\.ux-bottom-nav button\s*\{\s*min-height:\s*48px;/);
   assert.match(uxCss, /\.ux-utility-popover-mobile button\s*\{[\s\S]*?min-height:\s*44px;/);
   assert.match(uxCss, /@media \(max-width:\s*560px\)[\s\S]*?\.product-lockup strong\s*\{\s*display:\s*none;/);
-  assert.match(visualCss, /@media \(max-width:\s*560px\)[\s\S]*?\.ux-bottom-nav small\s*\{\s*font-size:\s*9px;/);
+  assert.match(visualCss, /@media \(max-width:\s*560px\)[\s\S]*?\.ux-bottom-nav small\s*\{\s*font-size:\s*12px;/);
 });

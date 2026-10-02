@@ -182,6 +182,10 @@ const bootStyles = `
     pointer-events: none;
   }
   @keyframes refresh-loader-spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    #refresh-loader { transition: none; }
+    #refresh-loader-mark { animation: none; }
+  }
   @media (prefers-color-scheme: dark) {
     #refresh-loader { background: #0b1220; color: #f8fafc; }
     #refresh-loader-mark { border-color: rgba(248, 250, 252, 0.2); border-top-color: #f8fafc; }

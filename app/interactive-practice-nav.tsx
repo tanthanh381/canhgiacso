@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { Icon } from "./shared/icons";
 
 function findPracticeButton() {
   return Array.from(document.querySelectorAll<HTMLButtonElement>(".topbar nav button"))
@@ -51,7 +52,7 @@ export function InteractivePracticeNav() {
       aria-label="Thực hành tương tác"
       onClick={() => findPracticeButton()?.click()}
     >
-      <span aria-hidden="true">▶</span>
+      <span aria-hidden="true"><Icon name="play" size={22} /></span>
       <small>Thực hành</small>
     </button>,
     target,

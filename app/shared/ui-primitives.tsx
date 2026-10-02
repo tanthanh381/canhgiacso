@@ -1,7 +1,13 @@
 import { useEffect, useRef } from "react";
+import { GlyphIcon, Icon, type IconName } from "./icons";
 
-export function BadgeIcon({ children }: { children: React.ReactNode }) {
-  return <span className="badge-icon" aria-hidden="true">{children}</span>;
+/** Decorative badge. Text children (content glyphs from data files) are drawn as inline SVG, never as font glyphs. */
+export function BadgeIcon({ children, name }: { children?: React.ReactNode; name?: IconName }) {
+  return (
+    <span className="badge-icon" aria-hidden="true">
+      {name ? <Icon name={name} size={22} /> : typeof children === "string" ? <GlyphIcon glyph={children} size={22} /> : children}
+    </span>
+  );
 }
 
 export function BrandMark() {
@@ -10,7 +16,8 @@ export function BrandMark() {
 
 export function FooterNotice({ notice }: { notice: string }) {
   const match = notice.match(/^\*\*(.+?)\*\*\s*([\s\S]*)$/);
-  const heading = match?.[1];
+  // Published copy may still carry the old "bởi:" wording; the brand line has no colon.
+  const heading = match?.[1]?.replace(/vận hành bởi:\s*/i, "vận hành bởi ");
   const detail = match?.[2] ?? notice;
   const lines = detail.split(/\n+/).map((line) => line.trim()).filter(Boolean);
   return (
