@@ -232,9 +232,15 @@ textarea,
   font-variation-settings: inherit; /* 1 */
   letter-spacing: inherit; /* 1 */
   color: inherit; /* 1 */
-  border-radius: 0; /* 2 */
   background-color: transparent; /* 3 */
   opacity: 1; /* 4 */
+}
+
+/* 2. Remove border radius (inputs, selects and text areas get the app radius from base.css). */
+button,
+optgroup,
+::file-selector-button {
+  border-radius: 0;
 }
 
 /*
