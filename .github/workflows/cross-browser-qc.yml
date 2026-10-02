@@ -48,6 +48,8 @@ jobs:
         run: pnpm exec playwright test --config=playwright.qc.config.ts
       - name: Upload QC artifacts on failure
         if: failure()
+        # TODO: pin to a commit SHA like every other action here (the SHA could
+        # not be verified offline). Dependabot will keep a pinned SHA current.
         uses: actions/upload-artifact@v4
         with:
           name: cross-browser-qc-artifacts
