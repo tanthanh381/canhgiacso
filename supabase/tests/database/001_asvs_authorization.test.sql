@@ -3,11 +3,12 @@
 -- thật của production.
 begin;
 set local search_path = public, extensions;
-select plan(22);
+select plan(24);
 
 -- 1. Hàm public mà anon được phép gọi: đúng danh sách cho phép, không hơn.
 --    Danh sách này gồm get_public_site_content (nội dung đã gỡ đáp án), evaluate_guest_choice
---    (chấm một lựa chọn của khách) và record_web_analytics_event_v4 (analytics ẩn danh).
+--    (chấm một lựa chọn của khách), record_web_analytics_event_v4 (analytics ẩn danh) và
+--    verify_training_certificate (xác minh chứng nhận bằng mã, chỉ trả dữ liệu tối thiểu).
 select is(
   (
     select coalesce(array_agg(p.proname::text order by p.proname), '{}'::text[])
@@ -18,8 +19,8 @@ select is(
       and has_function_privilege('anon', p.oid, 'EXECUTE')
       and not exists (select 1 from pg_depend d where d.objid = p.oid and d.deptype = 'e')
   ),
-  array['evaluate_guest_choice', 'get_public_site_content', 'record_web_analytics_event_v4']::text[],
-  'anon chỉ gọi được đúng 3 hàm public trong danh sách cho phép'
+  array['evaluate_guest_choice', 'get_public_site_content', 'record_web_analytics_event_v4', 'verify_training_certificate']::text[],
+  'anon chỉ gọi được đúng 4 hàm public trong danh sách cho phép'
 );
 
 select ok(
@@ -79,6 +80,27 @@ select ok(
   and not has_function_privilege('anon', 'public.set_privileged_email_domain(text,boolean)', 'EXECUTE')
   and not has_function_privilege('anon', 'public.log_privileged_mfa_event(text)', 'EXECUTE'),
   'anon không có quyền gọi RPC quản trị nội dung/vai trò/MFA'
+);
+
+-- 4b. RPC vòng đời tài khoản chỉ dành cho người đã đăng nhập; là wrapper INVOKER ủy quyền sang
+--     bản private (một nguồn sự thật); bản private cũng không mở cho anon.
+select ok(
+  not has_function_privilege('anon', 'public.delete_my_account(text)', 'EXECUTE')
+  and not has_function_privilege('anon', 'public.export_my_data()', 'EXECUTE')
+  and has_function_privilege('authenticated', 'public.delete_my_account(text)', 'EXECUTE')
+  and has_function_privilege('authenticated', 'public.export_my_data()', 'EXECUTE')
+  and not has_function_privilege('anon', 'private.delete_my_account(text)', 'EXECUTE')
+  and not has_function_privilege('anon', 'private.export_my_data()', 'EXECUTE')
+  and not has_function_privilege('authenticated', 'private.log_privacy_event(text,text,text,jsonb)', 'EXECUTE'),
+  'xóa/xuất dữ liệu tài khoản: chỉ authenticated gọi được; hàm ghi audit riêng tư không mở'
+);
+select ok(
+  not (select prosecdef from pg_proc where oid = 'public.delete_my_account(text)'::regprocedure)
+  and not (select prosecdef from pg_proc where oid = 'public.export_my_data()'::regprocedure)
+  and position('private.delete_my_account' in pg_get_functiondef('public.delete_my_account(text)'::regprocedure)) > 0
+  and position('private.export_my_data' in pg_get_functiondef('public.export_my_data()'::regprocedure)) > 0
+  and position('assert_recent_authentication' in pg_get_functiondef('private.delete_my_account(text)'::regprocedure)) > 0,
+  'wrapper xóa/xuất dữ liệu ủy quyền sang bản private; xóa tài khoản yêu cầu xác thực gần đây'
 );
 
 -- 5. Nhật ký kiểm toán không ghi được từ vai trò trình duyệt.

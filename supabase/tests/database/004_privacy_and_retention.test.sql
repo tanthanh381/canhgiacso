@@ -1,7 +1,7 @@
 -- Quyền riêng tư của giới hạn tốc độ (không còn IP thô) và chính sách lưu trữ dữ liệu kỹ thuật.
 begin;
 set local search_path = public, extensions;
-select plan(33);
+select plan(35);
 
 -- ===== Cấu trúc: không còn cột IP thô =====
 select is(
@@ -98,6 +98,24 @@ select throws_ok($$select private.data_api_pre_request()$$, 'PGRST', null,
   'yêu cầu thứ 11 tới set_content_manager_role bị 429 (PGRST)');
 select pg_temp.request('/rpc/set_content_manager_role', '{"cf-connecting-ip":"192.0.2.51"}');
 select lives_ok($$select private.data_api_pre_request()$$, 'IP khác không bị ảnh hưởng');
+
+-- Route của vòng đời tài khoản (20261002132000): xóa tài khoản 5 lần và xuất dữ liệu 10 lần mỗi 5 phút.
+select pg_temp.request('/rpc/delete_my_account', '{"cf-connecting-ip":"192.0.2.80"}');
+do $$
+begin
+  for i in 1..5 loop
+    perform private.data_api_pre_request();
+  end loop;
+end $$;
+select throws_ok($$select private.data_api_pre_request()$$, 'PGRST', null, 'yêu cầu thứ 6 tới delete_my_account bị 429 (PGRST)');
+select pg_temp.request('/rpc/export_my_data', '{"cf-connecting-ip":"192.0.2.81"}');
+do $$
+begin
+  for i in 1..10 loop
+    perform private.data_api_pre_request();
+  end loop;
+end $$;
+select throws_ok($$select private.data_api_pre_request()$$, 'PGRST', null, 'yêu cầu thứ 11 tới export_my_data bị 429 (PGRST)');
 
 -- Giới hạn khách chấm điểm: 300/5 phút (mạng nội bộ dùng chung một IP), không còn 60.
 select pg_temp.request('/rpc/evaluate_guest_choice', '{"cf-connecting-ip":"192.0.2.60"}');
