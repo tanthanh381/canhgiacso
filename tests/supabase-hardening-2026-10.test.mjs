@@ -18,6 +18,9 @@ const MIGRATIONS = {
   guest: "supabase/migrations/20261002102000_guest_choice_rpc.sql",
   privacy: "supabase/migrations/20261002103000_privacy_rate_limit_and_retention.sql",
   mfa: "supabase/migrations/20261002104000_privileged_mfa_event_log.sql",
+  accountLifecycle: "supabase/migrations/20261002130000_account_lifecycle_export_delete.sql",
+  certificateVerification: "supabase/migrations/20261002131000_certificate_verification.sql",
+  accountRoutesRateLimit: "supabase/migrations/20261002132000_rate_limit_account_and_verification_routes.sql",
 };
 const POST_DEPLOY = "supabase/post-deploy/20261002120000_revoke_public_answer_key_access.sql";
 
