@@ -69,7 +69,7 @@ node scripts/qc-static-server.mjs   # http://127.0.0.1:4173, phục vụ thư m�
 | `pnpm run lint` | ESLint, `--max-warnings 0` |
 | `pnpm run typecheck` | `tsc` cho ba project: `tsconfig.json` (ứng dụng), `tsconfig.tooling.json` (cấu hình build, Worker, Playwright), `tsconfig.functions.json` (Supabase Edge Functions) |
 | `pnpm test` | `build` (vinext) rồi toàn bộ unit test |
-| `pnpm run test:unit` | Chỉ chạy `node --test tests/*.test.mjs` (không build) |
+| `pnpm run test:unit` | Chỉ chạy `node --test tests/*.test.mjs` (không build; `tests/rendered-html.test.mjs` cần `dist/` nên phải chạy `pnpm run build` ít nhất một lần trước đó) |
 | `pnpm run test:e2e` | `build:pages` rồi chạy E2E smoke Playwright (Chromium) |
 | `node scripts/security-scan.mjs` | Quét khóa bí mật bị commit nhầm |
 | `pnpm run health:production` | Chỉ đọc: kiểm tra `canhgiacso.com` đang phục vụ đúng (gọi mạng) |

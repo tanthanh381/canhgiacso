@@ -43,7 +43,7 @@ git push -u origin fix/ten-ngan-gon     # rồi mở Pull Request
 | Lint (không cho phép cảnh báo) | `pnpm run lint` |
 | Kiểm tra kiểu TypeScript (ứng dụng, cấu hình/Worker/Playwright, Edge Functions) | `pnpm run typecheck` |
 | Unit test (kèm build vinext) | `pnpm test` |
-| Chỉ unit test | `pnpm run test:unit` |
+| Chỉ unit test (cần đã chạy `pnpm run build` một lần cho `rendered-html.test.mjs`) | `pnpm run test:unit` |
 | E2E smoke (Chromium) | `pnpm exec playwright install chromium` rồi `pnpm run test:e2e` |
 | Quét bí mật | `node scripts/security-scan.mjs` |
 | Audit phụ thuộc | `pnpm audit --prod --audit-level low` |
