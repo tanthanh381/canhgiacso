@@ -1,6 +1,6 @@
 # Thống kê truy cập gần thời gian thực
 
-Hệ thống analytics first-party của Cảnh Giác Số dùng Supabase để hiển thị số liệu trong Quản trị. Hệ thống không lưu IP, raw user-agent, email, tài khoản đăng nhập, query string hay dữ liệu biểu mẫu.
+Hệ thống analytics first-party của Cảnh Giác Số dùng Supabase để hiển thị số liệu trong Quản trị. Các bảng analytics không lưu IP, raw user-agent, email, tài khoản đăng nhập, query string hay dữ liệu biểu mẫu. Riêng lớp giới hạn tốc độ của Data API (chống lạm dụng) tạm thời lưu **mã băm muối của IP** (xem mục Bảo mật và riêng tư), không lưu IP thô.
 
 ## Định nghĩa
 
@@ -37,4 +37,7 @@ Hệ thống analytics first-party của Cảnh Giác Số dùng Supabase để 
 - Các RPC đọc dashboard kiểm tra `private.user_is_app_admin()` và chỉ được cấp EXECUTE cho `authenticated`.
 - Publishable key trong tracker là browser-safe; không có service-role key ở frontend.
 - Không dùng IP geolocation, không gửi IP sang dịch vụ bên ngoài và không lưu timezone/locale thô; chỉ lưu mã quốc gia đã ước tính.
+- **Giới hạn tốc độ và IP**: để chặn lạm dụng, hook `private.data_api_pre_request()` ghi mỗi yêu cầu vào `private.api_rate_limits` kèm `source_ip_hash` = SHA-256(khóa muối : ngày UTC : IP). Khóa muối được sinh ngẫu nhiên trong cơ sở dữ liệu (không nằm trong repo) và muối kèm ngày nên không thể liên kết một IP giữa các ngày. IP thô không được lưu trong bảng này; chỉ header do nền tảng đặt (mặc định `cf-connecting-ip`) được tin, không dùng `x-forwarded-for`.
+- **Thời hạn lưu**: dòng giới hạn tốc độ bị xóa sau 24 giờ; dữ liệu `private.web_analytics_pageviews` và `private.web_analytics_sessions` bị xóa sau 13 tháng. Việc xóa chạy theo lô bằng `private.purge_expired_security_data()` (pg_cron hằng giờ nếu bật, và dọn cơ hội trong hook).
+- Nhật ký kiểm toán bảo mật `private.security_audit_log` (chỉ gồm hành động của tài khoản đặc quyền như đổi quyền, xuất bản nội dung) có ghi IP và user-agent của người thực hiện vì mục đích an ninh; không thuộc dữ liệu analytics công khai và hiện chưa có lịch xóa tự động.
 - Không backfill visitor ID hoặc quốc gia cho dữ liệu cũ vì không có căn cứ kỹ thuật đáng tin cậy để suy ra chính xác.
