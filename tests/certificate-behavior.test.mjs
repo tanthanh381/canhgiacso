@@ -202,3 +202,74 @@ test("the download file name falls back to the username, and is capped at 48 cha
   assert.ok(name.length <= 48, `file-name stem "${name}" must be at most 48 characters`);
   assert.match(name, /^[A-Za-z0-9-]+$/, "only URL/file-safe characters remain");
 });
+
+// ---- Địa chỉ xác minh in trên chứng nhận -----------------------------------------
+
+const VERIFIABLE = "CGS-2026-0123456789ABCDEF";
+const VERIFY_URL = `https://canhgiacso.com/xac-minh-chung-chi/?code=${VERIFIABLE}`;
+
+test("địa chỉ xác minh chỉ có cho mã do máy chủ cấp, luôn dùng tên miền chính thức", async () => {
+  const { api } = await load();
+  assert.equal(api.certificateVerificationUrl(VERIFIABLE), VERIFY_URL);
+  assert.equal(api.certificateVerificationUrl("CGS-2025-0123456789"), "https://canhgiacso.com/xac-minh-chung-chi/?code=CGS-2025-0123456789", "mã cũ 10 ký tự vẫn xác minh được");
+  for (const code of ["CGS-GUEST-ABC123", "CGS-2026-ABC123", "", "CGS-2026-0123456789ABCDEF)", "javascript:alert(1)", "CGS-2026-0123456789abcdef"]) {
+    assert.equal(api.certificateVerificationUrl(code), null, `${code} không có địa chỉ xác minh`);
+    assert.equal(api.certificateVerificationLine(code), "");
+  }
+  assert.equal(api.certificateVerificationLine(VERIFIABLE), "Xác minh chứng nhận tại: canhgiacso.com/xac-minh-chung-chi/?code=CGS-2026-0123456789ABCDEF");
+});
+
+test("chứng nhận in địa chỉ xác minh ở cả mẫu cũ và mẫu thiết kế, riêng bản ghi nhận chế độ khách thì không", async () => {
+  const legacy = await load();
+  await legacy.api.renderCertificateCanvas(certificate({ certificateCode: VERIFIABLE }), legacy.classic);
+  assert.ok(legacy.env.drawn.includes(legacy.classic.footerNote), "ghi chú gốc được giữ");
+  assert.ok(legacy.env.drawn.some((line) => line.includes("canhgiacso.com/xac-minh-chung-chi/?code=" + VERIFIABLE)));
+
+  const designed = await load();
+  await designed.api.renderCertificateCanvas(certificate({ certificateCode: VERIFIABLE }), designed.designed);
+  assert.ok(designed.env.drawn.some((line) => line.includes("canhgiacso.com/xac-minh-chung-chi/")), designed.env.drawn.join("|"));
+
+  const guest = await load();
+  await guest.api.renderCertificateCanvas(certificate({ certificateCode: "CGS-GUEST-XYZ" }), guest.classic);
+  await guest.api.renderCertificateCanvas(certificate({ certificateCode: "CGS-GUEST-XYZ" }), guest.designed);
+  assert.ok(!guest.env.drawn.some((line) => line.includes("xac-minh-chung-chi")), "mã khách không có địa chỉ xác minh");
+});
+
+test("PDF của chứng nhận cấp bởi máy chủ có liên kết URI trên chân trang và bảng xref vẫn đúng", async () => {
+  const { env, api, classic } = await load();
+  await api.downloadTrainingCertificatePdf(certificate({ certificateCode: VERIFIABLE }), classic);
+  const body = text(new Uint8Array(await env.createdBlobs[0].arrayBuffer()));
+  assert.ok(body.includes("/Annots [6 0 R]"));
+  assert.ok(body.includes(`/Subtype /Link`));
+  assert.ok(body.includes(`/URI (${VERIFY_URL})`));
+  assert.ok(body.includes("/Border [0 0 0]"));
+  // Vùng liên kết nằm trong trang và ở phần dưới (tọa độ PDF có gốc ở góc dưới bên trái).
+  const rect = /\/Rect \[([\d. ]+)\]/.exec(body)[1].split(" ").map(Number);
+  assert.equal(rect.length, 4);
+  assert.ok(rect[0] >= 0 && rect[2] <= 841.89 && rect[1] >= 0 && rect[3] <= 595.28 && rect[0] < rect[2] && rect[1] < rect[3]);
+  assert.ok(rect[3] < 100, "ở chân trang");
+
+  const startxref = Number(/startxref\n(\d+)\n%%EOF$/.exec(body)[1]);
+  const entries = [...body.slice(startxref).matchAll(/^(\d{10}) 00000 n $/gm)].map((match) => Number(match[1]));
+  assert.equal(entries.length, 6, "sáu đối tượng gián tiếp");
+  entries.forEach((offset, index) => assert.ok(body.slice(offset).startsWith(`${index + 1} 0 obj\n`), `đối tượng ${index + 1}`));
+  assert.ok(body.includes("trailer\n<< /Size 7 /Root 1 0 R >>"));
+});
+
+test("PDF của bản ghi nhận chế độ khách không có liên kết, và địa chỉ không an toàn bị bỏ", async () => {
+  const guest = await load();
+  await guest.api.downloadTrainingCertificatePdf(certificate({ certificateCode: "CGS-GUEST-XYZ" }), guest.classic);
+  assert.ok(!text(new Uint8Array(await guest.env.createdBlobs[0].arrayBuffer())).includes("/Annots"));
+
+  const { api } = await load();
+  const jpeg = Uint8Array.from([0xff, 0xd8, 1, 2, 3, 0xff, 0xd9]);
+  const area = { x: 100, y: 1100, width: 1000, height: 60 };
+  for (const url of ["javascript:alert(1)", "http://canhgiacso.com/x", "https://canhgiacso.com/x)>>/AA<<", "https://canhgiacso.com/a\\b", "https://canhgiacso.com/ x"]) {
+    const body = text(api.buildSinglePageJpegPdf(jpeg, 1754, 1240, { url, ...area }));
+    assert.ok(!body.includes("/Annots") && !body.includes("/URI"), `${url} bị bỏ`);
+  }
+  const safe = text(api.buildSinglePageJpegPdf(jpeg, 1754, 1240, { url: VERIFY_URL, ...area }));
+  assert.ok(safe.includes(`/URI (${VERIFY_URL})`));
+  const noLink = text(api.buildSinglePageJpegPdf(jpeg, 1754, 1240));
+  assert.ok(!noLink.includes("/Annots"), "không có liên kết thì PDF giữ nguyên cấu trúc cũ");
+});
