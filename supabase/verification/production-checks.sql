@@ -161,6 +161,47 @@ with
       exists (select 1 from pg_extension where extname = 'pg_cron')::text,
       'true, hoặc chấp nhận dọn cơ hội trong hook',
       case when exists (select 1 from pg_extension where extname = 'pg_cron') then 'TỐT' else 'THEO DÕI' end
+    union all
+    select 21, 'RPC xóa/xuất dữ liệu tài khoản (20261002130000): có mặt và chỉ authenticated gọi được',
+      case when to_regprocedure('public.delete_my_account(text)') is null or to_regprocedure('public.export_my_data()') is null
+        then 'chưa có' else (has_function_privilege('authenticated', 'public.delete_my_account(text)', 'EXECUTE')
+          and not has_function_privilege('anon', 'public.delete_my_account(text)', 'EXECUTE')
+          and has_function_privilege('authenticated', 'public.export_my_data()', 'EXECUTE')
+          and not has_function_privilege('anon', 'public.export_my_data()', 'EXECUTE'))::text end,
+      'true (sau migration 20261002130000)',
+      case when to_regprocedure('public.delete_my_account(text)') is null or to_regprocedure('public.export_my_data()') is null then 'THEO DÕI'
+        when has_function_privilege('anon', 'public.delete_my_account(text)', 'EXECUTE')
+          or has_function_privilege('anon', 'public.export_my_data()', 'EXECUTE') then 'XẤU'
+        else 'TỐT' end
+    union all
+    select 22, 'verify_training_certificate (20261002131000): anon gọi được và là VOLATILE (để hook giới hạn tốc độ áp dụng)',
+      case when to_regprocedure('public.verify_training_certificate(text)') is null then 'chưa có'
+        else (has_function_privilege('anon', 'public.verify_training_certificate(text)', 'EXECUTE')
+              and (select provolatile = 'v' from pg_proc where oid = to_regprocedure('public.verify_training_certificate(text)')))::text end,
+      'true (sau migration 20261002131000)',
+      case when to_regprocedure('public.verify_training_certificate(text)') is null then 'THEO DÕI'
+        when has_function_privilege('anon', 'public.verify_training_certificate(text)', 'EXECUTE')
+             and (select provolatile = 'v' from pg_proc where oid = to_regprocedure('public.verify_training_certificate(text)')) then 'TỐT'
+        else 'XẤU' end
+    union all
+    select 23, 'Hook giới hạn tốc độ có route cho xóa/xuất dữ liệu và xác minh chứng nhận (20261002132000)',
+      (position('rpc/verify_training_certificate' in pg_get_functiondef('private.data_api_pre_request()'::regprocedure)) > 0
+        and position('rpc/delete_my_account' in pg_get_functiondef('private.data_api_pre_request()'::regprocedure)) > 0)::text,
+      'true (sau migration 20261002132000)',
+      case when position('rpc/verify_training_certificate' in pg_get_functiondef('private.data_api_pre_request()'::regprocedure)) > 0
+        and position('rpc/delete_my_account' in pg_get_functiondef('private.data_api_pre_request()'::regprocedure)) > 0 then 'TỐT' else 'THEO DÕI' end
+    union all
+    select 24, 'public.site_content.updated_by là ON DELETE SET NULL (cựu biên tập viên vẫn xóa được tài khoản)',
+      coalesce((select (pg_get_constraintdef(c.oid) ilike '%on delete set null%')::text
+        from pg_constraint c where c.conrelid = 'public.site_content'::regclass and c.conname = 'site_content_updated_by_fkey'), 'không tìm thấy ràng buộc'),
+      'true (sau migration 20261002130000)',
+      case when coalesce((select pg_get_constraintdef(c.oid) ilike '%on delete set null%'
+        from pg_constraint c where c.conrelid = 'public.site_content'::regclass and c.conname = 'site_content_updated_by_fkey'), false) then 'TỐT' else 'THEO DÕI' end
+    union all
+    select 25, 'Chứng nhận đã phát hành còn mã dạng cũ 10 ký tự hex (40 bit; giữ nguyên vì đã in; chứng nhận mới có 64 bit)',
+      coalesce((select count(*)::text from private.training_certificates where certificate_code ~ '^CGS-[0-9]{4}-[0-9A-F]{10}$'), '0'),
+      'số này chỉ giảm nếu cấp lại chứng nhận; không cần xử lý',
+      'THEO DÕI'
   )
 select kiem_tra, gia_tri, mong_doi, trang_thai
 from checks
@@ -329,8 +370,8 @@ from private.web_analytics_pageviews;
 
 -- ----------------------------------------------------------------------------
 -- 10. Hàm anon / authenticated có quyền EXECUTE trong schema public.
---     Mong đợi cho anon: chỉ get_public_site_content, evaluate_guest_choice và
---     record_web_analytics_event_v4. Mọi hàm khác của anon là bất thường.
+--     Mong đợi cho anon: chỉ get_public_site_content, evaluate_guest_choice,
+--     record_web_analytics_event_v4 và verify_training_certificate. Mọi hàm khác của anon là bất thường.
 -- ----------------------------------------------------------------------------
 select p.oid::regprocedure as ham,
        p.prosecdef as security_definer,

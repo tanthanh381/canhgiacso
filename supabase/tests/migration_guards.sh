@@ -57,6 +57,10 @@ insert into public.site_content (slug, content, published, updated_by) values
   ('main', '{"version":1,"scenarios":[]}'::jsonb, true, '00000000-0000-0000-0000-00000000a001')
   on conflict (slug) do nothing;
 insert into private.api_rate_limits (source_ip, route) values ('203.0.113.7', 'rpc/record_web_analytics_event_v4');
+-- Chứng nhận đã phát hành TRƯỚC migration (mã 10 ký tự hex): phải giữ nguyên và vẫn xác minh được.
+insert into private.training_certificates (id, certificate_code, user_id, run_id, display_name, username, scenario_total, completed, correct, accuracy, score, rating)
+values ('00000000-0000-0000-0000-0000000000c1', 'CGS-2025-0123456789', '00000000-0000-0000-0000-00000000f001',
+        '00000000-0000-0000-0000-0000000000f1', 'Player P', 'player_p', 10, 10, 9, 90, 1100, 'XUẤT SẮC');
 SQL
 
 SNAPSHOT_SQL="select concat_ws(',',
@@ -107,6 +111,12 @@ expect "số dòng các bảng dữ liệu người dùng/nội dung không đ�
 expect "tiến trình người chơi giữ nguyên" "250000000,80" \
   "select balance || ',' || awareness from public.user_progress where user_id = '00000000-0000-0000-0000-00000000f001'"
 
+echo "# 4b. Chứng nhận đã phát hành giữ nguyên mã và vẫn xác minh được"
+expect "mã chứng nhận cũ không bị đổi" "CGS-2025-0123456789" \
+  "select certificate_code from private.training_certificates where id = '00000000-0000-0000-0000-0000000000c1'"
+expect "mã cũ vẫn xác minh được qua RPC công khai" "true|P*** P***" \
+  "select (public.verify_training_certificate('CGS-2025-0123456789') ->> 'valid') || '|' || (public.verify_training_certificate('CGS-2025-0123456789') ->> 'name')"
+
 echo "# 5. IP thô của giới hạn tốc độ bị loại bỏ"
 expect "cột source_ip không còn" "0" \
   "select count(*) from information_schema.columns where table_schema='private' and table_name='api_rate_limits' and column_name='source_ip'"
@@ -126,7 +136,7 @@ for pass in 1 2; do
       fi
     fi
   done
-  if [ "$pass_failed" -eq 0 ]; then ok "chạy lại lần $pass: cả 5 migration mới không lỗi"; else nok "chạy lại lần $pass: có migration lỗi"; fi
+  if [ "$pass_failed" -eq 0 ]; then ok "chạy lại lần $pass: toàn bộ migration mới không lỗi"; else nok "chạy lại lần $pass: có migration lỗi"; fi
 done
 expect "khóa muối không bị xoay khi chạy lại" "$SECRET_BEFORE" "select value from private.security_settings where key='ip_hash_secret'"
 expect "dòng giới hạn tốc độ mới không bị xóa khi chạy lại" "1" "select count(*) from private.api_rate_limits where route='rpc/x'"

@@ -1,0 +1,126 @@
+/* Quên mật khẩu, khôi phục mật khẩu, tải dữ liệu và xóa tài khoản.
+   Tệp riêng để không chạm vào các tệp CSS dùng chung; chỉ dùng biến chủ đề sẵn có (đổi theo sáng/tối). */
+
+.auth-forgot-link,
+.privacy-danger-link {
+  justify-self: start;
+  min-height: 44px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.auth-forgot-link {
+  margin-top: -6px;
+  color: var(--ink);
+}
+
+.privacy-danger-link {
+  color: var(--red);
+}
+
+.auth-forgot-link:focus-visible,
+.privacy-danger-link:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--red) 55%, transparent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.privacy-panel {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.privacy-panel h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.privacy-panel p {
+  margin: 0;
+}
+
+.privacy-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}
+
+.privacy-actions .admin-secondary,
+.privacy-consequences .admin-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+}
+
+.privacy-consequences {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0 16px;
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--red) 35%, var(--line));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--red) 6%, var(--surface));
+}
+
+.privacy-consequences strong {
+  font-size: 13px;
+}
+
+.privacy-consequences ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.privacy-consequences p {
+  margin: 0;
+  font-size: 13px;
+}
+
+.privacy-consequences .admin-secondary {
+  justify-self: start;
+}
+
+.privacy-delete-form .profile-actions {
+  flex-wrap: wrap;
+}
+
+.privacy-delete-form .danger-button,
+.privacy-delete-form .admin-secondary,
+.password-recovery-modal .profile-actions button,
+.account-deleted-modal .profile-actions button,
+.auth-link-problem-modal .profile-actions button {
+  min-height: 44px;
+}
+
+.privacy-delete-form .danger-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.password-recovery-modal h2,
+.auth-link-problem-modal h2,
+.account-deleted-modal h2 {
+  font-size: clamp(26px, 6vw, 32px);
+}
+
+.password-recovery-modal .auth-form,
+.password-recovery-modal .auth-intro {
+  margin-top: 0;
+}

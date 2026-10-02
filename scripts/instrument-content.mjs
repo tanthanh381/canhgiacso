@@ -13,10 +13,20 @@ const SUPABASE_ORIGIN = "https://goietwyapiywrtibpkwo.supabase.co";
 const CONSENT_TAG = '<script src="/consent.js" defer></script>';
 const THEME_TAG = '<script src="/theme-init.js"></script>';
 const SPA_PAGE = path.join(ROOT, "github-pages", "index.html");
-const SKIPPED_PAGES = new Set([
-  // Nhúng trong /gioi-thieu/ bằng iframe; tự chứa, không nạp phân tích để khỏi đếm đôi lượt xem.
+// Trang nhúng trong /gioi-thieu/ bằng iframe: không nạp phân tích (khỏi đếm đôi lượt xem) nhưng vẫn phải
+// có CSP nghiêm ngặt trong thẻ meta. Script/style của trang nằm trong tệp riêng nên không cần 'unsafe-inline'.
+const EMBEDDED_PAGES = new Set([
   path.join(ROOT, "public", "gioi-thieu", "hoat-hinh.html"),
 ]);
+const EMBEDDED_CSP_DIRECTIVES = {
+  "default-src": ["'none'"],
+  "script-src": ["'self'"],
+  "style-src": ["'self'"],
+  "img-src": ["'self'", "data:"],
+  "font-src": ["'self'", "data:"],
+  "base-uri": ["'none'"],
+  "form-action": ["'none'"],
+};
 
 const BASE_CSP = {
   "default-src": ["'self'"],
@@ -60,6 +70,7 @@ const serializeCsp = (directives) => Object.entries(directives)
   .join("; ");
 
 const STATIC_CSP = serializeCsp(STATIC_CSP_DIRECTIVES);
+const EMBEDDED_CSP = serializeCsp(EMBEDDED_CSP_DIRECTIVES);
 const SPA_CSP = serializeCsp(SPA_CSP_DIRECTIVES);
 
 const CSP_META_PATTERN = /<meta\s+http-equiv=["']Content-Security-Policy["'][^>]*>/gi;
@@ -151,15 +162,37 @@ function assertCompliant(html, file) {
   if (inline.length) throw new Error(`${file}: inline executable script is not allowed under the page CSP`);
 }
 
+function assertEmbeddedCompliant(html, file) {
+  const cspMetas = [...html.matchAll(CSP_META_PATTERN)];
+  if (cspMetas.length !== 1) throw new Error(`${file}: expected exactly one CSP meta, found ${cspMetas.length}`);
+  if (/unsafe-inline|unsafe-eval/.test(cspMetas[0][0])) throw new Error(`${file}: CSP must not allow unsafe-inline/unsafe-eval`);
+  if (/<style\b/i.test(html) || /\sstyle\s*=/i.test(html)) throw new Error(`${file}: inline <style> or style="" is not allowed under the page CSP`);
+  const inline = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
+    .filter(([, attributes, body]) => !/\bsrc=/i.test(attributes) && body.trim());
+  if (inline.length) throw new Error(`${file}: inline executable script is not allowed under the page CSP`);
+  if (/\son[a-z]+\s*=/i.test(html)) throw new Error(`${file}: inline event handlers are not allowed under the page CSP`);
+  if (/consent\.js|web-analytics\.js|google-analytics-init\.js|googletagmanager\.com/i.test(html)) {
+    throw new Error(`${file}: embedded page must not load analytics`);
+  }
+}
+
 let checked = 0;
 let changed = 0;
 for (const relativeRoot of ["public", "github-pages"]) {
   const root = path.join(ROOT, relativeRoot);
   for (const file of await htmlFiles(root)) {
-    if (SKIPPED_PAGES.has(path.normalize(file))) continue;
     checked += 1;
     const original = await readFile(file, "utf8");
     let html = original;
+    if (EMBEDDED_PAGES.has(path.normalize(file))) {
+      html = normalizeCsp(html, EMBEDDED_CSP);
+      assertEmbeddedCompliant(html, file);
+      if (html !== original) {
+        await writeFile(file, html, "utf8");
+        changed += 1;
+      }
+      continue;
+    }
     html = removeLegacyGoogleTag(html, file);
     html = normalizeTheme(html);
     html = normalizeCsp(html, path.normalize(file) === SPA_PAGE ? SPA_CSP : STATIC_CSP);

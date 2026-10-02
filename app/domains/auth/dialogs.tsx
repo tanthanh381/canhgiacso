@@ -1,9 +1,13 @@
 "use client";
 
 import { useEffect, useState, type FormEventHandler } from "react";
+import { safeStorageRemove } from "../../shared/browser-storage";
+import { Icon } from "../../shared/icons";
 import { Modal } from "../../shared/ui-primitives";
+import { AccountDeletedNotice, AccountPrivacyPanel, DeleteAccountView } from "./account-privacy";
 import { resendSignupConfirmation } from "./gateway";
 import type { AuthMode, SessionAccount } from "./model";
+import { ForgotPasswordForm, PasswordRecoveryDialog } from "./password-recovery";
 
 const RESEND_COOLDOWN_SECONDS = 60;
 
@@ -115,10 +119,42 @@ export function AccountDialogs({
 }) {
   // Chỉ nhánh đăng ký không có phiên mới đặt authNotice (xem submitAuth trong page.tsx).
   const awaitingConfirmation = authMode === "register" && Boolean(authNotice);
+  const [forgotOpen, setForgotOpen] = useState(false);
+  const [profileView, setProfileView] = useState<"main" | "delete">("main");
+  const [deletedNoticeOpen, setDeletedNoticeOpen] = useState(false);
+  const showForgot = authMode === "login" && forgotOpen && !awaitingConfirmation;
+
+  function closeAuthDialog() {
+    setForgotOpen(false);
+    onCloseAuth();
+  }
+
+  function switchMode(mode: AuthMode) {
+    setForgotOpen(false);
+    onSwitchAuthMode(mode);
+  }
+
+  function openLoginWithForgot() {
+    setForgotOpen(true);
+    onOpenAuthFromGuestNotice("login");
+  }
+
+  function closeProfileDialog() {
+    setProfileView("main");
+    return onCloseProfile();
+  }
+
+  async function handleAccountDeleted() {
+    if (account) safeStorageRemove(`khien-so-pending:${account.id}`);
+    setProfileView("main");
+    setDeletedNoticeOpen(true);
+    await onLogout();
+  }
+
   return (
     <>
       <Modal open={showGuestLimitNotice} onClose={onDismissGuestNotice} labelledBy="guest-limit-title" className="guest-limit-modal">
-        <button className="modal-close" aria-label="Đóng thông báo chế độ khách" onClick={onDismissGuestNotice}>×</button>
+        <button className="modal-close" aria-label="Đóng thông báo chế độ khách" onClick={onDismissGuestNotice}><Icon name="close" size={18} /></button>
         <span className="modal-symbol">K</span>
         <span className="eyebrow">CHẾ ĐỘ KHÁCH</span>
         <h2 id="guest-limit-title">Bạn đang sử dụng với tính năng giới hạn</h2>
@@ -134,19 +170,21 @@ export function AccountDialogs({
         </div>
       </Modal>
 
-      <Modal open={authOpen} onClose={onCloseAuth} labelledBy="auth-title" className="auth-modal">
-        <button className="modal-close" aria-label="Đóng đăng nhập" onClick={onCloseAuth}>×</button>
+      <Modal open={authOpen} onClose={closeAuthDialog} labelledBy="auth-title" className="auth-modal">
+        <button className="modal-close" aria-label="Đóng đăng nhập" onClick={closeAuthDialog}><Icon name="close" size={18} /></button>
         <span className="modal-symbol">H</span>
         <span className="eyebrow">CẢNH GIÁC SỐ · TÀI KHOẢN ĐỒNG BỘ</span>
         <div className="auth-tabs" aria-label="Chọn hình thức tài khoản">
-          <button type="button" aria-pressed={authMode === "login"} className={authMode === "login" ? "active" : ""} onClick={() => onSwitchAuthMode("login")}>Đăng nhập</button>
-          <button type="button" aria-pressed={authMode === "register"} className={authMode === "register" ? "active" : ""} onClick={() => onSwitchAuthMode("register")}>Đăng ký</button>
+          <button type="button" aria-pressed={authMode === "login"} className={authMode === "login" ? "active" : ""} onClick={() => switchMode("login")}>Đăng nhập</button>
+          <button type="button" aria-pressed={authMode === "register"} className={authMode === "register" ? "active" : ""} onClick={() => switchMode("register")}>Đăng ký</button>
         </div>
-        <h2 id="auth-title">{awaitingConfirmation ? "Kiểm tra hộp thư" : authMode === "login" ? "Chào mừng trở lại" : "Tạo hồ sơ phòng vệ"}</h2>
-        <p className="auth-intro">Đăng nhập để lưu kết quả và tiếp tục trên thiết bị khác. Khi đăng ký, bạn có thể cần xác nhận email trước khi đăng nhập; hãy dùng địa chỉ email do chính bạn quản lý. Tiến trình khách được giữ riêng trên thiết bị và không tự chuyển vào tài khoản. Không sử dụng mật khẩu ngân hàng thật.</p>
-        {awaitingConfirmation ? (
+        <h2 id="auth-title">{awaitingConfirmation ? "Kiểm tra hộp thư" : showForgot ? "Quên mật khẩu" : authMode === "login" ? "Chào mừng trở lại" : "Tạo hồ sơ phòng vệ"}</h2>
+        {!showForgot && <p className="auth-intro">Đăng nhập để lưu kết quả và tiếp tục trên thiết bị khác. Khi đăng ký, bạn có thể cần xác nhận email trước khi đăng nhập; hãy dùng địa chỉ email do chính bạn quản lý. Tiến trình khách được giữ riêng trên thiết bị và không tự chuyển vào tài khoản. Không sử dụng mật khẩu ngân hàng thật.</p>}
+        {showForgot ? (
+          <ForgotPasswordForm initialEmail={authFields.email} onBack={() => setForgotOpen(false)} />
+        ) : awaitingConfirmation ? (
           <>
-            <ConfirmationPending email={authFields.email.trim().toLowerCase()} onBackToLogin={() => onSwitchAuthMode("login")} />
+            <ConfirmationPending email={authFields.email.trim().toLowerCase()} onBackToLogin={() => switchMode("login")} />
             <button className="guest-continue" type="button" onClick={() => void onContinueAsGuest()}>Tiếp tục với tư cách khách</button>
           </>
         ) : (
@@ -159,6 +197,9 @@ export function AccountDialogs({
           )}
           <label><span>Email</span><input type="email" autoComplete="email" value={authFields.email} onChange={(event) => authSetters.setEmail(event.target.value)} placeholder="email@example.com" autoCapitalize="none" spellCheck={false} /></label>
           <label><span>Mật khẩu</span><input type="password" autoComplete={authMode === "login" ? "current-password" : "new-password"} value={authFields.password} minLength={authMode === "register" ? 10 : 8} maxLength={72} onChange={(event) => authSetters.setPassword(event.target.value)} placeholder={authMode === "register" ? "Từ 10 ký tự: hoa, thường, số, ký tự đặc biệt" : "Ít nhất 8 ký tự"} /></label>
+          {authMode === "login" && (
+            <button className="auth-forgot-link" type="button" onClick={() => setForgotOpen(true)}>Quên mật khẩu?</button>
+          )}
           {authMode === "register" && (
             <label><span>Xác nhận mật khẩu</span><input type="password" autoComplete="new-password" value={authFields.confirmPassword} onChange={(event) => authSetters.setConfirmPassword(event.target.value)} placeholder="Nhập lại mật khẩu" /></label>
           )}
@@ -173,27 +214,37 @@ export function AccountDialogs({
         )}
       </Modal>
 
-      <Modal open={profileOpen} onClose={() => void onCloseProfile()} labelledBy="profile-title" className="profile-modal">
-        <button className="modal-close" aria-label="Đóng hồ sơ" onClick={() => void onCloseProfile()}>×</button>
-        <span className="eyebrow">TÀI KHOẢN ĐÃ ĐĂNG NHẬP</span>
-        <h2 id="profile-title">Hồ sơ của bạn</h2>
-        <p className="account-username">@{account?.username} · {account?.email}</p>
-        <label className="profile-name-field">
-          <span>Tên hiển thị</span>
-          <input
-            aria-label="Tên hiển thị"
-            value={playerName}
-            maxLength={32}
-            onChange={(event) => onPlayerNameChange(event.target.value)}
-            onKeyDown={(event) => { if (event.key === "Enter") void onCloseProfile(); }}
-          />
-        </label>
-        <div className="profile-actions">
-          <button className="primary-button" onClick={() => void onCloseProfile()}>Lưu thay đổi</button>
-          <button className="logout-button" onClick={() => void onLogout()}>Đăng xuất</button>
-        </div>
-        <p className="profile-note">Tiến trình được đồng bộ an toàn và phiên cũ trên trình duyệt được xoá khi đổi tài khoản.</p>
+      <Modal open={profileOpen} onClose={() => void closeProfileDialog()} labelledBy="profile-title" className="profile-modal">
+        <button className="modal-close" aria-label="Đóng hồ sơ" onClick={() => void closeProfileDialog()}><Icon name="close" size={18} /></button>
+        {profileView === "delete" && account ? (
+          <DeleteAccountView account={account} onCancel={() => setProfileView("main")} onDeleted={handleAccountDeleted} />
+        ) : (
+          <>
+            <span className="eyebrow">TÀI KHOẢN ĐÃ ĐĂNG NHẬP</span>
+            <h2 id="profile-title">Hồ sơ của bạn</h2>
+            <p className="account-username">@{account?.username} · {account?.email}</p>
+            <label className="profile-name-field">
+              <span>Tên hiển thị</span>
+              <input
+                aria-label="Tên hiển thị"
+                value={playerName}
+                maxLength={32}
+                onChange={(event) => onPlayerNameChange(event.target.value)}
+                onKeyDown={(event) => { if (event.key === "Enter") void closeProfileDialog(); }}
+              />
+            </label>
+            <div className="profile-actions">
+              <button className="primary-button" onClick={() => void closeProfileDialog()}>Lưu thay đổi</button>
+              <button className="logout-button" onClick={() => void onLogout()}>Đăng xuất</button>
+            </div>
+            <p className="profile-note">Tiến trình được đồng bộ an toàn và phiên cũ trên trình duyệt được xoá khi đổi tài khoản.</p>
+            {account && <AccountPrivacyPanel onRequestDelete={() => setProfileView("delete")} />}
+          </>
+        )}
       </Modal>
+
+      <AccountDeletedNotice open={deletedNoticeOpen} onClose={() => setDeletedNoticeOpen(false)} />
+      <PasswordRecoveryDialog onRequestNewLink={openLoginWithForgot} />
     </>
   );
 }

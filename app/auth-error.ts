@@ -38,3 +38,30 @@ export function authErrorMessage(error: AuthErrorLike, mode: "login" | "register
         : "Chưa thể đăng nhập. Vui lòng kiểm tra thông tin và thử lại.";
   }
 }
+
+// Lỗi khi đặt mật khẩu mới (updateUser) sau liên kết khôi phục hoặc khi đổi mật khẩu.
+export function passwordUpdateErrorMessage(error: AuthErrorLike) {
+  switch (error.code) {
+    case "same_password":
+      return "Mật khẩu mới phải khác mật khẩu hiện tại.";
+    case "weak_password":
+      return "Mật khẩu chưa đáp ứng yêu cầu bảo mật. Hãy dùng 10–72 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt.";
+    case "over_request_rate_limit":
+      return "Bạn đã gửi quá nhiều yêu cầu. Vui lòng chờ vài phút rồi thử lại.";
+    case "session_not_found":
+    case "session_expired":
+    case "bad_jwt":
+    case "no_authorization":
+    case "user_not_found":
+      return "Liên kết khôi phục đã hết hạn hoặc không còn hiệu lực. Hãy chọn “Quên mật khẩu” để nhận liên kết mới.";
+    case "reauthentication_needed":
+    case "reauthentication_not_valid":
+      return "Để đổi mật khẩu, hãy yêu cầu liên kết khôi phục mới từ mục “Quên mật khẩu”.";
+    default:
+      if (error.status === 429) return "Hệ thống đang tạm giới hạn yêu cầu. Vui lòng chờ vài phút rồi thử lại.";
+      if (error.status === 401 || error.status === 403) {
+        return "Liên kết khôi phục đã hết hạn hoặc không còn hiệu lực. Hãy chọn “Quên mật khẩu” để nhận liên kết mới.";
+      }
+      return "Chưa đổi được mật khẩu. Vui lòng thử lại sau ít phút.";
+  }
+}

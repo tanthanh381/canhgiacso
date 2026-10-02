@@ -54,9 +54,9 @@ Biến `ORIGIN` trong `wrangler.toml`:
 - Chuyển hướng `http://` sang `https://`; chỉ cho phép `GET`/`HEAD` (phương thức khác trả 405).
 - Giữ nguyên status, body, `ETag`, `Cache-Control`, `Last-Modified`, `Content-Type` của GitHub Pages, nên cache và
   yêu cầu điều kiện (`If-None-Match` -> 304) hoạt động như trước.
-- Ngoại lệ duy nhất: `/gioi-thieu/hoat-hinh.html` (trang hoạt hình nhúng iframe, chứa script/style inline và ảnh `data:`) nhận
-  CSP riêng cho phép inline và `X-Frame-Options: SAMEORIGIN` để iframe trong `/gioi-thieu/` vẫn chạy. Nếu chuyển script/style
-  của trang đó ra tệp riêng, hãy xóa ngoại lệ trong `worker.js` (`ANIMATION_PATH`).
+- Trang hoạt hình `/gioi-thieu/hoat-hinh.html` (nhúng iframe trong `/gioi-thieu/`) dùng **cùng CSP** với mọi trang: script và
+  style của nó đã nằm trong `hoat-hinh.js` và `hoat-hinh.css`, không còn `unsafe-inline`. Khác biệt duy nhất là được phép bị
+  nhúng bởi chính site: `frame-ancestors 'self'` và `X-Frame-Options: SAMEORIGIN` (mọi trang khác là `'none'`/`DENY`).
 
 ## Phương án B: Transform Rules
 
@@ -74,11 +74,12 @@ Rule 1, tên "Security headers", biểu thức `(http.host eq "canhgiacso.com") 
 | `Permissions-Policy` | `camera=(), microphone=(), geolocation=(), payment=(), usb=()` |
 | `Cross-Origin-Opener-Policy` | `same-origin` |
 
-Rule 2, tên "Animation iframe", đặt **sau** Rule 1, biểu thức `http.request.uri.path eq "/gioi-thieu/hoat-hinh.html"`, **Set static**:
+Rule 2, tên "Animation iframe", đặt **sau** Rule 1, biểu thức `http.request.uri.path eq "/gioi-thieu/hoat-hinh.html"`, **Set static**
+(chỉ đổi cho phép nhúng cùng nguồn gốc; CSP vẫn là CSP nghiêm ngặt của Rule 1 với `frame-ancestors 'self'`):
 
 | Header | Giá trị |
 | --- | --- |
-| `Content-Security-Policy` | `default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; base-uri 'none'; form-action 'none'; frame-ancestors 'self'` |
+| `Content-Security-Policy` | `default-src 'self'; script-src 'self' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://www.google-analytics.com https://www.googletagmanager.com; font-src 'self' data:; connect-src 'self' https://goietwyapiywrtibpkwo.supabase.co wss://goietwyapiywrtibpkwo.supabase.co https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://www.googletagmanager.com https://www.google.com; frame-src 'self' https://phishingquiz.withgoogle.com; media-src 'none'; worker-src 'none'; object-src 'none'; manifest-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests` |
 | `X-Frame-Options` | `SAMEORIGIN` |
 
 Chuyển hướng security.txt: Rules > Redirect Rules > Create rule, biểu thức `http.request.uri.path eq "/.well-known/security.txt"`,

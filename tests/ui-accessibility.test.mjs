@@ -33,7 +33,7 @@ test("no CSS declares a font size below 12px", async () => {
 
 test("reduced motion is honoured by CSS, the boot loader and the about animation", async () => {
   const [globals, seo, layout, animation] = await Promise.all([
-    readAppStyles(), read("public/seo.css"), read("app/layout.tsx"), read("public/gioi-thieu/hoat-hinh.html"),
+    readAppStyles(), read("public/seo.css"), read("app/layout.tsx"), read("public/gioi-thieu/hoat-hinh.js"),
   ]);
   assert.match(globals, /prefers-reduced-motion:\s*reduce[\s\S]*animation:\s*none\s*!important[\s\S]*transition:\s*none\s*!important/);
   assert.match(seo, /prefers-reduced-motion:\s*reduce/);

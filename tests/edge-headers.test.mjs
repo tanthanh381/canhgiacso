@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { REQUIRED_HEADERS, evaluateSecurityHeaders } from "../scripts/check-security-headers.mjs";
 import worker, {
+  ANIMATION_CSP_DIRECTIVES,
   ANIMATION_PATH,
   CSP_DIRECTIVES,
   SECURITY_HEADERS,
@@ -95,13 +96,25 @@ test("ORIGIN rewrites the upstream host but never loops onto the serving host", 
   assert.equal(seen[2][0], "https://canhgiacso.com/cong-cu/");
 });
 
-test("the self-contained animation page is the only path with a relaxed CSP and may be framed by this site", () => {
+test("the animation page has no CSP exception: same strict CSP as every page, framed only by this site", () => {
   const animation = securityHeadersFor(ANIMATION_PATH);
+  const csp = animation["Content-Security-Policy"];
   assert.equal(animation["X-Frame-Options"], "SAMEORIGIN");
-  assert.match(animation["Content-Security-Policy"], /frame-ancestors 'self'/);
-  assert.match(animation["Content-Security-Policy"], /default-src 'none'/);
+  assert.match(csp, /frame-ancestors 'self'/);
+  assert.doesNotMatch(csp.match(/script-src[^;]*/)[0], /unsafe-/);
+  assert.match(csp, /default-src 'self'/);
+  // Chỉ frame-ancestors khác CSP chung: không còn ngoại lệ script/style/img nào cho riêng trang này.
+  assert.deepEqual({ ...ANIMATION_CSP_DIRECTIVES, "frame-ancestors": CSP_DIRECTIVES["frame-ancestors"] }, CSP_DIRECTIVES);
   assert.equal(securityHeadersFor("/gioi-thieu/"), SECURITY_HEADERS);
   assert.equal(securityHeadersFor("/")["X-Frame-Options"], "DENY");
+  assert.match(SECURITY_HEADERS["Content-Security-Policy"], /frame-ancestors 'none'/);
+});
+
+test("the header checker accepts the animation page headers (no relaxed CSP left to special-case)", () => {
+  const results = evaluateSecurityHeaders(Object.fromEntries(
+    Object.entries(securityHeadersFor(ANIMATION_PATH)).map(([name, value]) => [name.toLowerCase(), value]),
+  ));
+  assert.deepEqual(results.filter((item) => !item.ok), []);
 });
 
 test("worker CSP covers every origin the pages' own CSP needs, so Google Analytics after consent and Supabase keep working", async () => {

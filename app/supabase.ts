@@ -1,9 +1,17 @@
 import { createClient, type Session } from "@supabase/supabase-js";
+import { parseAuthRedirect, sanitizeAuthRedirectUrl, type AuthRedirectState } from "./domains/auth/model";
 
 // This is a browser-safe Supabase publishable key. Authorization is enforced
 // by Postgres Row Level Security; no secret/service-role key is shipped here.
 const SUPABASE_URL = "https://goietwyapiywrtibpkwo.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_ghj-H14bq2n1tSsH4u-adA_LoBtWKO4";
+
+// Phải đọc TRƯỚC createClient: thư viện xóa token khỏi hash sau khi nhận phiên, còn giao diện chỉ
+// được dựng sau SessionBootstrap nên sự kiện PASSWORD_RECOVERY có thể đã phát trước khi có ai nghe.
+// Chỉ lưu LOẠI sự kiện (đặt lại mật khẩu / liên kết hết hạn), không lưu token.
+export const initialAuthRedirect: AuthRedirectState = typeof window === "undefined"
+  ? { kind: "none" }
+  : parseAuthRedirect(window.location.hash, window.location.search);
 
 const client = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
@@ -12,6 +20,19 @@ const client = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     detectSessionInUrl: true,
   },
 });
+
+// Thư viện không xóa hash lỗi (#error=access_denied&error_code=otp_expired…) và chỉ đặt hash rỗng
+// sau khi nhận token. Dọn cả hai để token / mã lỗi không nằm lại trong thanh địa chỉ, lịch sử
+// trình duyệt hay công cụ đo lường.
+if (typeof window !== "undefined" && initialAuthRedirect.kind !== "none") {
+  void client.auth.initialize().then(() => {
+    try {
+      window.history.replaceState(window.history.state, "", sanitizeAuthRedirectUrl(window.location.href));
+    } catch {
+      // Trình duyệt không cho thay đổi lịch sử: bỏ qua.
+    }
+  });
+}
 
 const guestMemoryStorage = new Map<string, string>();
 
@@ -30,6 +51,25 @@ const guestClient = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     },
   },
 });
+
+// Ứng dụng khách dùng một lần cho thao tác nhạy cảm cần đăng nhập lại bằng mật khẩu (xóa tài khoản).
+// Phiên của nó nằm trong bộ nhớ, tách khỏi phiên đang dùng nên không làm đổi phiên của người dùng.
+export function createReauthClient() {
+  const memory = new Map<string, string>();
+  return createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+      detectSessionInUrl: false,
+      storageKey: "cgs-reauth-isolated",
+      storage: {
+        getItem: (key) => memory.get(key) ?? null,
+        setItem: (key, value) => { memory.set(key, value); },
+        removeItem: (key) => { memory.delete(key); },
+      },
+    },
+  });
+}
 
 const delay = (milliseconds: number) => new Promise<void>((resolve) => {
   window.setTimeout(resolve, milliseconds);
