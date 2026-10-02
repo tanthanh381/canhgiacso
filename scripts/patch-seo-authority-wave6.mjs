@@ -207,7 +207,9 @@ const privacy = pageShell({
 <h3>Khách truy cập (không đăng nhập)</h3>
 <p>Bạn dùng được thử thách, cẩm nang và công cụ tra cứu mà không cần tài khoản. Tiến trình, tên người chơi (nếu bạn nhập) và chứng chỉ khách được lưu <strong>ngay trên thiết bị của bạn</strong> (xem bảng bên dưới). Khi bạn chọn đáp án trong thử thách, trình duyệt gửi mã tình huống và lựa chọn tới máy chủ để chấm điểm; yêu cầu này không kèm tên hay email.</p>
 <h3>Tài khoản và tiến trình</h3>
-<p>Nếu đăng ký, hệ thống lưu email, tên đăng nhập, tên hiển thị, kết quả từng tình huống, điểm, lượt chơi và chứng chỉ đã cấp (tên hiển thị, mã chứng chỉ, điểm, xếp loại, ngày cấp). Mật khẩu do dịch vụ xác thực Supabase xử lý và không được lưu dưới dạng đọc được. Dữ liệu này tách khỏi thống kê truy cập và được kiểm soát bằng cơ chế phân quyền của hệ thống.</p>
+<p>Nếu đăng ký, hệ thống lưu email, tên đăng nhập, tên hiển thị, kết quả từng tình huống, điểm, lượt chơi và chứng chỉ đã cấp (tên hiển thị, mã chứng chỉ, điểm, xếp loại, ngày cấp). Mật khẩu do dịch vụ xác thực Supabase xử lý và không được lưu dưới dạng đọc được. Dữ liệu này tách khỏi thống kê truy cập và được kiểm soát bằng cơ chế phân quyền của hệ thống. Bạn tự tải về hoặc tự xóa dữ liệu này trong mục Hồ sơ (xem phần <a href="#quyen-cua-ban">Quyền của bạn</a>).</p>
+<h3>Quên mật khẩu</h3>
+<p>Khi bạn dùng chức năng "Quên mật khẩu", email bạn nhập được gửi tới dịch vụ xác thực Supabase để gửi thư chứa liên kết đặt lại mật khẩu (dùng một lần, có thời hạn). Thông báo hiển thị cho bạn luôn giống nhau dù email có tài khoản hay không, nên không thể dùng chức năng này để dò xem email nào đã đăng ký. Mã trong liên kết không được ghi vào thống kê truy cập hay Google Analytics.</p>
 <h3>Thống kê nội bộ (chỉ sau khi bạn đồng ý)</h3>
 <p>Gồm mã khách và mã phiên ngẫu nhiên ẩn danh, đường dẫn trang, tên miền nguồn giới thiệu, nhãn trình duyệt, hệ điều hành, loại thiết bị, mã quốc gia ước tính từ múi giờ và ngôn ngữ (không dùng GPS hay tra cứu địa chỉ IP), các tham số UTM được cho phép (nguồn, phương tiện, chiến dịch) và loại sự kiện (lượt xem trang, nhịp hoạt động mỗi 60 giây). Không lưu user-agent thô, email hay mã tài khoản trong dữ liệu thống kê. Trước khi bạn đồng ý, mã khách và mã phiên không được tạo và không có yêu cầu thống kê nào được gửi đi.</p>
 <h3>Google Analytics 4 (chỉ sau khi bạn đồng ý)</h3>
@@ -224,25 +226,31 @@ const privacy = pageShell({
 ${storageTable}
 <p><a href="#cookie" data-cgs-consent-open>Mở Cài đặt cookie</a> để chấp nhận, từ chối hoặc rút lại thống kê truy cập bất cứ lúc nào; liên kết "Cài đặt cookie" cũng có ở cuối mỗi trang. Khi rút lại, cookie <code>_ga*</code> và hai khóa thống kê nội bộ trên thiết bị này bị xóa và bộ đếm dừng ngay. Nếu trình duyệt gửi tín hiệu Global Privacy Control hoặc Không theo dõi (DNT), chúng tôi coi đó là từ chối cho đến khi bạn tự chọn khác. Bạn cũng có thể xóa dữ liệu trang web trong phần cài đặt của trình duyệt.</p>
 </section>
+<section id="xac-minh-chung-chi"><h2>Xác minh chứng nhận bằng mã</h2>
+<p>Bất kỳ ai có mã in trên chứng nhận đều có thể nhập vào trang <a href="/xac-minh-chung-chi/">Xác minh chứng nhận</a> để biết mã có thật hay không. Kết quả cố ý tối thiểu: hợp lệ hay không, họ tên đã che (chỉ còn chữ cái đầu của mỗi từ), ngày cấp, xếp loại, tỷ lệ trả lời đúng và số tình huống đã hoàn thành. Không trả về email, tên đăng nhập, mã tài khoản hay điểm chi tiết. Mã chứng nhận được sinh ngẫu nhiên và không đoán được; mỗi lượt tra cứu bị giới hạn tần suất theo địa chỉ IP băm có muối (xem phần giới hạn tốc độ). Nếu bạn xóa tài khoản, chứng nhận bị xóa cùng và mã không còn xác minh được. Chứng nhận chế độ khách (CGS-GUEST-…) chỉ nằm trên thiết bị của người chơi và không thể xác minh.</p></section>
 <section id="thoi-han-luu"><h2>Thời hạn lưu</h2>
 <ul>
 <li><strong>Thống kê nội bộ:</strong> 13 tháng.</li>
-<li><strong>Tài khoản và tiến trình:</strong> đến khi tài khoản bị xóa.</li>
+<li><strong>Tài khoản và tiến trình:</strong> đến khi bạn xóa tài khoản; khi xóa, hồ sơ, email, lượt chơi và chứng nhận bị xóa ngay khỏi hệ thống. Nếu dự án bật sao lưu định kỳ, dữ liệu đã xóa có thể còn trong bản sao lưu cho đến khi bản sao lưu đó hết hạn theo cấu hình của dự án.</li>
+<li><strong>Bản ghi kiểm toán việc xóa tài khoản:</strong> chỉ gồm thời điểm, mã giả danh một chiều và số lượng bản ghi đã xóa; không có email, tên hay địa chỉ IP. Bản ghi này được giữ để chứng minh việc xóa đã diễn ra.</li>
 <li><strong>Dữ liệu giới hạn tốc độ (IP băm có muối):</strong> tối đa 24 giờ.</li>
 <li><strong>Google Analytics 4:</strong> theo thiết lập thời hạn lưu giữ dữ liệu của thuộc tính Google Analytics mà dự án cấu hình; cookie của Google có thời hạn 13 tháng như bảng trên.</li>
 <li><strong>Dữ liệu trên thiết bị của bạn:</strong> theo cột "Thời hạn" trong bảng cookie và lưu trữ cục bộ.</li>
 </ul></section>
 <section id="quyen-cua-ban"><h2>Quyền của bạn và cách thực hiện</h2>
-<p>Bạn có quyền truy cập, chỉnh sửa, xóa dữ liệu cá nhân của mình, rút lại sự đồng ý và phản đối việc xử lý.</p>
+<p>Bạn có quyền truy cập, chỉnh sửa, xóa dữ liệu cá nhân của mình, rút lại sự đồng ý và phản đối việc xử lý. Với dữ liệu tài khoản, bạn tự thực hiện ngay trên website:</p>
 <ul>
 <li><strong>Rút lại đồng ý thống kê:</strong> thực hiện ngay bằng "Cài đặt cookie" ở cuối trang.</li>
 <li><strong>Xóa dữ liệu trên thiết bị:</strong> xóa dữ liệu trang web trong cài đặt trình duyệt.</li>
-<li><strong>Truy cập, chỉnh sửa, xóa dữ liệu tài khoản và phản đối xử lý:</strong> gửi yêu cầu qua các kênh tại trang <a href="/lien-he/">Liên hệ</a>, nêu rõ tên đăng nhập hoặc email của tài khoản. Chúng tôi có thể cần xác minh danh tính hợp lý trước khi xử lý. Vui lòng không đăng thông tin cá nhân vào kênh công khai.</li>
+<li><strong>Tải dữ liệu của bạn:</strong> đăng nhập, mở Hồ sơ và chọn "Tải dữ liệu của tôi (JSON)". Tệp gồm thông tin tài khoản và hồ sơ, tiến trình, từng lượt trả lời, lịch sử các lượt chơi, chứng nhận và lựa chọn cookie lưu trên trình duyệt. Tệp được tạo ngay trên thiết bị của bạn, không gửi tới nơi khác. Mật khẩu không nằm trong tệp vì dịch vụ xác thực không cho đọc lại.</li>
+<li><strong>Chỉnh sửa dữ liệu:</strong> đổi tên hiển thị trong Hồ sơ. Đổi mật khẩu bằng chức năng "Quên mật khẩu" ở hộp thoại đăng nhập: thư chứa liên kết dùng một lần được gửi tới email của tài khoản; sau khi đặt mật khẩu mới, các thiết bị khác đang đăng nhập bị đăng xuất.</li>
+<li><strong>Xóa tài khoản:</strong> trong Hồ sơ, chọn "Xóa tài khoản…", đọc các hậu quả, nhập lại mật khẩu và gõ tên đăng nhập để xác nhận. Hồ sơ, email, lượt chơi, lịch sử và chứng nhận bị xóa ngay và không thể hoàn tác. Tài khoản đang giữ quyền quản trị hoặc biên tập phải được quản trị viên chuyển về thành viên trước, và quản trị viên cuối cùng không thể tự xóa để website không mất người quản trị.</li>
+<li><strong>Các yêu cầu khác</strong> (phản đối xử lý, trợ giúp khi không tự thực hiện được): gửi yêu cầu qua các kênh tại trang <a href="/lien-he/">Liên hệ</a>, nêu rõ tên đăng nhập hoặc email của tài khoản. Chúng tôi có thể cần xác minh danh tính hợp lý trước khi xử lý. Vui lòng không đăng thông tin cá nhân vào kênh công khai.</li>
 </ul></section>
 <section id="chuyen-du-lieu"><h2>Chuyển dữ liệu ra nước ngoài và bên xử lý</h2>
 <ul>
 <li><strong>Google (Google Analytics 4):</strong> chỉ khi bạn đồng ý; Google có thể xử lý dữ liệu tại các trung tâm dữ liệu ngoài Việt Nam.</li>
-<li><strong>Supabase (cơ sở dữ liệu và xác thực):</strong> lưu dữ liệu tài khoản, tiến trình, chứng chỉ và thống kê nội bộ. Vùng đặt dữ liệu: ${dataRegionText}.</li>
+<li><strong>Supabase (cơ sở dữ liệu và xác thực):</strong> lưu dữ liệu tài khoản, tiến trình, chứng chỉ và thống kê nội bộ, đồng thời gửi thư xác nhận đăng ký và thư đặt lại mật khẩu tới email của bạn qua nhà cung cấp gửi thư mà dự án cấu hình. Vùng đặt dữ liệu: ${dataRegionText}.</li>
 <li><strong>GitHub Pages (lưu trữ trang tĩnh):</strong> như mọi dịch vụ lưu trữ web, đơn vị lưu trữ tiếp nhận địa chỉ IP của bạn khi bạn tải trang theo chính sách của họ.</li>
 </ul></section>
 <section id="tre-em"><h2>Trẻ em</h2><p>Website nhằm giáo dục cộng đồng và không chủ ý thu thập dữ liệu của trẻ em. Trẻ em nên dùng website cùng cha mẹ hoặc người giám hộ. Nếu bạn là cha mẹ hoặc người giám hộ và biết con đã tạo tài khoản, hãy liên hệ để yêu cầu xóa.</p></section>
@@ -289,7 +297,7 @@ const contact = pageShell({
 <li><strong>Lỗ hổng bảo mật:</strong> báo riêng tư qua <a href="${GITHUB_SECURITY_POLICY}" rel="noopener noreferrer">chính sách bảo mật và Security Advisory trên GitHub</a>. Không đăng công khai chi tiết có thể bị khai thác trước khi lỗi được khắc phục. Thông tin kỹ thuật có tại <a href="/security.txt">security.txt</a>.</li>
 <li><strong>Lỗi hiển thị, nội dung sai hoặc sự cố không nhạy cảm:</strong> mở <a href="${GITHUB_ISSUES}" rel="noopener noreferrer">Issue trên GitHub</a>. Issue là công khai, vì vậy đừng kèm thông tin cá nhân, thông tin đăng nhập hay dữ liệu tài khoản.</li>
 </ul></section>
-<section id="du-lieu-ca-nhan"><h2>Yêu cầu về dữ liệu cá nhân</h2><p>Quyền truy cập, chỉnh sửa, xóa dữ liệu và phản đối xử lý được mô tả tại <a href="/quyen-rieng-tu/#quyen-cua-ban">quyền riêng tư và dữ liệu người dùng</a>. Hãy ghi rõ tên đăng nhập hoặc email của tài khoản và không đăng thông tin cá nhân vào kênh công khai. Riêng việc rút lại đồng ý thống kê, bạn tự thực hiện ngay bằng liên kết "Cài đặt cookie" ở cuối trang.</p></section>
+<section id="du-lieu-ca-nhan"><h2>Yêu cầu về dữ liệu cá nhân</h2><p>Quyền truy cập, chỉnh sửa, xóa dữ liệu và phản đối xử lý được mô tả tại <a href="/quyen-rieng-tu/#quyen-cua-ban">quyền riêng tư và dữ liệu người dùng</a>. Bạn có thể tự tải dữ liệu và tự xóa tài khoản trong mục Hồ sơ sau khi đăng nhập; nếu không tự thực hiện được, hãy ghi rõ tên đăng nhập hoặc email của tài khoản và không đăng thông tin cá nhân vào kênh công khai. Riêng việc rút lại đồng ý thống kê, bạn tự thực hiện ngay bằng liên kết "Cài đặt cookie" ở cuối trang.</p></section>
 <section id="nan-nhan"><h2>Khi bạn đang là nạn nhân</h2><p>Nếu đã chuyển tiền, mất tài khoản hoặc bị đe dọa, hãy ưu tiên liên hệ ngân hàng/nền tảng/cơ quan chức năng qua kênh chính thức. Cảnh Giác Số không thay thế quy trình tiếp nhận tố giác hoặc hỗ trợ khẩn cấp của các đơn vị đó.</p></section>`,
 });
 
@@ -304,9 +312,51 @@ const security = pageShell({
   lead: "Cảnh Giác Số xử lý chủ đề chống lừa đảo nên ưu tiên giảm dữ liệu nhạy cảm, minh bạch về analytics và tách công cụ tra cứu khỏi yêu cầu nhập bí mật cá nhân.",
   body: `
 <section><h2>Không yêu cầu bí mật đăng nhập</h2><p>Website không yêu cầu nhập OTP, PIN, CVV, mật khẩu ngân hàng hoặc mã khôi phục vào nội dung công cụ tra cứu. Nếu một trang yêu cầu các dữ liệu này, hãy rời khỏi trang và tự mở kênh chính thức của tổ chức liên quan.</p></section>
+<section id="tai-khoan"><h2>Bảo vệ tài khoản</h2>
+<ul>
+<li>Mật khẩu từ 10 đến 72 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt; mật khẩu do dịch vụ xác thực xử lý, không lưu dạng đọc được.</li>
+<li>Quên mật khẩu: thư đặt lại luôn được trả lời giống nhau dù email có tài khoản hay không; liên kết dùng một lần, có thời hạn; sau khi đặt lại, các thiết bị khác bị đăng xuất.</li>
+<li>Xóa tài khoản cần nhập lại mật khẩu ngay trước khi xóa và gõ tên đăng nhập; máy chủ kiểm tra lại phiên đăng nhập còn mới. Tài khoản quản trị phải qua xác thực hai lớp (TOTP) và dùng email đã xác nhận.</li>
+<li>Mỗi yêu cầu tới máy chủ dữ liệu, kể cả tải dữ liệu, xóa tài khoản và xác minh chứng nhận, đều bị giới hạn tần suất.</li>
+<li>Chứng nhận có mã ngẫu nhiên, xác minh công khai tại <a href="/xac-minh-chung-chi/">trang xác minh</a> với dữ liệu tối thiểu và tên đã che.</li>
+</ul></section>
 <section><h2>Analytics và quyền riêng tư</h2><p>Thống kê truy cập (first-party và Google Analytics 4) chỉ chạy sau khi bạn chấp nhận trong banner cookie và chỉ phục vụ thống kê ở cấp tổng hợp như đường dẫn, referrer host, thiết bị và UTM allowlist. Bạn có thể từ chối hoặc rút lại bất cứ lúc nào. Xem thêm <a href="/quyen-rieng-tu/">quyền riêng tư & dữ liệu người dùng</a>.</p></section>
 <section id="bao-cao-lo-hong"><h2>Báo cáo lỗ hổng</h2><p>Khi phát hiện lỗi bảo mật, hãy báo cáo theo nguyên tắc tối thiểu hóa dữ liệu: không truy cập, tải xuống hoặc chia sẻ dữ liệu không thuộc về bạn; chỉ cung cấp thông tin đủ để đội vận hành xác minh và khắc phục. Gửi báo cáo riêng tư qua <a href="${GITHUB_SECURITY_POLICY}" rel="noopener noreferrer">chính sách bảo mật và Security Advisory trên GitHub</a>; các kênh khác có tại trang <a href="/lien-he/">Liên hệ</a>.</p></section>
 <section><h2>Tài nguyên bảo mật công khai</h2><p>Website có tệp <a href="/security.txt">security.txt</a> (theo RFC 9116) nêu kênh báo cáo kỹ thuật và chính sách tiếp nhận.</p></section>`,
+});
+
+const verifyCertificate = pageShell({
+  title: "Xác minh chứng nhận | Cảnh Giác Số",
+  description: "Nhập mã in trên chứng nhận hoàn thành khóa đào tạo Cảnh Giác Số để kiểm tra chứng nhận có thật hay không; kết quả chỉ hiển thị thông tin tối thiểu và che tên người được cấp.",
+  canonical: `${SITE}/xac-minh-chung-chi/`,
+  type: "WebPage",
+  h1: "Xác minh chứng nhận",
+  eyebrow: "XÁC MINH CHỨNG NHẬN",
+  updated: PRIVACY_UPDATED,
+  extraHead: '\n  <link rel="stylesheet" href="/verify-certificate.css" />',
+  lead: "Nhà tuyển dụng, đơn vị đào tạo hoặc chính người học có thể nhập mã in trên chứng nhận để biết chứng nhận có do Cảnh Giác Số cấp hay không.",
+  body: `
+<section class="verify-card" aria-labelledby="verify-heading">
+<h2 id="verify-heading">Kiểm tra mã chứng nhận</h2>
+<form id="verify-form" class="verify-form" method="get" action="/xac-minh-chung-chi/" novalidate>
+<label for="verify-code">Mã chứng nhận</label>
+<input id="verify-code" name="code" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="64" placeholder="CGS-2026-0123456789ABCDEF" aria-describedby="verify-hint" />
+<p id="verify-hint" class="verify-hint">Mã nằm ở cuối chứng nhận, dạng CGS-năm-ký tự. Chữ hoa, chữ thường và khoảng trắng đều được chấp nhận.</p>
+<button type="submit" class="verify-submit">Xác minh</button>
+</form>
+<div id="verify-result" class="verify-result" role="status" aria-live="polite" tabindex="-1" hidden></div>
+<noscript><p class="seo-note">Trang này cần bật JavaScript để gọi dịch vụ xác minh.</p></noscript>
+</section>
+<script src="/verify-certificate.js" defer></script>
+<section id="ket-qua"><h2>Kết quả cho biết điều gì?</h2>
+<ul>
+<li><strong>Hợp lệ:</strong> mã khớp với một chứng nhận do hệ thống cấp cho tài khoản đã hoàn thành các tình huống. Trang hiển thị họ tên đã che (chỉ còn chữ cái đầu mỗi từ), ngày cấp, xếp loại, tỷ lệ trả lời đúng và số tình huống đã hoàn thành.</li>
+<li><strong>Không tìm thấy:</strong> không có chứng nhận nào khớp, hoặc chứng nhận đã bị xóa cùng tài khoản của người học.</li>
+<li><strong>Bản ghi nhận chế độ khách (CGS-GUEST-…):</strong> do trình duyệt tự tạo khi chơi không đăng nhập, lưu trên thiết bị của người chơi và không thể xác minh.</li>
+</ul>
+<p>Chứng nhận chỉ chứng minh người học đã hoàn thành bài thực hành mô phỏng của Cảnh Giác Số; đây không phải chứng chỉ nghề nghiệp hay xác nhận năng lực của một tổ chức đào tạo bên ngoài.</p></section>
+<section id="du-lieu-xac-minh"><h2>Dữ liệu và quyền riêng tư khi xác minh</h2>
+<p>Trang không hiển thị email, tên đăng nhập, mã tài khoản hay điểm chi tiết. Mỗi lượt tra cứu được giới hạn tần suất theo địa chỉ IP đã băm có muối (giữ tối đa 24 giờ); mã bạn nhập không được gửi tới Google Analytics hay thống kê nội bộ. Xem thêm <a href="/quyen-rieng-tu/#xac-minh-chung-chi">quyền riêng tư & dữ liệu người dùng</a>.</p></section>`,
 });
 
 await write("gioi-thieu/index.html", about);
@@ -314,6 +364,7 @@ await write("quyen-rieng-tu/index.html", privacy);
 await write("chinh-sach-bien-tap/index.html", editorial);
 await write("lien-he/index.html", contact);
 await write("bao-mat/index.html", security);
+await write("xac-minh-chung-chi/index.html", verifyCertificate);
 
 // security.txt (RFC 9116) được sinh từ cấu hình để Contact mailto: chỉ xuất hiện khi chủ dự án đã điền email.
 const securityTxt = [
@@ -507,6 +558,7 @@ ensureUrl(`${SITE}/chinh-sach-bien-tap/`, "0.7");
 ensureUrl(`${SITE}/lien-he/`, "0.6");
 ensureUrl(`${SITE}/quyen-rieng-tu/`, "0.6");
 ensureUrl(`${SITE}/bao-mat/`, "0.6");
+ensureUrl(`${SITE}/xac-minh-chung-chi/`, "0.4");
 ensureUrl(`${SITE}/phuong-phap-kiem-chung/`, "0.8");
 refreshLastmod(`${SITE}/`);
 refreshLastmod(`${SITE}/kien-thuc/`);
@@ -515,6 +567,7 @@ refreshLastmod(`${SITE}/chinh-sach-bien-tap/`);
 refreshLastmod(`${SITE}/lien-he/`);
 refreshLastmod(`${SITE}/quyen-rieng-tu/`);
 refreshLastmod(`${SITE}/bao-mat/`);
+refreshLastmod(`${SITE}/xac-minh-chung-chi/`);
 refreshLastmod(`${SITE}/phuong-phap-kiem-chung/`);
 
 for (const file of await htmlFiles(knowledgeDir)) {
