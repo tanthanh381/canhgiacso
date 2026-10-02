@@ -1,6 +1,10 @@
 import { expect, test } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
+  // Banner đồng ý cookie là lớp cố định ở đáy màn hình; lưu trước lựa chọn "từ chối" để nó không che các thao tác kiểm thử.
+  await page.addInitScript(() => {
+    try { window.localStorage.setItem("cgs-consent-v1", JSON.stringify({ analytics: false, ts: Date.now(), v: 1 })); } catch { /* storage bị chặn */ }
+  });
   await page.route("**/rest/v1/rpc/get_public_site_content", (route) => route.abort());
 });
 
