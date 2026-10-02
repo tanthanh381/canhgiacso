@@ -256,7 +256,11 @@ body.cgs-consent-open {
   border-bottom: 1px solid var(--seo-line, #e3e0dd);
   text-align: left;
   vertical-align: top;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+}
+
+.cgs-data-table td:last-child {
+  min-width: 7.5em;
 }
 
 .cgs-data-table thead th {
@@ -272,6 +276,7 @@ body.cgs-consent-open {
 
 .cgs-data-table code {
   font-size: 13px;
+  overflow-wrap: anywhere;
 }
 
 @media (max-width: 720px) {
@@ -286,6 +291,15 @@ body.cgs-consent-open {
   .cgs-data-table {
     border: 0;
     background: transparent;
+  }
+
+  .cgs-data-table caption {
+    display: block;
+    width: 100%;
+  }
+
+  .cgs-data-table td:last-child {
+    min-width: 0;
   }
 
   .cgs-data-table thead {
