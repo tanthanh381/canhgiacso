@@ -20,6 +20,7 @@ export function evaluateSecurityHeaders(headers) {
   const get = (name) => (typeof headers.get === "function" ? headers.get(name) : headers[name]) ?? "";
   const rules = {
     "content-security-policy": (value) => {
+      // 'self' chỉ dành cho /gioi-thieu/hoat-hinh.html (iframe cùng nguồn gốc); mọi trang khác phải là 'none'.
       if (!/frame-ancestors\s+('none'|'self')/i.test(value)) return "thiếu frame-ancestors 'none'";
       if (/script-src[^;]*'unsafe-(inline|eval)'/i.test(value)) return "script-src cho phép 'unsafe-inline/unsafe-eval'";
       if (!/form-action\s+'self'/i.test(value)) return "thiếu form-action 'self'";

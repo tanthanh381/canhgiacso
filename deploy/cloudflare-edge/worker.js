@@ -41,17 +41,13 @@ export const CSP_DIRECTIVES = {
   "upgrade-insecure-requests": [],
 };
 
-// Trang hoạt hình nhúng iframe tự chứa script/style inline và ảnh data:. Nó chỉ được nhúng bởi chính site.
-// Nên chuyển script/style ra tệp riêng để bỏ ngoại lệ này (xem README).
+// Trang hoạt hình /gioi-thieu/hoat-hinh.html được nhúng bằng iframe bởi chính site. Script và style của nó đã
+// nằm trong tệp riêng (hoat-hinh.js, hoat-hinh.css) nên KHÔNG còn ngoại lệ CSP: trang dùng đúng CSP của
+// CSP_DIRECTIVES (không 'unsafe-inline'). Khác biệt duy nhất là được phép bị nhúng bởi cùng nguồn gốc:
+// frame-ancestors 'self' và X-Frame-Options SAMEORIGIN thay cho 'none'/DENY.
 export const ANIMATION_PATH = "/gioi-thieu/hoat-hinh.html";
 export const ANIMATION_CSP_DIRECTIVES = {
-  "default-src": ["'none'"],
-  "script-src": ["'unsafe-inline'"],
-  "style-src": ["'unsafe-inline'"],
-  "img-src": ["'self'", "data:"],
-  "font-src": ["'self'", "data:"],
-  "base-uri": ["'none'"],
-  "form-action": ["'none'"],
+  ...CSP_DIRECTIVES,
   "frame-ancestors": ["'self'"],
 };
 
