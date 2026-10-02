@@ -20,6 +20,7 @@
   /* Status and accent colours. --danger is a solid/tint surface that carries white text; use --brand for danger text. */
   --danger: #b1122f;
   --highlight: #f3c400;
+  --on-highlight: #2b2300; /* text and icons on a solid --highlight fill (both themes) */
   --success: #18794e;
   --warning: #8a4f00;
 

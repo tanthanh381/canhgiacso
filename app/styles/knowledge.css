@@ -280,13 +280,13 @@
 }
 
 .checklist-priority.essential {
-  background: color-mix(in srgb, #d86b48 16%, var(--surface));
-  color: color-mix(in srgb, #a33b1f 85%, var(--ink));
+  background: color-mix(in srgb, var(--brand) 14%, var(--surface));
+  color: var(--brand);
 }
 
 .checklist-priority.recommended {
   background: color-mix(in srgb, var(--highlight) 32%, var(--surface));
-  color: var(--brand-strong);
+  color: var(--ink);
 }
 
 .checklist-items strong {
