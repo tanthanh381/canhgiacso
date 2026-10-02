@@ -5,12 +5,6 @@
   font-size: 20px;
 }
 
-.difficulty-filter button.active {
-  background: var(--brand-fill);
-  color: var(--on-brand);
-  border-color: var(--brand-fill);
-}
-
 .scenario-item:hover {
   background: var(--paper);
 }
@@ -46,11 +40,6 @@
   pointer-events: none;
 }
 
-.difficulty-filter button:disabled {
-  opacity: .48;
-  cursor: not-allowed;
-}
-
 .unlock-progress > div:first-child {
   display: flex;
   align-items: center;
@@ -71,11 +60,6 @@
   border-radius: inherit;
   background: var(--highlight);
   transition: width .3s ease;
-}
-
-.random-button:disabled {
-  opacity: .45;
-  cursor: not-allowed;
 }
 
 .scenario-copy {
@@ -142,11 +126,6 @@
   height: 100%;
   background: var(--highlight);
   transition: width .3s;
-}
-
-.evidence-link {
-  cursor: pointer;
-  text-align: left;
 }
 
 .scenario-stage {
@@ -331,7 +310,7 @@
 }
 
 .badge-preview span.unlocked {
-  color: #464646;
+  color: var(--on-highlight);
   background: var(--highlight);
 }
 
@@ -443,7 +422,7 @@
   border-color: color-mix(in srgb, #58b980 65%, var(--line));
 }
 
-.panel-heading h1 {
+.panel-heading h2 {
   margin: 0;
   font-size: 25px;
   font-weight: 750;
@@ -492,11 +471,6 @@
   padding-top: 20px;
 }
 
-.status-card:nth-child(3),
-.status-card:nth-child(4) {
-  display: none;
-}
-
 .status-card .badge-icon {
   width: 32px;
   height: 32px;
@@ -535,20 +509,10 @@
   align-items: end;
   justify-content: space-between;
   padding: 0 5px 17px;
-  order: 1;
   padding-bottom: 12px;
 }
 
-.difficulty-filter {
-  gap: 5px;
-  overflow-x: auto;
-  padding: 2px 1px 12px;
-  scrollbar-width: none;
-  display: none;
-}
-
 .ux-scenario-tools {
-  order: 3;
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 8px;
@@ -572,7 +536,6 @@
   margin: 0 0 12px;
   border: 1px solid color-mix(in srgb, var(--highlight) 58%, var(--line));
   border-radius: 11px;
-  order: 4;
   padding: 8px 10px;
   margin-bottom: 8px;
   border-style: dashed;
@@ -605,6 +568,7 @@
 }
 
 .ux-learning-moment {
+  width: 100%;
   margin-top: 13px;
   padding-top: 12px;
   border-top: 1px solid color-mix(in srgb, currentColor 12%, transparent);
@@ -658,13 +622,13 @@
   background: color-mix(in srgb, var(--highlight) 10%, var(--surface));
 }
 
-.ux-guest-conversion > div:first-child {
+.ux-guest-conversion-body {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.ux-guest-conversion > div:first-child > span:first-child {
+.ux-guest-conversion-icon {
   font-size: 22px;
 }
 
@@ -681,7 +645,7 @@
   line-height: 1.4;
 }
 
-.ux-guest-conversion > div:last-child {
+.ux-guest-conversion-actions {
   display: flex;
   align-items: center;
   gap: 7px;
@@ -697,8 +661,9 @@
   cursor: pointer;
 }
 
+/* Opens the scenario list and the tips panel; only needed where those panels are slide-overs (see the 900px block). */
 .ux-stage-actions {
-  display: flex;
+  display: none;
   justify-content: flex-end;
   gap: 8px;
   margin-bottom: 10px;
@@ -729,10 +694,10 @@
 .scenario-number.done {
   background: var(--highlight);
   border-color: var(--highlight);
-  color: #464646;
+  color: var(--on-highlight);
 }
 
-.ux-status-progress > span:first-child {
+.ux-status-progress-icon {
   width: 30px;
   height: 30px;
   border-radius: 9px;
@@ -903,6 +868,7 @@
 
 .feedback {
   display: flex;
+  flex-wrap: wrap;
   gap: 20px;
   justify-content: space-between;
   align-items: end;
@@ -911,6 +877,14 @@
   border: 1px solid;
   border-radius: var(--radius-card);
   box-shadow: none;
+}
+
+/* Text and "next" button share the first row; the learning moment wraps below (the 900px block stacks everything). */
+@media (min-width: 901px) {
+  .feedback-copy {
+    flex: 1 1 320px;
+    min-width: 0;
+  }
 }
 
 .feedback.success {
@@ -1153,20 +1127,7 @@
   background: var(--paper);
   padding: 0 11px;
   margin-bottom: 10px;
-  order: 2;
   border-radius: var(--radius-control);
-  border-color: var(--control-line);
-}
-
-.difficulty-filter button {
-  flex: 0 0 auto;
-  border: 1px solid var(--line);
-  background: transparent;
-  border-radius: 20px;
-  padding: 6px 9px;
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 12px;
   border-color: var(--control-line);
 }
 
@@ -1198,21 +1159,6 @@
   color: var(--ink);
   font-size: 13px;
   border-radius: var(--radius-control);
-  border-color: var(--control-line);
-}
-
-.random-button {
-  width: 100%;
-  margin-top: 12px;
-  border: 1px dashed color-mix(in srgb, var(--brand) 50%, var(--line));
-  background: transparent;
-  border-radius: 10px;
-  padding: 10px;
-  cursor: pointer;
-  font-weight: 750;
-  font-size: 13px;
-  display: none;
-  color: var(--brand);
   border-color: var(--control-line);
 }
 
@@ -1426,7 +1372,6 @@
   flex-direction: column;
   gap: 6px;
   scrollbar-width: thin;
-  order: 5;
   height: calc(100vh - 300px);
   padding: 7px 10px 7px 7px;
   margin: -7px -7px -7px -7px;
@@ -1548,6 +1493,7 @@
     right: min(305px, calc(92vw - 44px));
   }
   .ux-stage-actions {
+    display: flex;
     justify-content: space-between;
     margin-bottom: 9px;
   }
@@ -1577,7 +1523,7 @@
     display: grid;
     gap: 10px;
   }
-  .ux-guest-conversion > div:last-child {
+  .ux-guest-conversion-actions {
     justify-content: flex-start;
     flex-wrap: wrap;
   }

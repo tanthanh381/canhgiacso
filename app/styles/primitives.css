@@ -15,7 +15,7 @@
   place-items: center;
   border-radius: 11px;
   background: color-mix(in srgb, var(--highlight) 72%, var(--surface));
-  color: #464646;
+  color: var(--on-highlight);
   font-weight: 900;
 }
 
@@ -187,4 +187,56 @@
     right: -110px;
     top: -120px;
   }
+}
+
+/* Full-page status card shown instead of the app while the session is verified or after a rendering error (app/shared/status-card.tsx). */
+.session-bootstrap {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.session-bootstrap-card {
+  width: min(100%, 440px);
+  padding: 32px 28px;
+  text-align: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.session-bootstrap-mark {
+  margin-bottom: 14px;
+  font-size: 32px;
+  line-height: 1;
+  color: var(--brand);
+}
+
+.session-bootstrap h1 {
+  margin: 0 0 10px;
+  font-size: 22px;
+  line-height: 1.3;
+}
+
+.session-bootstrap p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.session-bootstrap button {
+  margin-top: 18px;
+  min-height: 44px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--brand-fill);
+  color: var(--on-brand);
+  font-weight: 750;
+  cursor: pointer;
 }

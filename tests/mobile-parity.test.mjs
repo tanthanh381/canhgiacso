@@ -2,20 +2,20 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import { readAppStyles } from "./helpers/styles.mjs";
+import { primaryNavLabels } from "./helpers/shell.mjs";
 
 const read = (path) => readFileSync(path, "utf8");
-const page = `${read("app/page.tsx")}\n${read("app/domains/shell/view.tsx")}`;
-const uxSource = read("app/ux-refresh.tsx");
+const page = `${read("app/page.tsx")}\n${read("app/domains/shell/view.tsx")}\n${read("app/domains/shell/navigation.ts")}`;
+const mobileNav = read("app/domains/shell/mobile-nav.tsx");
 const ux = readAppStyles();
 const practice = ux;
 
 test("mobile keeps the same primary destinations as desktop", () => {
-  assert.match(page, />Thử thách<\/button>/);
-  assert.match(page, /<summary[\s\S]*?>Cẩm nang<\/summary>/);
-  assert.match(page, />Tin tức<\/button>/);
-  assert.match(page, />Thực hành<\/button>/);
-  assert.match(page, />Thành tích<\/button>/);
-  assert.match(uxSource, /className="ux-about-nav-item"[\s\S]*?Giới thiệu/);
+  assert.deepEqual(primaryNavLabels(), ["Thử thách", "Cẩm nang", "Tin tức", "Thực hành", "Thành tích"]);
+  assert.match(page, /<summary[\s\S]*?\{item\.label\}<\/summary>/);
+  assert.match(page, /PRIMARY_NAV\.map/);
+  assert.match(mobileNav, /PRIMARY_NAV\.map/);
+  assert.match(mobileNav, /className="ux-about-nav-item"[\s\S]*?Giới thiệu/);
   assert.match(practice, /grid-template-columns:\s*repeat\(6,\s*1fr\)/);
 });
 

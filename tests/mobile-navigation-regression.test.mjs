@@ -2,24 +2,40 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import { declOf, readAppStyles } from "./helpers/styles.mjs";
+import { primaryNavLabels, readShell } from "./helpers/shell.mjs";
 
 const read = (path) => readFileSync(path, "utf8");
-const uxSource = read("app/ux-refresh.tsx");
+const mobileNav = readShell("mobile-nav.tsx");
+const header = readShell("view.tsx");
+const menus = readShell("header-menus.ts");
+const drawers = readShell("drawers.tsx");
+const navigation = readShell("navigation.ts");
 const uxCss = readAppStyles();
 const globalsCss = uxCss;
 const MOBILE = "@media (max-width: 900px)";
-const practiceSource = read("app/interactive-practice-nav.tsx");
-const practiceCss = uxCss;
 const visualCss = uxCss;
 
-test("mobile primary navigation renders six destinations including Giới thiệu without duplicate practice", () => {
-  assert.match(uxSource, /const PRIMARY_VIEWS: PrimaryView\[\] = \["Thử thách", "Cẩm nang", "Tin tức", "Thành tích"\]/);
-  assert.doesNotMatch(uxSource, /PRIMARY_VIEWS[^\n]+Thực hành/);
-  assert.match(practiceSource, /className=\{active \? "active ux-practice-nav-item" : "ux-practice-nav-item"\}/);
-  assert.match(uxSource, /className="ux-about-nav-item"[\s\S]*?Giới thiệu/);
-  assert.match(practiceCss, /grid-template-columns:\s*repeat\(6,\s*1fr\)/);
+test("mobile primary navigation renders six destinations including Giới thiệu from the same list as the desktop header", () => {
+  // One list (PRIMARY_NAV) feeds the desktop header and the mobile bar, so the two can not drift apart.
+  assert.deepEqual(primaryNavLabels(), ["Thử thách", "Cẩm nang", "Tin tức", "Thực hành", "Thành tích"]);
+  assert.match(mobileNav, /PRIMARY_NAV\.map/);
+  assert.match(header, /PRIMARY_NAV\.map/);
+  assert.match(mobileNav, /className="ux-about-nav-item"[\s\S]*?Giới thiệu/);
+  assert.match(mobileNav, /aria-current=\{active \? "page" : undefined\}/);
+  assert.match(navigation, /ariaLabel: "Thực hành tương tác"/);
   assert.match(uxCss, /grid-template-columns:\s*repeat\(6,\s*1fr\)/);
   assert.match(uxCss, /\.ux-bottom-nav \.ux-about-nav-item\s*\{\s*order:\s*6;/);
+});
+
+test("navigation components do not scan or patch the DOM", () => {
+  for (const file of ["view.tsx", "mobile-nav.tsx", "management-menu.tsx", "simulation-banner.tsx", "drawers.tsx", "header-menus.ts", "skip-link.tsx"]) {
+    const source = readShell(file);
+    assert.doesNotMatch(source, /MutationObserver|createPortal|querySelector|\.click\(\)|classList\./, `${file} must express its UI in React state`);
+  }
+  for (const file of ["app/page.tsx", "app/bootstrap.tsx", "app/layout.tsx", "app/domains/training/stage-widgets.tsx"]) {
+    assert.doesNotMatch(read(file), /MutationObserver|createPortal/, `${file} must not inject UI into DOM it does not own`);
+  }
+  assert.ok(!read("github-pages/main.tsx").includes("UxRefresh"), "the entry renders the application only");
 });
 
 test("mobile navigation stays below header and never falls back to bottom navigation", () => {
@@ -31,7 +47,11 @@ test("mobile navigation stays below header and never falls back to bottom naviga
 });
 
 test("mobile overlays are isolated above backdrop and outside the navigation stacking context", () => {
-  assert.match(uxSource, /<\/nav>[\s\S]*?ux-utility-backdrop[\s\S]*?ux-mobile-menu-backdrop[\s\S]*?ux-utility-popover-mobile[\s\S]*?ux-mobile-knowledge-menu/);
+  // The sheets are siblings rendered after the bar (never inside it), so the bar's stacking context can not trap them.
+  const bar = mobileNav.slice(mobileNav.indexOf("export function MobileNav"), mobileNav.indexOf("export function MobileKnowledgeMenu"));
+  assert.match(bar, /<\/nav>\s*\);\s*\}/);
+  assert.doesNotMatch(bar, /ux-mobile-knowledge-menu|ux-mobile-menu-backdrop/);
+  assert.match(header, /<MobileNav[\s\S]*?\/>\s*\{menus\.compact && menus\.open === "management"[\s\S]*?<ManagementSheet[\s\S]*?<MobileKnowledgeMenu/);
   assert.equal(declOf(uxCss, ".ux-utility-popover-mobile", "z-index", MOBILE), "88");
   assert.equal(declOf(uxCss, ".ux-mobile-knowledge-menu", "z-index", MOBILE), "86");
   assert.equal(declOf(uxCss, ".ux-utility-backdrop", "z-index", MOBILE), "82");
@@ -39,17 +59,24 @@ test("mobile overlays are isolated above backdrop and outside the navigation sta
 });
 
 test("desktop and mobile utility popovers cannot render visibly at the same breakpoint", () => {
+  // React renders exactly one of them (compact decides); the CSS keeps the mobile sheet out of sight on wide screens as well.
+  const management = readShell("management-menu.tsx");
+  assert.match(management, /open && !compact && <ManagementPopover/);
+  assert.match(header, /menus\.compact && menus\.open === "management"/);
   assert.equal(declOf(uxCss, ".ux-utility-popover-mobile", "display"), "none");
-  assert.equal(declOf(uxCss, ".ux-utility-popover-desktop", "display", MOBILE), "none");
   assert.equal(declOf(uxCss, ".ux-utility-popover-mobile", "display", MOBILE), "block");
   assert.equal(declOf(uxCss, ".ux-utility-popover-mobile", "position", MOBILE), "fixed");
 });
 
 test("mobile menu state is mutually exclusive and dismissible", () => {
-  assert.match(uxSource, /setMobileKnowledgeOpen\(false\);\s*setUtilityOpen\(\(value\) => !value\)/);
-  assert.match(uxSource, /setUtilityOpen\(false\), setMobileKnowledgeOpen\(\(value\) => !value\)/);
-  assert.match(uxSource, /event\.key !== "Escape"/);
-  assert.match(uxSource, /setUtilityOpen\(false\);[\s\S]*?setMobileKnowledgeOpen\(false\);[\s\S]*?setInsightOpen\(false\);[\s\S]*?setScenariosOpen\(false\);/);
+  // One state value holds the open menu, so opening one closes the other by construction.
+  assert.match(menus, /export type HeaderMenu = "knowledge" \| "management"/);
+  assert.match(menus, /useState<\{ menu: HeaderMenu \| null; compact: boolean \}>/);
+  assert.match(menus, /event\.key !== "Escape"/);
+  assert.match(menus, /closest\("\[data-menu-surface\]"\)/);
+  assert.match(menus, /state\.compact !== compact\) setState\(\{ menu: null, compact \}\)/, "crossing the breakpoint closes the menu");
+  assert.match(drawers, /event\.key === "Escape"\) close\(\)/);
+  assert.match(drawers, /opener\.current\?\.focus\(\)/, "closing a drawer returns focus to its button");
 });
 
 test("drawers always sit above mobile navigation and popup layers", () => {
@@ -68,9 +95,9 @@ test("mobile runtime status stays in document flow below the fixed navigation", 
   assert.equal(declOf(uxCss, ".sync-status", "transform", MOBILE), "none");
 });
 
-test("mobile checklist action delegates to the real desktop checklist control", () => {
-  assert.match(uxSource, /function knowledgeSubmenuButton\(label: string\)/);
-  assert.match(uxSource, /knowledgeSubmenuButton\("Danh sách kiểm tra"\)\?\.click\(\)/);
+test("mobile checklist action goes through the same handler as the desktop menu", () => {
+  assert.match(header, /<MobileKnowledgeMenu onOpenArticles=\{openArticles\} onOpenChecklist=\{openChecklist\}/);
+  assert.match(header, /const openChecklist = \(\) => \{ navigate\("knowledge"\); scrollToChecklist\(\); \};/);
 });
 
 test("application modals always stay above mobile navigation and drawers", () => {

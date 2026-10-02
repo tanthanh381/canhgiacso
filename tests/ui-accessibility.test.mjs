@@ -84,7 +84,8 @@ test("static pages get an accessible, CSP-safe theme toggle", async () => {
 
 test("UI controls use inline SVG icons instead of emoji or font glyphs", async () => {
   const files = [
-    "app/page.tsx", "app/ux-refresh.tsx", "app/interactive-practice-nav.tsx", "app/domains/shell/view.tsx",
+    "app/page.tsx", "app/domains/shell/view.tsx", "app/domains/shell/mobile-nav.tsx", "app/domains/shell/management-menu.tsx",
+    "app/domains/shell/simulation-banner.tsx", "app/domains/shell/drawers.tsx", "app/domains/training/stage-widgets.tsx", "app/bootstrap.tsx",
     "app/domains/dashboard/view.tsx", "app/domains/security-awareness/view.tsx", "app/shared/ui-primitives.tsx",
   ];
   for (const file of files) {

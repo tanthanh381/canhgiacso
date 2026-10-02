@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./styles/index.css";
+import { AppRoot } from "./bootstrap";
 
 const siteUrl = "https://canhgiacso.com";
 const siteTitle = "Cảnh Giác Số: Nhận diện lừa đảo trực tuyến | HDBank";
@@ -191,47 +192,13 @@ const bootStyles = `
   }
 `;
 
-const bootScript = `
-  (function () {
-    var body = document.body;
-    var shell = document.getElementById('refresh-shell');
-    var observer;
-    var done = false;
-
-    function reveal() {
-      if (done) return;
-      done = true;
-      if (observer) observer.disconnect();
-      body.classList.add('refresh-ready');
-    }
-
-    function revealWhenReady() {
-      if (!shell) return reveal();
-      var choice = shell.querySelector('.choice-list .choice');
-      if (!choice || !choice.hasAttribute('disabled')) reveal();
-    }
-
-    if (shell && 'MutationObserver' in window) {
-      observer = new MutationObserver(revealWhenReady);
-      observer.observe(shell, {
-        subtree: true,
-        childList: true,
-        attributes: true,
-        attributeFilter: ['disabled', 'class']
-      });
-    }
-
-    requestAnimationFrame(function () {
-      requestAnimationFrame(revealWhenReady);
-    });
-
-    window.setTimeout(reveal, 2200);
-  })();
-`;
+// Safety net only: the page lifts the loading screen itself (useAppReady) once the first interaction can work.
+// This makes sure the server-rendered page is shown even if the client bundle never starts.
+const bootScript = `window.setTimeout(function(){document.body.classList.add('refresh-ready')},2200);`;
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="vi-VN">
+    <html lang="vi-VN" suppressHydrationWarning>
       <body className="refresh-boot">
         <script
           type="application/ld+json"
@@ -244,10 +211,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <span>Cảnh giác số</span>
           </div>
         </div>
-        <div id="refresh-shell">{children}</div>
+        <div id="refresh-shell"><AppRoot verifySession={false}>{children}</AppRoot></div>
         <noscript>
           <style>{`#refresh-shell{visibility:visible!important}#refresh-loader{display:none!important}`}</style>
         </noscript>
+        <script src="/theme-init.js" defer />
+        <script src="/consent.js" defer />
         <script dangerouslySetInnerHTML={{ __html: bootScript }} />
       </body>
     </html>

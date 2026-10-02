@@ -1,9 +1,5 @@
 /* Navigation that only exists on small screens (bottom bar, Cẩm nang sheet, management popover) plus the touch-size chips in the top bar. */
 
-.app.ux-banner-dismissed .security-awareness-banner {
-  display: none;
-}
-
 .ux-utility-menu {
   position: relative;
 }
@@ -181,9 +177,6 @@
     line-height: 1.4;
     font-weight: 500;
   }
-  .ux-utility-popover-desktop {
-    display: none;
-  }
   .ux-utility-popover-mobile {
     display: block;
     position: fixed;
@@ -246,10 +239,8 @@
 }
 
 @media (max-width: 900px) {
-  .ux-bottom-nav .ux-practice-nav-item {
-    min-width: 0;
-  }
   .ux-bottom-nav button {
+    min-width: 0;
     border: 0;
     background: transparent;
     color: var(--muted);

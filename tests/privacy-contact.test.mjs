@@ -41,18 +41,18 @@ test("privacy page covers operator, purposes, data, cookie table, retention, rig
 });
 
 test("every storage key the application writes is documented in the privacy table", async () => {
-  const [html, storage, checklist, ux] = await Promise.all([
+  const [html, storage, checklist, banner] = await Promise.all([
     read("public/quyen-rieng-tu/index.html"),
     read("app/shared/browser-storage.ts"),
     read("app/domains/security-awareness/checklist.ts"),
-    read("app/ux-refresh.tsx"),
+    read("app/domains/shell/simulation-banner.tsx"),
   ]);
   const keys = [
     storage.match(/THEME_KEY = "([^"]+)"/)?.[1],
     storage.match(/GUEST_CERTIFICATE_KEY = "([^"]+)"/)?.[1],
     storage.match(/LEGACY_PROGRESS_KEY = "([^"]+)"/)?.[1],
     checklist.match(/SECURITY_CHECKLIST_KEY = "([^"]+)"/)?.[1],
-    ux.match(/BANNER_KEY = "([^"]+)"/)?.[1],
+    banner.match(/SIMULATION_BANNER_KEY = "([^"]+)"/)?.[1],
   ];
   for (const key of keys) {
     assert.ok(key, "storage key constant could not be read");

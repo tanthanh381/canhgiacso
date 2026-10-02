@@ -7,7 +7,10 @@ test("challenge levels are progressively unlocked in the UI", async () => {
   const progression = await readFile(new URL("../app/progression.ts", import.meta.url), "utf8");
   assert.match(page, /getUnlockedDifficulties/);
   assert.match(page, /disabled=\{!unlocked\}/);
-  assert.match(page, /Chọn tình huống đã mở ngẫu nhiên/);
+  // The random pick only draws from unlocked scenarios (unfinished ones first).
+  assert.match(page, /const randomCandidates = incompleteUnlockedScenarios\.length \? incompleteUnlockedScenarios : availableScenarios/);
+  assert.match(page, /onPickRandom=\{pickRandomScenario\}/);
+  assert.match(page, /unlocked=\{unlockedDifficulties\}/);
   assert.match(progression, /Dễ.*Trung bình.*Khó.*Rất khó/s);
 });
 

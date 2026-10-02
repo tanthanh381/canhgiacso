@@ -14,6 +14,54 @@
   font-size: 24px;
 }
 
+/* Entry to the evidence box (the list of lessons unlocked by safe answers). */
+.evidence-entry {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  margin-top: 10px;
+  padding: 14px 18px;
+  border: 1px solid var(--control-line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.evidence-entry:hover {
+  border-color: var(--control-line-hover);
+}
+
+.evidence-entry-icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--brand) 9%, var(--surface));
+  color: var(--brand);
+}
+
+.evidence-entry-copy {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.evidence-entry strong,
+.evidence-entry small {
+  display: block;
+}
+
+.evidence-entry small {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
 .achievement-section {
   margin-top: 50px;
 }
@@ -171,7 +219,6 @@
 }
 
 .evidence-grid article.unlocked {
-  opacity: 1;
   border-style: solid;
   background: var(--surface);
 }
@@ -186,6 +233,11 @@
   border: 1px solid var(--line);
   border-radius: 12px;
   font-size: 24px;
+}
+
+/* Locked cards are marked by the dashed border and the dimmed icon, never by fading the text (contrast stays above 4.5:1). */
+.evidence-grid article:not(.unlocked) .evidence-icon {
+  opacity: .55;
 }
 
 .evidence-grid .unlocked .evidence-icon {
@@ -268,7 +320,7 @@
 
 .training-certificate-card.ready .certificate-card-mark {
   background: var(--highlight);
-  color: #17372d;
+  color: var(--on-highlight);
 }
 
 .stats-overview article {
@@ -286,7 +338,6 @@
   border: 1px dashed var(--line);
   background: color-mix(in srgb, var(--surface) 50%, transparent);
   padding: 20px;
-  opacity: .5;
   border-color: color-mix(in srgb, var(--line) 72%, transparent);
   box-shadow: none;
   border-radius: var(--radius-card);

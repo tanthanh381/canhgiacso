@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { mockGuestScoring, rejectConsentUpfront } from "./helpers";
+import { mockGuestScoring, mockSignedInSession, rejectConsentUpfront } from "./helpers";
 
 test.beforeEach(async ({ page }) => {
   await rejectConsentUpfront(page);
@@ -152,37 +152,135 @@ test.describe("mobile interaction states", () => {
   });
 
   test("utility menu is mutually exclusive with Cẩm nang", async ({ page }) => {
+    // A signed-in administrator: the management menu comes from the account and its role, not from a patched DOM.
+    await mockSignedInSession(page, "admin");
     await waitForApp(page);
-    await page.route("**/rest/v1/rpc/get_content_management_role", (route) => route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify("admin"),
-    }));
-
-    await page.evaluate(() => {
-      const actions = document.querySelector(".top-actions");
-      if (!actions || actions.querySelector(".profile-button")) return;
-      // Mirror the signed-in header rendered by AppHeader: authentication
-      // actions are replaced by the profile control rather than shown beside it.
-      actions.querySelector(".auth-actions")?.remove();
-      const profile = document.createElement("button");
-      profile.className = "profile-button";
-      profile.textContent = "QC";
-      actions.appendChild(profile);
-    });
 
     const utility = page.locator(".ux-utility-trigger");
     await expect(utility).toBeVisible();
     await utility.click();
     await expect(page.locator(".ux-utility-popover-mobile")).toBeVisible();
+    await expect(utility).toHaveAttribute("aria-expanded", "true");
 
     const handbook = page.locator(".ux-bottom-nav button", { hasText: "Cẩm nang" });
     await handbook.click();
     await expect(page.locator(".ux-utility-popover-mobile")).toBeHidden();
+    await expect(utility).toHaveAttribute("aria-expanded", "false");
     await expect(page.locator("#ux-mobile-knowledge-menu")).toBeVisible();
+  });
+
+  test("members without a management role get no management menu", async ({ page }) => {
+    await mockSignedInSession(page, "member");
+    await waitForApp(page);
+    await expect(page.locator(".profile-button")).toBeVisible();
+    await expect(page.locator(".ux-utility-trigger")).toHaveCount(0);
+  });
+
+  test("the mobile bar highlights the current destination and Thực hành opens the practice page", async ({ page }) => {
+    await waitForApp(page);
+    const practice = page.locator(".ux-bottom-nav button", { hasText: "Thực hành" });
+    await expect(practice).not.toHaveAttribute("aria-current", "page");
+    await practice.click();
+    await expect(practice).toHaveAttribute("aria-current", "page");
+    await expect(page.locator(".ux-bottom-nav button", { hasText: "Thử thách" })).not.toHaveAttribute("aria-current", "page");
+    await expect(page.locator(".phishing-quiz-shell")).toBeVisible();
+  });
+
+  test("slide-over panels are unreachable by keyboard until they are opened", async ({ page }) => {
+    await waitForApp(page);
+    const scenarios = page.locator(".scenario-panel");
+    await expect(scenarios).toHaveAttribute("inert", "");
+    await page.getByRole("button", { name: /Danh sách tình huống/ }).click();
+    await expect(scenarios).not.toHaveAttribute("inert", "");
+    await expect(page.locator(".ux-scenario-close")).toBeFocused();
+    await page.keyboard.press("Escape");
+    await expect(scenarios).toHaveAttribute("inert", "");
+    await expect(page.getByRole("button", { name: /Danh sách tình huống/ })).toBeFocused();
   });
 });
 
+test.describe("desktop management menu", () => {
+  test.skip(({ viewport }) => (viewport?.width ?? 0) <= 900, "desktop viewport only");
+
+  test("opens a popover from the account role and closes with Escape or an outside click", async ({ page }) => {
+    await mockSignedInSession(page, "admin");
+    await waitForApp(page);
+    const trigger = page.locator(".ux-utility-trigger");
+    await trigger.click();
+    const popover = page.locator(".ux-utility-popover");
+    await expect(popover).toBeVisible();
+    await expect(popover.getByRole("button", { name: "Dashboard", exact: true })).toBeVisible();
+    await expect(popover.getByRole("button", { name: "Quản lý nội dung", exact: true })).toBeVisible();
+    await expect(popover.getByRole("button", { name: "Thống kê truy cập", exact: true })).toBeVisible();
+    await expect(popover.getByRole("button", { name: "Phân quyền", exact: true })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(popover).toBeHidden();
+    await expect(trigger).toBeFocused();
+
+    await trigger.click();
+    await expect(popover).toBeVisible();
+    await page.locator(".game-toolbar").click();
+    await expect(popover).toBeHidden();
+  });
+
+  test("editors see content management only", async ({ page }) => {
+    await mockSignedInSession(page, "editor");
+    await waitForApp(page);
+    await page.locator(".ux-utility-trigger").click();
+    const popover = page.locator(".ux-utility-popover");
+    await expect(popover.getByRole("button", { name: "Quản lý nội dung", exact: true })).toBeVisible();
+    await expect(popover.getByRole("button", { name: "Dashboard", exact: true })).toHaveCount(0);
+  });
+});
+
+test.describe("simulation notice", () => {
+  test("can be hidden, stays hidden after a reload and can be brought back", async ({ page }) => {
+    await waitForApp(page);
+    const banner = page.locator(".security-awareness-banner");
+    await expect(banner).toBeVisible();
+    await page.locator(".ux-banner-close").click();
+    await expect(banner).toHaveCount(0);
+    const chip = page.locator(".ux-simulation-chip");
+    await expect(chip).toBeVisible();
+
+    await page.reload();
+    await expect(page.locator(".app")).toBeVisible();
+    await expect(banner).toHaveCount(0);
+    await chip.click();
+    await expect(banner).toBeVisible();
+    await expect(chip).toHaveCount(0);
+  });
+});
+
+test.describe("guest progress prompts", () => {
+  test("a guest who solved three scenarios is invited to save progress and can decline", async ({ page }) => {
+    await waitForApp(page);
+    const invitation = page.locator(".ux-guest-conversion");
+    await expect(invitation).toHaveCount(0);
+    for (let solved = 0; solved < 3; solved += 1) {
+      await page.locator(".choice:not([disabled])").first().click();
+      await expect(page.locator(".feedback")).toBeVisible();
+      await expect(page.locator(".feedback .ux-learning-moment")).toBeVisible();
+      await page.locator(".feedback button").click();
+      await expect(page.locator(".feedback")).toHaveCount(0);
+    }
+    await expect(invitation).toBeVisible();
+    await expect(page.locator(".ux-status-progress")).toContainText("3/");
+    await invitation.getByRole("button", { name: "Tiếp tục với tư cách khách" }).click();
+    await expect(invitation).toHaveCount(0);
+  });
+
+  test("the evidence box is reachable from the achievements page", async ({ page }) => {
+    await waitForApp(page);
+    const width = page.viewportSize()?.width ?? 0;
+    if (width <= 900) await page.locator(".ux-bottom-nav button", { hasText: "Thành tích" }).click();
+    else await page.locator(".topbar nav").getByRole("button", { name: "Thành tích", exact: true }).click();
+    await page.locator(".evidence-entry").click();
+    await expect(page.getByRole("heading", { name: "Dấu vết bạn đã thu thập" })).toBeVisible();
+    await page.getByRole("button", { name: /Quay lại thành tích/ }).click();
+    await expect(page.locator(".evidence-entry")).toBeVisible();
+  });
+});
 
 test.describe("resilience and breakpoint boundaries", () => {
   test("built-in scenarios remain playable when public content RPC is unavailable", async ({ page }, testInfo) => {
