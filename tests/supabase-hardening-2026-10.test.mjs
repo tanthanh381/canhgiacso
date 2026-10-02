@@ -150,7 +150,7 @@ test("remediation runbook and dashboard checklist cover apply order, rollback an
 
 test("SQL test harness covers every new migration and CI runs with minimal permissions", async () => {
   const workflow = await read(".github/workflows/supabase-db-tests.yml");
-  assert.match(workflow, /^permissions:\n  contents: read$/m);
+  assert.match(workflow, /^permissions:\n {2}contents: read$/m);
   assert.match(workflow, /actions\/checkout@[0-9a-f]{40}/);
   assert.doesNotMatch(workflow, /secrets\./);
   assert.match(workflow, /pg_prove/);
