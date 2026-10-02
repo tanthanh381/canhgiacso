@@ -32,7 +32,7 @@ export function KnowledgeView({
       <div className="knowledge-grid">
         {knowledgeCards.map((card, index) => (
           <article key={card.title}>
-            <span>{String(index + 1).padStart(2, "0")}</span>
+            <span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
             <BadgeIcon>{card.icon}</BadgeIcon>
             <h2>{card.title}</h2>
             <p>{card.text}</p>
