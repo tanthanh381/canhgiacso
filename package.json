@@ -12,6 +12,7 @@
     "build:pages": "pnpm run content:compile && vite build --config vite.github-pages.config.ts",
     "start": "WRANGLER_LOG_PATH=.wrangler/wrangler.log vinext start",
     "test": "pnpm run build && node --test tests/*.test.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.tooling.json && tsc --noEmit -p tsconfig.functions.json",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "seo:audit": "node scripts/seo-audit.mjs docs",
     "test:e2e": "pnpm run build:pages && playwright test --config=playwright.platform.config.ts",

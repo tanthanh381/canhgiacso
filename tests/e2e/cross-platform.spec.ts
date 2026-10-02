@@ -1,10 +1,10 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
   await page.route("**/rest/v1/rpc/get_public_site_content", (route) => route.abort());
 });
 
-async function waitForApp(page) {
+async function waitForApp(page: Page) {
   await page.goto("/");
   await expect(page.locator(".app")).toBeVisible({ timeout: 20_000 });
   const guestModal = page.locator(".guest-limit-modal");
@@ -18,7 +18,7 @@ async function waitForApp(page) {
   await expect(page.locator(".choice").first()).toBeVisible({ timeout: 20_000 });
 }
 
-async function expectNoHorizontalOverflow(page) {
+async function expectNoHorizontalOverflow(page: Page) {
   const overflow = await page.evaluate(() => ({
     body: document.body.scrollWidth - document.documentElement.clientWidth,
     html: document.documentElement.scrollWidth - document.documentElement.clientWidth,

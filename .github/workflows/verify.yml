@@ -23,6 +23,7 @@ jobs:
       - run: node scripts/security-scan.mjs
       - run: pnpm audit --prod --audit-level low
       - run: pnpm run lint
+      - run: pnpm run typecheck
       - run: pnpm test
       - run: pnpm run build:pages
       - run: pnpm run seo:audit
