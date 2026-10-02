@@ -4,6 +4,11 @@ export type AuthErrorLike = {
   status?: number;
 };
 
+// Một thông điệp chung cho "email đã có tài khoản" và "tên đăng nhập đã dùng" để không cho
+// phép dò xem email/tên đăng nhập nào đã tồn tại, nhưng vẫn chỉ đường cho người dùng thật.
+export const REGISTRATION_UNAVAILABLE =
+  "Chưa thể đăng ký với thông tin này. Nếu bạn đã có tài khoản, hãy chuyển sang Đăng nhập; nếu chưa, hãy thử email hoặc tên đăng nhập khác.";
+
 export function authErrorMessage(error: AuthErrorLike, mode: "login" | "register") {
   switch (error.code) {
     case "over_email_send_rate_limit":
@@ -14,7 +19,7 @@ export function authErrorMessage(error: AuthErrorLike, mode: "login" | "register
       return "Dịch vụ email hiện chưa thể gửi xác nhận tới địa chỉ này. Vui lòng liên hệ quản trị viên.";
     case "email_exists":
     case "user_already_exists":
-      return "Email này đã có tài khoản. Hãy chuyển sang Đăng nhập hoặc dùng email khác.";
+      return REGISTRATION_UNAVAILABLE;
     case "email_not_confirmed":
       return "Email chưa được xác nhận. Hãy mở thư xác nhận rồi đăng nhập lại.";
     case "invalid_credentials":
@@ -23,7 +28,7 @@ export function authErrorMessage(error: AuthErrorLike, mode: "login" | "register
       return "Mật khẩu chưa đáp ứng yêu cầu bảo mật.";
     default:
       if ((error.message ?? "").toLowerCase().includes("database")) {
-        return "Email hoặc tên đăng nhập đã được sử dụng. Vui lòng chọn thông tin khác.";
+        return REGISTRATION_UNAVAILABLE;
       }
       if (error.status === 429) {
         return "Hệ thống đang tạm giới hạn yêu cầu. Vui lòng chờ vài phút rồi thử lại.";

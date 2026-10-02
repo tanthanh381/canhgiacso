@@ -651,7 +651,7 @@ export function AdminTrafficAnalytics() {
           <article><strong>Phiên tương tác</strong><span>Ước tính: thời lượng ≥10 giây hoặc có ≥2 pageview.</span></article>
           <article><strong>Quốc gia</strong><span>Ước tính từ timezone + locale; không dùng IP/GPS.</span></article>
           <article><strong>UTM</strong><span>Chỉ lưu source/medium/campaign; không lưu toàn bộ query string.</span></article>
-          <article><strong>Riêng tư</strong><span>Không lưu IP, raw user-agent, email, account ID, cookie nội dung hay dữ liệu biểu mẫu.</span></article>
+          <article><strong>Riêng tư</strong><span>Số liệu truy cập không lưu IP, raw user-agent, email, account ID, cookie nội dung hay dữ liệu biểu mẫu. Giới hạn tốc độ chỉ dùng mã băm muối của IP, xóa tự động sau tối đa 24 giờ; dữ liệu truy cập được giữ tối đa 13 tháng.</span></article>
         </div>
 
         <div className="traffic-privacy-note"><strong>Nguồn dữ liệu</strong><span>First-party Supabase Analytics là nguồn chính của dashboard này. Khối “Google” chỉ lọc phiên có Google referrer; dashboard hiện chưa kết nối GA4 Data API. GA4 chạy song song để đối chiếu bên ngoài; Google Search Console dùng cho query, impression, CTR và ranking.</span></div>

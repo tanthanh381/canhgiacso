@@ -7,6 +7,16 @@ type ManagementRole = "admin" | "editor";
 type GateState = "idle" | "checking" | "challenge" | "enroll" | "verified" | "error";
 type Enrollment = { factorId: string; qrCode: string; secret: string };
 
+// Ghi dấu vết kiểm toán (best-effort) khi tài khoản đặc quyền đăng ký / xác minh TOTP lần đầu.
+// Lỗi (ví dụ chưa áp dụng migration 20261002104000) không được chặn luồng MFA.
+async function reportMfaEvent(eventName: "MFA_ENROLLMENT_STARTED" | "MFA_ENROLLMENT_VERIFIED") {
+  try {
+    await supabase.rpc("log_privileged_mfa_event", { event_name: eventName });
+  } catch {
+    // bỏ qua: nhật ký là tín hiệu bổ trợ, không phải điều kiện bảo mật
+  }
+}
+
 export function PrivilegedMfaGate() {
   const [role, setRole] = useState<ManagementRole | null>(null);
   const [state, setState] = useState<GateState>("idle");
@@ -87,6 +97,7 @@ export function PrivilegedMfaGate() {
       setState("error");
       return;
     }
+    void reportMfaEvent("MFA_ENROLLMENT_STARTED");
     setFactorId(enrolled.data.id);
     setEnrollment({
       factorId: enrolled.data.id,
@@ -129,11 +140,17 @@ export function PrivilegedMfaGate() {
       if (verified.error) throw verified.error;
       const refreshed = await supabase.auth.refreshSession();
       if (refreshed.error) throw refreshed.error;
+      if (enrollment) await reportMfaEvent("MFA_ENROLLMENT_VERIFIED");
       window.location.reload();
     } catch {
       setError("Mã xác thực không hợp lệ hoặc đã hết hạn. Hãy thử mã mới.");
       setBusy(false);
     }
+  }
+
+  async function leaveWithoutEnrolling() {
+    await supabase.auth.signOut({ scope: "local" });
+    window.location.reload();
   }
 
   if (!role || state === "idle" || state === "verified") return null;
@@ -148,6 +165,7 @@ export function PrivilegedMfaGate() {
 
         {state === "enroll" && enrollment && (
           <div className="security-mfa-enroll">
+            <p className="security-mfa-status" role="alert"><strong>Cảnh báo bảo mật:</strong> đây là lần đầu tài khoản đặc quyền này đăng ký xác thực hai lớp. Chỉ tiếp tục nếu chính bạn vừa được Quản trị viên cấp quyền và đang cầm thiết bị Authenticator của mình. Nếu bạn không vừa được cấp quyền hoặc không nhận ra tài khoản này, hãy đăng xuất và báo IT Security ngay. Việc đăng ký được ghi vào nhật ký kiểm toán.</p>
             <p>Quét mã bằng ứng dụng Authenticator.</p>
             <img className="security-mfa-qr" src={enrollment.qrCode} alt="Mã QR để đăng ký TOTP MFA" />
             <p className="security-mfa-secret-label">Hoặc nhập khóa thủ công:</p>
@@ -178,6 +196,8 @@ export function PrivilegedMfaGate() {
             </button>
           </form>
         )}
+
+        {state === "enroll" && <button className="security-mfa-retry" type="button" onClick={() => void leaveWithoutEnrolling()}>Đăng xuất, không đăng ký</button>}
 
         {error && <p className="security-mfa-error" role="alert">{error}</p>}
         {state === "error" && <button className="security-mfa-retry" type="button" onClick={() => void inspect()}>Thử lại</button>}

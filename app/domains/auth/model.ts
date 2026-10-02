@@ -9,7 +9,7 @@ export type SessionAccount = {
 export type AuthMode = "login" | "register";
 
 export const USERNAME_PATTERN = /^[a-z0-9._-]{3,24}$/;
-export const PASSWORD_PATTERN = /^(?=.{8,72}$)(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d])\S+$/;
+export const PASSWORD_PATTERN = /^(?=.{10,72}$)(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d])\S+$/;
 
 export type AuthSubmission = {
   mode: AuthMode;
@@ -36,7 +36,7 @@ export function validateAuthSubmission(input: AuthSubmission): ValidatedAuthSubm
     return { ok: false, error: "Tên đăng nhập cần 3–24 ký tự: chữ thường, số, dấu chấm, gạch ngang hoặc gạch dưới." };
   }
   if (input.mode === "register" && !PASSWORD_PATTERN.test(input.password)) {
-    return { ok: false, error: "Mật khẩu cần 8–72 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt; không chứa khoảng trắng." };
+    return { ok: false, error: "Mật khẩu cần 10–72 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt; không chứa khoảng trắng." };
   }
   if (input.mode === "login" && input.password.length < 8) {
     return { ok: false, error: "Mật khẩu cần ít nhất 8 ký tự." };
