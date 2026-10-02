@@ -135,9 +135,9 @@ test("GitHub Pages metadata and deployment target are consistent", async () => {
     read("../.github/workflows/pages.yml"),
   ]);
   assert.match(html, /Content-Security-Policy/);
-  const gaTags = html.match(/https:\/\/www\.googletagmanager\.com\/gtag\/js\?id=G-HH04Q7FYHM/g) ?? [];
-  assert.equal(gaTags.length, 1);
-  assert.match(html, /\/google-analytics-init\.js/);
+  // Google Analytics chỉ được nạp động bởi /consent.js sau khi người dùng đồng ý.
+  assert.doesNotMatch(html, /googletagmanager\.com\/gtag\/js|\/google-analytics-init\.js|\/web-analytics\.js/);
+  assert.equal((html.match(/<script src="\/consent\.js" defer><\/script>/g) ?? []).length, 1);
   assert.match(html, /https:\/\/www\.google-analytics\.com/);
   assert.match(html, /\/khien-so-logo\.png/);
   assert.match(config, /base:\s*"\/"/);

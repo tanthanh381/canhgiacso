@@ -5,8 +5,46 @@ const ROOT = process.cwd();
 const PUBLIC = path.join(ROOT, "public");
 const SITE = "https://canhgiacso.com";
 const UPDATED = "2026-09-23";
+// Các trang liên hệ, quyền riêng tư và bảo mật được viết lại ngày 2026-10-02.
+const PRIVACY_UPDATED = "2026-10-02";
+const PRIVACY_EFFECTIVE_LABEL = "02/10/2026";
+const GITHUB_REPO = "https://github.com/tanthanh381/canhgiacso";
+const GITHUB_SECURITY_POLICY = `${GITHUB_REPO}/security/policy`;
+const GITHUB_ISSUES = `${GITHUB_REPO}/issues`;
+const OPERATOR = "IT Security Team - HDBank";
+const SECURITY_TXT_EXPIRES = "2027-09-30T00:00:00Z";
+
+const escapeHtml = (value) => String(value)
+  .replace(/&/g, "&amp;")
+  .replace(/</g, "&lt;")
+  .replace(/>/g, "&gt;")
+  .replace(/"/g, "&quot;");
+
+// Kênh liên hệ chính thức do chủ dự án điền trong content/site-config.json; để trống thì không hiển thị gì.
+async function loadSiteConfig() {
+  let raw = {};
+  try {
+    raw = JSON.parse(await readFile(path.join(ROOT, "content", "site-config.json"), "utf8"));
+  } catch (error) {
+    if (error?.code !== "ENOENT") throw new Error(`content/site-config.json is invalid: ${error.message}`);
+  }
+  const text = (key) => (typeof raw[key] === "string" ? raw[key].trim() : "");
+  const contactEmail = text("contactEmail");
+  const contactFormUrl = text("contactFormUrl");
+  const dataRegion = text("dataRegion");
+  if (contactEmail && !/^[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']+$/.test(contactEmail)) {
+    throw new Error("content/site-config.json: contactEmail is not a valid email address");
+  }
+  if (contactFormUrl && !/^https:\/\/[^\s"'<>]+$/.test(contactFormUrl)) {
+    throw new Error("content/site-config.json: contactFormUrl must be an https:// URL");
+  }
+  if (dataRegion.length > 120) throw new Error("content/site-config.json: dataRegion is too long");
+  return { contactEmail, contactFormUrl, dataRegion };
+}
+
+const SITE_CONFIG = await loadSiteConfig();
 const BRAND = '<span class="seo-brand-logo" aria-hidden="true"></span><span class="seo-brand-divider" aria-hidden="true"></span><span class="seo-product-lockup"><strong>CẢNH GIÁC SỐ</strong><small>IT SECURITY</small></span>';
-const THEME_INIT = '<script>try{if(localStorage.getItem("khien-so-theme")==="dark")document.documentElement.dataset.theme="dark"}catch{}</script>';
+const THEME_INIT = '<script src="/theme-init.js"></script>';
 const TRUST_NAV = '<nav class="seo-footer-links" aria-label="Thông tin website"><a href="/gioi-thieu/">Giới thiệu</a><a href="/chinh-sach-bien-tap/">Biên tập</a><a href="/phuong-phap-kiem-chung/">Kiểm chứng</a><a href="/lien-he/">Liên hệ</a><a href="/quyen-rieng-tu/">Quyền riêng tư</a><a href="/bao-mat/">Bảo mật</a><a href="/sitemap/">Sơ đồ nội dung</a></nav>';
 
 async function write(relative, content) {
@@ -15,7 +53,7 @@ async function write(relative, content) {
   await writeFile(file, content, "utf8");
 }
 
-function pageShell({ title, description, canonical, type, h1, eyebrow, lead, body }) {
+function pageShell({ title, description, canonical, type, h1, eyebrow, lead, body, updated = UPDATED, extraHead = "" }) {
   const schema = JSON.stringify({
     "@context": "https://schema.org",
     "@graph": [
@@ -26,7 +64,7 @@ function pageShell({ title, description, canonical, type, h1, eyebrow, lead, bod
         name: h1,
         description,
         inLanguage: "vi-VN",
-        dateModified: UPDATED,
+        dateModified: updated,
         isPartOf: { "@id": `${SITE}/#website` },
         about: { "@id": `${SITE}/#organization` },
       },
@@ -39,7 +77,13 @@ function pageShell({ title, description, canonical, type, h1, eyebrow, lead, bod
         logo: { "@type": "ImageObject", url: `${SITE}/search-logo.svg`, width: 800, height: 800 },
         publishingPrinciples: `${SITE}/phuong-phap-kiem-chung/`,
         ethicsPolicy: `${SITE}/chinh-sach-bien-tap/`,
-        contactPoint: { "@type": "ContactPoint", contactType: "editorial and security contact", url: `${SITE}/lien-he/`, availableLanguage: ["vi-VN"] },
+        contactPoint: {
+          "@type": "ContactPoint",
+          contactType: "editorial and security contact",
+          url: `${SITE}/lien-he/`,
+          ...(SITE_CONFIG.contactEmail ? { email: SITE_CONFIG.contactEmail } : {}),
+          availableLanguage: ["vi-VN"],
+        },
         knowsAbout: ["lừa đảo trực tuyến", "phishing", "an toàn thông tin", "bảo vệ tài khoản", "xác minh thông tin"],
       },
       {
@@ -73,7 +117,7 @@ function pageShell({ title, description, canonical, type, h1, eyebrow, lead, bod
   <link rel="canonical" href="${canonical}" />
   <link rel="alternate" hreflang="vi-VN" href="${canonical}" />
   <link rel="alternate" hreflang="x-default" href="${canonical}" />
-  <link rel="stylesheet" href="/seo.css" />
+  <link rel="stylesheet" href="/seo.css" />${extraHead}
   <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png" />
   <link rel="apple-touch-icon" href="/favicon.png" />
   <meta property="og:type" content="website" />
@@ -121,20 +165,89 @@ const about = pageShell({
 <section><h2>Phạm vi và giới hạn</h2><p>Cảnh Giác Số phục vụ giáo dục, tra cứu và nâng cao nhận thức. Nội dung không thay thế xác minh trực tiếp từ ngân hàng, cơ quan chức năng hoặc tổ chức có thẩm quyền trong từng vụ việc. Khi đã xảy ra thiệt hại tài chính hoặc mất quyền kiểm soát tài khoản, hãy ưu tiên khóa tài khoản, liên hệ đơn vị liên quan và lưu bằng chứng.</p></section>`,
 });
 
+const dataRegionText = SITE_CONFIG.dataRegion ? escapeHtml(SITE_CONFIG.dataRegion) : "theo cấu hình dự án, sẽ công bố";
+
+const STORAGE_ROWS = [
+  { name: "cgs-consent-v1", kind: "localStorage · cần thiết", purpose: "Ghi nhớ bạn đã chấp nhận hay từ chối thống kê truy cập.", ttl: "12 tháng, sau đó hỏi lại (hoặc khi chính sách đổi phiên bản).", provider: "Cảnh Giác Số" },
+  { name: "khien-so-theme", kind: "localStorage · chức năng", purpose: "Ghi nhớ chế độ giao diện sáng hoặc tối.", ttl: "Đến khi bạn xóa dữ liệu trình duyệt.", provider: "Cảnh Giác Số" },
+  { name: "khien-so-progress:guest (và khien-so-progress bản cũ)", kind: "localStorage · chức năng", purpose: "Lưu tiến trình thử thách của khách trên thiết bị: số dư, điểm cảnh giác, kết quả từng tình huống và tên người chơi nếu bạn nhập.", ttl: "Đến khi bạn xóa dữ liệu trình duyệt.", provider: "Cảnh Giác Số" },
+  { name: "canh-giac-so-guest-certificate", kind: "localStorage · chức năng", purpose: "Giữ chứng chỉ khách (tên hiển thị bạn nhập, điểm, mã chứng chỉ) để tải lại.", ttl: "Đến khi bạn làm lại thử thách hoặc xóa dữ liệu trình duyệt.", provider: "Cảnh Giác Số" },
+  { name: "khien-so-pending:<mã tài khoản>", kind: "localStorage · cần thiết", purpose: "Giữ tạm câu trả lời chưa đồng bộ được của tài khoản đã đăng nhập.", ttl: "Đến khi đồng bộ thành công.", provider: "Cảnh Giác Số" },
+  { name: "canh-giac-so-security-checklist", kind: "localStorage · chức năng", purpose: "Ghi nhớ các mục bạn đã đánh dấu trong danh sách kiểm tra bảo mật.", ttl: "Đến khi bạn xóa dữ liệu trình duyệt.", provider: "Cảnh Giác Số" },
+  { name: "canhgiacso:simulation-banner-dismissed", kind: "localStorage · chức năng", purpose: "Ghi nhớ bạn đã đóng thông báo cho biết đây là môi trường mô phỏng.", ttl: "Đến khi bạn khôi phục thông báo hoặc xóa dữ liệu trình duyệt.", provider: "Cảnh Giác Số" },
+  { name: "sb-…-auth-token", kind: "localStorage · cần thiết (chỉ khi đăng nhập)", purpose: "Giữ phiên đăng nhập tài khoản.", ttl: "Theo thời hạn phiên và tự làm mới; bị xóa khi bạn đăng xuất.", provider: "Supabase (dịch vụ xác thực)" },
+  { name: "canhgiacso-analytics-visitor-v1", kind: "localStorage · phân tích (cần đồng ý)", purpose: "Mã ngẫu nhiên ẩn danh để thống kê nội bộ phân biệt khách mới và khách quay lại.", ttl: "90 ngày kể từ khi tạo.", provider: "Cảnh Giác Số" },
+  { name: "canhgiacso-analytics-session-v2", kind: "localStorage · phân tích (cần đồng ý)", purpose: "Mã phiên truy cập và thời điểm hoạt động gần nhất.", ttl: "Phiên hết hiệu lực sau 30 phút không hoạt động.", provider: "Cảnh Giác Số" },
+  { name: "_ga", kind: "Cookie · phân tích (cần đồng ý)", purpose: "Google Analytics 4 dùng để phân biệt người dùng ở mức ẩn danh.", ttl: "13 tháng.", provider: "Google" },
+  { name: "_ga_HH04Q7FYHM", kind: "Cookie · phân tích (cần đồng ý)", purpose: "Google Analytics 4 dùng để duy trì trạng thái phiên (dạng _ga_<mã đo lường>).", ttl: "13 tháng.", provider: "Google" },
+];
+
+const storageTable = `<div class="cgs-table-wrap"><table class="cgs-data-table"><caption>Cookie và dữ liệu lưu cục bộ trên trình duyệt của bạn</caption><thead><tr><th scope="col">Tên</th><th scope="col">Loại</th><th scope="col">Mục đích</th><th scope="col">Thời hạn</th><th scope="col">Bên cung cấp</th></tr></thead><tbody>${STORAGE_ROWS.map((row) => `<tr><th scope="row" data-label="Tên"><code>${escapeHtml(row.name)}</code></th><td data-label="Loại">${escapeHtml(row.kind)}</td><td data-label="Mục đích">${escapeHtml(row.purpose)}</td><td data-label="Thời hạn">${escapeHtml(row.ttl)}</td><td data-label="Bên cung cấp">${escapeHtml(row.provider)}</td></tr>`).join("")}</tbody></table></div>`;
+
 const privacy = pageShell({
   title: "Quyền riêng tư & dữ liệu người dùng | Cảnh Giác Số",
-  description: "Cách Cảnh Giác Số xử lý dữ liệu khi truy cập, đăng nhập, dùng công cụ tra cứu và thống kê truy cập; phân biệt analytics first-party và Google Analytics.",
+  description: "Cảnh Giác Số thu thập dữ liệu gì, dùng để làm gì, lưu bao lâu, đặt cookie nào và cách bạn thực hiện quyền của mình; thống kê chỉ bật khi bạn đồng ý.",
   canonical: `${SITE}/quyen-rieng-tu/`,
   type: "WebPage",
   h1: "Quyền riêng tư & dữ liệu người dùng",
   eyebrow: "MINH BẠCH DỮ LIỆU",
-  lead: "Cảnh Giác Số được thiết kế để giảm lượng dữ liệu cần thu thập và không yêu cầu người dùng nhập OTP, PIN, CVV, mã khôi phục hoặc mật khẩu ngân hàng vào các công cụ tra cứu hay bài thực hành.",
+  updated: PRIVACY_UPDATED,
+  extraHead: '\n  <link rel="stylesheet" href="/consent.css" />',
+  lead: "Cảnh Giác Số được thiết kế để giảm lượng dữ liệu cần thu thập và không yêu cầu bạn nhập OTP, PIN, CVV, mã khôi phục hoặc mật khẩu ngân hàng vào các công cụ tra cứu hay bài thực hành.",
   body: `
-<section><h2>Dữ liệu khi truy cập website</h2><p>Hệ thống analytics first-party ghi nhận các chỉ số kỹ thuật phục vụ thống kê như visitor/session UUID ẩn danh, đường dẫn trang, hostname referrer, nhãn trình duyệt, hệ điều hành, loại thiết bị, mã quốc gia ước tính và các tham số UTM được cho phép. Collector first-party không lưu raw user-agent, email hay account ID trong dữ liệu analytics.</p></section>
-<section><h2>Google Analytics</h2><p>Website có chạy Google Analytics 4 song song để đối chiếu traffic ở cấp tổng hợp. Khi trình duyệt tải Google Analytics, dữ liệu kỹ thuật có thể được Google xử lý theo chính sách và điều khoản của Google. Dashboard Quản trị nội bộ của Cảnh Giác Số hiện sử dụng dữ liệu first-party Supabase làm nguồn chính và không đọc trực tiếp Google Analytics Data API.</p></section>
-<section><h2>Tài khoản và tiến trình học</h2><p>Nếu người dùng đăng ký hoặc đăng nhập, hệ thống có thể lưu thông tin tài khoản cần thiết cho xác thực và tiến trình tương tác. Dữ liệu này được tách khỏi analytics truy cập và được kiểm soát bằng cơ chế phân quyền của hệ thống.</p></section>
-<section><h2>Công cụ tra cứu</h2><p>Các công cụ kiểm tra URL và hướng dẫn tra cứu được thiết kế ưu tiên xử lý cục bộ trên trình duyệt khi có thể. Không nhập mật khẩu, OTP, PIN, CVV, mã khôi phục hoặc thông tin đăng nhập ngân hàng vào ô tra cứu.</p></section>
-<section><h2>Giới hạn của dữ liệu thống kê</h2><p>Referrer có thể bị trình duyệt, ứng dụng hoặc cơ chế riêng tư lược bỏ; dữ liệu quốc gia chỉ là ước tính kỹ thuật từ timezone/locale và không phải GPS. Vì vậy các số liệu nguồn truy cập và vị trí không nên được hiểu là dữ liệu định danh chính xác.</p></section>`,
+<p class="seo-note"><strong>Ngày hiệu lực: ${PRIVACY_EFFECTIVE_LABEL}.</strong> Trang này mô tả cách website hoạt động về mặt kỹ thuật: dữ liệu nào được xử lý, vì sao, lưu bao lâu và bạn có thể làm gì. Thống kê truy cập (Google Analytics 4 và thống kê nội bộ) chỉ chạy sau khi bạn chấp nhận trong banner cookie.</p>
+<section id="don-vi-van-hanh"><h2>Đơn vị vận hành</h2><p>Website được quản lý và vận hành bởi ${OPERATOR}. Đây là đơn vị quyết định mục đích sử dụng dữ liệu được mô tả trong trang này và tiếp nhận yêu cầu của bạn qua các kênh tại trang <a href="/lien-he/">Liên hệ</a>.</p></section>
+<section id="muc-dich-co-so"><h2>Mục đích và cơ sở xử lý</h2>
+<ul>
+<li><strong>Thống kê truy cập</strong> (đo lượt xem, nguồn truy cập, thiết bị để cải thiện nội dung): dựa trên <strong>sự đồng ý của bạn</strong>. Bạn có thể từ chối ngay ở banner hoặc rút lại bất cứ lúc nào; từ chối không làm mất tính năng nào của website.</li>
+<li><strong>Cung cấp tài khoản và tiến trình học</strong> (đăng nhập, lưu kết quả, cấp chứng chỉ): cần thiết để cung cấp tính năng mà bạn chủ động sử dụng khi đăng ký tài khoản.</li>
+<li><strong>Bảo vệ hệ thống khỏi lạm dụng</strong> (giới hạn tốc độ yêu cầu): cần thiết để giữ dịch vụ ổn định và an toàn cho mọi người.</li>
+</ul></section>
+<section id="du-lieu-xu-ly"><h2>Dữ liệu được xử lý</h2>
+<h3>Khách truy cập (không đăng nhập)</h3>
+<p>Bạn dùng được thử thách, cẩm nang và công cụ tra cứu mà không cần tài khoản. Tiến trình, tên người chơi (nếu bạn nhập) và chứng chỉ khách được lưu <strong>ngay trên thiết bị của bạn</strong> (xem bảng bên dưới). Khi bạn chọn đáp án trong thử thách, trình duyệt gửi mã tình huống và lựa chọn tới máy chủ để chấm điểm; yêu cầu này không kèm tên hay email.</p>
+<h3>Tài khoản và tiến trình</h3>
+<p>Nếu đăng ký, hệ thống lưu email, tên đăng nhập, tên hiển thị, kết quả từng tình huống, điểm, lượt chơi và chứng chỉ đã cấp (tên hiển thị, mã chứng chỉ, điểm, xếp loại, ngày cấp). Mật khẩu do dịch vụ xác thực Supabase xử lý và không được lưu dưới dạng đọc được. Dữ liệu này tách khỏi thống kê truy cập và được kiểm soát bằng cơ chế phân quyền của hệ thống.</p>
+<h3>Thống kê nội bộ (chỉ sau khi bạn đồng ý)</h3>
+<p>Gồm mã khách và mã phiên ngẫu nhiên ẩn danh, đường dẫn trang, tên miền nguồn giới thiệu, nhãn trình duyệt, hệ điều hành, loại thiết bị, mã quốc gia ước tính từ múi giờ và ngôn ngữ (không dùng GPS hay tra cứu địa chỉ IP), các tham số UTM được cho phép (nguồn, phương tiện, chiến dịch) và loại sự kiện (lượt xem trang, nhịp hoạt động mỗi 60 giây). Không lưu user-agent thô, email hay mã tài khoản trong dữ liệu thống kê. Trước khi bạn đồng ý, mã khách và mã phiên không được tạo và không có yêu cầu thống kê nào được gửi đi.</p>
+<h3>Google Analytics 4 (chỉ sau khi bạn đồng ý)</h3>
+<p>Khi bạn chấp nhận, website nạp Google Analytics 4 theo Consent Mode v2: chỉ <code>analytics_storage</code> được bật, còn các quyền quảng cáo (<code>ad_storage</code>, <code>ad_user_data</code>, <code>ad_personalization</code>) luôn bị từ chối; tín hiệu Google và cá nhân hóa quảng cáo được tắt. Google xử lý dữ liệu kỹ thuật theo chính sách của Google. Trước khi bạn đồng ý, trình duyệt không tải mã Google và không đặt cookie <code>_ga</code>. Dashboard Quản trị nội bộ dùng dữ liệu thống kê nội bộ làm nguồn chính và không đọc trực tiếp Google Analytics Data API.</p>
+<h3>Giới hạn tốc độ và an ninh</h3>
+<p>Mỗi yêu cầu tới máy chủ dữ liệu được kiểm soát tần suất để chống lạm dụng. Địa chỉ IP được băm có muối và chỉ giữ tối đa 24 giờ, chỉ để phục vụ việc giới hạn tốc độ này.</p>
+<h3>Công cụ tra cứu</h3>
+<p>Các công cụ kiểm tra URL, tin nhắn và hướng dẫn tra cứu ưu tiên xử lý cục bộ trên trình duyệt. Không nhập mật khẩu, OTP, PIN, CVV, mã khôi phục hoặc thông tin đăng nhập ngân hàng vào ô tra cứu.</p>
+<h3>Giới hạn của dữ liệu thống kê</h3>
+<p>Referrer có thể bị trình duyệt, ứng dụng hoặc cơ chế riêng tư lược bỏ; dữ liệu quốc gia chỉ là ước tính kỹ thuật từ múi giờ và ngôn ngữ, không phải vị trí chính xác. Các số liệu nguồn truy cập và vị trí không nên được hiểu là dữ liệu định danh.</p>
+</section>
+<section id="cookie"><h2>Cookie và lưu trữ cục bộ</h2>
+<p>Cảnh Giác Số chỉ đặt hai cookie (<code>_ga</code> và <code>_ga_HH04Q7FYHM</code>) và chỉ sau khi bạn chấp nhận thống kê truy cập. Phần còn lại là dữ liệu lưu trong bộ nhớ cục bộ của trình duyệt (localStorage) và không tự gửi đi theo mỗi yêu cầu như cookie.</p>
+${storageTable}
+<p><a href="#cookie" data-cgs-consent-open>Mở Cài đặt cookie</a> để chấp nhận, từ chối hoặc rút lại thống kê truy cập bất cứ lúc nào; liên kết "Cài đặt cookie" cũng có ở cuối mỗi trang. Khi rút lại, cookie <code>_ga*</code> và hai khóa thống kê nội bộ trên thiết bị này bị xóa và bộ đếm dừng ngay. Nếu trình duyệt gửi tín hiệu Global Privacy Control hoặc Không theo dõi (DNT), chúng tôi coi đó là từ chối cho đến khi bạn tự chọn khác. Bạn cũng có thể xóa dữ liệu trang web trong phần cài đặt của trình duyệt.</p>
+</section>
+<section id="thoi-han-luu"><h2>Thời hạn lưu</h2>
+<ul>
+<li><strong>Thống kê nội bộ:</strong> 13 tháng.</li>
+<li><strong>Tài khoản và tiến trình:</strong> đến khi tài khoản bị xóa.</li>
+<li><strong>Dữ liệu giới hạn tốc độ (IP băm có muối):</strong> tối đa 24 giờ.</li>
+<li><strong>Google Analytics 4:</strong> theo thiết lập thời hạn lưu giữ dữ liệu của thuộc tính Google Analytics mà dự án cấu hình; cookie của Google có thời hạn 13 tháng như bảng trên.</li>
+<li><strong>Dữ liệu trên thiết bị của bạn:</strong> theo cột "Thời hạn" trong bảng cookie và lưu trữ cục bộ.</li>
+</ul></section>
+<section id="quyen-cua-ban"><h2>Quyền của bạn và cách thực hiện</h2>
+<p>Bạn có quyền truy cập, chỉnh sửa, xóa dữ liệu cá nhân của mình, rút lại sự đồng ý và phản đối việc xử lý.</p>
+<ul>
+<li><strong>Rút lại đồng ý thống kê:</strong> thực hiện ngay bằng "Cài đặt cookie" ở cuối trang.</li>
+<li><strong>Xóa dữ liệu trên thiết bị:</strong> xóa dữ liệu trang web trong cài đặt trình duyệt.</li>
+<li><strong>Truy cập, chỉnh sửa, xóa dữ liệu tài khoản và phản đối xử lý:</strong> gửi yêu cầu qua các kênh tại trang <a href="/lien-he/">Liên hệ</a>, nêu rõ tên đăng nhập hoặc email của tài khoản. Chúng tôi có thể cần xác minh danh tính hợp lý trước khi xử lý. Vui lòng không đăng thông tin cá nhân vào kênh công khai.</li>
+</ul></section>
+<section id="chuyen-du-lieu"><h2>Chuyển dữ liệu ra nước ngoài và bên xử lý</h2>
+<ul>
+<li><strong>Google (Google Analytics 4):</strong> chỉ khi bạn đồng ý; Google có thể xử lý dữ liệu tại các trung tâm dữ liệu ngoài Việt Nam.</li>
+<li><strong>Supabase (cơ sở dữ liệu và xác thực):</strong> lưu dữ liệu tài khoản, tiến trình, chứng chỉ và thống kê nội bộ. Vùng đặt dữ liệu: ${dataRegionText}.</li>
+<li><strong>GitHub Pages (lưu trữ trang tĩnh):</strong> như mọi dịch vụ lưu trữ web, đơn vị lưu trữ tiếp nhận địa chỉ IP của bạn khi bạn tải trang theo chính sách của họ.</li>
+</ul></section>
+<section id="tre-em"><h2>Trẻ em</h2><p>Website nhằm giáo dục cộng đồng và không chủ ý thu thập dữ liệu của trẻ em. Trẻ em nên dùng website cùng cha mẹ hoặc người giám hộ. Nếu bạn là cha mẹ hoặc người giám hộ và biết con đã tạo tài khoản, hãy liên hệ để yêu cầu xóa.</p></section>
+<section id="thay-doi"><h2>Thay đổi chính sách</h2><p>Khi thay đổi đáng kể (ví dụ thêm loại cookie hoặc mục đích mới), chúng tôi cập nhật trang này và đổi ngày hiệu lực ở đầu trang; với thay đổi liên quan đến thống kê, banner cookie sẽ hỏi lại bạn. Ngày hiệu lực hiện tại: ${PRIVACY_EFFECTIVE_LABEL}.</p></section>
+<section id="lien-he-du-lieu"><h2>Liên hệ về dữ liệu cá nhân</h2><p>Mọi câu hỏi hoặc yêu cầu về dữ liệu cá nhân gửi tới ${OPERATOR} qua các kênh tại trang <a href="/lien-he/">Liên hệ</a>.${SITE_CONFIG.contactEmail ? ` Email: <a href="mailto:${escapeHtml(SITE_CONFIG.contactEmail)}">${escapeHtml(SITE_CONFIG.contactEmail)}</a>.` : ""}</p></section>`,
 });
 
 const editorial = pageShell({
@@ -152,6 +265,14 @@ const editorial = pageShell({
 <section><h2>Tác giả và người rà soát</h2><p>Nội dung công khai được ghi nhận dưới thực thể biên tập Cảnh Giác Số / IT Security. Với bài viết nhạy cảm, structured data dùng Organization làm author/publisher để tránh gán thẩm quyền cá nhân không cần thiết và giữ trách nhiệm ở cấp hệ thống biên tập.</p></section>`,
 });
 
+const contactChannels = [
+  SITE_CONFIG.contactEmail ? `<li><strong>Email:</strong> <a href="mailto:${escapeHtml(SITE_CONFIG.contactEmail)}">${escapeHtml(SITE_CONFIG.contactEmail)}</a></li>` : "",
+  SITE_CONFIG.contactFormUrl ? `<li><strong>Biểu mẫu liên hệ:</strong> <a href="${escapeHtml(SITE_CONFIG.contactFormUrl)}" rel="noopener noreferrer">Mở biểu mẫu</a></li>` : "",
+].filter(Boolean);
+const directContact = contactChannels.length
+  ? `\n<section id="lien-he-truc-tiep"><h2>Liên hệ trực tiếp ${OPERATOR}</h2><ul>${contactChannels.join("")}</ul><p>Hãy nêu rõ chủ đề (góp ý nội dung, lỗi kỹ thuật hoặc yêu cầu về dữ liệu cá nhân) và không kèm mật khẩu, OTP hay dữ liệu ngân hàng thật.</p></section>`
+  : "";
+
 const contact = pageShell({
   title: "Liên hệ | Cảnh Giác Số",
   description: "Cách liên hệ Cảnh Giác Số về góp ý nội dung, báo lỗi kỹ thuật, yêu cầu sửa thông tin hoặc vấn đề bảo mật của website.",
@@ -159,11 +280,17 @@ const contact = pageShell({
   type: "ContactPage",
   h1: "Liên hệ Cảnh Giác Số",
   eyebrow: "CONTACT",
+  updated: PRIVACY_UPDATED,
   lead: "Nếu cần góp ý nội dung, báo lỗi kỹ thuật hoặc phản ánh vấn đề bảo mật của website, hãy chuẩn bị đường dẫn trang, mô tả ngắn và bằng chứng có thể đối chiếu.",
-  body: `
-<section><h2>Góp ý nội dung</h2><p>Với yêu cầu chỉnh sửa, bổ sung nguồn hoặc báo nội dung đã lỗi thời, hãy nêu rõ URL, đoạn cần kiểm tra và nguồn mới nếu có. Cảnh Giác Số ưu tiên các phản hồi có thể xác minh độc lập.</p></section>
-<section><h2>Báo lỗi kỹ thuật hoặc bảo mật</h2><p>Không gửi mật khẩu, OTP, mã khôi phục, số thẻ hoặc dữ liệu ngân hàng thật. Với lỗi bảo mật, vui lòng mô tả tác động, bước tái hiện ở mức cần thiết và tránh khai thác vượt quá phạm vi chứng minh.</p></section>
-<section><h2>Khi bạn đang là nạn nhân</h2><p>Nếu đã chuyển tiền, mất tài khoản hoặc bị đe dọa, hãy ưu tiên liên hệ ngân hàng/nền tảng/cơ quan chức năng qua kênh chính thức. Cảnh Giác Số không thay thế quy trình tiếp nhận tố giác hoặc hỗ trợ khẩn cấp của các đơn vị đó.</p></section>`,
+  body: `${directContact}
+<section id="gop-y-noi-dung"><h2>Góp ý nội dung</h2><p>Với yêu cầu chỉnh sửa, bổ sung nguồn hoặc báo nội dung đã lỗi thời, hãy nêu rõ URL, đoạn cần kiểm tra và nguồn mới nếu có. Cảnh Giác Số ưu tiên các phản hồi có thể xác minh độc lập. Bạn có thể mở một <a href="${GITHUB_ISSUES}" rel="noopener noreferrer">Issue trên GitHub</a>.</p></section>
+<section id="bao-loi-bao-mat"><h2>Báo lỗi kỹ thuật hoặc bảo mật</h2><p>Không gửi mật khẩu, OTP, mã khôi phục, số thẻ hoặc dữ liệu ngân hàng thật. Với lỗi bảo mật, vui lòng mô tả tác động, bước tái hiện ở mức cần thiết và tránh khai thác vượt quá phạm vi chứng minh.</p>
+<ul>
+<li><strong>Lỗ hổng bảo mật:</strong> báo riêng tư qua <a href="${GITHUB_SECURITY_POLICY}" rel="noopener noreferrer">chính sách bảo mật và Security Advisory trên GitHub</a>. Không đăng công khai chi tiết có thể bị khai thác trước khi lỗi được khắc phục. Thông tin kỹ thuật có tại <a href="/security.txt">security.txt</a>.</li>
+<li><strong>Lỗi hiển thị, nội dung sai hoặc sự cố không nhạy cảm:</strong> mở <a href="${GITHUB_ISSUES}" rel="noopener noreferrer">Issue trên GitHub</a>. Issue là công khai, vì vậy đừng kèm thông tin cá nhân, thông tin đăng nhập hay dữ liệu tài khoản.</li>
+</ul></section>
+<section id="du-lieu-ca-nhan"><h2>Yêu cầu về dữ liệu cá nhân</h2><p>Quyền truy cập, chỉnh sửa, xóa dữ liệu và phản đối xử lý được mô tả tại <a href="/quyen-rieng-tu/#quyen-cua-ban">quyền riêng tư và dữ liệu người dùng</a>. Hãy ghi rõ tên đăng nhập hoặc email của tài khoản và không đăng thông tin cá nhân vào kênh công khai. Riêng việc rút lại đồng ý thống kê, bạn tự thực hiện ngay bằng liên kết "Cài đặt cookie" ở cuối trang.</p></section>
+<section id="nan-nhan"><h2>Khi bạn đang là nạn nhân</h2><p>Nếu đã chuyển tiền, mất tài khoản hoặc bị đe dọa, hãy ưu tiên liên hệ ngân hàng/nền tảng/cơ quan chức năng qua kênh chính thức. Cảnh Giác Số không thay thế quy trình tiếp nhận tố giác hoặc hỗ trợ khẩn cấp của các đơn vị đó.</p></section>`,
 });
 
 const security = pageShell({
@@ -173,12 +300,13 @@ const security = pageShell({
   type: "WebPage",
   h1: "Bảo mật website",
   eyebrow: "SECURITY",
+  updated: PRIVACY_UPDATED,
   lead: "Cảnh Giác Số xử lý chủ đề chống lừa đảo nên ưu tiên giảm dữ liệu nhạy cảm, minh bạch về analytics và tách công cụ tra cứu khỏi yêu cầu nhập bí mật cá nhân.",
   body: `
 <section><h2>Không yêu cầu bí mật đăng nhập</h2><p>Website không yêu cầu nhập OTP, PIN, CVV, mật khẩu ngân hàng hoặc mã khôi phục vào nội dung công cụ tra cứu. Nếu một trang yêu cầu các dữ liệu này, hãy rời khỏi trang và tự mở kênh chính thức của tổ chức liên quan.</p></section>
-<section><h2>Analytics và quyền riêng tư</h2><p>First-party analytics chỉ phục vụ thống kê traffic ở cấp tổng hợp như đường dẫn, referrer host, thiết bị và UTM allowlist. Xem thêm <a href="/quyen-rieng-tu/">quyền riêng tư & dữ liệu người dùng</a>.</p></section>
-<section><h2>Báo cáo lỗ hổng</h2><p>Khi phát hiện lỗi bảo mật, hãy báo cáo theo nguyên tắc tối thiểu hóa dữ liệu: không truy cập, tải xuống hoặc chia sẻ dữ liệu không thuộc về bạn; chỉ cung cấp thông tin đủ để đội vận hành xác minh và khắc phục.</p></section>
-<section><h2>Tài nguyên bảo mật công khai</h2><p>Website có tệp <a href="/security.txt">security.txt</a> để hỗ trợ quy trình báo cáo kỹ thuật khi được triển khai bởi môi trường hosting.</p></section>`,
+<section><h2>Analytics và quyền riêng tư</h2><p>Thống kê truy cập (first-party và Google Analytics 4) chỉ chạy sau khi bạn chấp nhận trong banner cookie và chỉ phục vụ thống kê ở cấp tổng hợp như đường dẫn, referrer host, thiết bị và UTM allowlist. Bạn có thể từ chối hoặc rút lại bất cứ lúc nào. Xem thêm <a href="/quyen-rieng-tu/">quyền riêng tư & dữ liệu người dùng</a>.</p></section>
+<section id="bao-cao-lo-hong"><h2>Báo cáo lỗ hổng</h2><p>Khi phát hiện lỗi bảo mật, hãy báo cáo theo nguyên tắc tối thiểu hóa dữ liệu: không truy cập, tải xuống hoặc chia sẻ dữ liệu không thuộc về bạn; chỉ cung cấp thông tin đủ để đội vận hành xác minh và khắc phục. Gửi báo cáo riêng tư qua <a href="${GITHUB_SECURITY_POLICY}" rel="noopener noreferrer">chính sách bảo mật và Security Advisory trên GitHub</a>; các kênh khác có tại trang <a href="/lien-he/">Liên hệ</a>.</p></section>
+<section><h2>Tài nguyên bảo mật công khai</h2><p>Website có tệp <a href="/security.txt">security.txt</a> (theo RFC 9116) nêu kênh báo cáo kỹ thuật và chính sách tiếp nhận.</p></section>`,
 });
 
 await write("gioi-thieu/index.html", about);
@@ -186,6 +314,18 @@ await write("quyen-rieng-tu/index.html", privacy);
 await write("chinh-sach-bien-tap/index.html", editorial);
 await write("lien-he/index.html", contact);
 await write("bao-mat/index.html", security);
+
+// security.txt (RFC 9116) được sinh từ cấu hình để Contact mailto: chỉ xuất hiện khi chủ dự án đã điền email.
+const securityTxt = [
+  `Contact: ${GITHUB_SECURITY_POLICY}`,
+  ...(SITE_CONFIG.contactEmail ? [`Contact: mailto:${SITE_CONFIG.contactEmail}`] : []),
+  `Expires: ${SECURITY_TXT_EXPIRES}`,
+  "Preferred-Languages: vi, en",
+  `Canonical: ${SITE}/security.txt`,
+  `Policy: ${GITHUB_SECURITY_POLICY}`,
+  "",
+].join("\n");
+await writeFile(path.join(PUBLIC, "security.txt"), securityTxt, "utf8");
 
 async function htmlFiles(dir) {
   const out = [];
@@ -303,7 +443,7 @@ for (const relative of ["phuong-phap-kiem-chung/index.html", "sitemap/index.html
   const file = path.join(PUBLIC, relative);
   try {
     let html = await readFile(file, "utf8");
-    if (!html.includes('khien-so-theme')) html = html.replace("<head>", `<head>\n  ${THEME_INIT}`);
+    if (!/khien-so-theme|theme-init\.js/.test(html)) html = html.replace("<head>", `<head>\n  ${THEME_INIT}`);
     if (!html.includes('name="referrer"')) html = html.replace(/(<meta name="viewport"[^>]*>)/i, '$1\n  <meta name="referrer" content="strict-origin-when-cross-origin" />');
 
     if (relative.startsWith("phuong-phap-kiem-chung")) {

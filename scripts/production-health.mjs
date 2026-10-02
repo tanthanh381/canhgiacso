@@ -1,3 +1,5 @@
+import { evaluateSecurityHeaders } from "./check-security-headers.mjs";
+
 const BASE_URL = process.env.HEALTH_BASE_URL || "https://canhgiacso.com";
 const TIMEOUT_MS = Number(process.env.HEALTH_TIMEOUT_MS || 12000);
 
@@ -7,6 +9,9 @@ const checks = [
   { path: "/cong-cu/", expect: /Công cụ|kiểm tra lừa đảo/i, contentType: /text\/html/i },
   { path: "/sitemap.xml", expect: /<urlset[\s>]/i, contentType: /xml/i },
   { path: "/robots.txt", expect: /Sitemap:\s*https:\/\/canhgiacso\.com\/sitemap\.xml/i, contentType: /text\/plain/i },
+  // Đồng ý cookie là điều kiện để analytics chạy; thiếu tệp này nghĩa là banner không hiện.
+  { path: "/consent.js", expect: /CGSConsent/, contentType: /javascript/i },
+  { path: "/security.txt", expect: /^Contact:/m, contentType: /text\/plain/i },
 ];
 
 async function check({ path, expect, contentType }) {
@@ -26,7 +31,8 @@ async function check({ path, expect, contentType }) {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     if (contentType && !contentType.test(type)) throw new Error(`unexpected content-type: ${type}`);
     if (!expect.test(body)) throw new Error("expected content marker missing");
-    return { path, status: response.status, elapsedMs };
+    const headerWarnings = evaluateSecurityHeaders(response.headers).filter((item) => !item.ok);
+    return { path, status: response.status, elapsedMs, headerWarnings };
   } finally {
     clearTimeout(timer);
   }
@@ -39,6 +45,10 @@ for (const item of checks) {
     const result = await check(item);
     results.push({ ...result, ok: true });
     console.log(`OK   ${result.path.padEnd(18)} ${result.status} ${result.elapsedMs}ms`);
+    // Header bảo mật chỉ ở mức CẢNH BÁO: GitHub Pages không đặt được chúng; xem deploy/cloudflare-edge/.
+    if (item.path === "/" && result.headerWarnings.length) {
+      console.warn(`WARN security headers missing or weak on /: ${result.headerWarnings.map((entry) => entry.name).join(", ")}`);
+    }
   } catch (error) {
     failed = true;
     results.push({ path: item.path, ok: false, error: error instanceof Error ? error.message : String(error) });

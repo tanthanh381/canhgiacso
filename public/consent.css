@@ -1,0 +1,338 @@
+/* Cảnh Giác Số — giao diện đồng ý cookie (do /consent.js tự nạp).
+   Các biến --cgs-* có giá trị dự phòng; chế độ tối bám theo chủ đề của site
+   (html[data-theme="dark"] hoặc .app.dark trong ứng dụng), nên không dùng prefers-color-scheme. */
+
+.cgs-consent {
+  --cgs-bg: var(--seo-surface, #ffffff);
+  --cgs-ink: var(--seo-ink, #2d2d2d);
+  --cgs-muted: var(--seo-muted, #57534f);
+  --cgs-line: var(--seo-line, #cfcac5);
+  --cgs-accent: var(--seo-accent, #be1128);
+  --cgs-link: var(--seo-link, #0b5f58);
+  --cgs-btn-bg: var(--seo-ink, #2d2d2d);
+  --cgs-btn-ink: var(--seo-surface, #ffffff);
+  --cgs-btn-hover: #000000;
+  --cgs-shadow: 0 -10px 32px rgba(0, 0, 0, 0.16);
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2147483000;
+  box-sizing: border-box;
+  margin: 0;
+  border-top: 1px solid var(--cgs-line, #cfcac5);
+  background: var(--cgs-bg, #ffffff);
+  color: var(--cgs-ink, #2d2d2d);
+  box-shadow: var(--cgs-shadow, 0 -10px 32px rgba(0, 0, 0, 0.16));
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+}
+
+.cgs-consent[data-cgs-theme="dark"] {
+  --cgs-bg: var(--seo-surface, #242424);
+  --cgs-ink: var(--seo-ink, #f5f5f5);
+  --cgs-muted: var(--seo-muted, #cbc7c5);
+  --cgs-line: var(--seo-line, #5a5654);
+  --cgs-accent: var(--seo-accent, #ff7184);
+  --cgs-link: var(--seo-link, #8fe0d4);
+  --cgs-btn-bg: var(--seo-ink, #f5f5f5);
+  --cgs-btn-ink: var(--seo-surface, #171717);
+  --cgs-btn-hover: #ffffff;
+  --cgs-shadow: 0 -10px 32px rgba(0, 0, 0, 0.55);
+}
+
+.cgs-consent[hidden],
+.cgs-consent-fab[hidden] {
+  display: none !important;
+}
+
+.cgs-consent *,
+.cgs-consent *::before,
+.cgs-consent *::after {
+  box-sizing: border-box;
+}
+
+.cgs-consent__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px 28px;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 14px 16px calc(14px + env(safe-area-inset-bottom, 0px));
+}
+
+.cgs-consent__copy {
+  min-width: 0;
+}
+
+.cgs-consent__title {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.35;
+  color: var(--cgs-ink, #2d2d2d);
+}
+
+.cgs-consent__text,
+.cgs-consent__status {
+  margin: 0;
+  color: var(--cgs-ink, #2d2d2d);
+}
+
+.cgs-consent__status {
+  margin-top: 6px;
+  color: var(--cgs-muted, #57534f);
+}
+
+.cgs-consent__status:empty {
+  display: none;
+}
+
+.cgs-consent__link {
+  color: var(--cgs-link, #0b5f58);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.cgs-consent__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Hai nút chọn dùng cùng một kiểu để không dẫn dắt người dùng. */
+.cgs-consent__btn {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 10px 20px;
+  border: 2px solid var(--cgs-btn-bg, #2d2d2d);
+  border-radius: 8px;
+  background: var(--cgs-btn-bg, #2d2d2d);
+  color: var(--cgs-btn-ink, #ffffff);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.2;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.cgs-consent__btn:hover {
+  border-color: var(--cgs-btn-hover, #000000);
+  background: var(--cgs-btn-hover, #000000);
+}
+
+.cgs-consent__btn--quiet {
+  border-color: var(--cgs-line, #cfcac5);
+  background: transparent;
+  color: var(--cgs-ink, #2d2d2d);
+  font-weight: 700;
+}
+
+.cgs-consent__btn--quiet:hover {
+  border-color: var(--cgs-ink, #2d2d2d);
+  background: transparent;
+}
+
+.cgs-consent__btn:focus-visible,
+.cgs-consent__link:focus-visible,
+.cgs-consent-fab:focus-visible {
+  outline: 3px solid var(--cgs-accent, #be1128);
+  outline-offset: 2px;
+}
+
+/* Nút nổi chỉ dùng khi không tìm thấy chân trang để gắn liên kết "Cài đặt cookie". */
+.cgs-consent-fab {
+  --cgs-bg: var(--seo-surface, #ffffff);
+  --cgs-ink: var(--seo-ink, #2d2d2d);
+  --cgs-line: var(--seo-line, #cfcac5);
+  --cgs-accent: var(--seo-accent, #be1128);
+  position: fixed;
+  bottom: 12px;
+  left: 12px;
+  z-index: 2147482999;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--cgs-line, #cfcac5);
+  border-radius: 999px;
+  background: var(--cgs-bg, #ffffff);
+  color: var(--cgs-ink, #2d2d2d);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cgs-consent-fab[data-cgs-theme="dark"] {
+  --cgs-bg: var(--seo-surface, #242424);
+  --cgs-ink: var(--seo-ink, #f5f5f5);
+  --cgs-line: var(--seo-line, #5a5654);
+  --cgs-accent: var(--seo-accent, #ff7184);
+}
+
+.cgs-consent-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  border: 0;
+  white-space: nowrap;
+}
+
+/* Chừa chỗ để banner không che chân trang. Giá trị --cgs-consent-h do consent.js đo. */
+body.cgs-consent-open {
+  padding-bottom: var(--cgs-consent-h, 0px);
+}
+
+@media (max-width: 640px) {
+  .cgs-consent__inner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    padding-top: 12px;
+  }
+
+  .cgs-consent__actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    justify-content: stretch;
+  }
+
+  .cgs-consent__btn {
+    padding-right: 10px;
+    padding-left: 10px;
+    white-space: normal;
+  }
+
+  .cgs-consent__btn--quiet {
+    grid-column: 1 / -1;
+  }
+}
+
+@media print {
+  .cgs-consent,
+  .cgs-consent-fab {
+    display: none !important;
+  }
+}
+
+/* Bảng cookie và lưu trữ cục bộ của trang /quyen-rieng-tu/ (tệp này được trang đó nạp tĩnh để tránh nhấp nháy).
+   Màu lấy từ token của site (--seo-*) và có giá trị dự phòng khi token vắng mặt. */
+.cgs-table-wrap {
+  margin: 16px 0 20px;
+}
+
+.cgs-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--seo-line, #e3e0dd);
+  background: var(--seo-surface, #ffffff);
+  color: var(--seo-body, #3f3c3b);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.cgs-data-table caption {
+  padding: 0 0 8px;
+  color: var(--seo-muted, #73706f);
+  font-size: 14px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.cgs-data-table th,
+.cgs-data-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--seo-line, #e3e0dd);
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: break-word;
+}
+
+.cgs-data-table td:last-child {
+  min-width: 7.5em;
+}
+
+.cgs-data-table thead th {
+  background: var(--seo-soft, #fbfaf8);
+  color: var(--seo-ink, #2d2d2d);
+  font-weight: 800;
+}
+
+.cgs-data-table tbody th {
+  color: var(--seo-ink, #2d2d2d);
+  font-weight: 700;
+}
+
+.cgs-data-table code {
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 720px) {
+  .cgs-data-table,
+  .cgs-data-table tbody,
+  .cgs-data-table tr,
+  .cgs-data-table th,
+  .cgs-data-table td {
+    display: block;
+  }
+
+  .cgs-data-table {
+    border: 0;
+    background: transparent;
+  }
+
+  .cgs-data-table caption {
+    display: block;
+    width: 100%;
+  }
+
+  .cgs-data-table td:last-child {
+    min-width: 0;
+  }
+
+  .cgs-data-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .cgs-data-table tr {
+    margin: 0 0 12px;
+    border: 1px solid var(--seo-line, #e3e0dd);
+    border-radius: 8px;
+    background: var(--seo-surface, #ffffff);
+  }
+
+  .cgs-data-table th,
+  .cgs-data-table td {
+    padding: 8px 12px;
+    border-bottom: 0;
+  }
+
+  .cgs-data-table td::before,
+  .cgs-data-table tbody th::before {
+    content: attr(data-label);
+    display: block;
+    color: var(--seo-muted, #73706f);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+}
