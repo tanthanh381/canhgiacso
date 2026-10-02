@@ -1,4 +1,5 @@
 import type { SiteContent } from "../../data";
+import { Icon } from "../../shared/icons";
 import { scrollBehavior } from "../../shared/motion";
 import { BrandMark, FooterNotice } from "../../shared/ui-primitives";
 import type { SessionAccount } from "../auth/model";
@@ -54,7 +55,7 @@ export function AppHeader({
           <button type="button" onClick={() => window.location.assign("/gioi-thieu/")}>Giới thiệu</button>
         </nav>
         <div className="top-actions">
-          <button className="icon-button" aria-pressed={dark} onClick={onToggleDark} aria-label="Đổi chế độ sáng tối">{dark ? "☀" : "☾"}</button>
+          <button className="icon-button" aria-pressed={dark} onClick={onToggleDark} aria-label="Đổi chế độ sáng tối"><Icon name={dark ? "sun" : "moon"} size={20} /></button>
           {account ? (
             <button className="profile-button" onClick={onOpenProfile} aria-label={`Mở tài khoản của ${playerName}`}>
               <span>{playerName.trim().slice(0, 1).toUpperCase() || "N"}</span>{playerName}
@@ -98,6 +99,11 @@ export function SyncStatus({
   );
 }
 
+/** Older published copy repeats the product name ("Cảnh Giác Số · …"); the lockup above already says it. */
+function footerTagline(copy: SiteContent["copy"]) {
+  return copy.footerTagline.replace(/^c[ảa]nh\s+gi[áa]c\s+s[ốo]\s*[·•:–—-]\s*/i, "");
+}
+
 export function AppFooter({
   copy,
   onOpenGuide,
@@ -109,7 +115,7 @@ export function AppFooter({
     <footer>
       <div className="footer-brand" aria-label="Cảnh Giác Số">
         <BrandMark />
-        <span><b>{copy.departmentName}</b><small>{copy.footerTagline}</small></span>
+        <span><b>{copy.productName}</b><small>{copy.departmentName}</small><small className="footer-tagline">{footerTagline(copy)}</small></span>
       </div>
       <FooterNotice notice={copy.footerNotice} />
       <div className="footer-actions">
