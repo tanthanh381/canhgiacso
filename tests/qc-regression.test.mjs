@@ -42,7 +42,9 @@ test("browser bundle contains no server secret and keeps auth validation", async
   assert.match(browserSource, /signOut\(\{ scope: "local" \}\)/);
   assert.match(client, /guestSupabase = guestClient/);
   assert.match(browserSource, /get_public_site_content/);
-  assert.match(page, /Guest gameplay is intentionally local/);
+  // Guest scoring: the answer key never ships to the browser; the page asks the gateway, which
+  // calls the per-choice RPC (see supabase/migrations/20261002102000_guest_choice_rpc.sql).
+  assert.match(page, /requestGuestChoiceOutcome\(selected, index\)/);
   assert.doesNotMatch(page, /supabase\.rpc\("evaluate_guest_choice"/);
   assert.doesNotMatch(page, /scenario_snapshot/);
   assert.doesNotMatch(page, /persistFullProgress|khien-so-migrated/);
@@ -60,22 +62,30 @@ test("answer keys are redacted and content management uses protected RPCs", asyn
   assert.match(migration, /choice_item - array\['correct', 'moneyDelta', 'awarenessDelta', 'feedback'\]/);
   assert.match(migration, /public\.get_managed_site_content/);
   assert.match(migration, /public\.save_managed_site_content/);
-  assert.match(page, /Guest gameplay is intentionally local/);
+  assert.match(page, /requestGuestChoiceOutcome/);
   assert.doesNotMatch(page, /supabase\.rpc\("evaluate_guest_choice"/);
   assert.match(admin, /save_managed_site_content/);
   const definitions = data.slice(data.indexOf("const scenarioDefinitions"), data.indexOf("export const scenarios"));
   assert.doesNotMatch(definitions, /correct:\s*(?:true|false)|moneyDelta:|awarenessDelta:|feedback:/);
 });
 
-test("guest choice scoring is local and obsolete privileged RPC access is revoked", async () => {
-  const [page, model, hardening] = await Promise.all([
+test("guest choice scoring uses the per-choice RPC and obsolete privileged RPC access is revoked", async () => {
+  const [page, model, gateway, hardening, guestRpc] = await Promise.all([
     read("../app/page.tsx"),
     read("../app/domains/training/model.ts"),
+    read("../app/domains/training/gateway.ts"),
     read("../supabase/migrations/20260923085000_enterprise_security_hardening_p0.sql"),
+    read("../supabase/migrations/20261002102000_guest_choice_rpc.sql"),
   ]);
-  assert.match(page, /evaluateGuestChoice\(selected, index\)/);
+  // The page delegates to the gateway; local scoring remains only as the legacy-payload path inside it.
+  assert.match(page, /requestGuestChoiceOutcome\(selected, index\)/);
   assert.match(model, /export function evaluateGuestChoice/);
+  assert.match(gateway, /evaluateGuestChoice\(/);
+  assert.match(gateway, /guestSupabase\.rpc\("evaluate_guest_choice"/);
+  // The 2026-09-23 migration revoked the old RPC; the 2026-10-02 migration deliberately re-creates it
+  // with a different, one-choice-only contract and grants it to anon.
   assert.match(hardening, /revoke all on function public\.evaluate_guest_choice\(integer,integer\)/);
+  assert.match(guestRpc, /grant execute on function public\.evaluate_guest_choice\(integer, ?integer\)\s+to anon, authenticated/);
   assert.doesNotMatch(page, /supabase\.rpc\("evaluate_guest_choice"/);
 });
 
