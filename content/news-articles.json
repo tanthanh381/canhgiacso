@@ -1,5 +1,125 @@
 [
   {
+    "id": "fanpage-gia-danh-giao-xu-tu-thien",
+    "slug": "fanpage-gia-danh-giao-xu-tu-thien",
+    "status": "published",
+    "title": "Cảnh giác Fanpage giả danh giáo xứ kêu gọi tiền từ thiện",
+    "summary": "Các Fanpage giả mạo có thể sao chép hình ảnh, thông tin của giáo xứ và giả danh người có uy tín để kêu gọi quyên góp. Trước khi chuyển tiền, hãy xác minh trực tiếp với tổ chức qua kênh chính thức và lưu bằng chứng nếu phát hiện dấu hiệu bất thường.",
+    "category": "Cảnh báo lừa đảo",
+    "publishedAt": "2026-10-01",
+    "sourceName": "Bộ Công an",
+    "sourceUrl": "https://bocongan.gov.vn/bai-viet/khoi-to-2-doi-tuong-lap-fanpage-gia-danh-giao-xu-lua-dao-tien-tu-thien-1790823696",
+    "featured": false,
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "heading",
+          "attrs": { "level": 2 },
+          "content": [{ "type": "text", "text": "Thủ đoạn được ghi nhận" }]
+        },
+        {
+          "type": "paragraph",
+          "content": [{ "type": "text", "text": "Đối tượng lập Fanpage giả danh giáo xứ, đăng lại hình ảnh và thông tin thật, sau đó giả danh người quản lý để kêu gọi đóng góp. Tài khoản ngân hàng và sim điện thoại mua lại qua mạng được dùng để nhận tiền và che giấu danh tính." }]
+        },
+        {
+          "type": "heading",
+          "attrs": { "level": 2 },
+          "content": [{ "type": "text", "text": "Cách tự bảo vệ" }]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Xác minh lời kêu gọi qua website, số điện thoại hoặc người đại diện chính thức của tổ chức." }] }] },
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Không xem lượt tương tác, hình ảnh quen thuộc hoặc bình luận tích cực là bằng chứng Fanpage chính chủ." }] }] },
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Chỉ chuyển tiền khi đã kiểm tra rõ đơn vị tiếp nhận, mục đích và thông tin tài khoản." }] }] },
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Lưu đường dẫn, tin nhắn và chứng từ giao dịch để trình báo cơ quan Công an khi nghi ngờ bị lừa." }] }] }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "gia-danh-cong-an-goi-dien-chuyen-tien-xac-minh",
+    "slug": "gia-danh-cong-an-goi-dien-chuyen-tien-xac-minh",
+    "status": "published",
+    "title": "Giả danh Công an gọi điện, yêu cầu chuyển tiền để “xác minh”",
+    "summary": "Kẻ gian tự xưng là cán bộ Công an, đe dọa người nghe có liên quan đến vụ án rồi yêu cầu cung cấp thông tin ngân hàng hoặc chuyển tiền. Cơ quan Công an không yêu cầu người dân chuyển tiền, cung cấp tài khoản hay mã OTP qua điện thoại để điều tra.",
+    "category": "Cảnh báo lừa đảo",
+    "publishedAt": "2026-09-30",
+    "sourceName": "Bộ Công an",
+    "sourceUrl": "https://bocongan.gov.vn/bai-viet/kip-thoi-ngan-chan-vu-lua-dao-qua-dien-thoai-bao-ve-tai-san-cua-nguoi-dan-1790762586",
+    "featured": false,
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "heading",
+          "attrs": { "level": 2 },
+          "content": [{ "type": "text", "text": "Dấu hiệu nhận biết" }]
+        },
+        {
+          "type": "paragraph",
+          "content": [{ "type": "text", "text": "Cuộc gọi từ số lạ thường đưa ra cáo buộc nghiêm trọng như liên quan đến ma túy, rửa tiền hoặc khoản nợ, tạo áp lực phải làm theo ngay. Bước tiếp theo là yêu cầu cung cấp thông tin tài khoản, mã OTP hoặc chuyển tiền để phục vụ việc “xác minh”." }]
+        },
+        {
+          "type": "heading",
+          "attrs": { "level": 2 },
+          "content": [{ "type": "text", "text": "Cách xử lý an toàn" }]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Bình tĩnh, ngắt cuộc gọi và không tiếp tục trao đổi qua ứng dụng nhắn tin do người gọi chỉ định." }] }] },
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Không cung cấp thông tin cá nhân, tài khoản ngân hàng, mật khẩu hoặc mã OTP." }] }] },
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Không chuyển tiền vào bất kỳ tài khoản nào để chứng minh vô tội hoặc phục vụ điều tra." }] }] },
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Chủ động liên hệ cơ quan Công an gần nhất qua kênh chính thức để kiểm tra và được hướng dẫn." }] }] }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "lua-dao-hoan-tien-mua-hang-online",
+    "slug": "lua-dao-hoan-tien-mua-hang-online",
+    "status": "published",
+    "title": "Cảnh báo cuộc gọi hoàn tiền, thu hồi hàng mua online",
+    "summary": "Đối tượng tự xưng là nhân viên sàn, thương hiệu hoặc đơn vị vận chuyển, dùng đúng thông tin đơn hàng để tạo lòng tin rồi gửi link giả, mã QR hoặc yêu cầu cài ứng dụng. Hãy kiểm tra trực tiếp trong ứng dụng mua hàng và chỉ liên hệ kênh chăm sóc khách hàng chính thức.",
+    "category": "Cảnh báo lừa đảo",
+    "publishedAt": "2026-09-28",
+    "sourceName": "Bộ Công an",
+    "sourceUrl": "https://www.bocongan.gov.vn/bai-viet/xuat-hien-thu-doan-lua-dao-moi-khi-mua-hang-online-1790562304",
+    "featured": false,
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "heading",
+          "attrs": { "level": 2 },
+          "content": [{ "type": "text", "text": "Kịch bản lừa đảo" }]
+        },
+        {
+          "type": "paragraph",
+          "content": [{ "type": "text", "text": "Người gọi thông báo sản phẩm vừa nhận thuộc lô hàng lỗi, hàng cấm hoặc cần thu hồi. Sau khi tạo lòng tin bằng thông tin đơn hàng chính xác, đối tượng đề nghị chuyển sang Zalo, Telegram hoặc Facebook để xử lý hoàn tiền, rồi gửi liên kết giả, mã QR hoặc hướng dẫn thao tác trên điện thoại." }]
+        },
+        {
+          "type": "heading",
+          "attrs": { "level": 2 },
+          "content": [{ "type": "text", "text": "Nguyên tắc phòng tránh" }]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Kiểm tra yêu cầu trả hàng hoặc hoàn tiền ngay trong ứng dụng thương mại điện tử chính thức." }] }] },
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Không bấm link lạ, quét mã QR không rõ nguồn gốc hoặc cài ứng dụng theo hướng dẫn qua điện thoại." }] }] },
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Không cung cấp mật khẩu, mã OTP hoặc chuyển tiền để nhận hoàn tiền, bồi thường." }] }] },
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Nếu đã thao tác theo hướng dẫn đáng ngờ, hãy dừng giao dịch, liên hệ ngân hàng, lưu bằng chứng và trình báo cơ quan Công an." }] }] }
+          ]
+        }
+      ]
+    }
+  },
+  {
     "id": "25-kich-ban-lua-dao-2026",
     "title": "Cảnh giác trước 25 kịch bản lừa đảo trên không gian mạng năm 2026",
     "summary": "Các thủ đoạn được chia thành 5 nhóm, nổi bật với giả mạo cơ quan, chiếm đoạt tài khoản và sử dụng AI, deepfake, deepvoice để tạo lòng tin. Không truy cập liên kết lạ, quét QR không rõ nguồn hoặc cung cấp OTP.",
