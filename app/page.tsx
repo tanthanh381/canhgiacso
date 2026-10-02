@@ -17,8 +17,8 @@ import { mapAnalyticsUsers, mapScenarioRisks, summarizeAnalytics, topScenarioRis
 import { DashboardView } from "./domains/dashboard/view";
 import { loadCisoDashboardData } from "./domains/dashboard/gateway";
 import { bestCorrectStreak, buildDefenseBadges, difficulties, difficultyTone, PHISHING_QUIZ_URL, scenarioCategoryLabel, scenarioChannelLabel } from "./domains/training/presentation";
-import { evaluateGuestChoice, type ChoiceOutcome, type GameHistory, type GameState, type PendingChoice, type Result, type StoredProgress } from "./domains/training/model";
-import { issueTrainingCertificate, loadTrainingAccountData, loadTrainingCertificates, restartTrainingRun, submitTrainingChoice } from "./domains/training/gateway";
+import { type ChoiceOutcome, type GameHistory, type GameState, type PendingChoice, type Result, type StoredProgress } from "./domains/training/model";
+import { issueTrainingCertificate, loadTrainingAccountData, loadTrainingCertificates, requestGuestChoiceOutcome, restartTrainingRun, submitTrainingChoice } from "./domains/training/gateway";
 import { GUEST_CERTIFICATE_KEY, LEGACY_PROGRESS_KEY, THEME_KEY, progressKey, readStoredProgress, safeStorageGet, safeStorageRemove, safeStorageSet } from "./shared/browser-storage";
 import { BadgeIcon, Modal } from "./shared/ui-primitives";
 import { canChangeHash, navigateBrowser, restoreHash, routeFromHash, type View } from "./domains/shell/navigation";
@@ -416,16 +416,23 @@ export default function Home() {
       await syncChoice(pending);
       return;
     }
-    // Guest gameplay is intentionally local. The published scenario payload
-    // already contains the scoring deltas used to render the exercise, so an
-    // anonymous learner should not depend on a network RPC just to select an
-    // answer. Authenticated attempts continue to use submit_game_choice so
-    // server-side progress and certificates remain authoritative.
-    const outcome = evaluateGuestChoice(selected, index);
-    if (!outcome) {
-      setDataStatus("Không tìm thấy lựa chọn này. Vui lòng tải lại trang và thử lại.");
+    // Guest gameplay: progress stays local, but the answer key never ships to the
+    // browser. The server scores exactly the chosen option (evaluate_guest_choice,
+    // rate limited, writes nothing). If scoring is unavailable the answer is NOT
+    // recorded, so the guest can retry. Authenticated attempts use submit_game_choice.
+    saveLock.current = true;
+    setSavingChoice(true);
+    setDataStatus("Đang chấm điểm lựa chọn…");
+    const evaluation = await requestGuestChoiceOutcome(selected, index);
+    saveLock.current = false;
+    setSavingChoice(false);
+    if (activeUser.current) return;
+    if (!evaluation.ok) {
+      setDataStatus(evaluation.message);
       return;
     }
+    setDataStatus("");
+    const outcome = evaluation.outcome;
     const nextBalance = Math.max(0, balance + outcome.moneyDelta);
     const nextAwareness = Math.max(0, Math.min(100, awareness + outcome.awarenessDelta));
     const nextResults = [...results, { scenarioId: selected.id, correct: outcome.correct, choiceIndex: index }];
@@ -604,7 +611,7 @@ export default function Home() {
         } else {
           setAuthPassword("");
           setAuthConfirmPassword("");
-          setAuthNotice("Tài khoản đã được tạo. Bạn có thể đăng nhập ngay mà không cần xác nhận email.");
+          setAuthNotice("Đã gửi thư xác nhận. Hãy kiểm tra hộp thư để hoàn tất đăng ký.");
         }
       } else {
         await signOutLocal();

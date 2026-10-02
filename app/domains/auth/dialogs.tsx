@@ -1,6 +1,58 @@
-import type { FormEventHandler } from "react";
+"use client";
+
+import { useEffect, useState, type FormEventHandler } from "react";
 import { Modal } from "../../shared/ui-primitives";
+import { resendSignupConfirmation } from "./gateway";
 import type { AuthMode, SessionAccount } from "./model";
+
+const RESEND_COOLDOWN_SECONDS = 60;
+
+// Hiển thị sau khi đăng ký mà chưa có phiên (dự án bật xác nhận email). Thông điệp cố ý
+// trung tính: không cho biết email đã tồn tại hay chưa, để không bị dò tài khoản.
+function ConfirmationPending({ email, onBackToLogin }: { email: string; onBackToLogin: () => void }) {
+  const [cooldown, setCooldown] = useState(RESEND_COOLDOWN_SECONDS);
+  const [busy, setBusy] = useState(false);
+  const [resendStatus, setResendStatus] = useState("");
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = window.setTimeout(() => setCooldown((value) => value - 1), 1000);
+    return () => window.clearTimeout(timer);
+  }, [cooldown]);
+
+  async function resend() {
+    if (busy || cooldown > 0) return;
+    setBusy(true);
+    setResendStatus("");
+    try {
+      const { error } = await resendSignupConfirmation(email);
+      if (error?.status === 429 || error?.code === "over_email_send_rate_limit" || error?.code === "over_request_rate_limit") {
+        setResendStatus("Bạn vừa yêu cầu gửi email. Vui lòng chờ vài phút rồi thử lại.");
+      } else if (error) {
+        setResendStatus("Chưa gửi lại được email. Vui lòng thử lại sau ít phút.");
+      } else {
+        setResendStatus("Nếu địa chỉ email này đang chờ xác nhận, một thư mới đã được gửi.");
+      }
+    } catch {
+      setResendStatus("Không thể kết nối dịch vụ tài khoản. Vui lòng thử lại.");
+    } finally {
+      setCooldown(RESEND_COOLDOWN_SECONDS);
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="auth-form" role="status" aria-live="polite">
+      <p className="auth-notice"><strong>Kiểm tra hộp thư để xác nhận tài khoản.</strong> Nếu địa chỉ <b>{email}</b> có thể đăng ký, chúng tôi đã gửi một thư xác nhận. Hãy mở thư, chọn liên kết xác nhận, sau đó quay lại đây và đăng nhập.</p>
+      <p className="auth-intro">Thư có thể mất vài phút để đến; hãy kiểm tra cả thư mục Spam hoặc Quảng cáo. Chỉ dùng liên kết trong thư gửi từ Cảnh Giác Số và không chia sẻ liên kết hoặc mật khẩu của bạn với bất kỳ ai. Nếu bạn đã có tài khoản, hãy chuyển sang Đăng nhập.</p>
+      {resendStatus && <p className="auth-notice" role="status">{resendStatus}</p>}
+      <button className="primary-button auth-submit" type="button" disabled={busy || cooldown > 0} onClick={() => void resend()}>
+        {busy ? "Đang gửi lại…" : cooldown > 0 ? `Gửi lại email xác nhận (${cooldown} giây)` : "Gửi lại email xác nhận"}
+      </button>
+      <button className="admin-secondary" type="button" onClick={onBackToLogin}>Quay lại đăng nhập</button>
+    </div>
+  );
+}
 
 type AuthFields = {
   email: string;
@@ -61,6 +113,8 @@ export function AccountDialogs({
   onCloseProfile: () => void | Promise<void>;
   onLogout: () => void | Promise<void>;
 }) {
+  // Chỉ nhánh đăng ký không có phiên mới đặt authNotice (xem submitAuth trong page.tsx).
+  const awaitingConfirmation = authMode === "register" && Boolean(authNotice);
   return (
     <>
       <Modal open={showGuestLimitNotice} onClose={onDismissGuestNotice} labelledBy="guest-limit-title" className="guest-limit-modal">
@@ -88,8 +142,14 @@ export function AccountDialogs({
           <button type="button" aria-pressed={authMode === "login"} className={authMode === "login" ? "active" : ""} onClick={() => onSwitchAuthMode("login")}>Đăng nhập</button>
           <button type="button" aria-pressed={authMode === "register"} className={authMode === "register" ? "active" : ""} onClick={() => onSwitchAuthMode("register")}>Đăng ký</button>
         </div>
-        <h2 id="auth-title">{authMode === "login" ? "Chào mừng trở lại" : "Tạo hồ sơ phòng vệ"}</h2>
-        <p className="auth-intro">Đăng nhập để lưu kết quả và tiếp tục trên thiết bị khác. Tài khoản mới được sử dụng ngay, không cần xác nhận email. Tiến trình khách được giữ riêng trên thiết bị và không tự chuyển vào tài khoản. Không sử dụng mật khẩu ngân hàng thật.</p>
+        <h2 id="auth-title">{awaitingConfirmation ? "Kiểm tra hộp thư" : authMode === "login" ? "Chào mừng trở lại" : "Tạo hồ sơ phòng vệ"}</h2>
+        <p className="auth-intro">Đăng nhập để lưu kết quả và tiếp tục trên thiết bị khác. Khi đăng ký, bạn có thể cần xác nhận email trước khi đăng nhập; hãy dùng địa chỉ email do chính bạn quản lý. Tiến trình khách được giữ riêng trên thiết bị và không tự chuyển vào tài khoản. Không sử dụng mật khẩu ngân hàng thật.</p>
+        {awaitingConfirmation ? (
+          <>
+            <ConfirmationPending email={authFields.email.trim().toLowerCase()} onBackToLogin={() => onSwitchAuthMode("login")} />
+            <button className="guest-continue" type="button" onClick={() => void onContinueAsGuest()}>Tiếp tục với tư cách khách</button>
+          </>
+        ) : (
         <form className="auth-form" onSubmit={onSubmitAuth}>
           {authMode === "register" && (
             <label><span>Tên hiển thị</span><input autoComplete="name" value={authFields.displayName} maxLength={32} onChange={(event) => authSetters.setDisplayName(event.target.value)} placeholder="Ví dụ: Minh An" /></label>
@@ -98,7 +158,7 @@ export function AccountDialogs({
             <label><span>Tên đăng nhập</span><input autoComplete="username" value={authFields.username} minLength={3} maxLength={24} onChange={(event) => authSetters.setUsername(event.target.value)} placeholder="tanthanh381" autoCapitalize="none" spellCheck={false} /></label>
           )}
           <label><span>Email</span><input type="email" autoComplete="email" value={authFields.email} onChange={(event) => authSetters.setEmail(event.target.value)} placeholder="email@example.com" autoCapitalize="none" spellCheck={false} /></label>
-          <label><span>Mật khẩu</span><input type="password" autoComplete={authMode === "login" ? "current-password" : "new-password"} value={authFields.password} minLength={8} maxLength={72} onChange={(event) => authSetters.setPassword(event.target.value)} placeholder={authMode === "register" ? "Hoa, thường, số và ký tự đặc biệt" : "Ít nhất 8 ký tự"} /></label>
+          <label><span>Mật khẩu</span><input type="password" autoComplete={authMode === "login" ? "current-password" : "new-password"} value={authFields.password} minLength={authMode === "register" ? 10 : 8} maxLength={72} onChange={(event) => authSetters.setPassword(event.target.value)} placeholder={authMode === "register" ? "Từ 10 ký tự: hoa, thường, số, ký tự đặc biệt" : "Ít nhất 8 ký tự"} /></label>
           {authMode === "register" && (
             <label><span>Xác nhận mật khẩu</span><input type="password" autoComplete="new-password" value={authFields.confirmPassword} onChange={(event) => authSetters.setConfirmPassword(event.target.value)} placeholder="Nhập lại mật khẩu" /></label>
           )}
@@ -110,6 +170,7 @@ export function AccountDialogs({
           <div className="auth-or" aria-hidden="true"><span>hoặc</span></div>
           <button className="guest-continue" type="button" onClick={() => void onContinueAsGuest()}>Tiếp tục với tư cách khách</button>
         </form>
+        )}
       </Modal>
 
       <Modal open={profileOpen} onClose={() => void onCloseProfile()} labelledBy="profile-title" className="profile-modal">

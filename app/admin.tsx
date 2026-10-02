@@ -12,7 +12,7 @@ type AdminAccount = { id: string; displayName: string; email: string };
 type AdminState = "checking" | "ready" | "forbidden" | "error";
 type ContentRole = "admin" | "editor";
 type ManagedRole = ContentRole | "member";
-type ManagedUser = { id: string; email: string; username: string; displayName: string; createdAt: string; role: ManagedRole };
+type ManagedUser = { id: string; email: string; username: string; displayName: string; createdAt: string; role: ManagedRole; emailConfirmed: boolean };
 type AdminTab = "content" | "general" | "certificate" | "scenarios" | "knowledge" | "news" | "traffic" | "users";
 
 function adminTabFromHash(): AdminTab {
@@ -28,7 +28,25 @@ function cloneContent(content: SiteContent): SiteContent {
   return structuredClone(content);
 }
 
-function parseManagementContext(value: unknown): { role: ContentRole; users: ManagedUser[] } | null {
+// Lý do chặn cấp quyền đặc quyền (admin/editor) ở giao diện. CSDL vẫn là nơi cưỡng chế thật:
+// set_content_manager_role từ chối email chưa xác nhận (CG001) và miền ngoài danh sách (CG002).
+function privilegeGrantBlockReason(user: ManagedUser, nextRole: ManagedRole, allowedDomains: string[]): string | null {
+  if (nextRole === "member" || user.role === nextRole) return null;
+  const rank = { member: 0, editor: 1, admin: 2 } as const;
+  if (rank[nextRole] <= rank[user.role]) return null;
+  if (!user.emailConfirmed) {
+    return "Email của tài khoản này chưa được xác nhận nên chưa thể cấp quyền Biên tập viên hoặc Quản trị. Hãy yêu cầu người dùng mở thư xác nhận từ Cảnh Giác Số trước.";
+  }
+  if (allowedDomains.length > 0) {
+    const domain = user.email.toLowerCase().split("@").pop() ?? "";
+    if (!allowedDomains.includes(domain)) {
+      return `Chỉ cấp quyền đặc quyền cho email thuộc miền: ${allowedDomains.join(", ")}.`;
+    }
+  }
+  return null;
+}
+
+function parseManagementContext(value: unknown): { role: ContentRole; users: ManagedUser[]; allowedDomains: string[] } | null {
   if (!value || typeof value !== "object") return null;
   const record = value as Record<string, unknown>;
   if (record.role !== "admin" && record.role !== "editor") return null;
@@ -38,9 +56,13 @@ function parseManagementContext(value: unknown): { role: ContentRole; users: Man
     if (typeof user.id !== "string" || typeof user.email !== "string" || typeof user.username !== "string"
       || typeof user.display_name !== "string" || typeof user.created_at !== "string"
       || (user.role !== "admin" && user.role !== "editor" && user.role !== "member")) return [];
-    return [{ id: user.id, email: user.email, username: user.username, displayName: user.display_name, createdAt: user.created_at, role: user.role as ManagedRole }];
+    // email_confirmed chỉ có từ migration 20261002100000; thiếu trường = CSDL chưa có kiểm tra, không chặn ở giao diện.
+    return [{ id: user.id, email: user.email, username: user.username, displayName: user.display_name, createdAt: user.created_at, role: user.role as ManagedRole, emailConfirmed: user.email_confirmed !== false }];
   }) : [];
-  return { role: record.role, users };
+  const allowedDomains = Array.isArray(record.privileged_email_domains)
+    ? record.privileged_email_domains.filter((item): item is string => typeof item === "string")
+    : [];
+  return { role: record.role, users, allowedDomains };
 }
 
 export function AdminPage({
@@ -65,6 +87,7 @@ export function AdminPage({
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const [role, setRole] = useState<ContentRole | null>(null);
   const [managedUsers, setManagedUsers] = useState<ManagedUser[]>([]);
+  const [allowedDomains, setAllowedDomains] = useState<string[]>([]);
   const [changingUserId, setChangingUserId] = useState<string | null>(null);
   const [grantIdentity, setGrantIdentity] = useState("");
   const [grantRole, setGrantRole] = useState<ContentRole>("editor");
@@ -98,6 +121,7 @@ export function AdminPage({
       }
       setRole(context.role);
       setManagedUsers(context.users);
+      setAllowedDomains(context.allowedDomains);
       const { data, error } = await supabase.rpc("get_managed_site_content");
       if (!active) return;
       if (error) {
@@ -249,7 +273,9 @@ export function AdminPage({
     });
     if (draftResult.error) {
       setBusy(false);
-      setStatus("Không thể lưu. Vui lòng kiểm tra quyền quản trị và cấu hình cơ sở dữ liệu.");
+      setStatus(draftResult.error.code === "22023"
+        ? `Máy chủ từ chối nội dung (${draftResult.error.message}). Kiểm tra mỗi tình huống có đủ 3 lựa chọn, đúng một đáp án an toàn, mức thay đổi tài sản/cảnh giác là số nguyên và phản hồi không để trống.`
+        : "Không thể lưu. Vui lòng kiểm tra quyền quản trị và cấu hình cơ sở dữ liệu.");
       return;
     }
     setSavedSnapshot(JSON.stringify(normalized));
@@ -281,6 +307,11 @@ export function AdminPage({
       setStatus(`${user.displayName} đã có quyền ${nextRole === "admin" ? "Quản trị" : nextRole === "editor" ? "Biên tập viên" : "Thành viên"}.`);
       return true;
     }
+    const blockReason = privilegeGrantBlockReason(user, nextRole, allowedDomains);
+    if (blockReason) {
+      setStatus(blockReason);
+      return false;
+    }
     setChangingUserId(user.id);
     setStatus(`Đang cập nhật quyền cho ${user.displayName}…`);
     const result = await supabase.rpc("set_content_manager_role", {
@@ -289,7 +320,11 @@ export function AdminPage({
     });
     if (result.error) {
       setChangingUserId(null);
-      setStatus("Không thể cập nhật quyền. Vui lòng tải lại và kiểm tra phiên đăng nhập.");
+      setStatus(result.error.code === "CG001"
+        ? "Máy chủ từ chối: email của tài khoản này chưa được xác nhận."
+        : result.error.code === "CG002"
+          ? "Máy chủ từ chối: miền email không nằm trong danh sách được phép nhận quyền đặc quyền."
+          : "Không thể cập nhật quyền. Vui lòng tải lại và kiểm tra phiên đăng nhập.");
       return false;
     }
     const refreshed = await supabase.rpc("get_content_management_access");
@@ -300,6 +335,7 @@ export function AdminPage({
       return false;
     }
     setManagedUsers(context.users);
+    setAllowedDomains(context.allowedDomains);
     setChangingUserId(null);
     setStatus(`Đã cấp quyền ${nextRole === "admin" ? "Quản trị" : nextRole === "editor" ? "Biên tập viên" : "Thành viên"} cho ${user.displayName}.`);
     return true;
@@ -456,8 +492,8 @@ export function AdminPage({
           <label><span>Nhóm quyền cần cấp</span><select value={grantRole} onChange={(event) => setGrantRole(event.target.value as ContentRole)}><option value="editor">Biên tập viên</option><option value="admin">Quản trị</option></select></label>
           <button className="primary-button" disabled={Boolean(changingUserId)} type="submit">Cấp quyền</button>
         </form>
-        <p className="role-grant-help">Chỉ tài khoản đã đăng ký và xác nhận email mới có thể được cấp quyền. Có thể thu hồi quyền về “Thành viên” trong danh sách bên dưới.</p>
-        <div className="role-table-wrap"><table><thead><tr><th>Tài khoản</th><th>Ngày đăng ký</th><th>Nhóm quyền</th></tr></thead><tbody>{managedUsers.map((user) => <tr key={user.id}><td><strong>{user.displayName}</strong><small>@{user.username} · {user.email}</small></td><td>{new Date(user.createdAt).toLocaleDateString("vi-VN")}</td><td><select aria-label={`Nhóm quyền của ${user.displayName}`} value={user.role} disabled={user.id === account.id || changingUserId === user.id} onChange={(event) => void changeUserRole(user, event.target.value as ManagedRole)}><option value="member">Thành viên</option><option value="editor">Biên tập viên</option><option value="admin">Quản trị</option></select>{user.id === account.id && <small className="self-role-note">Tài khoản hiện tại</small>}</td></tr>)}</tbody></table></div>
+        <p className="role-grant-help">Chỉ tài khoản đã đăng ký và xác nhận email mới có thể được cấp quyền Biên tập viên hoặc Quản trị; máy chủ từ chối cấp cho email chưa xác nhận. Có thể thu hồi quyền về “Thành viên” trong danh sách bên dưới.{allowedDomains.length > 0 && <> Chỉ email thuộc miền <b>{allowedDomains.join(", ")}</b> được nhận quyền đặc quyền.</>}</p>
+        <div className="role-table-wrap"><table><thead><tr><th>Tài khoản</th><th>Ngày đăng ký</th><th>Nhóm quyền</th></tr></thead><tbody>{managedUsers.map((user) => <tr key={user.id}><td><strong>{user.displayName}</strong><small>@{user.username} · {user.email}</small><small>{user.emailConfirmed ? "✓ Email đã xác nhận" : "⚠ Email chưa xác nhận — chưa thể cấp quyền đặc quyền"}</small></td><td>{new Date(user.createdAt).toLocaleDateString("vi-VN")}</td><td><select aria-label={`Nhóm quyền của ${user.displayName}`} value={user.role} disabled={user.id === account.id || changingUserId === user.id} onChange={(event) => void changeUserRole(user, event.target.value as ManagedRole)}><option value="member">Thành viên</option><option value="editor" disabled={Boolean(privilegeGrantBlockReason(user, "editor", allowedDomains))}>Biên tập viên</option><option value="admin" disabled={Boolean(privilegeGrantBlockReason(user, "admin", allowedDomains))}>Quản trị</option></select>{user.id === account.id && <small className="self-role-note">Tài khoản hiện tại</small>}</td></tr>)}</tbody></table></div>
       </div>}
       </fieldset>
     </section>

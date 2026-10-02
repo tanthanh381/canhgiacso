@@ -84,7 +84,7 @@ test("ships product metadata and social artwork", async () => {
   assert.match(page, /validateAuthSubmission/);
   assert.match(authModel, /USERNAME_PATTERN/);
   assert.match(authModel, /PASSWORD_PATTERN/);
-  assert.match(authModel, /Mật khẩu cần 8–72 ký tự/);
+  assert.match(authModel, /Mật khẩu cần 10–72 ký tự/);
   assert.match(appSource, /supabase\.auth\.signInWithPassword/);
   assert.match(appSource, /supabase\.auth\.signOut\(\{ scope: "local" \}\)/);
   assert.match(page, /continueAsGuest/);

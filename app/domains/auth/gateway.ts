@@ -35,6 +35,11 @@ export function registerAccount({
   });
 }
 
+// Gửi lại email xác nhận đăng ký (Supabase giới hạn ~1 lần/60 giây cho mỗi địa chỉ).
+export function resendSignupConfirmation(email: string) {
+  return supabase.auth.resend({ type: "signup", email });
+}
+
 export function loginAccount(email: string, password: string) {
   return supabase.auth.signInWithPassword({ email, password });
 }
