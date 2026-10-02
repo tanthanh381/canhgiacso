@@ -73,7 +73,8 @@ test("analytics application wiring is canonical source while build instrumentati
   assert.match(admin, /Thống kê truy cập/);
   assert.match(traffic, /AdminCountryAnalytics/);
   assert.doesNotMatch(instrumentation, /patchAdmin|patchCountryAnalytics|admin\.tsx|admin-traffic-analytics\.tsx/);
-  assert.match(instrumentation, /web-analytics\.js/);
+  assert.match(instrumentation, /web-analytics/);
+  assert.match(instrumentation, /consent\.js/);
   assert.match(instrumentation, /connect-src/);
 });
 
