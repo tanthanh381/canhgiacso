@@ -709,6 +709,8 @@ a:hover { text-decoration-thickness: 2px; }
   --seo-focus: #ffe15a;
   --seo-focus-halo: #0d1620;
   --seo-control-line: #74859a;
+  --seo-brand: #ff7184;
+  --seo-brand-strong: #e54c62;
 }
 
 .seo-header { background: color-mix(in srgb, var(--seo-surface) 96%, transparent); }
@@ -915,4 +917,30 @@ li > a:only-child {
   .seo-card:hover,
   .seo-intent-grid a:hover,
   .seo-intent-grid a:focus-visible { transform: none !important; }
+}
+
+/* Theme toggle (inserted by /theme-init.js into .seo-nav): 44px target, ring comes from the global :focus-visible rule. */
+.seo-theme-toggle {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--seo-control-line);
+  border-radius: 50%;
+  background: var(--seo-surface);
+  color: var(--seo-ink);
+  cursor: pointer;
+}
+.seo-theme-toggle:hover { border-color: var(--seo-ink); }
+.seo-theme-toggle .seo-theme-sun { display: none; }
+:root[data-theme="dark"] .seo-theme-toggle .seo-theme-moon { display: none; }
+:root[data-theme="dark"] .seo-theme-toggle .seo-theme-sun { display: block; }
+.seo-nav-links { margin-left: auto; }
+@media (max-width: 760px) {
+  .seo-nav { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px 12px; }
+  .seo-nav > .seo-brand { grid-column: 1; grid-row: 1; justify-self: start; }
+  .seo-nav > .seo-theme-toggle { grid-column: 2; grid-row: 1; }
+  .seo-nav > .seo-nav-links { grid-column: 1 / -1; grid-row: 2; margin-left: 0; }
 }

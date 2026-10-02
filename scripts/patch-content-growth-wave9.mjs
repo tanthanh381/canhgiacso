@@ -778,6 +778,22 @@ for (const relative of ["gioi-thieu/index.html","quyen-rieng-tu/index.html","phu
   await writeFile(file,html,"utf8");
 }
 
+// Every static page with the shared header loads /theme-init.js: it applies the saved/system theme before first
+// paint and adds the accessible light/dark toggle to .seo-nav. Idempotent; pages already loading it are untouched.
+async function ensureThemeInit(dir) {
+  for (const entry of await readdir(dir,{withFileTypes:true})) {
+    const full = path.join(dir,entry.name);
+    if (entry.isDirectory()) { await ensureThemeInit(full); continue; }
+    if (!entry.name.endsWith(".html")) continue;
+    const original = await readFile(full,"utf8");
+    if (!/class="[^"]*\bseo-nav\b/.test(original)) continue;
+    let html = original.replace(/<script>try\{if\(localStorage\.getItem\("khien-so-theme"\)===["']dark["']\)document\.documentElement\.dataset\.theme=["']dark["']\}catch\{\}<\/script>/g,THEME);
+    if (!html.includes('/theme-init.js')) html = html.replace(/<head(\s[^>]*)?>/i,(open)=>`${open}\n  ${THEME}`);
+    if (html !== original) await writeFile(full,html,"utf8");
+  }
+}
+await ensureThemeInit(PUBLIC);
+
 let hub = await read("kien-thuc/index.html");
 if (!hub.includes('data-growth-wave9="knowledge-hub"')) {
   const cards = articles.slice(0,12).map((a)=>`<a class="growth-card" href="/kien-thuc/${a.slug}/"><strong>${a.breadcrumb}</strong><span>${a.quick}</span></a>`).join("");
