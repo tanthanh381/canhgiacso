@@ -8,6 +8,8 @@ const SITE = "https://canhgiacso.com";
 const SEO_CSS_VERSION = "20260924-design-system";
 const BRAND_MARKUP = '<span class="seo-brand-logo" aria-hidden="true"></span><span class="seo-brand-divider" aria-hidden="true"></span><span class="seo-product-lockup"><strong>CẢNH GIÁC SỐ</strong><small>IT SECURITY</small></span>';
 const SEO_FOOTER_NAV = '<nav class="seo-footer-links" aria-label="Thông tin website"><a href="/gioi-thieu/">Giới thiệu</a><a href="/chinh-sach-bien-tap/">Biên tập</a><a href="/phuong-phap-kiem-chung/">Kiểm chứng</a><a href="/lien-he/">Liên hệ</a><a href="/quyen-rieng-tu/">Quyền riêng tư</a><a href="/bao-mat/">Bảo mật</a><a href="/sitemap/">Sơ đồ nội dung</a></nav>';
+const OPERATOR_TEXT = "Website được quản lý và vận hành bởi IT Security Team - HDBank.";
+const OPERATOR_LINE = `<p class="seo-safety">${OPERATOR_TEXT}</p>`;
 const EDITORIAL_REVIEWER = {
   "@type": "Organization",
   "@id": `${SITE}/#editorial-team`,
@@ -49,6 +51,9 @@ function normalizeSeoFooter(html) {
   return html.replace(/<footer class="seo-footer">([\s\S]*?)<\/footer>/gi, (_, body) => {
     let next = body.replace(/<nav class="seo-footer-links"[^>]*>[\s\S]*?<\/nav>/gi, "");
     next = next.replace(/(<strong>Cảnh Giác Số<\/strong>)/i, `$1${SEO_FOOTER_NAV}`);
+    if (!next.includes(OPERATOR_TEXT)) {
+      next = /<\/div>\s*$/.test(next) ? next.replace(/<\/div>(\s*)$/, `${OPERATOR_LINE}</div>$1`) : `${next}${OPERATOR_LINE}`;
+    }
     return `<footer class="seo-footer">${next}</footer>`;
   });
 }
@@ -67,11 +72,28 @@ function match(html, re) {
   return html.match(re)?.[1]?.trim() ?? "";
 }
 
+function structuredDate(html, property) {
+  for (const block of html.matchAll(/<script\s+type=["']application\/ld\+json["']>([\s\S]*?)<\/script>/gi)) {
+    try {
+      const data = JSON.parse(block[1]);
+      const nodes = Array.isArray(data["@graph"]) ? data["@graph"] : [data];
+      for (const node of nodes) {
+        const value = node && typeof node === "object" ? node[property] : "";
+        if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}/.test(value)) return value.slice(0, 10);
+      }
+    } catch {
+      // JSON-LD không hợp lệ không được làm hỏng sitemap.
+    }
+  }
+  return "";
+}
+
+// Ngày sửa đổi lấy từ chính trang (không dùng mtime hay ngày hệ thống) để sitemap xác định và lặp lại được.
 function modifiedDate(html) {
   const article = match(html, /<meta\s+property=["']article:modified_time["']\s+content=["']([^"']+)["']/i);
   if (article) return article.slice(0, 10);
   const time = match(html, /<time\s+datetime=["'](\d{4}-\d{2}-\d{2})["']/i);
-  return time || "";
+  return time || structuredDate(html, "dateModified") || structuredDate(html, "datePublished") || "";
 }
 
 function isIndexable(html) {
@@ -177,6 +199,14 @@ function normalizeStructuredTrust(html) {
   });
 }
 
+// 404.html không nằm trong sitemap nhưng cần cùng chân trang (liên kết thông tin website + đơn vị vận hành).
+{
+  const notFound = path.join(PUBLIC, "404.html");
+  const html = await readFile(notFound, "utf8");
+  const next = normalizeSeoFooter(html);
+  if (next !== html) await writeFile(notFound, next, "utf8");
+}
+
 const records = [];
 for (const file of [HOME, ...(await htmlFiles(PUBLIC))]) {
   let html = await readFile(file, "utf8");
@@ -218,6 +248,18 @@ for (const record of records) {
     throw new Error(`Duplicate meta description: ${record.canonical}`);
   }
   byDescription.set(record.description, record.file);
+}
+
+// Trang tổng hợp (trang chủ, hub, sơ đồ) không có ngày riêng: dùng ngày sửa mới nhất của các trang con
+// (hoặc của toàn site nếu không có trang con) để lastmod luôn xác định theo nội dung.
+{
+  const dated = records.filter((record) => record.modified);
+  const newest = (pool) => pool.reduce((latest, record) => (record.modified > latest ? record.modified : latest), "");
+  for (const record of records) {
+    if (record.modified) continue;
+    const children = dated.filter((other) => other.canonical !== record.canonical && other.canonical.startsWith(record.canonical));
+    record.modified = newest(children.length ? children : dated);
+  }
 }
 
 records.sort((a, b) => {
