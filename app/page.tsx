@@ -21,6 +21,7 @@ import { evaluateGuestChoice, type ChoiceOutcome, type GameHistory, type GameSta
 import { issueTrainingCertificate, loadTrainingAccountData, loadTrainingCertificates, restartTrainingRun, submitTrainingChoice } from "./domains/training/gateway";
 import { GUEST_CERTIFICATE_KEY, LEGACY_PROGRESS_KEY, THEME_KEY, progressKey, readStoredProgress, safeStorageGet, safeStorageRemove, safeStorageSet } from "./shared/browser-storage";
 import { BadgeIcon, Modal } from "./shared/ui-primitives";
+import { scrollBehavior } from "./shared/motion";
 import { canChangeHash, navigateBrowser, restoreHash, routeFromHash, type View } from "./domains/shell/navigation";
 import { AppFooter, AppHeader, SyncStatus } from "./domains/shell/view";
 
@@ -189,6 +190,11 @@ export default function Home() {
   // latest browser state when auth emits an event.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    // Mirror the theme on <html> so UI rendered outside .app (portals, drawers, native controls) follows it.
+    document.documentElement.dataset.theme = dark ? "dark" : "light";
+  }, [dark]);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -388,7 +394,7 @@ export default function Home() {
     setAnswer(null);
     setAnswerOutcome(null);
     navigateTo("game");
-    if (window.innerWidth < 1050) document.querySelector(".stage")?.scrollIntoView({ behavior: "smooth" });
+    if (window.innerWidth < 1050) document.querySelector(".stage")?.scrollIntoView({ behavior: scrollBehavior() });
   }
 
   function navigateTo(nextView: View) {

@@ -1,4 +1,5 @@
 import type { SiteContent } from "../../data";
+import { scrollBehavior } from "../../shared/motion";
 import { BrandMark, FooterNotice } from "../../shared/ui-primitives";
 import type { SessionAccount } from "../auth/model";
 import { SIMULATION_BANNER_VIEWS, type View } from "./navigation";
@@ -43,7 +44,7 @@ export function AppHeader({
               <button type="button" onClick={() => {
                 document.querySelector<HTMLDetailsElement>(".knowledge-menu")?.removeAttribute("open");
                 onNavigate("knowledge");
-                window.setTimeout(() => document.getElementById("security-checklist-title")?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
+                window.setTimeout(() => document.getElementById("security-checklist-title")?.scrollIntoView({ behavior: scrollBehavior(), block: "start" }), 80);
               }}><strong>Danh sách kiểm tra</strong><small>Tự kiểm tra an toàn số và lưu tiến độ</small></button>
             </div>
           </details>

@@ -74,7 +74,7 @@ a.url:focus-visible{outline:4px solid #ffdc00;outline-offset:6px}
   .notch{top:10px;width:76px;height:20px;margin-left:-38px}
   .clock{top:48px;font-size:clamp(42px,12vw,64px)}
   .msg{left:12px;right:12px;border-radius:15px;padding:11px 12px;font-size:clamp(12px,3.2vw,16px);line-height:1.3}
-  .msg b{font-size:11px;margin-bottom:4px}
+  .msg b{font-size:12px;margin-bottom:4px}
   #m1{top:145px!important}
   #m2{top:245px!important}
   #m3{top:345px!important}
@@ -125,11 +125,11 @@ a.url:focus-visible{outline:4px solid #ffdc00;outline-offset:6px}
   #m2{top:210px!important}
   #m3{top:300px!important}
   .card{min-height:154px;padding:15px 11px}
-  .card .d{font-size:11px}
+  .card .d{font-size:12px}
   .search{height:58px}
   .result{padding:12px;font-size:14px}
-  .result small{font-size:11px}
-  .tool{font-size:11px}
+  .result small{font-size:12px}
+  .tool{font-size:12px}
 }
 @media (max-width:720px) and (max-height:650px){
   .phone{height:48vh}
@@ -137,8 +137,8 @@ a.url:focus-visible{outline:4px solid #ffdc00;outline-offset:6px}
   #m1{top:76px!important}
   #m2{top:140px!important}
   #m3{top:204px!important}
-  .msg{padding:8px 9px;font-size:11px}
-  .msg b{font-size:10px}
+  .msg{padding:8px 9px;font-size:12px}
+  .msg b{font-size:12px}
 }
 </style></head><body>
 <canvas id="bg" width="1920" height="1080"></canvas>
@@ -290,20 +290,24 @@ function render(t){
 }
 
 // Own clock so the embedding page can pause; loops after holding the final scene.
+// Reduced motion: start on the final, static scene and draw nothing until the visitor presses play.
 const LOOP=TOTAL+4, FINAL=37.5;
-const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
-let clock=reduceMotion?FINAL:0, last=null, playing=!reduceMotion;
+const reduceQuery=matchMedia('(prefers-reduced-motion: reduce)');
+let clock=reduceQuery.matches?FINAL:0, last=null, playing=!reduceQuery.matches, raf=0;
+// The frame loop only runs while playing, so a paused or reduced-motion animation costs no CPU.
 function tick(ms){
-  if(playing){
-    if(last!==null)clock+=Math.min(ms-last,100)/1000;
-    if(clock>LOOP)clock=0;
-    render(clock);
-  }
+  raf=0;
+  if(!playing){last=null;return}
+  if(last!==null)clock+=Math.min(ms-last,100)/1000;
   last=ms;
-  requestAnimationFrame(tick);
+  if(clock>LOOP)clock=0;
+  render(clock);
+  raf=requestAnimationFrame(tick);
 }
+function startLoop(){if(!raf){last=null;raf=requestAnimationFrame(tick)}}
 function announce(){if(parent!==window)parent.postMessage({type:'cgs-about-anim',playing},location.origin)}
-function setPlaying(next){playing=next;if(playing&&clock>=LOOP-.05)clock=0;announce()}
+function setPlaying(next){playing=next;if(playing){if(clock>=LOOP-.05)clock=0;startLoop()}announce()}
+reduceQuery.addEventListener('change',e=>{if(e.matches){playing=false;clock=FINAL;render(clock);announce()}});
 addEventListener('message',e=>{
   if(e.origin!==location.origin||e.data?.type!=='cgs-about-anim')return;
   if(e.data.action==='toggle')setPlaying(!playing);
@@ -314,5 +318,5 @@ addEventListener('message',e=>{
 function fit(){document.documentElement.style.setProperty('--fit',Math.min(innerWidth/1920,innerHeight/1080))}
 addEventListener('resize',fit);fit();
 render(clock);announce();
-requestAnimationFrame(tick);
+if(playing)startLoop();
 </script></body></html>
