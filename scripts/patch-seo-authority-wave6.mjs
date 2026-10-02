@@ -327,7 +327,7 @@ const security = pageShell({
 
 const verifyCertificate = pageShell({
   title: "Xác minh chứng nhận | Cảnh Giác Số",
-  description: "Nhập mã in trên chứng nhận hoàn thành khóa đào tạo Cảnh Giác Số để kiểm tra chứng nhận có thật hay không; kết quả chỉ hiển thị thông tin tối thiểu và che tên người được cấp.",
+  description: "Nhập mã in trên chứng nhận hoàn thành của Cảnh Giác Số để kiểm tra chứng nhận có thật hay không. Kết quả chỉ hiển thị thông tin tối thiểu, tên được che.",
   canonical: `${SITE}/xac-minh-chung-chi/`,
   type: "WebPage",
   h1: "Xác minh chứng nhận",
