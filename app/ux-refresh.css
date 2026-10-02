@@ -111,7 +111,7 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
 .security-awareness-banner { position: relative; padding-right: 48px; }
 .ux-banner-close { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; border: 0; border-radius: 50%; background: transparent; color: var(--muted); cursor: pointer; font-size: 21px; }
 .app.ux-banner-dismissed .security-awareness-banner { display: none; }
-.ux-simulation-chip { display: inline-flex; align-items: center; gap: 5px; border: 1px solid color-mix(in srgb, var(--ux-highlight) 65%, var(--line)); background: color-mix(in srgb, var(--ux-highlight) 11%, var(--surface)); border-radius: 18px; min-height: 34px; padding: 0 9px; font-size: 11px; font-weight: 750; cursor: pointer; }
+.ux-simulation-chip { display: inline-flex; align-items: center; gap: 5px; border: 1px solid color-mix(in srgb, var(--ux-highlight) 65%, var(--line)); background: color-mix(in srgb, var(--ux-highlight) 11%, var(--surface)); border-radius: 18px; min-height: 34px; padding: 0 9px; font-size: 12px; font-weight: 750; cursor: pointer; }
 
 /* Defer account conversion until the learner has experienced value. */
 .guest-mode-note { display: none; }
@@ -183,7 +183,7 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
     justify-content: center;
     min-height: 36px;
     padding: 0 9px;
-    font-size: 11px;
+    font-size: 12px;
     white-space: nowrap;
   }
   .icon-button { width: 36px; height: 36px; }
@@ -204,7 +204,7 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
     border-radius: 12px;
   }
   .security-awareness-banner { min-height: 42px; justify-content: flex-start; text-align: left; padding: 7px 48px 7px 13px; }
-  .security-awareness-banner span { font-size: 11px; }
+  .security-awareness-banner span { font-size: 12px; }
 
   .game-shell { display: block; min-height: auto; }
   .stage { padding: 14px 14px 34px; }
@@ -266,7 +266,7 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
   }
   .ux-bottom-nav button { border: 0; background: transparent; color: var(--muted); border-radius: 12px; display: grid; place-items: center; align-content: center; gap: 1px; cursor: pointer; }
   .ux-bottom-nav button > span { font-size: 17px; line-height: 1; }
-  .ux-bottom-nav small { font-size: 10px; font-weight: 750; }
+  .ux-bottom-nav small { font-size: 12px; font-weight: 750; }
   .ux-bottom-nav button.active { color: var(--ux-brand); background: color-mix(in srgb, var(--ux-brand) 7%, var(--surface)); }
   .ux-bottom-nav .ux-about-nav-item { order: 6; }
 
@@ -277,7 +277,7 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
   .top-actions { gap: 4px; }
   .product-lockup strong { display: none; }
   .topbar .auth-actions .login-button,
-  .topbar .auth-actions .signup-button { min-height: 34px; padding-inline: 7px; font-size: 10px; }
+  .topbar .auth-actions .signup-button { min-height: 34px; padding-inline: 7px; font-size: 12px; }
   .ux-utility-trigger { width: 34px; height: 34px; }
   .stage { padding-inline: 10px; }
   .status-card { min-width: 142px; }
@@ -338,7 +338,7 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
   .ux-mobile-knowledge-menu small {
     margin-top: 3px;
     color: var(--muted);
-    font-size: 10px;
+    font-size: 12px;
     line-height: 1.4;
     font-weight: 500;
   }
@@ -398,7 +398,7 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 9px;
+    font-size: 12px;
   }
   .ux-utility-popover-mobile {
     top: 126px;
