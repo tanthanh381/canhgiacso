@@ -129,14 +129,20 @@ Cổng sau mỗi tệp: không có lỗi; đăng nhập quản trị bằng TOTP
 
 | Hạng mục | Kết quả | Mức |
 |---|---|---|
-| Toàn bộ schema + migration hiện hữu + 5 migration mới áp dụng theo thứ tự | Chạy sạch trên PostgreSQL 16 cục bộ có stub của Supabase | Thật trên Postgres, KHÔNG phải Supabase thật |
-| pgTAP `supabase/tests/database/001–004` | 116/116 đạt | như trên |
+| Toàn bộ schema + migration hiện hữu + 8 migration mới (5 của D1, 3 của D2) áp dụng theo thứ tự | Chạy sạch trên PostgreSQL 16 cục bộ có stub của Supabase | Thật trên Postgres, KHÔNG phải Supabase thật |
+| pgTAP `supabase/tests/database/001–006` (D2 thêm `005_account_lifecycle` và `006_certificate_verification`) | 195/195 đạt | như trên |
 | pgTAP `supabase/tests/post-deploy/001` (sau khi áp dụng script post-deploy) | 15/15 đạt | như trên |
-| `supabase/tests/migration_guards.sh` (chốt `CG003`, chạy lại 2 lần, giữ dữ liệu, xóa IP thô) | 20/20 đạt | như trên |
-| Đường pg_cron | Chạy trên cụm PostgreSQL 16 có `pg_cron` 1.6.2 tải sẵn: lịch được tạo, chạy lại không nhân đôi | Thật trên pg_cron, không phải môi trường Supabase |
-| `production-checks.sql` | Chạy được trên CSDL trước và sau migration | như trên |
+| `supabase/tests/migration_guards.sh` (chốt `CG003`, chạy lại 2 lần, giữ dữ liệu, xóa IP thô, mã chứng nhận cũ còn xác minh được) | 25/25 đạt | như trên |
+| Đường pg_cron | Chạy trên cụm PostgreSQL 16 có `pg_cron` 1.6.2 tải sẵn: lịch được tạo, chạy lại không nhân đôi (đã kiểm ở D1, D2 không đổi phần này) | Thật trên pg_cron, không phải môi trường Supabase |
+| `production-checks.sql` (D2 thêm mục 21–25) | Chạy không lỗi trên CSDL sau toàn bộ migration | như trên |
+| `pnpm run lint`, `typecheck`, `build`, `build:pages`, `seo:audit`, `node scripts/security-scan.mjs` | Đạt | Cục bộ |
+| `node --test tests/*.test.mjs` | 310/310 đạt (gồm mô hình xác thực, hợp đồng giao diện/CSDL, trang xác minh, PDF, CSP trang hoạt hình) | Cục bộ, Node |
+| `pnpm run content:compile` chạy hai lần liên tiếp | Cây tệp giống hệt nhau | Cục bộ |
+| Playwright `account-lifecycle.spec.ts` (quên mật khẩu, liên kết khôi phục, xuất/xóa tài khoản, trang xác minh, trang hoạt hình dưới CSP chặt) + `platform-smoke.spec.ts` | 21/21 đạt trên Chromium desktop | Giả lập Supabase bằng route của Playwright, không gọi dịch vụ thật |
+| Playwright `account-lifecycle.spec.ts` + `cross-platform.spec.ts` | 88 đạt, 14 bỏ qua theo thiết kế của spec, 0 lỗi (Chromium desktop 1440x900 và Android Pixel 7) | như trên |
+| Firefox, WebKit/Safari (iPhone, iPad), Windows/macOS | **Chưa chạy** (môi trường chỉ có Chromium); các spec mới được thêm vào cấu hình `playwright.platform.config.ts` nên CI đa hệ điều hành sẽ chạy chúng | Cần CI |
 | PostgREST thật + hook với vai trò `anon` thật, GoTrue thật, Dashboard | **Chưa kiểm** | Cần staging |
-| Luồng đăng ký/xác nhận email, TOTP, PKCE end-to-end | **Chưa kiểm** | Cần staging có SMTP |
+| Luồng đăng ký/xác nhận email, TOTP, PKCE, thư đặt lại mật khẩu end-to-end | **Chưa kiểm** (e2e chỉ giả lập phản hồi của Supabase) | Cần staging có SMTP |
 
 Stub của Supabase mô phỏng các vai trò, `auth.uid()/jwt()`, `auth.users/sessions/mfa_factors` và quyền mặc định; không phải bản sao của nền tảng. Hãy chạy toàn bộ quy trình ở mục 2 trên một dự án staging trước khi áp dụng cho production.
 
