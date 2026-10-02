@@ -1,0 +1,83 @@
+# Cấu hình Supabase CLI cho Cảnh Giác Số (canhgiacso.com).
+#
+# QUAN TRỌNG: tệp này là NGUỒN SỰ THẬT DỰ KIẾN cho cấu hình Auth, nhưng việc "commit tệp"
+# KHÔNG tự thay đổi dự án production. Chỉ có hiệu lực khi:
+#   * chạy cục bộ:      supabase start            (môi trường thử, không phải production), hoặc
+#   * đẩy lên dự án:    supabase link --project-ref <ref> && supabase config push
+#     (hãy chạy `supabase config push --dry-run` nếu phiên bản CLI hỗ trợ và đọc diff trước).
+# Với production, cách chắc chắn nhất là đặt tay theo
+# documentation/security/SUPABASE-DASHBOARD-CHECKLIST.md rồi dùng tệp này để đối chiếu.
+#
+# CẢNH BÁO khi dùng `supabase config push`: lệnh có thể đặt cả những mục KHÔNG khai báo ở đây
+# về mặc định của CLI (ví dụ giới hạn gửi thư [auth.rate_limit] mặc định 2 thư/giờ khi dùng
+# SMTP tích hợp, hay [api].schemas). Vì vậy tệp này CỐ Ý không có [api] và [auth.rate_limit];
+# luôn đọc diff trước khi xác nhận và chỉ đẩy khi đã hiểu từng thay đổi.
+#
+# Không có khóa bí mật nào trong tệp này. Mọi giá trị bí mật (SMTP, CAPTCHA secret, ...) đặt
+# bằng biến môi trường `env(...)` hoặc trong Dashboard, KHÔNG ghi vào repo.
+#
+# Phiên bản Postgres: không khai báo `[db] major_version` ở đây vì không có căn cứ trong repo
+# về phiên bản của dự án production; nếu dùng `supabase start`, hãy đặt trùng với
+# Dashboard -> Project Settings -> Infrastructure.
+
+project_id = "canhgiacso"
+
+[auth]
+enabled = true
+
+# URL gốc dùng trong thư xác nhận/khôi phục (khớp README: mục URL Configuration).
+site_url = "https://canhgiacso.com/"
+additional_redirect_urls = [
+  "https://canhgiacso.com/**",
+  "https://www.canhgiacso.com/**",
+  # Tạm giữ trong giai đoạn chuyển miền để các liên kết xác nhận cũ còn dùng được;
+  # gỡ bỏ khi hết thư xác nhận cũ chưa dùng (xem checklist).
+  "https://tanthanh381.github.io/chongluadao/**",
+]
+
+# Access token sống 1 giờ (mặc định của Supabase); refresh token luân phiên và chống dùng lại.
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+refresh_token_reuse_interval = 10
+
+# Đăng ký bằng email/mật khẩu vẫn mở (trò chơi cho cộng đồng); không cho đăng nhập ẩn danh.
+enable_signup = true
+enable_anonymous_sign_ins = false
+enable_manual_linking = false
+
+# Mật khẩu: tối thiểu 10 ký tự, có chữ hoa + chữ thường + chữ số. Chỉ áp dụng khi ĐẶT/ĐỔI
+# mật khẩu, không ảnh hưởng đăng nhập của tài khoản hiện hữu. (Giao diện còn yêu cầu thêm
+# ký tự đặc biệt, chặt hơn máy chủ.)
+minimum_password_length = 10
+password_requirements = "lower_upper_letters_digits"
+
+[auth.email]
+enable_signup = true
+# BẮT BUỘC xác nhận email: migration 20261002100000 dựa vào email_confirmed_at để chặn việc
+# đăng ký trước bằng email của người khác rồi nhận quyền đặc quyền.
+enable_confirmations = true
+double_confirm_changes = true
+secure_password_change = true
+# Khoảng tối thiểu giữa hai thư gửi tới cùng một địa chỉ.
+max_frequency = "1m0s"
+otp_length = 6
+otp_expiry = 3600
+
+# Xác thực đa yếu tố: TOTP (ứng dụng authenticator) cho Quản trị/Biên tập viên.
+[auth.mfa]
+max_enrolled_factors = 10
+
+[auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true
+
+[auth.mfa.phone]
+enroll_enabled = false
+verify_enabled = false
+
+[auth.mfa.web_authn]
+enroll_enabled = false
+verify_enabled = false
+
+# Không đặt [api], [auth.rate_limit], [auth.external.*], [auth.sms], [auth.hook.*], [auth.captcha] ở đây: chưa dùng
+# (CAPTCHA nên được bật trong Dashboard; xem checklist). Thêm khi có quyết định rõ ràng.

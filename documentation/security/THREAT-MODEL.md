@@ -93,7 +93,7 @@ Controls: CSP `frame-src` allowlist and browser same-origin isolation.
 | Spoofing | Stolen editor password | Unauthorized content changes | TOTP MFA; AAL2 DB enforcement; live-session check |
 | Tampering | Member modifies another user's progress | Integrity breach | Owner-bound RLS; negative authorization tests |
 | Repudiation | Admin denies changing a role | Audit gap | Supabase auth audit logs + private security audit log |
-| Information disclosure | Guest reads draft/correct answers | Training/data exposure | Published-only RLS/RPCs; private helpers; response shaping |
+| Information disclosure | Guest reads draft/correct answers | Training/data exposure | Published-only RLS/RPCs; private helpers; response shaping; per-choice `evaluate_guest_choice` RPC and table SELECT revoked after the new frontend ships (see REMEDIATION-2026-10) |
 | Denial of service | Bot floods guest-choice RPC | Resource exhaustion | Per-IP Data API rate limits; Auth built-in rate limits |
 | Elevation of privilege | Editor calls publish/role-change RPC directly | Admin takeover | Server-side admin checks; AAL2; explicit execute grants |
 
