@@ -31,6 +31,7 @@ import { GuestNotice, useGuestNoticeDismissed } from "./domains/shell/guest-noti
 const AdminPage = lazy(() => import("./admin").then((module) => ({ default: module.AdminPage })));
 
 const money = new Intl.NumberFormat("vi-VN");
+const BUILT_IN_CONTENT_NOTICE = "Không tải được nội dung cập nhật; đang dùng thư viện tích hợp sẵn.";
 // Data shown in the "loss" modal after a wrong choice (see setLossNotice call sites).
 type LossNotice = { scenarioTitle: string; amountLost: number; awarenessLost: number; balanceAfter: number };
 export default function Home() {
@@ -160,7 +161,7 @@ export default function Home() {
         setSiteContent(normalized);
         setSiteContent({ ...normalized, newsArticles: repoNewsArticles });
       } else if (error) {
-        setDataStatus("Không tải được nội dung cập nhật; đang dùng thư viện tích hợp sẵn.");
+        setDataStatus(BUILT_IN_CONTENT_NOTICE);
       }
       setContentReady(true);
     })();
@@ -436,6 +437,7 @@ export default function Home() {
     // recorded, so the guest can retry. Authenticated attempts use submit_game_choice.
     saveLock.current = true;
     setSavingChoice(true);
+    const noticeBeforeScoring = dataStatus;
     setDataStatus("Đang chấm điểm lựa chọn…");
     const evaluation = await requestGuestChoiceOutcome(selected, index);
     saveLock.current = false;
@@ -445,7 +447,8 @@ export default function Home() {
       setDataStatus(evaluation.message);
       return;
     }
-    setDataStatus("");
+    // Giữ lại thông báo "đang dùng thư viện tích hợp sẵn" để khách biết nội dung chưa phải bản mới nhất.
+    setDataStatus(noticeBeforeScoring === BUILT_IN_CONTENT_NOTICE ? noticeBeforeScoring : "");
     const outcome = evaluation.outcome;
     const nextBalance = Math.max(0, balance + outcome.moneyDelta);
     const nextAwareness = Math.max(0, Math.min(100, awareness + outcome.awarenessDelta));

@@ -1,10 +1,8 @@
 import { expect, test } from "@playwright/test";
+import { mockGuestScoring, rejectConsentUpfront } from "./helpers";
 
 test.beforeEach(async ({ page }) => {
-  // Banner đồng ý cookie là lớp cố định ở đáy màn hình; lưu trước lựa chọn "từ chối" để nó không che các thao tác kiểm thử.
-  await page.addInitScript(() => {
-    try { window.localStorage.setItem("cgs-consent-v1", JSON.stringify({ analytics: false, ts: Date.now(), v: 1 })); } catch { /* storage bị chặn */ }
-  });
+  await rejectConsentUpfront(page);
   await page.route("**/rest/v1/rpc/get_public_site_content", (route) => route.abort());
 });
 
@@ -23,6 +21,7 @@ test("application shell, guest gameplay and static knowledge work on this OS/bro
     if (failure) requestFailures.push(`${request.url()} :: ${failure.errorText}`);
   });
 
+  await mockGuestScoring(page);
   await page.goto("/");
   try {
     await expect(page.locator(".app")).toBeVisible({ timeout: 20_000 });
@@ -66,4 +65,19 @@ test("application shell, guest gameplay and static knowledge work on this OS/bro
   expect(toolOverflow).toBeLessThanOrEqual(2);
 
   expect(severeConsole).toEqual([]);
+});
+
+test("guest scoring failure is explained and never recorded as a wrong answer", async ({ page }) => {
+  await page.route("**/rest/v1/rpc/evaluate_guest_choice", (route) => route.abort());
+  await page.goto("/");
+  await expect(page.locator(".app")).toBeVisible({ timeout: 20_000 });
+  const guestModal = page.locator(".guest-limit-modal");
+  if (await guestModal.isVisible().catch(() => false)) {
+    await guestModal.getByRole("button", { name: "Tiếp tục với tư cách khách" }).click();
+  }
+  await expect(page.locator(".choice:not([disabled])").first()).toBeVisible({ timeout: 20_000 });
+  await page.locator(".choice:not([disabled])").first().click();
+  await expect(page.getByRole("status").filter({ hasText: "Chưa chấm điểm được lựa chọn này" })).toBeVisible();
+  await expect(page.locator(".feedback")).toHaveCount(0);
+  await expect(page.locator(".choice:not([disabled])").first()).toBeVisible();
 });

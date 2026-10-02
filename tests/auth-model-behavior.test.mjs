@@ -47,9 +47,9 @@ test("usernames follow ^[a-z0-9._-]{3,24}$ after trimming and lower-casing", () 
   assert.equal(USERNAME_PATTERN.test("An"), false, "the raw pattern is lower-case only; the validator lower-cases first");
 });
 
-test("passwords need 8-72 chars with upper, lower, digit, symbol and no whitespace", () => {
+test("passwords need 10-72 chars with upper, lower, digit, symbol and no whitespace", () => {
   const weak = {
-    "too short": "Aa1!aaa",
+    "too short": "Aa1!aaaaa",
     "no upper-case": "matkhau#2026",
     "no lower-case": "MATKHAU#2026",
     "no digit": "Matkhau#abcd",
@@ -60,12 +60,13 @@ test("passwords need 8-72 chars with upper, lower, digit, symbol and no whitespa
   for (const [label, password] of Object.entries(weak)) {
     const result = validateAuthSubmission(register({ password, confirmPassword: password }));
     assert.equal(result.ok, false, `${label} must be rejected`);
-    assert.match(result.error, /Mật khẩu cần 8–72 ký tự/, label);
+    assert.match(result.error, /Mật khẩu cần 10–72 ký tự/, label);
   }
   const boundary = `Aa1!${"a".repeat(68)}`;
   assert.equal(boundary.length, 72);
   assert.equal(validateAuthSubmission(register({ password: boundary, confirmPassword: boundary })).ok, true);
-  assert.equal(PASSWORD_PATTERN.test("Aa1!aaaa"), true, "8 characters is the minimum");
+  assert.equal(PASSWORD_PATTERN.test("Aa1!aaaaaa"), true, "10 characters is the minimum");
+  assert.equal(PASSWORD_PATTERN.test("Aa1!aaaaa"), false, "9 characters is below the minimum");
 });
 
 test("registration requires a 2-32 character display name", () => {

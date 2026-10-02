@@ -1,10 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
+import { mockGuestScoring, rejectConsentUpfront } from "./helpers";
 
 test.beforeEach(async ({ page }) => {
-  // Banner đồng ý cookie là lớp cố định ở đáy màn hình; lưu trước lựa chọn "từ chối" để nó không che các thao tác kiểm thử.
-  await page.addInitScript(() => {
-    try { window.localStorage.setItem("cgs-consent-v1", JSON.stringify({ analytics: false, ts: Date.now(), v: 1 })); } catch { /* storage bị chặn */ }
-  });
+  await rejectConsentUpfront(page);
+  await mockGuestScoring(page);
   await page.route("**/rest/v1/rpc/get_public_site_content", (route) => route.abort());
 });
 
@@ -109,7 +108,7 @@ test.describe("mobile interaction states", () => {
 
   test("auth modal stays above mobile navigation", async ({ page }) => {
     await waitForApp(page);
-    const login = page.getByRole("button", { name: "Đăng nhập", exact: true });
+    const login = page.locator("header").getByRole("button", { name: "Đăng nhập", exact: true });
     await login.click();
     const modalLayer = page.locator(".modal-layer");
     await expect(modalLayer).toBeVisible();
@@ -267,7 +266,9 @@ test.describe("trust/system page consistency", () => {
       await expect(page.locator(".seo-brand-divider")).toBeVisible();
       await expect(page.locator(".seo-product-lockup")).toBeVisible();
       await expect(page.locator(".seo-footer")).toBeVisible();
-      await expect(page.locator(".seo-footer-links a")).toHaveCount(7);
+      // 7 liên kết thông tin + liên kết "Cài đặt cookie" do public/consent.js thêm vào.
+      await expect(page.locator(".seo-footer-links a")).toHaveCount(8);
+      await expect(page.locator(".seo-footer-links [data-cgs-consent-open]")).toHaveText("Cài đặt cookie");
       await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
       await expect(page.locator(".seo-nav-links a", { hasText: "Cẩm nang" })).toBeVisible();
       await expectNoHorizontalOverflow(page);

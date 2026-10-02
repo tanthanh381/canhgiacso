@@ -14,7 +14,9 @@ test("public scenario loading always unlocks the built-in fallback library", () 
   assert.match(block, /const normalized = normalizeSiteContent\(data\)/);
   assert.match(block, /setSiteContent\(normalized\)/);
   assert.match(block, /setContentReady\(true\)/);
-  assert.match(block, /đang dùng thư viện tích hợp sẵn/);
+  assert.match(block, /setDataStatus\(BUILT_IN_CONTENT_NOTICE\)/);
+  assert.match(page, /const BUILT_IN_CONTENT_NOTICE = "[^"]*đang dùng thư viện tích hợp sẵn\.";/);
+  assert.match(page, /noticeBeforeScoring === BUILT_IN_CONTENT_NOTICE/, "the notice survives a successful guest answer");
   assert.ok(block.indexOf("setContentReady(true)") > block.indexOf("if (normalized)"));
 });
 
