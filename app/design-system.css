@@ -553,3 +553,13 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]) { min-heig
 :root[data-theme="dark"] .security-awareness-banner strong { color: #ff9aa8; }
 .app.dark .ux-bottom-nav button.active,
 :root[data-theme="dark"] .ux-bottom-nav button.active { color: var(--danger-text); }
+
+/* 320px phones: six 12px labels must fit their cells without clipping. */
+@media (max-width: 340px) {
+  .ux-bottom-nav { padding-inline: 0; }
+  .ux-bottom-nav button { padding-inline: 0; }
+  .ux-bottom-nav small { letter-spacing: -.1em; font-weight: 600; }
+}
+/* Locked-group rows: a little more room for "Trung bình · 8 tình huống" in the 260px sidebar. */
+.scenario-lock-toggle { grid-template-columns: 36px minmax(0, 1fr) 18px; gap: 8px; padding: 8px; }
+.scenario-lock-copy strong { letter-spacing: -.005em; }
