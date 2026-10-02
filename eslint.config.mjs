@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "docs/**",
     "out/**",
     "build/**",
+    "playwright-report/**",
+    "test-results/**",
     "next-env.d.ts",
   ]),
   eslint.configs.recommended,
@@ -35,6 +37,16 @@ const eslintConfig = defineConfig([
       react: {
         version: "detect",
       },
+    },
+  },
+  {
+    rules: {
+      // Production is a Vite static SPA (github-pages/), where `next/image`
+      // does not exist, and the <img> sources here are data: URLs (QR codes,
+      // certificate previews), editor uploads that are already compressed on the
+      // client, or remote article thumbnails. The rule targets Next.js image
+      // optimisation and does not apply to this build target.
+      "@next/next/no-img-element": "off",
     },
   },
 ]);
