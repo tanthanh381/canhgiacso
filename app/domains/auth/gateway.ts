@@ -1,12 +1,15 @@
+import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 import { supabase } from "../../supabase";
+
+// Synchronous handler. `Parameters<typeof onAuthStateChange>[0]` resolves to the
+// last overload (the async one), which rejects the plain callbacks used by the UI.
+export type AuthChangeHandler = (event: AuthChangeEvent, session: Session | null) => void;
 
 export function getCurrentAuthSession() {
   return supabase.auth.getSession();
 }
 
-export function subscribeToAuthChanges(
-  callback: Parameters<typeof supabase.auth.onAuthStateChange>[0],
-) {
+export function subscribeToAuthChanges(callback: AuthChangeHandler) {
   return supabase.auth.onAuthStateChange(callback);
 }
 

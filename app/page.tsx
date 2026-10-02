@@ -27,6 +27,8 @@ import { AppFooter, AppHeader, SyncStatus } from "./domains/shell/view";
 const AdminPage = lazy(() => import("./admin").then((module) => ({ default: module.AdminPage })));
 
 const money = new Intl.NumberFormat("vi-VN");
+// Data shown in the "loss" modal after a wrong choice (see setLossNotice call sites).
+type LossNotice = { scenarioTitle: string; amountLost: number; awarenessLost: number; balanceAfter: number };
 export default function Home() {
   const [view, setView] = useState<View>("game");
   const [siteContent, setSiteContent] = useState<SiteContent>(defaultSiteContent);
@@ -486,8 +488,9 @@ export default function Home() {
 
   async function resetProgress() {
     if (resetBusy || saveLock.current || pendingChoice) return;
+    if (sessionAccount && !runId) { setDataStatus("Vui lòng chờ tải xong dữ liệu tài khoản."); return; }
     setResetBusy(true);
-    if (sessionAccount) {
+    if (sessionAccount && runId) {
       const epoch = accountEpoch.current;
       const { data, error } = await restartTrainingRun(runId);
       if (epoch !== accountEpoch.current) { setResetBusy(false); return; }

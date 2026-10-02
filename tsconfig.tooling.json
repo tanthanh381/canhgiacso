@@ -1,0 +1,24 @@
+{
+  "//": "Node-side TypeScript: build/dev config, the Cloudflare Worker entry and the Playwright suite. The browser app is checked by tsconfig.json and the Supabase Edge Functions by tsconfig.functions.json.",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["esnext", "dom"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "types": ["node"]
+  },
+  "include": [
+    "vite.config.ts",
+    "vite.github-pages.config.ts",
+    "build/**/*.ts",
+    "worker/**/*.ts",
+    "playwright.*.config.ts",
+    "tests/e2e/**/*.ts"
+  ]
+}

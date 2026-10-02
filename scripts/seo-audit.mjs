@@ -1,5 +1,6 @@
-import { readFile, stat } from "node:fs/promises";
+import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
+import { findRepeatedPhrasesInHtml } from "./lib/repeated-phrase.mjs";
 
 const outDir = process.argv[2] || "docs";
 const root = path.resolve(outDir);
@@ -106,6 +107,30 @@ for (const url of urls) {
     if (wordCount < 300) fail(`${url}: thin article (${wordCount} words)`);
   }
 }
+
+// Accidental text duplication ("X: X: X") in titles, links and headings. This
+// has shipped before (a patch stage appended the same phrase on every run), so
+// every generated HTML page is scanned, not only the sitemap URLs.
+async function* htmlFiles(directory) {
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    const full = path.join(directory, entry.name);
+    if (entry.isDirectory()) yield* htmlFiles(full);
+    else if (entry.name.endsWith(".html")) yield full;
+  }
+}
+let scannedForRepeats = 0;
+let repeatedPhraseDefects = 0;
+for await (const file of htmlFiles(root)) {
+  scannedForRepeats += 1;
+  const html = await readFile(file, "utf8");
+  for (const problem of findRepeatedPhrasesInHtml(html)) {
+    repeatedPhraseDefects += 1;
+    fail(
+      `${path.relative(root, file)}: <${problem.kind}> repeats "${problem.phrase}" ${problem.repeats}x in a row: ${problem.text.slice(0, 120)}`,
+    );
+  }
+}
+if (!repeatedPhraseDefects) ok(`No repeated-phrase defects in titles, links or headings (${scannedForRepeats} HTML files)`);
 
 const knowledgeRoot = path.join(root, "kien-thuc");
 if (await exists(knowledgeRoot)) {

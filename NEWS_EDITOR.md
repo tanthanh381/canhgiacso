@@ -50,7 +50,7 @@ Chủ đề được hỗ trợ theo trường `category` sẵn có. Không thê
 - `node --test tests/*.test.mjs`: 36/36 đạt.
 - `pnpm run lint`: không lỗi; còn 8 cảnh báo khuyến nghị dùng `next/image` thay `<img>` (dự án xuất bản tĩnh và đã nén ảnh tải lên).
 - `pnpm audit --prod --audit-level low`: không có lỗ hổng đã biết.
-- TypeScript cho toàn bộ thư mục `app`: đạt. `tsc --noEmit` toàn dự án vẫn bị chặn bởi khai báo kiểu Cloudflare có sẵn còn thiếu: `cloudflare:workers`, `Fetcher`, `D1Database` ở `db/index.ts`, `worker/index.ts`.
+- TypeScript cho toàn bộ thư mục `app`: đạt. `tsc --noEmit` toàn dự án khi đó vẫn bị chặn bởi khai báo kiểu Cloudflare còn thiếu (`cloudflare:workers`, `Fetcher`, `D1Database` ở `db/index.ts`, `worker/index.ts`). Ghi chú cập nhật: thư mục `db/` đã bị xóa cùng mã mẫu Drizzle không dùng, và `pnpm run typecheck` hiện chạy sạch.
 - Kiểm tra trình duyệt bằng fixture cục bộ, không ghi vào Supabase: thêm bài, nhập tiêu đề/tóm tắt/nội dung, đậm/căn giữa, tạo slug, preview, tải ảnh mẫu, alt text, dùng lại ảnh trong bài. Bố cục 390 px không tràn ngang.
 - Trang Tin tức công khai mở đúng khi khởi tạo và tải lại đường dẫn. Dữ liệu công khai nhận được trong lúc kiểm tra không có bài tin, nên chưa xác minh mở/lưu/xuất bản một bài thật bằng tài khoản quản trị trên hệ thống sản xuất.
 

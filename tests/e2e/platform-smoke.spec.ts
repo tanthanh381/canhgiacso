@@ -5,9 +5,9 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("application shell, guest gameplay and static knowledge work on this OS/browser", async ({ page }) => {
-  const severeConsole = [];
-  const pageErrors = [];
-  const requestFailures = [];
+  const severeConsole: string[] = [];
+  const pageErrors: string[] = [];
+  const requestFailures: string[] = [];
   page.on("console", (message) => {
     if (message.type() === "error" && !/supabase|net::ERR_FAILED|Failed to load resource/i.test(message.text())) {
       severeConsole.push(message.text());

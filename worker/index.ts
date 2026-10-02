@@ -2,9 +2,16 @@
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
 
+// Minimal structural types for the Cloudflare bindings used here. They avoid a
+// dependency on @cloudflare/workers-types (the global `Fetcher`/`D1Database`).
+interface Fetcher {
+  fetch(request: Request): Promise<Response>;
+}
+
 interface Env {
   ASSETS: Fetcher;
-  DB: D1Database;
+  /** D1 is not provisioned (`d1: null` in .openai/hosting.json) and is unused. */
+  DB?: unknown;
   IMAGES: {
     input(stream: ReadableStream): {
       transform(options: Record<string, unknown>): {
