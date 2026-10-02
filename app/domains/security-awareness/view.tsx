@@ -1,4 +1,5 @@
 import type { SiteContent } from "../../data";
+import { GlyphIcon } from "../../shared/icons";
 import { BadgeIcon } from "../../shared/ui-primitives";
 import { securityChecklistGroups, securityChecklistItemIds } from "./checklist";
 
@@ -61,7 +62,7 @@ export function KnowledgeView({
             return (
               <details className="checklist-group" key={group.id}>
                 <summary>
-                  <span className="checklist-icon" aria-hidden="true">{group.icon}</span>
+                  <span className="checklist-icon" aria-hidden="true"><GlyphIcon glyph={group.icon} size={22} /></span>
                   <span className="checklist-group-copy"><strong>{group.title}</strong><small>{group.description}</small></span>
                   <span className="checklist-group-progress"><b>{progress}%</b><small>{completed}/{group.items.length} mục</small></span>
                 </summary>

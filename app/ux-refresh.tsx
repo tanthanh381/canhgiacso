@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { supabase } from "./supabase";
+import { Icon, type IconName } from "./shared/icons";
 
 type PrimaryView = "Thử thách" | "Cẩm nang" | "Tin tức" | "Thành tích";
 
@@ -191,32 +192,32 @@ export function UxRefresh() {
   const selectDifficulty = (value: string) => {
     if (!domReady) return;
     Array.from(document.querySelectorAll<HTMLButtonElement>(".difficulty-filter button"))
-      .find((item) => item.textContent?.replace("🔒", "").trim() === value)?.click();
+      .find((item) => item.textContent?.trim() === value)?.click();
   };
   const flags = domReady
     ? Array.from(document.querySelectorAll<HTMLElement>(".red-flags div span"))
-      .map((item) => (item.textContent ?? "").replace(/^△\s*/, "").trim()).filter(Boolean).slice(0, 3)
+      .map((item) => (item.textContent ?? "").trim()).filter(Boolean).slice(0, 3)
     : [];
   const tip = domReady ? document.querySelector<HTMLElement>(".coach-card > p")?.textContent?.trim() : undefined;
   const feedbackDanger = feedback?.classList.contains("danger") ?? false;
 
   return <>
     {topActions && createPortal(<>
-      {bannerDismissed && <button className="ux-simulation-chip" onClick={restoreBanner}><span aria-hidden="true">🛡</span> Mô phỏng</button>}
-      {canUseManagementMenu && <div className="ux-utility-menu"><button className="ux-utility-trigger" aria-expanded={utilityOpen} aria-haspopup="true" aria-label="Mở chức năng quản lý" onClick={() => { setMobileKnowledgeOpen(false); setUtilityOpen((value) => !value); }}>•••</button>{utilityOpen && <div className="ux-utility-popover ux-utility-popover-desktop" aria-label="Chức năng quản lý">{hasAdmin && <button onClick={openDashboard}>Dashboard</button>}<button onClick={() => openAdminTab("content")}>Quản lý nội dung</button>{hasAdmin && <><button onClick={() => openAdminTab("traffic")}>Thống kê truy cập</button><button onClick={() => openAdminTab("users")}>Phân quyền</button></>}</div>}</div>}
+      {bannerDismissed && <button className="ux-simulation-chip" onClick={restoreBanner}><Icon name="shield" size={16} /> Mô phỏng</button>}
+      {canUseManagementMenu && <div className="ux-utility-menu"><button className="ux-utility-trigger" aria-expanded={utilityOpen} aria-haspopup="true" aria-label="Mở chức năng quản lý" onClick={() => { setMobileKnowledgeOpen(false); setUtilityOpen((value) => !value); }}><Icon name="more" size={20} /></button>{utilityOpen && <div className="ux-utility-popover ux-utility-popover-desktop" aria-label="Chức năng quản lý">{hasAdmin && <button onClick={openDashboard}>Dashboard</button>}<button onClick={() => openAdminTab("content")}>Quản lý nội dung</button>{hasAdmin && <><button onClick={() => openAdminTab("traffic")}>Thống kê truy cập</button><button onClick={() => openAdminTab("users")}>Phân quyền</button></>}</div>}</div>}
     </>, topActions)}
 
-    {banner && !bannerDismissed && createPortal(<button className="ux-banner-close" aria-label="Ẩn lưu ý môi trường mô phỏng" onClick={dismissBanner}>×</button>, banner)}
+    {banner && !bannerDismissed && createPortal(<button className="ux-banner-close" aria-label="Ẩn lưu ý môi trường mô phỏng" onClick={dismissBanner}><Icon name="close" size={18} /></button>, banner)}
 
-    {scenarioPanel && createPortal(<div className="ux-scenario-tools"><label><span>Lọc độ khó</span><select defaultValue="Tất cả" aria-label="Lọc độ khó" onChange={(event) => selectDifficulty(event.target.value)}><option>Tất cả</option><option>Dễ</option><option>Trung bình</option><option>Khó</option><option>Rất khó</option></select></label><button className="ux-random" onClick={() => domReady && document.querySelector<HTMLButtonElement>(".random-button")?.click()}><span aria-hidden="true">🎲</span><span>Ngẫu nhiên</span></button></div>, scenarioPanel)}
+    {scenarioPanel && createPortal(<div className="ux-scenario-tools"><label><span>Lọc độ khó</span><select defaultValue="Tất cả" aria-label="Lọc độ khó" onChange={(event) => selectDifficulty(event.target.value)}><option>Tất cả</option><option>Dễ</option><option>Trung bình</option><option>Khó</option><option>Rất khó</option></select></label><button className="ux-random" onClick={() => domReady && document.querySelector<HTMLButtonElement>(".random-button")?.click()}><Icon name="dice" size={18} /><span>Ngẫu nhiên</span></button></div>, scenarioPanel)}
 
-    {statusGrid && createPortal(<div className="ux-status-progress"><span aria-hidden="true">✓</span><span><small>Tiến trình</small><strong>{completed}/{total || "—"}</strong></span></div>, statusGrid)}
+    {statusGrid && createPortal(<div className="ux-status-progress"><span aria-hidden="true"><Icon name="check" size={18} /></span><span><small>Tiến trình</small><strong>{completed}/{total || "—"}</strong></span></div>, statusGrid)}
 
-    {stage && active === "Thử thách" && createPortal(<><div className="ux-stage-actions"><button className="ux-scenario-trigger" onClick={() => setScenariosOpen(true)}><span aria-hidden="true">☰</span> Danh sách tình huống</button><button className="ux-insight-trigger" onClick={() => setInsightOpen(true)}><span aria-hidden="true">💡</span> Mẹo & tiến trình</button></div>{!signedIn && completed >= 3 && !guestPromptDismissed && <aside className="ux-guest-conversion" role="note"><div><span aria-hidden="true">🎯</span><span><strong>Bạn đã có tiến trình đáng để lưu</strong><small>Tạo tài khoản để giữ kết quả trên nhiều thiết bị và nhận chứng nhận khi hoàn thành.</small></span></div><div><button className="ux-primary" onClick={openRegistration}>Lưu tiến trình</button><button className="ux-text-button" onClick={() => setGuestPromptDismissed(true)}>Tiếp tục với tư cách khách</button></div></aside>}</>, stage)}
+    {stage && active === "Thử thách" && createPortal(<><div className="ux-stage-actions"><button className="ux-scenario-trigger" onClick={() => setScenariosOpen(true)}><Icon name="list" size={18} /> Danh sách tình huống</button><button className="ux-insight-trigger" onClick={() => setInsightOpen(true)}><Icon name="bulb" size={18} /> Mẹo & tiến trình</button></div>{!signedIn && completed >= 3 && !guestPromptDismissed && <aside className="ux-guest-conversion" role="note"><div><span aria-hidden="true"><Icon name="target" size={24} /></span><span><strong>Bạn đã có tiến trình đáng để lưu</strong><small>Tạo tài khoản để giữ kết quả trên nhiều thiết bị và nhận chứng nhận khi hoàn thành.</small></span></div><div><button className="ux-primary" onClick={openRegistration}>Lưu tiến trình</button><button className="ux-text-button" onClick={() => setGuestPromptDismissed(true)}>Tiếp tục với tư cách khách</button></div></aside>}</>, stage)}
 
-    {feedback && createPortal(<div className="ux-learning-moment"><div className="ux-learning-heading"><span aria-hidden="true">{feedbackDanger ? "⚠" : "✓"}</span><strong>{feedbackDanger ? "Dấu hiệu bạn cần ghi nhớ" : "Vì sao cách xử lý này an toàn"}</strong></div>{flags.length > 0 && <ul>{flags.map((flag) => <li key={flag}>{flag}</li>)}</ul>}{tip && <div className="ux-principle"><b>Nguyên tắc áp dụng ngoài đời</b><span>{tip}</span></div>}</div>, feedback)}
+    {feedback && createPortal(<div className="ux-learning-moment"><div className="ux-learning-heading"><span aria-hidden="true"><Icon name={feedbackDanger ? "warning" : "check"} size={20} /></span><strong>{feedbackDanger ? "Dấu hiệu bạn cần ghi nhớ" : "Vì sao cách xử lý này an toàn"}</strong></div>{flags.length > 0 && <ul>{flags.map((flag) => <li key={flag}>{flag}</li>)}</ul>}{tip && <div className="ux-principle"><b>Nguyên tắc áp dụng ngoài đời</b><span>{tip}</span></div>}</div>, feedback)}
 
-    {knowledgeHero && createPortal(<button className="ux-practice-cta" onClick={() => navigate("Thực hành")}><span aria-hidden="true">▶</span> Luyện nhận diện phishing</button>, knowledgeHero)}
+    {knowledgeHero && createPortal(<button className="ux-practice-cta" onClick={() => navigate("Thực hành")}><Icon name="play" size={16} /> Luyện nhận diện phishing</button>, knowledgeHero)}
 
     <nav className="ux-bottom-nav" aria-label="Điều hướng di động">
       {PRIMARY_VIEWS.map((item) => (
@@ -228,12 +229,12 @@ export function UxRefresh() {
           aria-controls={item === "Cẩm nang" ? "ux-mobile-knowledge-menu" : undefined}
           onClick={() => item === "Cẩm nang" ? (setUtilityOpen(false), setMobileKnowledgeOpen((value) => !value)) : navigate(item)}
         >
-          <span aria-hidden="true">{{ "Thử thách": "◇", "Cẩm nang": "▤", "Tin tức": "◫", "Thành tích": "★" }[item]}</span>
+          <span aria-hidden="true"><Icon name={{ "Thử thách": "diamond", "Cẩm nang": "book", "Tin tức": "news", "Thành tích": "star" }[item] as IconName} size={22} /></span>
           <small>{item}</small>
         </button>
       ))}
       <button type="button" className="ux-about-nav-item" onClick={openAbout}>
-        <span aria-hidden="true">ⓘ</span>
+        <span aria-hidden="true"><Icon name="info" size={22} /></span>
         <small>Giới thiệu</small>
       </button>
     </nav>
@@ -254,7 +255,7 @@ export function UxRefresh() {
       </div>
     )}
 
-    {scenariosOpen && <><button className="ux-drawer-backdrop" aria-label="Đóng danh sách tình huống" onClick={() => setScenariosOpen(false)} /><button className="ux-drawer-close ux-scenario-close" aria-label="Đóng danh sách tình huống" onClick={() => setScenariosOpen(false)}>×</button></>}
-    {insightOpen && <><button className="ux-drawer-backdrop ux-insight-backdrop" aria-label="Đóng bảng mẹo và tiến trình" onClick={() => setInsightOpen(false)} /><button className="ux-drawer-close ux-insight-close" aria-label="Đóng bảng mẹo và tiến trình" onClick={() => setInsightOpen(false)}>×</button></>}
+    {scenariosOpen && <><button className="ux-drawer-backdrop" aria-label="Đóng danh sách tình huống" onClick={() => setScenariosOpen(false)} /><button className="ux-drawer-close ux-scenario-close" aria-label="Đóng danh sách tình huống" onClick={() => setScenariosOpen(false)}><Icon name="close" size={20} /></button></>}
+    {insightOpen && <><button className="ux-drawer-backdrop ux-insight-backdrop" aria-label="Đóng bảng mẹo và tiến trình" onClick={() => setInsightOpen(false)} /><button className="ux-drawer-close ux-insight-close" aria-label="Đóng bảng mẹo và tiến trình" onClick={() => setInsightOpen(false)}><Icon name="close" size={20} /></button></>}
   </>;
 }

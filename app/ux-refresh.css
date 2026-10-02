@@ -24,7 +24,6 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
 .difficulty-filter button { font-size: 12px; }
 .scenario-copy strong,
 .status-card small,
-.guest-mode-note small,
 .random-button { font-size: 13px; }
 .story-box p,
 .choice,
@@ -114,7 +113,6 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
 .ux-simulation-chip { display: inline-flex; align-items: center; gap: 5px; border: 1px solid color-mix(in srgb, var(--ux-highlight) 65%, var(--line)); background: color-mix(in srgb, var(--ux-highlight) 11%, var(--surface)); border-radius: 18px; min-height: 34px; padding: 0 9px; font-size: 12px; font-weight: 750; cursor: pointer; }
 
 /* Defer account conversion until the learner has experienced value. */
-.guest-mode-note { display: none; }
 .ux-guest-conversion { margin: 0 0 15px; display: flex; justify-content: space-between; align-items: center; gap: 18px; padding: 13px 15px; border-radius: 13px; border: 1px solid color-mix(in srgb, var(--ux-highlight) 62%, var(--line)); background: color-mix(in srgb, var(--ux-highlight) 10%, var(--surface)); }
 .ux-guest-conversion > div:first-child { display: flex; align-items: center; gap: 10px; }
 .ux-guest-conversion > div:first-child > span:first-child { font-size: 22px; }

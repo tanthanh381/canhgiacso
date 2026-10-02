@@ -436,3 +436,110 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]) { min-heig
   .news-search input { height: 44px; }
   .checklist-items input[type="checkbox"] { margin-top: 0; }
 }
+
+/* ---------------------------------------------------------------------------
+   Inline SVG icons (shared/icons.tsx): decorative, colour follows the text.
+   --------------------------------------------------------------------------- */
+.icon { flex: 0 0 auto; vertical-align: -0.2em; }
+.modal-close,
+.ux-banner-close,
+.ux-drawer-close,
+.ux-utility-trigger,
+.icon-button { display: inline-grid; place-items: center; padding: 0; }
+.modal-close { display: grid; }
+.choice b { display: inline-grid; place-items: center; }
+.search-box > span,
+.news-search > span { display: inline-grid; place-items: center; flex: 0 0 auto; }
+/* Buttons and chips that carry an icon plus a text label: icon and label on one line. */
+.reset-run-button,
+.export-button,
+.admin-secondary,
+.back-button,
+.certificate-download,
+.ux-scenario-trigger,
+.ux-insight-trigger,
+.ux-practice-cta,
+.ux-random,
+.ux-simulation-chip { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.red-flags span { display: inline-flex; align-items: center; gap: 6px; }
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px; margin: -1px; padding: 0; border: 0;
+  overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------------
+   First-visit guest notice: compact, non-blocking, above the scenario.
+   --------------------------------------------------------------------------- */
+.guest-notice {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px 16px;
+  margin: 0 0 14px;
+  padding: 10px 10px 10px 16px;
+  border: 1px solid color-mix(in srgb, var(--mint) 65%, var(--line));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--mint) 11%, var(--surface));
+}
+.guest-notice-copy { min-width: 0; }
+.guest-notice-copy strong { display: block; font-size: 13px; line-height: 1.3; }
+.guest-notice-copy small { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; line-height: 1.4; }
+.guest-notice-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; }
+.guest-notice-actions button {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 36px; padding: 0 14px; border-radius: 18px;
+  font: inherit; font-size: 12px; font-weight: 750; line-height: 1.2; text-align: center; cursor: pointer;
+}
+.guest-notice-primary { border: 1px solid var(--green-dark); background: var(--green-dark); color: #fff; }
+.guest-notice-secondary { border: 1px solid var(--control-line); background: var(--surface); color: var(--ink); }
+.guest-notice-continue { border: 1px solid transparent; background: transparent; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.guest-notice-primary:hover { filter: brightness(1.12); }
+.guest-notice-secondary:hover { border-color: var(--control-line-hover); }
+.guest-notice-close {
+  display: inline-grid; place-items: center; width: 36px; height: 36px; padding: 0;
+  border: 1px solid transparent; border-radius: 50%; background: transparent; color: var(--ink); cursor: pointer;
+}
+.guest-notice-close:hover { border-color: var(--control-line); background: var(--surface); }
+.dark .guest-notice-primary,
+:root[data-theme="dark"] .guest-notice-primary { border-color: var(--mint); background: var(--mint); color: #17372d; }
+
+@media (max-width: 760px) {
+  .guest-notice { grid-template-columns: minmax(0, 1fr) 44px; gap: 6px 4px; margin-bottom: 12px; padding: 8px 6px 8px 12px; }
+  .guest-notice-more { display: none; }
+  .guest-notice-copy { grid-column: 1; grid-row: 1; }
+  .guest-notice-close { grid-column: 2; grid-row: 1; }
+  .guest-notice-actions { grid-row: 2; }
+  .guest-notice-actions { grid-column: 1 / -1; display: grid; grid-template-columns: auto auto minmax(0, 1fr); gap: 6px; padding-right: 6px; }
+  .guest-notice-actions button { padding-inline: 12px; }
+  .guest-notice-continue { padding-inline: 4px; }
+  .guest-notice-close { width: 44px; height: 44px; justify-self: end; }
+}
+
+/* ---------------------------------------------------------------------------
+   Locked scenarios: one collapsible group per difficulty instead of N rows.
+   --------------------------------------------------------------------------- */
+.scenario-lock-group { margin-top: 2px; }
+.scenario-lock-toggle {
+  display: grid; grid-template-columns: 38px minmax(0, 1fr) 20px; align-items: center; gap: 10px;
+  width: 100%; padding: 8px 10px 8px 9px;
+  border: 1px solid var(--control-line); border-radius: 10px;
+  background: var(--paper); color: var(--ink); text-align: left; cursor: pointer;
+}
+.scenario-lock-toggle:hover { border-color: var(--control-line-hover); background: color-mix(in srgb, var(--paper) 70%, var(--surface)); }
+.scenario-lock-icon {
+  display: grid; place-items: center; width: 36px; height: 36px; border-radius: 9px;
+  border: 1px solid var(--line); background: color-mix(in srgb, var(--muted) 8%, var(--surface)); color: var(--muted);
+}
+.scenario-lock-copy { min-width: 0; }
+.scenario-lock-copy strong { display: block; font-size: 13px; line-height: 1.3; }
+.scenario-lock-copy small { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; line-height: 1.35; }
+.scenario-lock-chevron { display: grid; place-items: center; color: var(--muted); transition: transform .18s ease; }
+.scenario-lock-group.open .scenario-lock-chevron { transform: rotate(180deg); }
+.scenario-lock-items { display: flex; flex-direction: column; gap: 6px; margin: 6px 0 4px 10px; padding-left: 8px; border-left: 2px solid var(--line); }
+.scenario-lock-items[hidden] { display: none; }
+.scenario-lock-items .scenario-item.locked { opacity: .72; filter: none; }
+
+/* Footer brand block mirrors the header lockup (CẢNH GIÁC SỐ / IT SECURITY). */
+.footer-brand .footer-tagline { margin-top: 2px; }
