@@ -376,7 +376,7 @@ body { font-size: 16px; }
   box-shadow: 0 0 0 7px var(--focus-halo);
 }
 .search-box input:focus-visible,
-.news-search input:focus-visible { outline: 0; box-shadow: none; }
+.news-search input:focus-visible { outline: 0; box-shadow: none !important; }
 .auth-form input:focus,
 .profile-modal input:focus { border-color: var(--control-line-hover); box-shadow: 0 0 0 7px var(--focus-halo); }
 
@@ -543,3 +543,13 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]) { min-heig
 
 /* Footer brand block mirrors the header lockup (CẢNH GIÁC SỐ / IT SECURITY). */
 .footer-brand .footer-tagline { margin-top: 2px; }
+
+/* Dark theme: brand-coloured small text on dark surfaces needs lighter tints to keep 4.5:1. */
+.app.dark .product-lockup small,
+:root[data-theme="dark"] .product-lockup small { color: var(--danger-text); }
+.app.dark .guest-badge,
+:root[data-theme="dark"] .guest-badge { color: var(--ink); }
+.app.dark .security-awareness-banner strong,
+:root[data-theme="dark"] .security-awareness-banner strong { color: #ff9aa8; }
+.app.dark .ux-bottom-nav button.active,
+:root[data-theme="dark"] .ux-bottom-nav button.active { color: var(--danger-text); }

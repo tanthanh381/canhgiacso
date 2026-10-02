@@ -182,7 +182,7 @@
 
 /* Status information becomes supporting metadata rather than competing content. */
 .status-card,
-.ux-status-progress { opacity: .9; }
+.ux-status-progress { opacity: 1; }
 .status-card strong,
 .ux-status-progress strong { font-variant-numeric: tabular-nums; }
 

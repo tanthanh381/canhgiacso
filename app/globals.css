@@ -29,8 +29,9 @@ button { color: inherit; }
 .app.dark, :root[data-theme="dark"] { --ink: #f5f5f5; --muted: #b8b4b2; --paper: #171717; --surface: #242424; --line: #4a4745; --green: #ff7184; --green-dark: #be1128; --shadow: 0 18px 50px rgba(0,0,0,.25); --focus-ring: #ffe15a; --focus-halo: #0d1620; --control-line: #74859a; --control-line-hover: #a9b6c6; --danger-text: #ff7184; color-scheme: dark; }
 
 /* Keyboard focus: 3px ring flanked by a halo of the opposite tone, so contrast holds on light, dark and brand-coloured surfaces. */
-:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px; box-shadow: 0 0 0 7px var(--focus-halo); }
-@media (forced-colors: active) { :focus-visible { outline-color: Highlight; box-shadow: none; } }
+/* !important on the halo: component rules (card shadows etc.) must never replace the second ring. */
+:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px; box-shadow: 0 0 0 7px var(--focus-halo) !important; }
+@media (forced-colors: active) { :focus-visible { outline-color: Highlight; box-shadow: none !important; } }
 .security-awareness-banner { min-height: 38px; display: flex; align-items: center; justify-content: center; gap: 10px; padding: 8px 20px; border-bottom: 1px solid color-mix(in srgb, var(--mint) 55%, var(--line)); background: color-mix(in srgb, var(--mint) 16%, var(--surface)); color: var(--ink); text-align: center; font-size: 12px; line-height: 1.45; }
 .security-awareness-banner strong { flex: 0 0 auto; color: var(--green); text-transform: uppercase; letter-spacing: .06em; font-size: 12px; }
 

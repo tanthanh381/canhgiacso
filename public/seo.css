@@ -54,9 +54,9 @@ a:hover { text-decoration-thickness: 2px; }
 :focus-visible {
   outline: 3px solid var(--seo-focus, #0b4a7d);
   outline-offset: 2px;
-  box-shadow: 0 0 0 7px var(--seo-focus-halo, #ffffff);
+  box-shadow: 0 0 0 7px var(--seo-focus-halo, #ffffff) !important;
 }
-@media (forced-colors: active) { :focus-visible { outline-color: Highlight; box-shadow: none; } }
+@media (forced-colors: active) { :focus-visible { outline-color: Highlight; box-shadow: none !important; } }
 
 .seo-header {
   position: sticky;
@@ -675,7 +675,7 @@ a:hover { text-decoration-thickness: 2px; }
   --seo-brand-strong: #7d0b20;
   --seo-ink: #17212b;
   --seo-body: #344054;
-  --seo-muted: #667085;
+  --seo-muted: #5d6679;
   --seo-bg: #f5f7f9;
   --seo-surface: #ffffff;
   --seo-soft: #f8fafc;
@@ -944,3 +944,8 @@ li > a:only-child {
   .seo-nav > .seo-theme-toggle { grid-column: 2; grid-row: 1; }
   .seo-nav > .seo-nav-links { grid-column: 1 / -1; grid-row: 2; margin-left: 0; }
 }
+
+/* Dark theme: the about-page CTA keeps white text at >= 4.5:1 (the generic accent is a light tint in dark mode). */
+:root[data-theme="dark"] .about-hero-cta { border-color: #cc1a33; background: #cc1a33; color: #ffffff; }
+:root[data-theme="dark"] .about-hero-cta:hover { background: #b1122f; border-color: #b1122f; }
+:root[data-theme="dark"] .scam-tool-panel button { background: #cc1a33; color: #ffffff; }

@@ -23,6 +23,7 @@ import { GUEST_CERTIFICATE_KEY, LEGACY_PROGRESS_KEY, THEME_KEY, progressKey, rea
 import { BadgeIcon, Modal } from "./shared/ui-primitives";
 import { GlyphIcon, Icon } from "./shared/icons";
 import { scrollBehavior } from "./shared/motion";
+import { useMediaQuery } from "./shared/media-query";
 import { canChangeHash, navigateBrowser, restoreHash, routeFromHash, type View } from "./domains/shell/navigation";
 import { AppFooter, AppHeader, SyncStatus } from "./domains/shell/view";
 import { GuestNotice, useGuestNoticeDismissed } from "./domains/shell/guest-notice";
@@ -52,6 +53,8 @@ export default function Home() {
   const [authOpen, setAuthOpen] = useState(false);
   const [guestLimitOpen, setGuestLimitOpen] = useState(false);
   const guestNotice = useGuestNoticeDismissed();
+  // Below 900px the status cards scroll sideways, so the strip must be reachable with the keyboard.
+  const statusStripScrolls = useMediaQuery("(max-width: 900px)");
   // Manual open/close of a locked group is only valid for the search text it was made under, so a new search auto-opens matches again.
   const [lockedGroupChoice, setLockedGroupChoice] = useState<{ query: string; open: Partial<Record<Difficulty, boolean>> }>({ query: "", open: {} });
   const [authMode, setAuthMode] = useState<AuthMode>("login");
@@ -857,7 +860,7 @@ export default function Home() {
 
       {view === "game" && (
         <div className="game-shell">
-          <aside className="scenario-panel">
+          <aside className="scenario-panel" aria-label="Thư viện tình huống">
             <div className="panel-heading">
               <div><span className="eyebrow">{siteContent.copy.libraryEyebrow}</span><h1>{siteContent.copy.libraryTitle}</h1></div>
               <span className="scenario-count">{safeIds.size}/{scenarios.length}</span>
@@ -919,7 +922,7 @@ export default function Home() {
               <span><strong>Muốn làm lại từ đầu?</strong><small>Tiến trình hiện tại sẽ được xác nhận trước khi đặt lại.</small></span>
               <button className="reset-run-button" disabled={savingChoice || !!pendingChoice || resetBusy} onClick={() => setResetConfirmOpen(true)} aria-label="Chơi lại toàn bộ thử thách từ đầu">{resetBusy ? "Đang đặt lại…" : <><Icon name="refresh" size={16} /> Chơi lại từ đầu</>}</button>
             </div>
-            <div className="status-grid">
+            <div className="status-grid" {...(statusStripScrolls ? { tabIndex: 0, role: "group", "aria-label": "Chỉ số của bạn, cuộn ngang để xem thêm" } : {})}>
               <div className="status-card"><BadgeIcon>₫</BadgeIcon><span><small>Tài sản an toàn</small><strong>{money.format(balance)}đ</strong></span></div>
               <div className="status-card"><BadgeIcon>⌁</BadgeIcon><span className="status-value"><small>Mức cảnh giác</small><strong>{awareness}%</strong><span className="meter" aria-hidden="true"><i style={{ width: `${awareness}%` }} /></span></span></div>
               <div className="status-card compact"><BadgeIcon>◆</BadgeIcon><span><small>Điểm phòng vệ</small><strong>{score}</strong></span></div>

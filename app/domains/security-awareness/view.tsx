@@ -50,7 +50,7 @@ export function KnowledgeView({
           <div className="checklist-overall" aria-label={`Đã hoàn thành ${checklistCompleted} trên ${checklistTotal} mục`}>
             <strong>{checklistProgress}%</strong>
             <span>{checklistCompleted}/{checklistTotal} hoàn thành</span>
-            <div className="checklist-progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={checklistProgress}>
+            <div className="checklist-progress" role="progressbar" aria-label="Tiến độ danh sách kiểm tra" aria-valuemin={0} aria-valuemax={100} aria-valuenow={checklistProgress}>
               <i style={{ width: `${checklistProgress}%` }} />
             </div>
           </div>
