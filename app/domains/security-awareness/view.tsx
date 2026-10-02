@@ -1,5 +1,5 @@
 import type { SiteContent } from "../../data";
-import { GlyphIcon } from "../../shared/icons";
+import { GlyphIcon, Icon } from "../../shared/icons";
 import { BadgeIcon } from "../../shared/ui-primitives";
 import { securityChecklistGroups, securityChecklistItemIds } from "./checklist";
 
@@ -8,11 +8,13 @@ export function KnowledgeView({
   knowledgeCards,
   completedChecklistIds,
   onToggleChecklistItem,
+  onPractice,
 }: {
   copy: SiteContent["copy"];
   knowledgeCards: SiteContent["knowledgeCards"];
   completedChecklistIds: string[];
   onToggleChecklistItem: (id: string) => void;
+  onPractice: () => void;
 }) {
   const checklistCompleted = completedChecklistIds.length;
   const checklistTotal = securityChecklistItemIds.size;
@@ -23,6 +25,7 @@ export function KnowledgeView({
       <div className="page-hero knowledge-hero">
         <div><span className="eyebrow">{copy.knowledgeEyebrow}</span><h1>{copy.knowledgeTitle}</h1></div>
         <p>{copy.knowledgeIntro}</p>
+        <button type="button" className="ux-practice-cta" onClick={onPractice}><Icon name="play" size={16} /> Luyện nhận diện phishing</button>
       </div>
 
       <div className="knowledge-section-heading">

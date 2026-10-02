@@ -1,38 +1,49 @@
+/* Design tokens for the static pages. Same palette as the app (app/styles/tokens.css): one brand red, white-on-fill 7.0:1, text red >= 4.5:1 on both themes. */
 :root {
   color-scheme: light;
-  --seo-ink: #2d2d2d;
-  --seo-body: #3f3c3b;
-  --seo-muted: #73706f;
-  --seo-bg: #f6f5f3;
+  --seo-ink: #17212b;
+  --seo-body: #344054;
+  --seo-muted: #5d6679;
+  --seo-bg: #f5f7f9;
   --seo-surface: #ffffff;
-  --seo-soft: #fbfaf8;
-  --seo-line: #e3e0dd;
-  --seo-accent: #be1128;
-  --seo-accent-dark: #7c0718;
-  --seo-warm: #f68b1f;
-  --seo-mint: #ffdc00;
-  --seo-link: #0f766e;
-  --seo-shadow: 0 18px 50px rgba(102, 7, 25, .08);
+  --seo-soft: #f8fafc;
+  --seo-line: #dfe4ea;
+  --seo-brand: #b1122f;
+  --seo-brand-strong: #7d0b20;
+  --seo-brand-fill: #7d0b20;
+  --seo-accent: var(--seo-brand);
+  --seo-warm: #f3c400;
+  --seo-mint: #f3c400;
+  --seo-link: #0b5684;
+  --seo-shadow: 0 8px 24px rgba(23, 33, 43, .06);
   --seo-logo: #0b5684;
+  /* Accessibility tokens (WCAG 2.2 AA): focus ring + halo, and the boundary colour of form controls. */
+  --seo-focus: #0b4a7d;
+  --seo-focus-halo: #ffffff;
+  --seo-control-line: #75808e;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --seo-ink: #f5f5f5;
-  --seo-body: #ececec;
-  --seo-muted: #b8b4b2;
-  --seo-bg: #171717;
-  --seo-surface: #242424;
-  --seo-soft: #1e1e1e;
-  --seo-line: #4a4745;
-  --seo-accent: #ff7184;
-  --seo-accent-dark: #be1128;
-  --seo-warm: #f6a04d;
-  --seo-mint: #ffdc00;
-  --seo-link: #7dd3c7;
-  --seo-shadow: 0 18px 50px rgba(0, 0, 0, .25);
+  --seo-ink: #f4f7fa;
+  --seo-body: #e4eaf0;
+  --seo-muted: #aeb9c5;
+  --seo-bg: #0d1620;
+  --seo-surface: #152230;
+  --seo-soft: #101c29;
+  --seo-line: #2b3c4d;
+  --seo-brand: #ff7184;
+  --seo-brand-strong: #ff9aa8;
+  --seo-brand-fill: #a30f27;
+  --seo-warm: #ffe15a;
+  --seo-mint: #ffe15a;
+  --seo-link: #8ec5e5;
+  --seo-shadow: 0 12px 30px rgba(0, 0, 0, .2);
   --seo-logo: #ffffff;
+  --seo-focus: #ffe15a;
+  --seo-focus-halo: #0d1620;
+  --seo-control-line: #74859a;
 }
 
 * { box-sizing: border-box; }
@@ -669,50 +680,6 @@ a:hover { text-decoration-thickness: 2px; }
   .seo-product-lockup strong { font-size: 12px; }
 }
 
-/* Shared brand foundation: app and editorial pages use the same visual grammar. */
-:root {
-  --seo-brand: #b1122f;
-  --seo-brand-strong: #7d0b20;
-  --seo-ink: #17212b;
-  --seo-body: #344054;
-  --seo-muted: #5d6679;
-  --seo-bg: #f5f7f9;
-  --seo-surface: #ffffff;
-  --seo-soft: #f8fafc;
-  --seo-line: #dfe4ea;
-  --seo-accent: var(--seo-brand);
-  --seo-accent-dark: var(--seo-brand-strong);
-  --seo-warm: #f3c400;
-  --seo-mint: #f3c400;
-  --seo-link: #0b5684;
-  --seo-shadow: 0 8px 24px rgba(23, 33, 43, .06);
-  /* Accessibility tokens (WCAG 2.2 AA): focus ring + halo, and the boundary colour of form controls. */
-  --seo-focus: #0b4a7d;
-  --seo-focus-halo: #ffffff;
-  --seo-control-line: #75808e;
-}
-
-:root[data-theme="dark"] {
-  --seo-ink: #f4f7fa;
-  --seo-body: #e4eaf0;
-  --seo-muted: #aeb9c5;
-  --seo-bg: #0d1620;
-  --seo-surface: #152230;
-  --seo-soft: #101c29;
-  --seo-line: #2b3c4d;
-  --seo-accent: #ff7184;
-  --seo-accent-dark: #e54c62;
-  --seo-warm: #ffe15a;
-  --seo-mint: #ffe15a;
-  --seo-link: #8ec5e5;
-  --seo-shadow: 0 12px 30px rgba(0, 0, 0, .2);
-  --seo-focus: #ffe15a;
-  --seo-focus-halo: #0d1620;
-  --seo-control-line: #74859a;
-  --seo-brand: #ff7184;
-  --seo-brand-strong: #e54c62;
-}
-
 .seo-header { background: color-mix(in srgb, var(--seo-surface) 96%, transparent); }
 .seo-nav-links {
   gap: 0;
@@ -850,11 +817,11 @@ a:hover { text-decoration-thickness: 2px; }
   cursor: pointer;
 }
 .about-hero-cta {
-  border: 1px solid var(--seo-accent-dark);
-  background: var(--seo-accent-dark);
+  border: 1px solid var(--seo-brand-fill);
+  background: var(--seo-brand-fill);
   color: #ffffff;
 }
-.about-hero-cta:hover { background: color-mix(in srgb, var(--seo-accent-dark) 86%, #000000); }
+.about-hero-cta:hover { background: color-mix(in srgb, var(--seo-brand-fill) 86%, #000000); }
 .about-hero-toggle {
   border: 1px solid var(--seo-control-line);
   background: var(--seo-surface);
@@ -900,7 +867,7 @@ li > a:only-child {
   width: 24px;
   height: 24px;
   margin: 0;
-  accent-color: var(--seo-accent-dark);
+  accent-color: var(--seo-brand-fill);
 }
 @media (pointer: coarse), (max-width: 760px) {
   .seo-breadcrumb a,
@@ -946,8 +913,6 @@ li > a:only-child {
 }
 
 /* Dark theme: the about-page CTA keeps white text at >= 4.5:1 (the generic accent is a light tint in dark mode). */
-:root[data-theme="dark"] .about-hero-cta { border-color: #cc1a33; background: #cc1a33; color: #ffffff; }
-:root[data-theme="dark"] .about-hero-cta:hover { background: #b1122f; border-color: #b1122f; }
 :root[data-theme="dark"] .scam-tool-panel button { background: #cc1a33; color: #ffffff; }
 
 /* Mobile header links scroll sideways: leave room so the focus ring is not clipped. */

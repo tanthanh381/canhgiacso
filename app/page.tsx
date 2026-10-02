@@ -16,10 +16,10 @@ import { AccountDialogs } from "./domains/auth/dialogs";
 import { mapAnalyticsUsers, mapScenarioRisks, summarizeAnalytics, topScenarioRisks, type AnalyticsUser, type DashboardStatus, type ScenarioRisk } from "./domains/dashboard/model";
 import { DashboardView } from "./domains/dashboard/view";
 import { loadCisoDashboardData } from "./domains/dashboard/gateway";
-import { bestCorrectStreak, buildDefenseBadges, difficulties, difficultyTone, PHISHING_QUIZ_URL, scenarioCategoryLabel, scenarioChannelLabel } from "./domains/training/presentation";
+import { bestCorrectStreak, buildDefenseBadges, difficultyTone, PHISHING_QUIZ_URL, scenarioCategoryLabel, scenarioChannelLabel } from "./domains/training/presentation";
 import { type ChoiceOutcome, type GameHistory, type GameState, type PendingChoice, type Result, type StoredProgress } from "./domains/training/model";
 import { issueTrainingCertificate, loadTrainingAccountData, loadTrainingCertificates, requestGuestChoiceOutcome, restartTrainingRun, submitTrainingChoice } from "./domains/training/gateway";
-import { GUEST_CERTIFICATE_KEY, LEGACY_PROGRESS_KEY, THEME_KEY, progressKey, readStoredProgress, safeStorageGet, safeStorageRemove, safeStorageSet } from "./shared/browser-storage";
+import { GUEST_CERTIFICATE_KEY, LEGACY_PROGRESS_KEY, THEME_KEY, progressKey, readStoredProgress, safeStorageRemove, safeStorageSet } from "./shared/browser-storage";
 import { BadgeIcon, Modal } from "./shared/ui-primitives";
 import { GlyphIcon, Icon } from "./shared/icons";
 import { scrollBehavior } from "./shared/motion";
@@ -27,6 +27,11 @@ import { useMediaQuery } from "./shared/media-query";
 import { canChangeHash, navigateBrowser, restoreHash, routeFromHash, type View } from "./domains/shell/navigation";
 import { AppFooter, AppHeader, SyncStatus } from "./domains/shell/view";
 import { GuestNotice, useGuestNoticeDismissed } from "./domains/shell/guest-notice";
+import { DrawerControls, useDrawers } from "./domains/shell/drawers";
+import { MainContentAnchor, SkipLink } from "./domains/shell/skip-link";
+import { useAppReady } from "./shared/app-ready";
+import { applyTheme, preferredTheme } from "./shared/theme";
+import { GUEST_CONVERSION_THRESHOLD, GuestConversion, LearningMoment, ProgressStat, ScenarioTools, StageActions } from "./domains/training/stage-widgets";
 
 const AdminPage = lazy(() => import("./admin").then((module) => ({ default: module.AdminPage })));
 
@@ -56,8 +61,11 @@ export default function Home() {
   const [authOpen, setAuthOpen] = useState(false);
   const [guestLimitOpen, setGuestLimitOpen] = useState(false);
   const guestNotice = useGuestNoticeDismissed();
-  // Below 900px the status cards scroll sideways, so the strip must be reachable with the keyboard.
-  const statusStripScrolls = useMediaQuery("(max-width: 900px)");
+  // Below 900px the status cards scroll sideways (so the strip must be reachable with the keyboard) and the side panels become slide-overs.
+  const compactLayout = useMediaQuery("(max-width: 900px)");
+  const drawers = useDrawers(view === "game" && compactLayout);
+  const [conversionDismissed, setConversionDismissed] = useState(false);
+  const stageRef = useRef<HTMLElement>(null);
   // Manual open/close of a locked group is only valid for the search text it was made under, so a new search auto-opens matches again.
   const [lockedGroupChoice, setLockedGroupChoice] = useState<{ query: string; open: Partial<Record<Difficulty, boolean>> }>({ query: "", open: {} });
   const [authMode, setAuthMode] = useState<AuthMode>("login");
@@ -90,6 +98,7 @@ export default function Home() {
   const saveLock = useRef(false);
   const accountEpoch = useRef(0);
   const activeUser = useRef<string | null>(null);
+  useAppReady(hydrated && contentReady);
   const scenarios = siteContent.scenarios;
   const knowledgeCards = siteContent.knowledgeCards;
   const newsArticles = useMemo(() => publicNews(siteContent.newsArticles), [siteContent.newsArticles]);
@@ -204,7 +213,7 @@ export default function Home() {
 
   useEffect(() => {
     // Mirror the theme on <html> so UI rendered outside .app (portals, drawers, native controls) follows it.
-    document.documentElement.dataset.theme = dark ? "dark" : "light";
+    applyTheme(dark ? "dark" : "light");
   }, [dark]);
 
   useEffect(() => {
@@ -259,6 +268,7 @@ export default function Home() {
   const incompleteUnlockedScenarios = availableScenarios.filter((item) => !completedIds.has(item.id));
   const randomCandidates = incompleteUnlockedScenarios.length ? incompleteUnlockedScenarios : availableScenarios;
   const evidence = scenarios.filter((item) => safeIds.has(item.id));
+  const attemptedCount = scenarios.filter((item) => completedIds.has(item.id)).length;
   const score = results.reduce((total, result) => total + (result.correct ? 120 : 20), 0);
   const analytics = useMemo(() => summarizeAnalytics(analyticsUsers), [analyticsUsers]);
   const scenarioRisks = useMemo(
@@ -296,7 +306,7 @@ export default function Home() {
     setBalance(progress.balance);
     setAwareness(progress.awareness);
     setResults(progress.results);
-    setDark(safeStorageGet(THEME_KEY) === "dark" || progress.dark);
+    setDark(preferredTheme() === "dark" || progress.dark);
     setPlayerName(displayName || "Người chơi ẩn danh");
     setAnswer(null);
     setAnswerOutcome(null);
@@ -322,7 +332,7 @@ export default function Home() {
       balance: 300_000_000,
       awareness: 100,
       results: [],
-      dark: safeStorageGet(THEME_KEY) === "dark",
+      dark: preferredTheme() === "dark",
       playerName: "Người chơi ẩn danh",
     };
     setSessionAccount(null);
@@ -361,7 +371,7 @@ export default function Home() {
       balance: state.balance,
       awareness: state.awareness,
       results: state.results,
-      dark: safeStorageGet(THEME_KEY) === "dark",
+      dark: preferredTheme() === "dark",
       playerName: profile.display_name,
     };
 
@@ -405,11 +415,17 @@ export default function Home() {
     setAnswer(null);
     setAnswerOutcome(null);
     navigateTo("game");
-    if (window.innerWidth < 1050) document.querySelector(".stage")?.scrollIntoView({ behavior: scrollBehavior() });
+    if (window.innerWidth < 1050) stageRef.current?.scrollIntoView({ behavior: scrollBehavior() });
+  }
+
+  function pickRandomScenario() {
+    const item = randomCandidates[Math.floor(Math.random() * randomCandidates.length)];
+    if (item) chooseScenario(item.id);
   }
 
   function navigateTo(nextView: View) {
     if (!navigateBrowser(view, nextView)) return;
+    drawers.close();
     setNewsSlug("");
     setView(nextView);
   }
@@ -841,16 +857,8 @@ export default function Home() {
   }
 
   return (
-    <main className={dark ? "app dark" : "app"}>
-      <a
-        className="skip-link"
-        href="#main-content"
-        onClick={(event) => {
-          // Routing is hash-based, so focus the target directly instead of changing the hash.
-          event.preventDefault();
-          document.getElementById("main-content")?.focus();
-        }}
-      >Bỏ qua đến nội dung chính</a>
+    <main className={drawers.rootClassName(dark)}>
+      <SkipLink />
       <AppHeader
         view={view}
         copy={siteContent.copy}
@@ -869,22 +877,24 @@ export default function Home() {
         saving={savingChoice}
         onRetry={() => { if (pendingChoice) void syncChoice(pendingChoice); }}
       />
-      <div id="main-content" className="skip-target" tabIndex={-1} />
+      <MainContentAnchor />
 
       {view === "game" && (
         <div className="game-shell">
-          <aside className="scenario-panel" aria-label="Thư viện tình huống">
+          <h1 className="visually-hidden">Luyện xử lý tình huống lừa đảo</h1>
+          <aside className="scenario-panel" aria-label="Thư viện tình huống" inert={compactLayout && drawers.open !== "scenarios"}>
             <div className="panel-heading">
-              <div><span className="eyebrow">{siteContent.copy.libraryEyebrow}</span><h1>{siteContent.copy.libraryTitle}</h1></div>
+              <div><span className="eyebrow">{siteContent.copy.libraryEyebrow}</span><h2>{siteContent.copy.libraryTitle}</h2></div>
               <span className="scenario-count">{safeIds.size}/{scenarios.length}</span>
             </div>
             <div className="search-box"><span aria-hidden="true"><Icon name="search" size={18} /></span><input aria-label="Tìm kịch bản" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Tìm theo tên, kênh..." /></div>
-            <div className="difficulty-filter" aria-label="Lọc độ khó">
-              {difficulties.map((item) => {
-                const locked = item !== "Tất cả" && !unlockedDifficulties.has(item);
-                return <button key={item} aria-pressed={difficulty === item} className={difficulty === item ? "active" : ""} disabled={locked} title={locked ? `Hoàn thành cấp thấp hơn để mở ${item}` : undefined} onClick={() => setDifficulty(item)}>{locked && <Icon name="lock" size={14} />}{locked ? " " : ""}{item}</button>;
-              })}
-            </div>
+            <ScenarioTools
+              difficulty={difficulty}
+              unlocked={unlockedDifficulties}
+              canPickRandom={randomCandidates.length > 0}
+              onSelectDifficulty={setDifficulty}
+              onPickRandom={pickRandomScenario}
+            />
             <div className="unlock-progress" role="status" aria-live="polite">
               <div><span aria-hidden="true"><Icon name={levelProgress.nextDifficulty ? "unlock" : "trophy"} size={18} /></span><strong>Cấp đang mở: {levelProgress.currentDifficulty}</strong></div>
               <small>{levelProgress.nextDifficulty
@@ -921,13 +931,13 @@ export default function Home() {
               })}
               {!filtered.length && <p className="empty-state">Không tìm thấy tình huống phù hợp.</p>}
             </div>
-            <button className="random-button" disabled={!randomCandidates.length} onClick={() => {
-              const item = randomCandidates[Math.floor(Math.random() * randomCandidates.length)];
-              if (item) chooseScenario(item.id);
-            }}><Icon name="dice" size={18} /> Chọn tình huống đã mở ngẫu nhiên</button>
           </aside>
 
-          <section className="stage">
+          <section className="stage" ref={stageRef}>
+            <StageActions onOpenScenarios={() => drawers.show("scenarios")} onOpenInsight={() => drawers.show("insight")} />
+            {!sessionAccount && attemptedCount >= GUEST_CONVERSION_THRESHOLD && !conversionDismissed && (
+              <GuestConversion onSave={() => openAuth("register")} onDismiss={() => setConversionDismissed(true)} />
+            )}
             {!sessionAccount && guestNotice.visible && (
               <GuestNotice onLogin={() => openAuth("login")} onRegister={() => openAuth("register")} onContinue={guestNotice.dismiss} onClose={guestNotice.dismiss} />
             )}
@@ -935,11 +945,10 @@ export default function Home() {
               <span><strong>Muốn làm lại từ đầu?</strong><small>Tiến trình hiện tại sẽ được xác nhận trước khi đặt lại.</small></span>
               <button className="reset-run-button" disabled={savingChoice || !!pendingChoice || resetBusy} onClick={() => setResetConfirmOpen(true)} aria-label="Chơi lại toàn bộ thử thách từ đầu">{resetBusy ? "Đang đặt lại…" : <><Icon name="refresh" size={16} /> Chơi lại từ đầu</>}</button>
             </div>
-            <div className="status-grid" {...(statusStripScrolls ? { tabIndex: 0, role: "group", "aria-label": "Chỉ số của bạn, cuộn ngang để xem thêm" } : {})}>
+            <div className="status-grid" {...(compactLayout ? { tabIndex: 0, role: "group", "aria-label": "Chỉ số của bạn, cuộn ngang để xem thêm" } : {})}>
               <div className="status-card"><BadgeIcon>₫</BadgeIcon><span><small>Tài sản an toàn</small><strong>{money.format(balance)}đ</strong></span></div>
               <div className="status-card"><BadgeIcon>⌁</BadgeIcon><span className="status-value"><small>Mức cảnh giác</small><strong>{awareness}%</strong><span className="meter" aria-hidden="true"><i style={{ width: `${awareness}%` }} /></span></span></div>
-              <div className="status-card compact"><BadgeIcon>◆</BadgeIcon><span><small>Điểm phòng vệ</small><strong>{score}</strong></span></div>
-              <button className="status-card compact evidence-link" onClick={() => setView("evidence")}><BadgeIcon>▤</BadgeIcon><span><small>Chứng cứ</small><strong>{evidence.length}</strong></span></button>
+              <ProgressStat completed={attemptedCount} total={scenarios.length} />
             </div>
 
             {(balance === 0 || awareness === 0) ? (
@@ -966,15 +975,16 @@ export default function Home() {
                 </div>
                 {selectedAnswer !== null && selectedOutcome && (
                   <div role="status" aria-live="polite" className={`feedback ${selectedOutcome.correct ? "success" : "danger"}`}>
-                    <div><strong>Dấu hiệu cần lưu ý</strong><p>{selectedOutcome.feedback}</p><small>{selectedOutcome.correct ? "Lựa chọn an toàn." : "Lựa chọn có rủi ro."} Mẹo ghi nhớ: {selected.tip}</small></div>
+                    <div className="feedback-copy"><strong>Dấu hiệu cần lưu ý</strong><p>{selectedOutcome.feedback}</p><small>{selectedOutcome.correct ? "Lựa chọn an toàn." : "Lựa chọn có rủi ro."} Mẹo ghi nhớ: {selected.tip}</small></div>
                     <button onClick={nextScenario}>{results.length >= scenarios.length ? "Xem chứng nhận PDF →" : "Kịch bản tiếp theo →"}</button>
+                    <LearningMoment safe={selectedOutcome.correct} redFlags={selected.redFlags} tip={selected.tip} />
                   </div>
                 )}
               </section>
             )}
           </section>
 
-          <aside className="insight-panel">
+          <aside className="insight-panel" inert={compactLayout && drawers.open !== "insight"}>
             <div className="coach-card">
               <span className="eyebrow">{siteContent.copy.coachEyebrow}</span><h3>Ghi nhớ trong tình huống này</h3><p>{selected.tip}</p>
               <button onClick={() => setGuide(true)}>Xem quy tắc 3 bước</button>
@@ -993,12 +1003,15 @@ export default function Home() {
         </div>
       )}
 
+      <DrawerControls open={drawers.open} onClose={drawers.close} />
+
       {view === "knowledge" && (
         <KnowledgeView
           copy={siteContent.copy}
           knowledgeCards={knowledgeCards}
           completedChecklistIds={completedChecklistIds}
           onToggleChecklistItem={toggleChecklistItem}
+          onPractice={() => navigateTo("quiz")}
         />
       )}
 
@@ -1056,6 +1069,11 @@ export default function Home() {
         <section className="content-page stats-page">
           <div className="page-hero"><span className="eyebrow">HỒ SƠ PHÒNG VỆ</span><h1>{playerName}</h1><p>{sessionAccount ? "Tiến bộ của bạn được đồng bộ an toàn giữa các thiết bị." : "Đăng nhập để đồng bộ tiến bộ giữa các thiết bị."}</p></div>
           <div className="stats-overview"><article><small>Kịch bản đã thử</small><strong>{results.length}</strong><span>/ {scenarios.length}</span></article><article><small>Xử lý an toàn</small><strong>{safeIds.size}</strong><span>{results.length ? Math.round((safeIds.size / results.length) * 100) : 0}% chính xác</span></article><article><small>Điểm phòng vệ</small><strong>{score}</strong><span>cấp {Math.floor(score / 500) + 1}</span></article><article><small>Tài sản còn lại</small><strong className="money-stat">{money.format(balance)}đ</strong><span>bảo toàn {Math.round((balance / 300_000_000) * 100)}%</span></article></div>
+          <button className="evidence-entry" onClick={() => setView("evidence")}>
+            <span className="evidence-entry-icon" aria-hidden="true"><Icon name="folder" size={22} /></span>
+            <span className="evidence-entry-copy"><strong>Hộp chứng cứ</strong><small>{evidence.length}/{scenarios.length} chứng cứ đã mở khóa từ các tình huống xử lý an toàn</small></span>
+            <Icon name="arrow-right" size={18} />
+          </button>
           {sessionAccount ? (
             latestCertificate ? (
               <article className="training-certificate-card issued">
@@ -1093,7 +1111,7 @@ export default function Home() {
 
       {view === "evidence" && (
         <section className="content-page">
-          <button className="back-button" onClick={() => setView("game")}><Icon name="arrow-left" size={16} /> Quay lại màn chơi</button>
+          <button className="back-button" onClick={() => setView("stats")}><Icon name="arrow-left" size={16} /> Quay lại thành tích</button>
           <div className="page-hero"><span className="eyebrow">HỘP CHỨNG CỨ</span><h1>Dấu vết bạn đã thu thập</h1><p>Mỗi kịch bản xử lý đúng mở khoá một chứng cứ và một bài học có thể áp dụng ngoài đời.</p></div>
           <div className="evidence-grid">{scenarios.map((item) => <article className={safeIds.has(item.id) ? "unlocked" : ""} key={item.id}><span className="evidence-icon" aria-hidden="true">{safeIds.has(item.id) ? <GlyphIcon glyph={item.icon} size={26} /> : "?"}</span><div><small>CHỨNG CỨ {String(item.id).padStart(2, "0")}</small><h2>{safeIds.has(item.id) ? item.evidence : "Chưa xác định"}</h2><p>{safeIds.has(item.id) ? item.tip : "Xử lý an toàn kịch bản này để mở khoá."}</p></div></article>)}</div>
         </section>

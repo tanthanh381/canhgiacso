@@ -1,0 +1,110 @@
+/* Accessibility rules. This is the last cascade layer, so these declarations win over every component rule without needing !important (the only !important left are the reduced-motion resets, which must also beat unlayered stylesheets and inline styles). */
+
+/* Focus: outline comes from base.css, the halo makes the ring visible on any background. */
+:focus-visible {
+  box-shadow: 0 0 0 7px var(--focus-halo);
+}
+
+@media (forced-colors: active) {
+  :focus-visible {
+    outline-color: Highlight;
+    box-shadow: none;
+  }
+}
+
+/* The search fields draw their ring on the wrapper (.search-box:focus-within), so the field itself shows none. */
+.search-box input:focus-visible,
+.news-search input:focus-visible {
+  outline: 0;
+  box-shadow: none;
+}
+
+/* The primary navigation buttons keep the outline only: a 7px halo would paint over their neighbours. */
+.topbar nav button:focus-visible {
+  box-shadow: none;
+}
+
+/* Skip link: first focusable element, revealed on keyboard focus. */
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 2147483000;
+  padding: 10px 16px;
+  border-radius: var(--radius-control);
+  background: var(--brand-fill);
+  color: var(--on-brand);
+  font-size: 14px;
+  font-weight: 750;
+  text-decoration: none;
+  transform: translateY(-160%);
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.skip-link:focus {
+  transform: none;
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 7px var(--focus-halo);
+}
+
+.skip-target {
+  scroll-margin-top: calc(var(--mobile-header-height) + var(--mobile-nav-height));
+}
+
+.skip-target:focus {
+  outline: none;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Reduced motion: no animation, no smooth scrolling, no hover movement. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+  .choice:hover:not(:disabled),
+  .news-card:hover {
+    transform: none;
+  }
+}
+
+/* Touch targets: at least 44 x 44 CSS px on coarse pointers and narrow screens (WCAG 2.5.8 / platform guidance). */
+@media (pointer: coarse), (max-width: 760px) {
+  button,
+  summary,
+  select,
+  input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]) {
+    min-height: 44px;
+  }
+  .brand,
+  .icon-button,
+  .modal-close,
+  .ux-drawer-close,
+  .ux-utility-trigger,
+  .ux-simulation-chip,
+  .ux-banner-close {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}

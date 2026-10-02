@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { access, readFile } from "node:fs/promises";
 import test from "node:test";
+import { declOf, readAppStyles } from "./helpers/styles.mjs";
+import { readAllShell } from "./helpers/shell.mjs";
 
 const root = new URL("../", import.meta.url);
 
@@ -35,12 +37,11 @@ test("server renders the Cảnh Giác Số experience", async () => {
 });
 
 test("primary game navigation uses the Thử thách label without changing its route", async () => {
-  const shell = await readFile(new URL("../app/domains/shell/view.tsx", import.meta.url), "utf8");
-  const gameNavigation = /onClick=\{\(\) => onNavigate\("game"\)\}>([^<]+)<\/button>/g;
-  const labels = [...shell.matchAll(gameNavigation)].map((match) => match[1]);
+  const navigation = await readFile(new URL("../app/domains/shell/navigation.ts", import.meta.url), "utf8");
+  const gameItem = navigation.match(/\{ view: "game", label: "([^"]+)"/);
 
-  assert.ok(labels.includes("Thử thách"));
-  assert.ok(!labels.includes("Mô phỏng"));
+  assert.equal(gameItem?.[1], "Thử thách");
+  assert.doesNotMatch(navigation, /label: "Mô phỏng"/);
 });
 
 test("ships product metadata and social artwork", async () => {
@@ -50,7 +51,7 @@ test("ships product metadata and social artwork", async () => {
     readFile(new URL("../app/domains/dashboard/view.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/domains/security-awareness/view.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/domains/auth/dialogs.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../app/domains/shell/view.tsx", import.meta.url), "utf8"),
+    readAllShell(),
     readFile(new URL("../app/domains/auth/gateway.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/domains/training/gateway.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/domains/dashboard/gateway.ts", import.meta.url), "utf8"),
@@ -60,7 +61,7 @@ test("ships product metadata and social artwork", async () => {
     readFile(new URL("../supabase/schema.sql", import.meta.url), "utf8"),
     readFile(new URL("../supabase/content_roles.sql", import.meta.url), "utf8"),
     readFile(new URL("../package.json", import.meta.url), "utf8"),
-    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    readAppStyles(),
     readFile(new URL("../app/shared/ui-primitives.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/shared/browser-storage.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/domains/training/presentation.ts", import.meta.url), "utf8"),
@@ -163,6 +164,7 @@ test("ships product metadata and social artwork", async () => {
   assert.doesNotMatch(styles, /khien-logo-shield|khien-logo-signal/);
   assert.doesNotMatch(page, /hdbank-logo\.png|alt="HDBank"|className="hdbank-logo"/);
   assert.match(styles, /\.app \{[^}]*color: var\(--ink\)/);
-  assert.match(styles, /\.app\.dark,\s*:root\[data-theme="dark"\] \{[^}]*color-scheme: dark/);
+  // The dark theme is declared once, on <html data-theme="dark"> (React mirrors the theme there), and switches the native controls too.
+  assert.equal(declOf(styles, ':root[data-theme="dark"]', "color-scheme"), "dark");
   await assert.rejects(access(new URL("../app/_sites-preview", root)));
 });

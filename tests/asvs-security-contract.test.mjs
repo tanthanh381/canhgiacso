@@ -7,6 +7,7 @@ const migration = read('supabase/migrations/20260913063000_asvs_l2_security_hard
 const fixups = read('supabase/migrations/20260913063100_asvs_l2_security_fixups.sql');
 const mfa = read('app/security-hardening.tsx');
 const entry = read('github-pages/main.tsx');
+const bootstrap = read('app/bootstrap.tsx');
 const html = read('github-pages/index.html');
 const workflow = read('.github/workflows/security-analysis.yml');
 
@@ -21,7 +22,8 @@ test('admin and editor UI implements TOTP enrollment and challenge', () => {
   assert.match(mfa, /mfa\.enroll\(\{[\s\S]*?factorType: "totp"/);
   assert.match(mfa, /mfa\.challenge\(/);
   assert.match(mfa, /mfa\.verify\(/);
-  assert.match(entry, /<PrivilegedMfaGate \/>/);
+  assert.match(bootstrap, /<PrivilegedMfaGate \/>/);
+  assert.match(entry, /<AppRoot>[\s\S]*?<App \/>/);
 });
 
 test('privileged MFA is enforced immediately after sign-in and is not admin-route gated', () => {

@@ -2,6 +2,7 @@
 
 import { ReactNode, useCallback, useEffect, useState } from "react";
 import { supabase } from "./supabase";
+import { StatusCard } from "./shared/status-card";
 
 type BootstrapState = "checking" | "ready" | "retry";
 
@@ -70,19 +71,15 @@ export function SessionBootstrap({ children }: SessionBootstrapProps) {
   if (state === "ready") return <>{children}</>;
 
   return (
-    <main className="session-bootstrap" aria-live="polite">
-      <section className="session-bootstrap-card">
-        <div className="session-bootstrap-mark" aria-hidden="true">◉</div>
-        <h1>{state === "checking" ? "Đang xác minh phiên đăng nhập…" : "Chưa thể xác minh phiên đăng nhập"}</h1>
-        <p>
-          {state === "checking"
-            ? "Cảnh Giác Số đang kiểm tra và tự làm mới phiên bảo mật trước khi tải dữ liệu tài khoản."
-            : "Có thể kết nối tới dịch vụ xác thực đang gián đoạn. Dữ liệu tài khoản của bạn không bị xóa."}
-        </p>
-        {state === "retry" && (
-          <button type="button" onClick={() => void validateSession()}>Thử lại</button>
-        )}
-      </section>
-    </main>
+    <StatusCard title={state === "checking" ? "Đang xác minh phiên đăng nhập…" : "Chưa thể xác minh phiên đăng nhập"}>
+      <p>
+        {state === "checking"
+          ? "Cảnh Giác Số đang kiểm tra và tự làm mới phiên bảo mật trước khi tải dữ liệu tài khoản."
+          : "Có thể kết nối tới dịch vụ xác thực đang gián đoạn. Dữ liệu tài khoản của bạn không bị xóa."}
+      </p>
+      {state === "retry" && (
+        <button type="button" onClick={() => void validateSession()}>Thử lại</button>
+      )}
+    </StatusCard>
   );
 }

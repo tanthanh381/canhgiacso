@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "./supabase";
-import "./admin-traffic-analytics.css";
-import "./admin-google-traffic.css";
+import "./styles/admin-traffic-analytics.css";
+import "./styles/admin-google-traffic.css";
 import { AdminCountryAnalytics } from "./admin-country-analytics";
 
 type WindowKey = "24h" | "7d" | "30d" | "90d";

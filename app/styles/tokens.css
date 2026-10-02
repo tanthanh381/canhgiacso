@@ -1,0 +1,66 @@
+/* Design tokens: the only place colours, radii, elevation and layout sizes are defined. Light values live on :root, dark values on :root[data-theme="dark"] (React mirrors the theme on <html>, so portals and native controls follow it too). */
+
+:root {
+  /* Surfaces and text */
+  --paper: #f5f7f9;
+  --surface: #ffffff;
+  --ink: #17212b;
+  --muted: #5d6679;
+  --line: #dfe4ea;
+  --control-line: #75808e;
+  --control-line-hover: #4d5866;
+
+  /* Brand red (one value, white-on-brand 7.0:1). --brand is for text, icons, borders and tints on --paper/--surface; --brand-strong for emphasised text and hover; --brand-fill for solid backgrounds that carry --on-brand text. */
+  --brand: #b1122f;
+  --brand-strong: #7d0b20;
+  --brand-fill: #7d0b20;
+  --brand-fill-hover: #b1122f;
+  --on-brand: #ffffff;
+
+  /* Status and accent colours. --danger is a solid/tint surface that carries white text; use --brand for danger text. */
+  --danger: #b1122f;
+  --highlight: #f3c400;
+  --on-highlight: #2b2300; /* text and icons on a solid --highlight fill (both themes) */
+  --success: #18794e;
+  --warning: #8a4f00;
+
+  /* Keyboard focus: dual ring + halo so it is visible on any background */
+  --focus-ring: #0b4a7d;
+  --focus-halo: #ffffff;
+
+  /* Shape, elevation and layout */
+  --radius-control: 8px;
+  --radius-card: 12px;
+  --radius-panel: 16px;
+  --shadow-card: 0 8px 24px rgba(23, 33, 43, .06);
+  --shadow-raised: 0 18px 50px rgba(125, 11, 32, .11);
+  --mobile-header-height: 64px;
+  --mobile-nav-height: 58px;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --paper: #0d1620;
+  --surface: #152230;
+  --ink: #f4f7fa;
+  --muted: #aeb9c5;
+  --line: #2b3c4d;
+  --control-line: #74859a;
+  --control-line-hover: #a9b6c6;
+
+  --brand: #ff7184;
+  --brand-strong: #ff9aa8;
+  --brand-fill: #a30f27;
+  --brand-fill-hover: #cc1a33;
+
+  --highlight: #ffe15a;
+  --success: #5ac493;
+  --warning: #f0b45d;
+
+  --focus-ring: #ffe15a;
+  --focus-halo: #0d1620;
+
+  --shadow-card: 0 8px 24px rgba(0, 0, 0, .18);
+  --shadow-raised: 0 18px 50px rgba(0, 0, 0, .34);
+}
