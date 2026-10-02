@@ -1,18 +1,27 @@
-/* Single stylesheet entry of the application (GitHub Pages bundle and vinext layout import this file).
-   The order below is the cascade order: reset -> tokens -> base -> shared primitives -> shell -> dialogs ->
-   screens -> late overrides -> admin. Every selector is declared in exactly one of these files. */
-@import "./reset.css";
-@import "./tokens.css";
-@import "./base.css";
-@import "./primitives.css";
-@import "./shell.css";
-@import "./mobile-nav.css";
-@import "./dialogs.css";
-@import "./game.css";
-@import "./knowledge.css";
-@import "./news.css";
-@import "./quiz.css";
-@import "./stats.css";
-@import "./dashboard.css";
-@import "./late.css";
-@import "./admin.css";
+/* Single stylesheet entry of the application (the GitHub Pages bundle and the vinext layout both import this file).
+   Cascade layers, lowest to highest priority. A layer always beats the ones before it, whatever the selector specificity,
+   so a rule only needs to live in the right layer instead of out-shouting others with !important:
+     reset       vendored Tailwind preflight (third-party, not edited)
+     tokens      custom properties for the light and dark themes (the only place colours are defined)
+     base        element defaults
+     components  shared primitives, shell, dialogs, screens (late.css: page-level typography/padding), admin
+     a11y        focus halo, skip link, reduced motion and touch-target sizes (win over every component)
+   Unlayered stylesheets (public/consent.css, public/seo.css) are outside this file and beat every layer. */
+@layer reset, tokens, base, components, a11y;
+
+@import "./reset.css" layer(reset);
+@import "./tokens.css" layer(tokens);
+@import "./base.css" layer(base);
+@import "./primitives.css" layer(components);
+@import "./shell.css" layer(components);
+@import "./mobile-nav.css" layer(components);
+@import "./dialogs.css" layer(components);
+@import "./game.css" layer(components);
+@import "./knowledge.css" layer(components);
+@import "./news.css" layer(components);
+@import "./quiz.css" layer(components);
+@import "./stats.css" layer(components);
+@import "./dashboard.css" layer(components);
+@import "./late.css" layer(components);
+@import "./admin.css" layer(components);
+@import "./a11y.css" layer(a11y);

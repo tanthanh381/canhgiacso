@@ -55,8 +55,8 @@
   align-items: center;
   margin-top: 8px;
   padding: 10px 13px;
-  border-left: 3px solid var(--orange);
-  background: color-mix(in srgb, var(--orange) 7%, var(--surface));
+  border-left: 3px solid var(--warning);
+  background: color-mix(in srgb, var(--warning) 7%, var(--surface));
   border-radius: 0 8px 8px 0;
   font-size: 12px;
 }
@@ -134,7 +134,7 @@
 
 .checklist-overall > strong {
   display: block;
-  color: var(--green);
+  color: var(--brand);
   font: 28px Georgia, serif;
 }
 
@@ -150,7 +150,7 @@
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--mint);
+  background: var(--highlight);
   transition: width .25s ease;
 }
 
@@ -184,7 +184,7 @@
   content: "+";
   grid-column: 4;
   grid-row: 1;
-  color: var(--green);
+  color: var(--brand);
   font-size: 22px;
   line-height: 1;
 }
@@ -199,8 +199,8 @@
   display: grid;
   place-items: center;
   border-radius: 11px;
-  background: color-mix(in srgb, var(--mint) 34%, var(--surface));
-  color: var(--green-dark);
+  background: color-mix(in srgb, var(--highlight) 34%, var(--surface));
+  color: var(--brand-strong);
   font-weight: 900;
 }
 
@@ -228,7 +228,7 @@
 
 .checklist-group-progress b {
   display: block;
-  color: var(--green);
+  color: var(--brand);
   font-size: 14px;
 }
 
@@ -247,7 +247,7 @@
 }
 
 .checklist-items label:hover {
-  background: color-mix(in srgb, var(--mint) 6%, var(--surface));
+  background: color-mix(in srgb, var(--highlight) 6%, var(--surface));
 }
 
 .checklist-items label.completed {
@@ -258,7 +258,7 @@
   width: 18px;
   height: 18px;
   margin: 1px 0 0;
-  accent-color: var(--green);
+  accent-color: var(--brand);
   cursor: pointer;
 }
 
@@ -285,8 +285,8 @@
 }
 
 .checklist-priority.recommended {
-  background: color-mix(in srgb, var(--mint) 32%, var(--surface));
-  color: var(--green-dark);
+  background: color-mix(in srgb, var(--highlight) 32%, var(--surface));
+  color: var(--brand-strong);
 }
 
 .checklist-items strong {
@@ -297,7 +297,7 @@
 
 .checklist-items label.completed strong {
   text-decoration: line-through;
-  text-decoration-color: color-mix(in srgb, var(--green) 55%, transparent);
+  text-decoration-color: color-mix(in srgb, var(--brand) 55%, transparent);
 }
 
 .knowledge-grid h2 {
@@ -319,7 +319,7 @@
   position: relative;
   border-color: color-mix(in srgb, var(--line) 72%, transparent);
   box-shadow: none;
-  border-radius: var(--cgs-radius-card);
+  border-radius: var(--radius-card);
 }
 
 .checklist-overall > span {

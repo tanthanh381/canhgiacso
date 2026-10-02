@@ -1,4 +1,4 @@
-/* Element defaults (body, form controls, headings), focus ring, skip link, visually-hidden helper and the motion / forced-colors preferences. */
+/* Element defaults: box model, body, headings, form controls and the base focus outline. The focus halo, skip link, visually-hidden helper, motion preference and touch-target sizes live in a11y.css (last layer). */
 
 * {
   box-sizing: border-box;
@@ -11,7 +11,6 @@ html {
 :focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
-  box-shadow: 0 0 0 7px var(--focus-halo) !important;
 }
 
 table,
@@ -27,11 +26,6 @@ h3 {
   background: var(--paper);
   color: var(--ink);
   transition: background .25s, color .25s;
-}
-
-.app.dark,
-:root[data-theme="dark"] {
-  color-scheme: dark;
 }
 
 input {
@@ -53,21 +47,6 @@ body {
   font-size: 16px;
 }
 
-.skip-link:focus {
-  transform: none;
-  outline: 3px solid var(--focus-ring);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 7px var(--focus-halo);
-}
-
-.skip-target {
-  scroll-margin-top: calc(var(--cgs-mobile-header-height) + var(--cgs-mobile-nav-height));
-}
-
-.skip-target:focus {
-  outline: none;
-}
-
 button {
   font: inherit;
   color: inherit;
@@ -85,59 +64,8 @@ select {
   min-height: 24px;
 }
 
-input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]) {
+input:where(:not([type="checkbox"], [type="radio"], [type="hidden"])) {
   min-height: 24px;
-}
-
-.skip-link {
-  position: fixed;
-  top: 8px;
-  left: 8px;
-  z-index: 2147483000;
-  padding: 10px 16px;
-  border-radius: var(--cgs-radius-control);
-  background: var(--cgs-brand-strong);
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 750;
-  text-decoration: none;
-  transform: translateY(-160%);
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-}
-
-.visually-hidden {
-  position: absolute !important;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  border: 0;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-@media (forced-colors: active) {
-  :focus-visible {
-    outline-color: Highlight;
-    box-shadow: none !important;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto !important;
-  }
-  *,
-  *::before,
-  *::after {
-    animation: none !important;
-    transition: none !important;
-    scroll-behavior: auto !important;
-  }
 }
 
 @media (max-width: 900px) {
@@ -151,14 +79,5 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]) {
   body {
     max-width: 100%;
     padding-bottom: 0;
-  }
-}
-
-@media (pointer: coarse), (max-width: 760px) {
-  button,
-  summary,
-  select,
-  input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]) {
-    min-height: 44px !important;
   }
 }

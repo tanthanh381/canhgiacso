@@ -23,9 +23,9 @@ test("mobile primary navigation renders six destinations including Giới thiệ
 });
 
 test("mobile navigation stays below header and never falls back to bottom navigation", () => {
-  assert.equal(declOf(uxCss, ".ux-bottom-nav", "top", MOBILE), "var(--cgs-mobile-header-height)");
+  assert.equal(declOf(uxCss, ".ux-bottom-nav", "top", MOBILE), "var(--mobile-header-height)");
   assert.equal(declOf(uxCss, ".ux-bottom-nav", "bottom", MOBILE), "auto");
-  assert.equal(declOf(uxCss, ".topbar", "height", MOBILE), "var(--cgs-mobile-header-height)");
+  assert.equal(declOf(uxCss, ".topbar", "height", MOBILE), "var(--mobile-header-height)");
   assert.equal(declOf(uxCss, ".topbar", "margin-bottom", MOBILE), "66px");
   assert.equal(declOf(visualCss, ".ux-bottom-nav", "border-radius", MOBILE), "0");
 });

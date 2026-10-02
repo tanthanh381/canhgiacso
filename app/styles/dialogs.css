@@ -38,8 +38,8 @@
   height: 64px;
   display: grid;
   place-items: center;
-  background: var(--green-dark);
-  color: var(--mint);
+  background: var(--brand-fill);
+  color: var(--highlight);
   font: 34px Georgia, serif;
   margin-bottom: 24px;
   border-radius: 14px;
@@ -126,9 +126,9 @@
 .auth-error {
   margin: 0;
   padding: 10px 12px;
-  border: 1px solid color-mix(in srgb, var(--red) 35%, var(--line));
-  background: color-mix(in srgb, var(--red) 7%, var(--surface));
-  color: var(--danger-text);
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, var(--line));
+  background: color-mix(in srgb, var(--danger) 7%, var(--surface));
+  color: var(--brand);
   border-radius: 8px;
   font-size: 12px;
   line-height: 1.45;
@@ -206,7 +206,7 @@
 .guest-limit-grid strong {
   display: block;
   margin-bottom: 6px;
-  color: var(--green);
+  color: var(--brand);
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: .08em;
@@ -229,13 +229,13 @@
   grid-column: 1 / -1;
 }
 
-.account-username {
+.profile-modal .account-username {
   display: inline-block;
-  margin: -12px 0 22px !important;
+  margin: -12px 0 22px;
   padding: 5px 9px;
   border-radius: 15px;
   background: var(--paper);
-  color: var(--green) !important;
+  color: var(--brand);
   font-weight: 750;
 }
 
@@ -251,7 +251,7 @@
 
 .loss-modal {
   width: min(500px, 100%);
-  border-top: 5px solid var(--red);
+  border-top: 5px solid var(--danger);
 }
 
 .loss-symbol {
@@ -261,7 +261,7 @@
   place-items: center;
   margin-bottom: 20px;
   border-radius: 50%;
-  background: var(--red);
+  background: var(--danger);
   color: #ffffff;
   font: 700 38px Georgia, serif;
 }
@@ -285,12 +285,12 @@
 }
 
 .loss-summary .has-loss {
-  border-color: color-mix(in srgb, var(--red) 40%, var(--line));
-  background: color-mix(in srgb, var(--red) 7%, var(--surface));
+  border-color: color-mix(in srgb, var(--danger) 40%, var(--line));
+  background: color-mix(in srgb, var(--danger) 7%, var(--surface));
 }
 
 .loss-summary .has-loss strong {
-  color: var(--danger-text);
+  color: var(--brand);
 }
 
 .remaining-balance {
@@ -318,9 +318,9 @@
 .guide-disclaimer {
   margin: 0 0 18px;
   padding: 12px 14px;
-  border-left: 3px solid var(--orange);
+  border-left: 3px solid var(--warning);
   border-radius: 0 8px 8px 0;
-  background: color-mix(in srgb, var(--orange) 8%, var(--paper));
+  background: color-mix(in srgb, var(--warning) 8%, var(--paper));
   color: var(--muted);
   font-size: 12px;
   line-height: 1.55;
@@ -334,9 +334,9 @@
 
 .reset-confirm-modal .reset-warning {
   padding: 11px 13px;
-  border-left: 3px solid var(--red);
+  border-left: 3px solid var(--danger);
   border-radius: 0 8px 8px 0;
-  background: color-mix(in srgb, var(--red) 8%, var(--paper));
+  background: color-mix(in srgb, var(--danger) 8%, var(--paper));
   color: var(--ink);
   font-weight: 750;
 }
@@ -349,7 +349,7 @@
 }
 
 .modal li b {
-  color: var(--green);
+  color: var(--brand);
   font: 20px Georgia, serif;
   font-family: "Segoe UI", "Noto Sans", Arial, sans-serif;
 }
@@ -478,7 +478,7 @@
 }
 
 .security-mfa-secret-label {
-  margin-bottom: 6px !important;
+  margin-bottom: 6px;
   font-size: 13px;
 }
 
@@ -586,11 +586,11 @@
   font-size: 12px;
 }
 
-.profile-note {
+.profile-modal .profile-note {
   margin: 16px 0 0;
   padding-top: 14px;
   border-top: 1px solid var(--line);
-  font-size: 12px !important;
+  font-size: 12px;
 }
 
 .guest-continue {
@@ -643,8 +643,8 @@
 }
 
 .guest-continue:hover {
-  color: var(--green);
-  border-color: var(--green);
+  color: var(--brand);
+  border-color: var(--brand);
 }
 
 .auth-form input:focus,
@@ -677,9 +677,9 @@
   gap: 8px 16px;
   margin: 0 0 14px;
   padding: 10px 10px 10px 16px;
-  border: 1px solid color-mix(in srgb, var(--mint) 65%, var(--line));
+  border: 1px solid color-mix(in srgb, var(--highlight) 65%, var(--line));
   border-radius: 12px;
-  background: color-mix(in srgb, var(--mint) 11%, var(--surface));
+  background: color-mix(in srgb, var(--highlight) 11%, var(--surface));
 }
 
 .guest-notice-copy {
@@ -724,9 +724,9 @@
 }
 
 .guest-notice-primary {
-  border: 1px solid var(--green-dark);
-  background: var(--green-dark);
-  color: #fff;
+  border: 1px solid var(--brand-fill);
+  background: var(--brand-fill);
+  color: var(--on-brand);
 }
 
 .guest-notice-secondary {
@@ -770,9 +770,9 @@
 }
 
 :root[data-theme="dark"] .guest-notice-primary {
-  border-color: var(--mint);
-  background: var(--mint);
-  color: #17372d;
+  border-color: var(--highlight);
+  background: var(--highlight);
+  color: var(--paper);
 }
 
 @media (max-width: 520px) {
@@ -817,8 +817,6 @@
 
 @media (pointer: coarse), (max-width: 760px) {
   .modal-close {
-    min-width: 44px !important;
-    min-height: 44px !important;
     top: 10px;
     right: 10px;
     width: 44px;

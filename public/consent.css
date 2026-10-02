@@ -7,7 +7,7 @@
   --cgs-ink: var(--seo-ink, #2d2d2d);
   --cgs-muted: var(--seo-muted, #57534f);
   --cgs-line: var(--seo-line, #cfcac5);
-  --cgs-accent: var(--seo-accent, #be1128);
+  --cgs-accent: var(--seo-accent, #b1122f);
   --cgs-link: var(--seo-link, #0b5f58);
   --cgs-btn-bg: var(--seo-ink, #2d2d2d);
   --cgs-btn-ink: var(--seo-surface, #ffffff);
@@ -142,7 +142,7 @@
 .cgs-consent__btn:focus-visible,
 .cgs-consent__link:focus-visible,
 .cgs-consent-fab:focus-visible {
-  outline: 3px solid var(--cgs-accent, #be1128);
+  outline: 3px solid var(--cgs-accent, #b1122f);
   outline-offset: 2px;
 }
 
@@ -151,7 +151,7 @@
   --cgs-bg: var(--seo-surface, #ffffff);
   --cgs-ink: var(--seo-ink, #2d2d2d);
   --cgs-line: var(--seo-line, #cfcac5);
-  --cgs-accent: var(--seo-accent, #be1128);
+  --cgs-accent: var(--seo-accent, #b1122f);
   position: fixed;
   bottom: 12px;
   left: 12px;

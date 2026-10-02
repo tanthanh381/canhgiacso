@@ -1,18 +1,14 @@
 /* Challenge screen: scenario list, stage, choices, feedback, status strip, insight panel, drawers and guest conversion prompt. */
 
 .search-box span {
-  color: var(--green);
+  color: var(--brand);
   font-size: 20px;
 }
 
 .difficulty-filter button.active {
-  background: var(--green-dark);
-  color: var(--surface);
-  border-color: var(--green-dark);
-}
-
-:root[data-theme="dark"] .difficulty-filter button.active {
-  color: #ffffff;
+  background: var(--brand-fill);
+  color: var(--on-brand);
+  border-color: var(--brand-fill);
 }
 
 .scenario-item:hover {
@@ -20,14 +16,14 @@
 }
 
 .scenario-item.selected {
-  border-color: color-mix(in srgb, var(--green) 35%, var(--line));
-  background: color-mix(in srgb, var(--green) 7%, var(--surface));
+  border-color: color-mix(in srgb, var(--brand) 35%, var(--line));
+  background: color-mix(in srgb, var(--brand) 7%, var(--surface));
 }
 
 .scenario-number.attempted {
-  background: color-mix(in srgb, var(--orange) 18%, var(--surface));
-  border-color: color-mix(in srgb, var(--orange) 45%, var(--line));
-  color: var(--orange);
+  background: color-mix(in srgb, var(--warning) 18%, var(--surface));
+  border-color: color-mix(in srgb, var(--warning) 45%, var(--line));
+  color: var(--warning);
 }
 
 .scenario-number.locked {
@@ -73,7 +69,7 @@
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--mint);
+  background: var(--highlight);
   transition: width .3s ease;
 }
 
@@ -114,7 +110,7 @@
 }
 
 .reset-run-button:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--red) 8%, var(--surface));
+  background: color-mix(in srgb, var(--danger) 8%, var(--surface));
 }
 
 .reset-run-button:disabled {
@@ -144,7 +140,7 @@
 .meter i {
   display: block;
   height: 100%;
-  background: var(--mint);
+  background: var(--highlight);
   transition: width .3s;
 }
 
@@ -177,21 +173,17 @@
   height: 62px;
   display: grid;
   place-items: center;
-  background: var(--green-dark);
-  color: var(--mint);
+  background: var(--brand-fill);
+  color: var(--highlight);
   border-radius: 15px;
   font-size: 28px;
-}
-
-:root[data-theme="dark"] .scenario-hero-icon {
-  background: #85091a;
 }
 
 .quote-mark {
   position: absolute;
   left: 18px;
   top: 8px;
-  color: var(--green);
+  color: var(--brand);
   font: 44px Georgia, serif;
 }
 
@@ -211,8 +203,8 @@
 }
 
 .choice.wrong {
-  border-color: var(--red);
-  background: color-mix(in srgb, var(--red) 7%, var(--surface));
+  border-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 7%, var(--surface));
 }
 
 .choice.correct .choice-letter {
@@ -222,13 +214,9 @@
 }
 
 .choice.wrong .choice-letter {
-  background: var(--red);
+  background: var(--danger);
   color: white;
-  border-color: var(--red);
-}
-
-:root[data-theme="dark"] .feedback button {
-  color: #ffffff;
+  border-color: var(--danger);
 }
 
 .game-over {
@@ -245,7 +233,7 @@
   height: 80px;
   display: grid;
   place-items: center;
-  background: var(--red);
+  background: var(--danger);
   color: white;
   border-radius: 50%;
   font: 48px Georgia, serif;
@@ -263,13 +251,8 @@
   line-height: 1.6;
 }
 
-:root[data-theme="dark"] .coach-card {
-  background: #8d0a1d;
-  color: #ffffff;
-}
-
 .coach-card .eyebrow {
-  color: var(--mint);
+  color: var(--highlight);
 }
 
 .section-title {
@@ -288,7 +271,7 @@
   height: 96px;
   margin: 16px auto;
   border-radius: 50%;
-  background: conic-gradient(var(--mint) var(--progress), var(--line) 0);
+  background: conic-gradient(var(--highlight) var(--progress), var(--line) 0);
   display: grid;
   place-items: center;
   position: relative;
@@ -329,7 +312,7 @@
   display: grid;
   place-items: center;
   border-radius: 11px;
-  background: conic-gradient(var(--mint) var(--badge-progress), var(--line) 0);
+  background: conic-gradient(var(--highlight) var(--badge-progress), var(--line) 0);
   color: var(--muted);
 }
 
@@ -349,17 +332,17 @@
 
 .badge-preview span.unlocked {
   color: #464646;
-  background: var(--mint);
+  background: var(--highlight);
 }
 
 .badge-preview span.unlocked::after {
-  background: color-mix(in srgb, var(--mint) 58%, var(--surface));
+  background: color-mix(in srgb, var(--highlight) 58%, var(--surface));
 }
 
 .emergency-card {
   margin-top: auto;
-  border: 1px solid color-mix(in srgb, var(--red) 30%, var(--line));
-  background: color-mix(in srgb, var(--red) 6%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--danger) 30%, var(--line));
+  background: color-mix(in srgb, var(--danger) 6%, var(--surface));
   border-radius: 12px;
   padding: 13px;
   display: grid;
@@ -376,7 +359,7 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: var(--red);
+  background: var(--danger);
   color: white;
   font-weight: 900;
 }
@@ -587,7 +570,7 @@
 
 .unlock-progress {
   margin: 0 0 12px;
-  border: 1px solid color-mix(in srgb, var(--mint) 58%, var(--line));
+  border: 1px solid color-mix(in srgb, var(--highlight) 58%, var(--line));
   border-radius: 11px;
   order: 4;
   padding: 8px 10px;
@@ -671,8 +654,8 @@
   gap: 18px;
   padding: 13px 15px;
   border-radius: 13px;
-  border: 1px solid color-mix(in srgb, var(--ux-highlight) 62%, var(--line));
-  background: color-mix(in srgb, var(--ux-highlight) 10%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--highlight) 62%, var(--line));
+  background: color-mix(in srgb, var(--highlight) 10%, var(--surface));
 }
 
 .ux-guest-conversion > div:first-child {
@@ -744,10 +727,9 @@
 }
 
 .scenario-number.done {
-  background: var(--mint);
-  border-color: var(--mint);
+  background: var(--highlight);
+  border-color: var(--highlight);
   color: #464646;
-  --state-color: var(--visual-success);
 }
 
 .ux-status-progress > span:first-child {
@@ -756,23 +738,22 @@
   border-radius: 9px;
   display: grid;
   place-items: center;
-  background: color-mix(in srgb, var(--ux-success) 13%, var(--surface));
-  color: var(--ux-success);
+  background: color-mix(in srgb, var(--success) 13%, var(--surface));
+  color: var(--success);
   font-weight: 900;
-  --state-color: var(--visual-success);
 }
 
 .feedback.success > div > strong {
-  color: var(--visual-success);
+  color: var(--success);
 }
 
 .feedback.danger > div > strong {
-  color: var(--visual-danger);
+  color: var(--brand);
 }
 
 .level-pill.easy,
 .difficulty-dot.easy {
-  background: var(--visual-success);
+  background: var(--success);
 }
 
 .level-pill.medium,
@@ -782,12 +763,12 @@
 
 .level-pill.hard,
 .difficulty-dot.hard {
-  background: var(--visual-warning);
+  background: var(--warning);
 }
 
 .level-pill.extreme,
 .difficulty-dot.extreme {
-  background: var(--visual-danger);
+  background: var(--brand);
 }
 
 .status-grid {
@@ -821,7 +802,7 @@
   padding: 20px 21px 20px 52px;
   position: relative;
   border: 0;
-  border-left: 3px solid color-mix(in srgb, var(--ux-brand) 45%, var(--line));
+  border-left: 3px solid color-mix(in srgb, var(--brand) 45%, var(--line));
   border-radius: 0;
   background: transparent;
   padding-top: 10px;
@@ -851,7 +832,7 @@
   top: -100px;
   opacity: .16;
   border-radius: 50%;
-  background: radial-gradient(circle at center, transparent 0 22px, color-mix(in srgb, var(--visual-brand) 34%, transparent) 23px 24px, transparent 25px 52px, color-mix(in srgb, var(--visual-brand) 24%, transparent) 53px 54px, transparent 55px 84px, color-mix(in srgb, var(--visual-brand) 18%, transparent) 85px 86px, transparent 87px), conic-gradient(from 205deg, transparent 0 70deg, color-mix(in srgb, var(--visual-highlight) 42%, transparent) 70deg 73deg, transparent 73deg 360deg);
+  background: radial-gradient(circle at center, transparent 0 22px, color-mix(in srgb, var(--brand) 34%, transparent) 23px 24px, transparent 25px 52px, color-mix(in srgb, var(--brand) 24%, transparent) 53px 54px, transparent 55px 84px, color-mix(in srgb, var(--brand) 18%, transparent) 85px 86px, transparent 87px), conic-gradient(from 205deg, transparent 0 70deg, color-mix(in srgb, var(--highlight) 42%, transparent) 70deg 73deg, transparent 73deg 360deg);
   pointer-events: none;
 }
 
@@ -883,8 +864,8 @@
 
 .choice:hover:not(:disabled) {
   transform: translateY(-1px);
-  border-color: color-mix(in srgb, var(--visual-brand) 42%, var(--line));
-  box-shadow: var(--shadow-soft);
+  border-color: color-mix(in srgb, var(--brand) 42%, var(--line));
+  box-shadow: var(--shadow-card);
   background: var(--surface);
 }
 
@@ -916,8 +897,8 @@
 }
 
 .ux-primary:hover {
-  background: var(--visual-brand);
-  border-color: var(--visual-brand);
+  background: var(--brand-fill-hover);
+  border-color: var(--brand-fill-hover);
 }
 
 .feedback {
@@ -933,28 +914,27 @@
 }
 
 .feedback.success {
-  --state-color: var(--visual-success);
-  border-color: color-mix(in srgb, var(--visual-success) 36%, var(--line));
-  background: color-mix(in srgb, var(--visual-success) 7%, var(--surface));
+  border-color: color-mix(in srgb, var(--success) 36%, var(--line));
+  background: color-mix(in srgb, var(--success) 7%, var(--surface));
 }
 
 .feedback.danger {
-  border-color: color-mix(in srgb, var(--visual-danger) 38%, var(--line));
-  background: color-mix(in srgb, var(--visual-danger) 7%, var(--surface));
+  border-color: color-mix(in srgb, var(--brand) 38%, var(--line));
+  background: color-mix(in srgb, var(--brand) 7%, var(--surface));
 }
 
 .ux-principle {
   display: grid;
   gap: 3px;
   padding: 9px 11px;
-  background: color-mix(in srgb, var(--ux-highlight) 13%, var(--surface));
+  background: color-mix(in srgb, var(--highlight) 13%, var(--surface));
   color: var(--ink);
-  border-left: 3px solid var(--visual-highlight);
+  border-left: 3px solid var(--highlight);
   border-radius: var(--radius-control);
 }
 
 .ux-primary {
-  border: 1px solid var(--ux-brand-dark);
+  border: 1px solid var(--brand-fill);
   padding: 0 13px;
   font-size: 12px;
   cursor: pointer;
@@ -962,9 +942,9 @@
   box-shadow: none;
   font-weight: 760;
   min-height: 40px;
-  border-radius: var(--cgs-radius-control);
-  background: var(--cgs-brand-strong);
-  border-color: var(--cgs-brand-strong);
+  border-radius: var(--radius-control);
+  background: var(--brand-fill);
+  border-color: var(--brand-fill);
 }
 
 .status-card {
@@ -980,16 +960,16 @@
   background: color-mix(in srgb, var(--surface) 94%, var(--paper));
   border: 1px solid color-mix(in srgb, var(--line) 76%, transparent);
   opacity: 1;
-  border-radius: var(--cgs-radius-card);
+  border-radius: var(--radius-card);
 }
 
 .coach-card {
   padding: 17px;
-  background: var(--green-dark);
-  color: var(--surface);
+  background: var(--brand-fill);
+  color: var(--on-brand);
   border: 0;
   box-shadow: none;
-  border-radius: var(--cgs-radius-card);
+  border-radius: var(--radius-card);
 }
 
 .progress-card,
@@ -998,17 +978,17 @@
   background: var(--surface);
   padding: 17px;
   box-shadow: none;
-  border-radius: var(--cgs-radius-card);
+  border-radius: var(--radius-card);
 }
 
 .scenario-stage.card-surface {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--visual-brand) 17%, var(--line));
-  background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 97%, var(--visual-brand)) 0%, var(--surface) 38%);
-  border-radius: var(--cgs-radius-panel);
-  box-shadow: var(--cgs-shadow-focus);
+  border: 1px solid color-mix(in srgb, var(--brand) 17%, var(--line));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 97%, var(--brand)) 0%, var(--surface) 38%);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-raised);
 }
 
 .scenario-stage h2 {
@@ -1146,8 +1126,8 @@
 .feedback button {
   flex: 0 0 auto;
   border: 0;
-  background: var(--green-dark);
-  color: var(--surface);
+  background: var(--brand-fill);
+  color: var(--on-brand);
   border-radius: 8px;
   padding: 10px 13px;
   cursor: pointer;
@@ -1158,7 +1138,7 @@
 .section-title button {
   border: 0;
   background: none;
-  color: var(--green);
+  color: var(--brand);
   cursor: pointer;
   font-size: 12px;
   min-height: 32px;
@@ -1224,7 +1204,7 @@
 .random-button {
   width: 100%;
   margin-top: 12px;
-  border: 1px dashed color-mix(in srgb, var(--green) 50%, var(--line));
+  border: 1px dashed color-mix(in srgb, var(--brand) 50%, var(--line));
   background: transparent;
   border-radius: 10px;
   padding: 10px;
@@ -1232,7 +1212,7 @@
   font-weight: 750;
   font-size: 13px;
   display: none;
-  color: var(--visual-brand);
+  color: var(--brand);
   border-color: var(--control-line);
 }
 
@@ -1253,11 +1233,6 @@
   box-shadow: 0 0 0 7px var(--focus-halo);
 }
 
-.search-box input:focus-visible {
-  outline: 0;
-  box-shadow: none !important;
-}
-
 .choice-editor-head input[type="checkbox"] {
   width: 24px;
   height: 24px;
@@ -1275,7 +1250,7 @@
   color: var(--ink);
   cursor: pointer;
   font-size: 20px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-card);
   border-color: var(--control-line);
   display: inline-grid;
   place-items: center;
@@ -1296,15 +1271,15 @@
 
 .reset-run-button {
   flex: 0 0 auto;
-  border: 1px solid color-mix(in srgb, var(--red) 52%, var(--line));
+  border: 1px solid color-mix(in srgb, var(--danger) 52%, var(--line));
   background: transparent;
   border-radius: 8px;
   padding: 8px 11px;
   cursor: pointer;
   font-weight: 800;
   font-size: 12px;
-  border-color: var(--danger-text);
-  color: var(--danger-text);
+  border-color: var(--brand);
+  color: var(--brand);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1318,11 +1293,11 @@
   font-size: 12px;
   font-weight: 750;
   cursor: pointer;
-  color: var(--visual-brand);
+  color: var(--brand);
   background: var(--surface);
   box-shadow: none;
   min-height: 40px;
-  border-radius: var(--cgs-radius-control);
+  border-radius: var(--radius-control);
   border-color: var(--control-line);
   display: inline-flex;
   align-items: center;
@@ -1339,7 +1314,7 @@
   background: var(--surface);
   box-shadow: none;
   min-height: 40px;
-  border-radius: var(--cgs-radius-control);
+  border-radius: var(--radius-control);
   border-color: var(--control-line);
   display: inline-flex;
   align-items: center;
@@ -1351,7 +1326,7 @@
   line-height: 1.6;
   border: 0;
   border-radius: 8px;
-  background: color-mix(in srgb, var(--ux-warning) 8%, var(--surface));
+  background: color-mix(in srgb, var(--warning) 8%, var(--surface));
   padding: 7px 9px;
   color: var(--ink);
   box-shadow: none;
@@ -1524,12 +1499,6 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .choice:hover:not(:disabled) {
-    transform: none !important;
-  }
-}
-
 @media (max-width: 1180px) {
   .game-shell {
     grid-template-columns: 270px minmax(0, 1fr);
@@ -1653,13 +1622,6 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .choice,
-  .scenario-stage.card-surface {
-    transition: none !important;
-  }
-}
-
 @media (max-width: 560px) {
   .choice {
     padding: 12px 10px;
@@ -1675,10 +1637,6 @@
 }
 
 @media (pointer: coarse), (max-width: 760px) {
-  .ux-drawer-close {
-    min-width: 44px !important;
-    min-height: 44px !important;
-  }
   .section-title button {
     padding-inline: 8px;
   }

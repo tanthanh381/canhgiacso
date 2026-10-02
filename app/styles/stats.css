@@ -43,7 +43,7 @@
 
 .achievement-summary strong {
   display: block;
-  color: var(--green);
+  color: var(--brand);
   font: 23px Georgia, serif;
 }
 
@@ -60,8 +60,8 @@
 
 .achievement-grid article.unlocked {
   opacity: 1;
-  border-color: color-mix(in srgb, var(--badge-tone, var(--mint)) 70%, var(--line));
-  box-shadow: 0 8px 22px color-mix(in srgb, var(--badge-tone, var(--mint)) 9%, transparent);
+  border-color: color-mix(in srgb, var(--badge-tone, var(--highlight)) 70%, var(--line));
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--badge-tone, var(--highlight)) 9%, transparent);
 }
 
 .achievement-icon {
@@ -76,7 +76,7 @@
 }
 
 .achievement-grid .unlocked .achievement-icon {
-  background: color-mix(in srgb, var(--badge-tone, var(--mint)) 72%, var(--surface));
+  background: color-mix(in srgb, var(--badge-tone, var(--highlight)) 72%, var(--surface));
   color: var(--badge-ink, #3f3400);
 }
 
@@ -127,7 +127,7 @@
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--badge-tone, var(--mint));
+  background: var(--badge-tone, var(--highlight));
 }
 
 .achievement-progress span {
@@ -189,8 +189,8 @@
 }
 
 .evidence-grid .unlocked .evidence-icon {
-  background: var(--green-dark);
-  color: var(--mint);
+  background: var(--brand-fill);
+  color: var(--highlight);
 }
 
 .stats-overview strong {
@@ -253,7 +253,7 @@
 }
 
 .training-certificate-card.ready {
-  border-color: color-mix(in srgb, var(--mint) 55%, var(--line));
+  border-color: color-mix(in srgb, var(--highlight) 55%, var(--line));
 }
 
 .training-certificate-card.locked {
@@ -267,7 +267,7 @@
 }
 
 .training-certificate-card.ready .certificate-card-mark {
-  background: var(--mint);
+  background: var(--highlight);
   color: #17372d;
 }
 
@@ -277,7 +277,7 @@
   padding: 22px;
   border-color: color-mix(in srgb, var(--line) 72%, transparent);
   box-shadow: none;
-  border-radius: var(--cgs-radius-card);
+  border-radius: var(--radius-card);
 }
 
 .evidence-grid article {
@@ -289,11 +289,11 @@
   opacity: .5;
   border-color: color-mix(in srgb, var(--line) 72%, transparent);
   box-shadow: none;
-  border-radius: var(--cgs-radius-card);
+  border-radius: var(--radius-card);
 }
 
 .evidence-grid small {
-  color: var(--green);
+  color: var(--brand);
   letter-spacing: .1em;
   font-size: 12px;
 }

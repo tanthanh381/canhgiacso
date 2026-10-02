@@ -14,7 +14,7 @@
   display: inline-grid;
   place-items: center;
   border-radius: 11px;
-  background: color-mix(in srgb, var(--mint) 72%, var(--surface));
+  background: color-mix(in srgb, var(--highlight) 72%, var(--surface));
   color: #464646;
   font-weight: 900;
 }
@@ -49,7 +49,7 @@
   border: 0;
   border-radius: 8px;
   padding: 11px 15px;
-  background: var(--red);
+  background: var(--danger);
   color: #fff;
   cursor: pointer;
   font-size: 13px;
@@ -83,8 +83,8 @@
 }
 
 .primary-button:hover {
-  background: var(--visual-brand);
-  border-color: var(--visual-brand);
+  background: var(--brand-fill-hover);
+  border-color: var(--brand-fill-hover);
 }
 
 .page-hero::after {
@@ -97,7 +97,7 @@
   top: -170px;
   border-radius: 50%;
   opacity: .12;
-  background: repeating-radial-gradient(circle at center, color-mix(in srgb, var(--visual-brand) 40%, transparent) 0 1px, transparent 1px 36px), conic-gradient(from 225deg, transparent 0 75deg, color-mix(in srgb, var(--visual-highlight) 48%, transparent) 75deg 78deg, transparent 78deg 360deg);
+  background: repeating-radial-gradient(circle at center, color-mix(in srgb, var(--brand) 40%, transparent) 0 1px, transparent 1px 36px), conic-gradient(from 225deg, transparent 0 75deg, color-mix(in srgb, var(--highlight) 48%, transparent) 75deg 78deg, transparent 78deg 360deg);
   pointer-events: none;
 }
 
@@ -110,9 +110,9 @@
   box-shadow: none;
   font-weight: 760;
   min-height: 40px;
-  border-radius: var(--cgs-radius-control);
-  background: var(--cgs-brand-strong);
-  border-color: var(--cgs-brand-strong);
+  border-radius: var(--radius-control);
+  background: var(--brand-fill);
+  border-color: var(--brand-fill);
 }
 
 .card-surface {
@@ -120,7 +120,7 @@
   border: 1px solid var(--line);
   border-color: color-mix(in srgb, var(--line) 72%, transparent);
   box-shadow: none;
-  border-radius: var(--cgs-radius-card);
+  border-radius: var(--radius-card);
 }
 
 .eyebrow {
@@ -129,13 +129,13 @@
   letter-spacing: .14em;
   margin-bottom: 7px;
   line-height: 1.4;
-  color: var(--visual-brand);
+  color: var(--brand);
   font-size: 12px;
 }
 
 .admin-secondary:hover {
-  color: var(--green);
-  border-color: var(--green);
+  color: var(--brand);
+  border-color: var(--brand);
 }
 
 .icon {
@@ -149,11 +149,11 @@
   cursor: pointer;
   font-size: 12px;
   font-weight: 750;
-  color: var(--visual-brand);
+  color: var(--brand);
   background: var(--surface);
   box-shadow: none;
   min-height: 40px;
-  border-radius: var(--cgs-radius-control);
+  border-radius: var(--radius-control);
   border-color: var(--control-line);
   display: inline-flex;
   align-items: center;
@@ -169,7 +169,7 @@
   font-size: 12px;
   cursor: pointer;
   margin: 0 0 25px;
-  color: var(--visual-brand);
+  color: var(--brand);
   border-color: var(--control-line);
   display: inline-flex;
   align-items: center;

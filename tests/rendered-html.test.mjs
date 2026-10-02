@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { access, readFile } from "node:fs/promises";
 import test from "node:test";
-import { readAppStyles } from "./helpers/styles.mjs";
+import { declOf, readAppStyles } from "./helpers/styles.mjs";
 
 const root = new URL("../", import.meta.url);
 
@@ -164,6 +164,7 @@ test("ships product metadata and social artwork", async () => {
   assert.doesNotMatch(styles, /khien-logo-shield|khien-logo-signal/);
   assert.doesNotMatch(page, /hdbank-logo\.png|alt="HDBank"|className="hdbank-logo"/);
   assert.match(styles, /\.app \{[^}]*color: var\(--ink\)/);
-  assert.match(styles, /\.app\.dark,\s*:root\[data-theme="dark"\] \{[^}]*color-scheme: dark/);
+  // The dark theme is declared once, on <html data-theme="dark"> (React mirrors the theme there), and switches the native controls too.
+  assert.equal(declOf(styles, ':root[data-theme="dark"]', "color-scheme"), "dark");
   await assert.rejects(access(new URL("../app/_sites-preview", root)));
 });
