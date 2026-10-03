@@ -261,8 +261,6 @@
 .stats-overview small {
   display: block;
   color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: .1em;
   font-size: 12px;
 }
 

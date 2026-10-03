@@ -4,7 +4,8 @@
      reset       vendored Tailwind preflight (third-party, not edited)
      tokens      custom properties for the light and dark themes (the only place colours are defined)
      base        element defaults
-     components  shared primitives, shell, dialogs, screens (late.css: page-level typography/padding), admin
+     components  shared primitives, shell, dialogs, screens (late.css: page-level typography/padding), admin,
+                 then frontend-design.css (the "digital defence desk" direction: command bar, rails, case file) on top of them
      a11y        focus halo, skip link, reduced motion and touch-target sizes (win over every component)
    Unlayered stylesheets (public/consent.css, public/seo.css) are outside this file and beat every layer. */
 @layer reset, tokens, base, components, a11y;
@@ -25,4 +26,5 @@
 @import "./dashboard.css" layer(components);
 @import "./late.css" layer(components);
 @import "./admin.css" layer(components);
+@import "./frontend-design.css" layer(components);
 @import "./a11y.css" layer(a11y);

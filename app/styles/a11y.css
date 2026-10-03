@@ -89,9 +89,10 @@
   }
 }
 
-/* Touch targets: at least 44 x 44 CSS px on coarse pointers and narrow screens (WCAG 2.5.8 / platform guidance). */
+/* Touch targets: at least 44 x 44 CSS px on coarse pointers and narrow screens (WCAG 2.5.8 / platform guidance).
+   Answer buttons (.choice) are excluded because they already keep a taller min-height (62px, see frontend-design.css) that this layer would otherwise lower. */
 @media (pointer: coarse), (max-width: 760px) {
-  button,
+  button:not(.choice),
   summary,
   select,
   input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]) {

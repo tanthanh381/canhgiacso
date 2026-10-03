@@ -5,15 +5,6 @@
   font-size: 20px;
 }
 
-.scenario-item:hover {
-  background: var(--paper);
-}
-
-.scenario-item.selected {
-  border-color: color-mix(in srgb, var(--brand) 35%, var(--line));
-  background: color-mix(in srgb, var(--brand) 7%, var(--surface));
-}
-
 .scenario-number.attempted {
   background: color-mix(in srgb, var(--warning) 18%, var(--surface));
   border-color: color-mix(in srgb, var(--warning) 45%, var(--line));
@@ -78,10 +69,6 @@
   justify-content: space-between;
   gap: 14px;
   margin: 0 0 14px;
-  padding: 9px 12px;
-  border: 1px solid var(--line);
-  border-radius: 11px;
-  background: color-mix(in srgb, var(--surface) 82%, var(--paper));
 }
 
 .game-toolbar span {
@@ -136,8 +123,6 @@
 
 .scenario-meta span {
   border: 1px solid var(--line);
-  border-radius: 20px;
-  padding: 5px 9px;
 }
 
 .scenario-meta .level-pill {
@@ -148,13 +133,8 @@
 
 .scenario-hero-icon {
   flex: 0 0 auto;
-  width: 62px;
-  height: 62px;
   display: grid;
   place-items: center;
-  background: var(--brand-fill);
-  color: var(--highlight);
-  border-radius: 15px;
   font-size: 28px;
 }
 
@@ -162,7 +142,6 @@
   position: absolute;
   left: 18px;
   top: 8px;
-  color: var(--brand);
   font: 44px Georgia, serif;
 }
 
@@ -228,10 +207,6 @@
   max-width: 530px;
   color: var(--muted);
   line-height: 1.6;
-}
-
-.coach-card .eyebrow {
-  color: var(--highlight);
 }
 
 .section-title {
@@ -322,7 +297,6 @@
   margin-top: auto;
   border: 1px solid color-mix(in srgb, var(--danger) 30%, var(--line));
   background: color-mix(in srgb, var(--danger) 6%, var(--surface));
-  border-radius: 12px;
   padding: 13px;
   display: grid;
   grid-template-columns: 30px 1fr auto;
@@ -424,8 +398,6 @@
 
 .panel-heading h2 {
   margin: 0;
-  font-size: 25px;
-  font-weight: 750;
   font-family: inherit;
 }
 
@@ -433,7 +405,6 @@
   display: grid;
   min-height: calc(100vh - 78px);
   grid-template-columns: 290px minmax(0, 1fr);
-  max-width: 1560px;
   margin: 0 auto;
 }
 
@@ -458,13 +429,16 @@
   border-left: 1px solid var(--line);
 }
 
+.insight-panel > * {
+  flex-shrink: 0;
+}
+
 .app.ux-insight-open .insight-panel {
   transform: translateX(0);
 }
 
 .stage {
   min-width: 0;
-  padding: 25px clamp(22px, 3vw, 50px) 45px;
   max-width: 1040px;
   width: 100%;
   margin: 0 auto;
@@ -474,7 +448,6 @@
 .status-card .badge-icon {
   width: 32px;
   height: 32px;
-  border-radius: 9px;
 }
 
 .status-card small {
@@ -496,9 +469,6 @@
 }
 
 .scenario-panel {
-  border-right: 1px solid var(--line);
-  background: var(--surface);
-  padding: 24px 18px;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -506,7 +476,6 @@
 
 .panel-heading {
   display: flex;
-  align-items: end;
   justify-content: space-between;
   padding: 0 5px 17px;
   padding-bottom: 12px;
@@ -534,12 +503,9 @@
 
 .unlock-progress {
   margin: 0 0 12px;
-  border: 1px solid color-mix(in srgb, var(--highlight) 58%, var(--line));
-  border-radius: 11px;
   padding: 8px 10px;
   margin-bottom: 8px;
   border-style: dashed;
-  background: transparent;
 }
 
 .unlock-progress strong {
@@ -550,11 +516,9 @@
   border: 1px solid transparent;
   background: transparent;
   display: grid;
-  grid-template-columns: 38px 1fr 8px;
   gap: 10px;
   align-items: center;
   width: 100%;
-  border-radius: 10px;
   text-align: left;
   cursor: pointer;
   transition: .18s;
@@ -661,9 +625,9 @@
   cursor: pointer;
 }
 
-/* Opens the scenario list and the tips panel; only needed where those panels are slide-overs (see the 900px block). */
+/* Opens the tips panel (a slide-over at every width) and, on small screens, the scenario list (see the 900px block). */
 .ux-stage-actions {
-  display: none;
+  display: flex;
   justify-content: flex-end;
   gap: 8px;
   margin-bottom: 10px;
@@ -700,11 +664,8 @@
 .ux-status-progress-icon {
   width: 30px;
   height: 30px;
-  border-radius: 9px;
   display: grid;
   place-items: center;
-  background: color-mix(in srgb, var(--success) 13%, var(--surface));
-  color: var(--success);
   font-weight: 900;
 }
 
@@ -741,11 +702,7 @@
   align-items: stretch;
   display: flex;
   margin-bottom: 16px;
-  border-radius: 14px;
   border: 0;
-  background: transparent;
-  padding: 0;
-  gap: 10px;
 }
 
 .level-pill {
@@ -754,22 +711,15 @@
 
 .scenario-count {
   border: 1px solid var(--line);
-  color: var(--muted);
   padding: 5px 8px;
-  border-radius: 18px;
   font-weight: 700;
   font-size: 12px;
   box-shadow: none;
 }
 
 .story-box {
-  margin: 25px 0 18px;
-  padding: 20px 21px 20px 52px;
   position: relative;
-  border: 0;
-  border-left: 3px solid color-mix(in srgb, var(--brand) 45%, var(--line));
   border-radius: 0;
-  background: transparent;
   padding-top: 10px;
   padding-bottom: 10px;
   box-shadow: none;
@@ -778,8 +728,6 @@
 .red-flags {
   display: flex;
   gap: 15px;
-  align-items: center;
-  padding-bottom: 20px;
   border: 0;
   background: transparent;
   padding-left: 0;
@@ -791,56 +739,37 @@
   content: "";
   position: absolute;
   z-index: -1;
-  width: 250px;
-  height: 250px;
-  right: -82px;
-  top: -100px;
-  opacity: .16;
   border-radius: 50%;
-  background: radial-gradient(circle at center, transparent 0 22px, color-mix(in srgb, var(--brand) 34%, transparent) 23px 24px, transparent 25px 52px, color-mix(in srgb, var(--brand) 24%, transparent) 53px 54px, transparent 55px 84px, color-mix(in srgb, var(--brand) 18%, transparent) 85px 86px, transparent 87px), conic-gradient(from 205deg, transparent 0 70deg, color-mix(in srgb, var(--highlight) 42%, transparent) 70deg 73deg, transparent 73deg 360deg);
   pointer-events: none;
 }
 
 .scenario-title-row {
   display: flex;
-  gap: 17px;
-  align-items: center;
   margin-bottom: 18px;
 }
 
 .story-box p {
   margin: 0;
-  font-family: "Segoe UI", "Noto Sans", Arial, sans-serif;
-  font-size: clamp(15px, 1.18vw, 17px);
-  line-height: 1.72;
 }
 
 .decision-title {
   margin: 23px 0 13px;
-  margin-top: 24px;
-  font-size: 17px;
   letter-spacing: -.01em;
 }
 
 .choice-list {
   display: grid;
-  gap: 10px;
 }
 
 .choice:hover:not(:disabled) {
-  transform: translateY(-1px);
-  border-color: color-mix(in srgb, var(--brand) 42%, var(--line));
-  box-shadow: var(--shadow-card);
   background: var(--surface);
 }
 
 .ux-status-progress {
-  min-width: 130px;
   display: flex;
   align-items: center;
   gap: 9px;
   padding: 8px 12px;
-  border-left: 1px solid var(--line);
   opacity: 1;
 }
 
@@ -868,7 +797,6 @@
 
 .feedback {
   display: flex;
-  flex-wrap: wrap;
   gap: 20px;
   justify-content: space-between;
   align-items: end;
@@ -877,14 +805,6 @@
   border: 1px solid;
   border-radius: var(--radius-card);
   box-shadow: none;
-}
-
-/* Text and "next" button share the first row; the learning moment wraps below (the 900px block stacks everything). */
-@media (min-width: 901px) {
-  .feedback-copy {
-    flex: 1 1 320px;
-    min-width: 0;
-  }
 }
 
 .feedback.success {
@@ -927,23 +847,15 @@
   align-items: center;
   gap: 13px;
   position: relative;
-  min-height: 54px;
   flex: 1 1 0;
   box-shadow: none;
-  padding: 8px 10px;
-  background: color-mix(in srgb, var(--surface) 94%, var(--paper));
-  border: 1px solid color-mix(in srgb, var(--line) 76%, transparent);
   opacity: 1;
-  border-radius: var(--radius-card);
 }
 
 .coach-card {
   padding: 17px;
-  background: var(--brand-fill);
-  color: var(--on-brand);
   border: 0;
   box-shadow: none;
-  border-radius: var(--radius-card);
 }
 
 .progress-card,
@@ -952,24 +864,16 @@
   background: var(--surface);
   padding: 17px;
   box-shadow: none;
-  border-radius: var(--radius-card);
 }
 
 .scenario-stage.card-surface {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--brand) 17%, var(--line));
-  background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 97%, var(--brand)) 0%, var(--surface) 38%);
-  border-radius: var(--radius-panel);
-  box-shadow: var(--shadow-raised);
 }
 
 .scenario-stage h2 {
   font-family: inherit;
-  max-width: 760px;
-  font-size: clamp(26px, 2.15vw, 36px);
-  line-height: 1.14;
   letter-spacing: -.025em;
 }
 
@@ -990,10 +894,7 @@
 }
 
 .red-flags strong {
-  text-transform: uppercase;
-  letter-spacing: .1em;
   white-space: nowrap;
-  font-size: 12px;
 }
 
 .scenario-meta {
@@ -1001,9 +902,6 @@
   align-items: center;
   gap: 8px;
   color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  margin-bottom: 18px;
   font-size: 12px;
 }
 
@@ -1023,12 +921,9 @@
 }
 
 .choice-letter {
-  border: 1px solid var(--line);
   display: grid;
   place-items: center;
-  border-radius: 8px;
   font-weight: 800;
-  color: var(--muted);
   width: 32px;
   height: 32px;
   font-size: 12px;
@@ -1057,8 +952,6 @@
   display: block;
   font: 12px Inter, sans-serif;
   color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: .08em;
   font-size: 12px;
 }
 
@@ -1068,7 +961,6 @@
   background: var(--paper);
   color: var(--muted);
   border: 1px solid var(--line);
-  border-radius: 9px;
   font-weight: 800;
   width: 34px;
   height: 34px;
@@ -1124,10 +1016,8 @@
   gap: 8px;
   align-items: center;
   border: 1px solid var(--line);
-  background: var(--paper);
   padding: 0 11px;
   margin-bottom: 10px;
-  border-radius: var(--radius-control);
   border-color: var(--control-line);
 }
 
@@ -1142,11 +1032,7 @@
   align-items: center;
   cursor: pointer;
   line-height: 1.6;
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--surface) 96%, var(--paper));
   transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease, background .18s ease;
-  min-height: 54px;
-  font-size: 14px;
   border-color: var(--control-line);
 }
 
@@ -1219,7 +1105,6 @@
   flex: 0 0 auto;
   border: 1px solid color-mix(in srgb, var(--danger) 52%, var(--line));
   background: transparent;
-  border-radius: 8px;
   padding: 8px 11px;
   cursor: pointer;
   font-weight: 800;
@@ -1251,6 +1136,10 @@
   gap: 6px;
 }
 
+.ux-scenario-trigger {
+  display: none;
+}
+
 .ux-random {
   border: 1px solid var(--line);
   padding: 0 10px;
@@ -1270,11 +1159,7 @@
 
 .red-flags span {
   line-height: 1.6;
-  border: 0;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--warning) 8%, var(--surface));
   padding: 7px 9px;
-  color: var(--ink);
   box-shadow: none;
   font-size: 12px;
   display: inline-flex;
@@ -1370,7 +1255,6 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 6px;
   scrollbar-width: thin;
   height: calc(100vh - 300px);
   padding: 7px 10px 7px 7px;
@@ -1455,9 +1339,6 @@
     display: block;
     min-height: auto;
   }
-  .stage {
-    padding: 14px 14px 34px;
-  }
   .scenario-panel {
     position: fixed;
     z-index: 104;
@@ -1493,9 +1374,11 @@
     right: min(305px, calc(92vw - 44px));
   }
   .ux-stage-actions {
-    display: flex;
     justify-content: space-between;
     margin-bottom: 9px;
+  }
+  .ux-scenario-trigger {
+    display: inline-flex;
   }
   .status-card {
     min-width: 155px;
@@ -1508,8 +1391,6 @@
   }
   .scenario-hero-icon {
     display: grid;
-    width: 40px;
-    height: 40px;
     font-size: 19px;
     flex: 0 0 auto;
   }
@@ -1556,15 +1437,6 @@
   .ux-drawer-close {
     min-width: 40px;
     min-height: 40px;
-  }
-}
-
-@media (max-width: 560px) {
-  .scenario-stage h2 {
-    font-size: clamp(23px, 7vw, 29px);
-  }
-  .scenario-stage.card-surface {
-    padding: 20px 15px;
   }
 }
 
