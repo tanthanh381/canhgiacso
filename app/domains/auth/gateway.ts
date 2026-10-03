@@ -74,7 +74,9 @@ export function updateAccountPassword(password: string) {
 // Tài khoản bật TOTP cần phiên aal2 mới đổi được mật khẩu (Auth trả "insufficient_aal").
 export async function verifyTotpForPasswordChange(code: string): Promise<boolean> {
   const factors = await supabase.auth.mfa.listFactors();
-  const factor = factors.data?.totp?.[0];
+  // Chỉ dùng yếu tố đã xác minh: người dùng có thể còn một lần đăng ký dang dở (unverified)
+  // nằm trước yếu tố thật trong danh sách, khi đó mã từ ứng dụng xác thực đang dùng sẽ bị từ chối.
+  const factor = factors.data?.totp?.find((item) => item.status === "verified");
   if (factors.error || !factor) return false;
   const verified = await supabase.auth.mfa.challengeAndVerify({ factorId: factor.id, code });
   return !verified.error;

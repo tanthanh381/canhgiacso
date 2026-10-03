@@ -191,3 +191,26 @@ test("runbook and checklist document apply order, Redirect URLs, e-mail template
   assert.match(privacyPage, /id="xac-minh-chung-chi"/);
   assert.match(contactPage, /tự tải dữ liệu và tự xóa tài khoản/);
 });
+
+// Hai lỗi do rà soát tự động (Codex) nêu trên PR #73; giữ lại để không tái phát.
+test("password-recovery TOTP step uses the verified factor, not whichever factor is listed first", async () => {
+  const gateway = await read("app/domains/auth/gateway.ts");
+  const start = gateway.indexOf("export async function verifyTotpForPasswordChange");
+  assert.ok(start >= 0, "verifyTotpForPasswordChange exists");
+  const body = gateway.slice(start, gateway.indexOf("\n}\n", start));
+  assert.match(body, /\.find\(\(\w+\) => \w+\.status === "verified"\)/);
+  assert.doesNotMatch(body, /totp\?\.\[0\]/);
+});
+
+test("rate-limit hook serialises the count-then-insert per IP and route in every definition", async () => {
+  for (const file of [
+    "supabase/migrations/20261002103000_privacy_rate_limit_and_retention.sql",
+    ROUTES,
+  ]) {
+    const sql = await read(file);
+    const lock = sql.indexOf("pg_advisory_xact_lock(hashtextextended(ip_hash || '|' || route_key, 0))");
+    const count = sql.indexOf("select count(*) into recent_count");
+    const insert = sql.indexOf("insert into private.api_rate_limits");
+    assert.ok(lock > 0 && lock < count && count < insert, `${file}: lock must come before count and insert`);
+  }
+});

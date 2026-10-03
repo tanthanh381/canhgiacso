@@ -64,6 +64,11 @@ begin
     perform private.purge_expired_security_data(500, 1);
   end if;
 
+  -- Tuần tự hoá "đếm rồi ghi" theo (IP, tuyến): không có khoá này, một đợt yêu cầu đồng
+  -- thời cùng đọc số đếm dưới ngưỡng trước khi ai kịp ghi và đều được cho qua. Khoá
+  -- chỉ sống đến hết giao dịch của chính yêu cầu nên không cần giải phóng thủ công.
+  perform pg_advisory_xact_lock(hashtextextended(ip_hash || '|' || route_key, 0));
+
   delete from private.api_rate_limits
   where source_ip_hash = ip_hash and route = route_key
     and request_at < clock_timestamp() - interval '1 hour';
