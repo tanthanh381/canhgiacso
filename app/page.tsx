@@ -953,14 +953,14 @@ export default function Home() {
 
             {(balance === 0 || awareness === 0) ? (
               <section className="game-over card-surface">
-                <span className="giant-icon">!</span><span className="eyebrow">PHÒNG TUYẾN ĐÃ VỠ</span>
+                <span className="giant-icon">!</span><span className="eyebrow">Phòng tuyến đã vỡ</span>
                 <h2>Bạn đã để kẻ gian chiếm ưu thế</h2><p>Không sao — mỗi lần nhận ra một dấu hiệu là thêm một lớp bảo vệ ngoài đời thật.</p>
                 <button className="primary-button" onClick={() => setResetConfirmOpen(true)}>Bắt đầu hành trình mới</button>
               </section>
             ) : (
               <section className="scenario-stage card-surface">
                 <div className="scenario-meta"><span className={`level-pill ${difficultyTone[selected.difficulty]}`}>{selected.difficulty}</span><span>{scenarioChannelLabel(selected.channel)}</span><span>{scenarioCategoryLabel(selected.category)}</span></div>
-                <div className="scenario-title-row"><span className="scenario-hero-icon" aria-hidden="true"><GlyphIcon glyph={selected.icon} size={26} /></span><div><span className="eyebrow">TÌNH HUỐNG {String(selected.id).padStart(2, "0")}</span><h2>{selected.title}</h2></div></div>
+                <div className="scenario-title-row"><span className="scenario-hero-icon" aria-hidden="true"><GlyphIcon glyph={selected.icon} size={26} /></span><div><span className="eyebrow">Tình huống {String(selected.id).padStart(2, "0")}</span><h2>{selected.title}</h2></div></div>
                 <div className="story-box"><span className="quote-mark">“</span><p>{selected.story}</p></div>
                 <div className="red-flags"><strong>Dấu hiệu cần quan sát</strong><div>{selected.redFlags.map((flag) => <span key={flag}><Icon name="triangle" size={14} /> {flag}</span>)}</div></div>
                 <h3 className="decision-title">Đâu là hành động an toàn nhất đầu tiên?</h3>
@@ -990,7 +990,7 @@ export default function Home() {
               <button onClick={() => setGuide(true)}>Xem quy tắc 3 bước</button>
             </div>
             <div className="progress-card">
-              <div className="section-title"><span><small>TIẾN TRÌNH</small><strong>{Math.round((safeIds.size / scenarios.length) * 100)}%</strong></span></div>
+              <div className="section-title"><span><small>Tiến trình</small><strong>{Math.round((safeIds.size / scenarios.length) * 100)}%</strong></span></div>
               <div className="ring" style={{ "--progress": `${(safeIds.size / scenarios.length) * 360}deg` } as React.CSSProperties}><span>{safeIds.size}<small>an toàn</small></span></div>
               <div className="mini-stats"><span><strong>{streak}</strong> chuỗi tốt nhất</span><span><strong>{unlockedBadgeCount}</strong> / {defenseBadges.length} huy hiệu</span></div>
             </div>
