@@ -183,3 +183,60 @@ test("tokens: a single brand red is shared by the app, the static pages, the con
   assert.match(await read("github-pages/index.html"), /<meta name="theme-color" content="#b1122f"/);
   assert.match(await read("public/consent.css"), /--cgs-accent: var\(--seo-accent, #b1122f\)/);
 });
+
+// ---- Navy "digital defence desk" tokens (frontend-design.css) --------------------------------------------------------
+
+/** Resolves a token for one theme. tokens.css only uses #hex, var(--x) and color-mix(in srgb, A p%, B), which is all this understands. */
+function tokenResolver(theme) {
+  const tokens = readStyle("tokens.css");
+  const raw = (name) => (theme === "dark" ? declOf(tokens, ':root[data-theme="dark"]', `--${name}`) : undefined) ?? declOf(tokens, ":root", `--${name}`);
+  const colour = (value) => {
+    const text = String(value).trim();
+    if (/^#[0-9a-f]{6}$/i.test(text)) return text;
+    const reference = /^var\(--([a-z0-9-]+)\)$/i.exec(text);
+    if (reference) return colour(raw(reference[1]));
+    const blend = /^color-mix\(in srgb, (.+) (\d+)%, (.+)\)$/.exec(text);
+    if (blend) return mix(colour(blend[1]), Number(blend[2]), colour(blend[3]));
+    throw new Error(`token value is not a colour this test understands: ${text}`);
+  };
+  return (name) => colour(raw(name));
+}
+
+test("tokens: the navy family is declared for both themes and resolves to real colours", () => {
+  for (const theme of ["light", "dark"]) {
+    const token = tokenResolver(theme);
+    for (const name of ["night", "on-night", "night-deep", "night-chip", "ink-strong", "rule-strong", "command-rule", "on-highlight"]) {
+      assert.match(token(name), /^#[0-9a-f]{6}$/i, `${theme}: --${name}`);
+    }
+  }
+  assert.equal(tokenResolver("light")("night").toLowerCase(), "#0c2538");
+  // Upstream neutrals (owner's design) are the single source for page, card, text and line colours.
+  const light = tokenResolver("light");
+  const dark = tokenResolver("dark");
+  assert.deepEqual(["paper", "surface", "ink", "muted", "line"].map((name) => light(name).toLowerCase()), ["#f4f6f7", "#ffffff", "#15212b", "#5e6973", "#d9e0e5"]);
+  assert.deepEqual(["paper", "surface", "ink", "muted", "line"].map((name) => dark(name).toLowerCase()), ["#0b1721", "#122330", "#f2f6f8", "#b6c1c8", "#2c414f"]);
+});
+
+test("tokens: text on the navy surfaces and on the yellow and navy tints used by frontend-design.css meets 4.5:1 in both themes", () => {
+  for (const theme of ["light", "dark"]) {
+    const token = tokenResolver(theme);
+    const surface = token("surface");
+    const pairs = [
+      ["ink-strong on surface", token("ink-strong"), surface],
+      ["ink-strong on paper", token("ink-strong"), token("paper")],
+      ["ink-strong on banner tint", token("ink-strong"), mix(token("highlight"), 14, surface)],
+      ["ink-strong on case file gradient", token("ink-strong"), mix(token("night"), 3, surface)],
+      ["ink on story box", token("ink"), mix(token("night"), 4, surface)],
+      ["ink on red-flag chip", token("ink"), mix(token("highlight"), 12, surface)],
+      ["ink on unlock tint", token("ink"), mix(token("highlight"), 9, surface)],
+      ["on-night on night (coach card)", token("on-night"), token("night")],
+      ["on-night on night-chip (choice letter)", token("on-night"), token("night-chip")],
+      ["highlight on night (coach eyebrow)", token("highlight"), token("night")],
+      ["highlight on night-deep (hero icon)", token("highlight"), token("night-deep")],
+      ["on-highlight on status icon tint", token("on-highlight"), mix(token("highlight"), 64, surface)],
+      ["brand on selected scenario tint", token("brand"), mix(token("brand"), 7, surface)],
+      ["success on progress icon tint", token("success"), mix(token("success"), 12, surface)],
+    ];
+    for (const [label, fg, bg] of pairs) assert.ok(contrast(fg, bg) >= 4.5, `${theme}: ${label} ${fg} on ${bg} is ${contrast(fg, bg).toFixed(2)}:1 (< 4.5:1)`);
+  }
+});

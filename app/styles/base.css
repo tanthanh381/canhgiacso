@@ -19,7 +19,10 @@ h3 {
 .app {
   min-height: 100vh;
   overflow-x: clip;
-  background: var(--paper);
+  /* One hairline every 72px: the "desk grid" behind the screens (dropped on phones, see below). */
+  background:
+    linear-gradient(90deg, transparent 0, transparent calc(100% - 1px), var(--grid-line) calc(100% - 1px)) 0 0 / 72px 72px,
+    var(--paper);
   color: var(--ink);
   transition: background .25s, color .25s;
 }
@@ -72,5 +75,11 @@ input:where(:not([type="checkbox"], [type="radio"], [type="hidden"])) {
   body {
     max-width: 100%;
     padding-bottom: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .app {
+    background: var(--paper);
   }
 }

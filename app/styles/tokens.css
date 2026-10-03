@@ -2,11 +2,11 @@
 
 :root {
   /* Surfaces and text */
-  --paper: #f5f7f9;
+  --paper: #f4f6f7;
   --surface: #ffffff;
-  --ink: #17212b;
-  --muted: #5d6679;
-  --line: #dfe4ea;
+  --ink: #15212b;
+  --muted: #5e6973;
+  --line: #d9e0e5;
   --control-line: #75808e;
   --control-line-hover: #4d5866;
 
@@ -24,12 +24,25 @@
   --success: #18794e;
   --warning: #8a4f00;
 
+  /* Digital-defence desk: a navy accent family for the command bar, the case file, the coach card and numbered markers.
+     --night is a solid navy surface (white text, yellow icons); --ink-strong is emphasised text on light surfaces (it follows --ink in the dark theme);
+     --rule-strong is the firm border of the scenario counter; --command-rule is the line under the top bar. */
+  --night: #0c2538;
+  --on-night: #ffffff;
+  --night-deep: #0c2538;
+  --night-chip: #0c2538;
+  --ink-strong: #0c2538;
+  --rule-strong: #0c2538;
+  --command-rule: #0c2538;
+  --grid-line: rgba(12, 37, 56, .035);
+
   /* Keyboard focus: dual ring + halo so it is visible on any background */
   --focus-ring: #0b4a7d;
   --focus-halo: #ffffff;
 
   /* Shape, elevation and layout */
   --radius-control: 8px;
+  --radius-field: 9px;
   --radius-card: 12px;
   --radius-panel: 16px;
   --shadow-card: 0 8px 24px rgba(23, 33, 43, .06);
@@ -41,11 +54,11 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  --paper: #0d1620;
-  --surface: #152230;
-  --ink: #f4f7fa;
-  --muted: #aeb9c5;
-  --line: #2b3c4d;
+  --paper: #0b1721;
+  --surface: #122330;
+  --ink: #f2f6f8;
+  --muted: #b6c1c8;
+  --line: #2c414f;
   --control-line: #74859a;
   --control-line-hover: #a9b6c6;
 
@@ -58,8 +71,15 @@
   --success: #5ac493;
   --warning: #f0b45d;
 
+  --night-deep: #07131c;
+  --night-chip: color-mix(in srgb, var(--ink) 16%, var(--surface));
+  --ink-strong: var(--ink);
+  --rule-strong: var(--line);
+  --command-rule: color-mix(in srgb, var(--highlight) 62%, var(--line));
+  --grid-line: rgba(231, 237, 241, .025);
+
   --focus-ring: #ffe15a;
-  --focus-halo: #0d1620;
+  --focus-halo: #0b1721;
 
   --shadow-card: 0 8px 24px rgba(0, 0, 0, .18);
   --shadow-raised: 0 18px 50px rgba(0, 0, 0, .34);
