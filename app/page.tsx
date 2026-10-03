@@ -796,14 +796,12 @@ export default function Home() {
       >Bỏ qua đến nội dung chính</a>
       <AppHeader
         view={view}
-        copy={siteContent.copy}
         account={sessionAccount}
         playerName={playerName}
         dark={dark}
         onNavigate={navigateTo}
         onToggleDark={() => setDark((value) => !value)}
         onOpenProfile={() => setProfileOpen(true)}
-        onOpenGuestNotice={() => setGuestLimitOpen(true)}
         onOpenAuth={openAuth}
       />
       <SyncStatus

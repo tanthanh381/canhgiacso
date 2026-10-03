@@ -5,75 +5,55 @@ import { SIMULATION_BANNER_VIEWS, type View } from "./navigation";
 
 export function AppHeader({
   view,
-  copy,
   account,
   playerName,
   dark,
   onNavigate,
   onToggleDark,
   onOpenProfile,
-  onOpenGuestNotice,
   onOpenAuth,
 }: {
   view: View;
-  copy: SiteContent["copy"];
   account: SessionAccount | null;
   playerName: string;
   dark: boolean;
   onNavigate: (view: View) => void;
   onToggleDark: () => void;
   onOpenProfile: () => void;
-  onOpenGuestNotice: () => void;
   onOpenAuth: (mode: "login" | "register") => void;
 }) {
   return (
-    <>
-      <header className="topbar">
-        <button className="brand" onClick={() => onNavigate("game")} aria-label="Cảnh Giác Số — về màn chơi">
+    <aside className="left-rail" role="navigation" aria-label="Điều hướng chính">
+      <div className="left-rail-brand">
+        <button onClick={() => onNavigate("game")} aria-label="Cảnh Giác Số — về màn chơi" title="Cảnh Giác Số">
           <BrandMark />
-          <span className="brand-divider" aria-hidden="true" />
-          <span className="product-lockup"><strong>{copy.productName}</strong><small>{copy.departmentName}</small></span>
         </button>
-        <nav aria-label="Điều hướng chính">
-          <button aria-current={view === "game" ? "page" : undefined} className={view === "game" ? "active" : ""} onClick={() => onNavigate("game")}>Thử thách</button>
-          <details className="knowledge-menu">
-            <summary aria-label="Mở menu Cẩm nang" aria-current={view === "knowledge" ? "page" : undefined} className={view === "knowledge" ? "active" : ""}>Cẩm nang</summary>
-            <div className="knowledge-submenu" role="group" aria-label="Cẩm nang">
-              <button type="button" onClick={() => window.location.assign("/kien-thuc/")}><strong>Bài viết kiến thức</strong><small>Hướng dẫn, cảnh báo và nội dung tra cứu</small></button>
-              <button type="button" onClick={() => {
-                document.querySelector<HTMLDetailsElement>(".knowledge-menu")?.removeAttribute("open");
-                onNavigate("knowledge");
-                window.setTimeout(() => document.getElementById("security-checklist-title")?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
-              }}><strong>Danh sách kiểm tra</strong><small>Tự kiểm tra an toàn số và lưu tiến độ</small></button>
-            </div>
-          </details>
-          <button aria-current={view === "news" ? "page" : undefined} className={view === "news" ? "active" : ""} onClick={() => onNavigate("news")}>Tin tức</button>
-          <button aria-current={view === "quiz" ? "page" : undefined} className={view === "quiz" ? "active" : ""} onClick={() => onNavigate("quiz")}>Thực hành</button>
-          <button aria-current={view === "stats" ? "page" : undefined} className={view === "stats" ? "active" : ""} onClick={() => onNavigate("stats")}>Thành tích</button>
-          <button type="button" onClick={() => window.location.assign("/gioi-thieu/")}>Giới thiệu</button>
-        </nav>
-        <div className="top-actions">
-          <button className="icon-button" aria-pressed={dark} onClick={onToggleDark} aria-label="Đổi chế độ sáng tối">{dark ? "☀" : "☾"}</button>
-          {account ? (
-            <button className="profile-button" onClick={onOpenProfile} aria-label={`Mở tài khoản của ${playerName}`}>
-              <span>{playerName.trim().slice(0, 1).toUpperCase() || "N"}</span>{playerName}
-            </button>
-          ) : (
-            <div className="auth-actions">
-              <button className="guest-badge guest-badge-button" type="button" onClick={onOpenGuestNotice}>Khách</button>
-              <button className="login-button" onClick={() => onOpenAuth("login")}>Đăng nhập</button>
-              <button className="signup-button" onClick={() => onOpenAuth("register")}>Đăng ký</button>
-            </div>
-          )}
-        </div>
-      </header>
+      </div>
+
+      <nav className="left-rail-nav" aria-label="Chuyên mục">
+        <button aria-current={view === "game" ? "page" : undefined} className={view === "game" ? "active" : ""} onClick={() => onNavigate("game")} aria-label="Thử thách" title="Thử thách">🎮</button>
+        <button aria-current={view === "knowledge" ? "page" : undefined} className={view === "knowledge" ? "active" : ""} onClick={() => onNavigate("knowledge")} aria-label="Cẩm nang" title="Cẩm nang">📚</button>
+        <button aria-current={view === "news" ? "page" : undefined} className={view === "news" ? "active" : ""} onClick={() => onNavigate("news")} aria-label="Tin tức" title="Tin tức">📰</button>
+        <button aria-current={view === "quiz" ? "page" : undefined} className={view === "quiz" ? "active" : ""} onClick={() => onNavigate("quiz")} aria-label="Thực hành" title="Thực hành">⚡</button>
+        <button aria-current={view === "stats" ? "page" : undefined} className={view === "stats" ? "active" : ""} onClick={() => onNavigate("stats")} aria-label="Thành tích" title="Thành tích">🏆</button>
+        <button type="button" onClick={() => window.location.assign("/gioi-thieu/")} aria-label="Giới thiệu" title="Giới thiệu">ℹ</button>
+      </nav>
+
+      <div className="left-rail-actions">
+        <button aria-pressed={dark} onClick={onToggleDark} aria-label="Đổi chế độ sáng tối" title={dark ? "Chế độ sáng" : "Chế độ tối"}>{dark ? "☀" : "☾"}</button>
+        {account ? (
+          <button onClick={onOpenProfile} aria-label={`Tài khoản: ${playerName}`} title="Tài khoản">{playerName.trim().slice(0, 1).toUpperCase() || "N"}</button>
+        ) : (
+          <button type="button" onClick={() => onOpenAuth("register")} aria-label="Đăng ký" title="Đăng ký">+</button>
+        )}
+      </div>
+
       {SIMULATION_BANNER_VIEWS.has(view) && (
         <div className="security-awareness-banner" role="note">
-          <strong>Môi trường mô phỏng</strong>
-          <span>Không nhập mật khẩu ngân hàng, OTP, số thẻ hoặc dữ liệu thật. Mọi số tiền chỉ dùng cho đào tạo.</span>
+          <strong>Mô phỏng</strong>
         </div>
       )}
-    </>
+    </aside>
   );
 }
 
