@@ -1,18 +1,19 @@
 # Bàn giao đợt khắc phục toàn diện, tháng 10/2026
 
-Tài liệu này là mục lục và trình tự triển khai tổng thể cho nhánh `fix/qc-remediation-20261002` (xuất phát từ commit `baad494`). Chi tiết kỹ thuật nằm ở các tài liệu được liên kết; đừng nhân đôi nội dung ở đây.
+Tài liệu này là mục lục và trình tự triển khai tổng thể cho nhánh `fix/qc-remediation-20261002`. Nhánh đã được hợp nhất với `main` tại commit `14006e9` ("design: apply digital defence visual system"), nên Pull Request vào `main` không có xung đột. Chi tiết kỹ thuật nằm ở các tài liệu được liên kết; đừng nhân đôi nội dung ở đây.
 
 ## 1. Cách nhận và đưa vào repository
 
 Môi trường làm việc không có quyền ghi vào repository, nên kết quả được bàn giao dưới dạng bundle và bản vá:
 
 ```bash
-# Cách 1 (khuyến nghị, giữ nguyên lịch sử commit và chữ ký)
+# Cách 1 (khuyến nghị, giữ nguyên lịch sử commit). Bundle yêu cầu bản clone đã có commit 14006e9 (git fetch origin trước).
+git fetch origin
 git fetch /đường/dẫn/canhgiacso-remediation-20261002.bundle fix/qc-remediation-20261002:fix/qc-remediation-20261002
 git push -u origin fix/qc-remediation-20261002      # rồi mở Pull Request vào main
 
-# Cách 2 (một diff duy nhất, không giữ lịch sử)
-git checkout -b fix/qc-remediation-20261002 baad494
+# Cách 2 (một diff duy nhất, không giữ lịch sử; áp lên đúng 14006e9)
+git checkout -b fix/qc-remediation-20261002 14006e9
 git apply --index canhgiacso-remediation-20261002.full.patch
 ```
 
@@ -31,6 +32,15 @@ Không merge thẳng vào `main`. Mở Pull Request và để CI chạy (lint, t
 | Vòng đời tài khoản | Quên và đặt lại mật khẩu, tải dữ liệu cá nhân (JSON), xoá tài khoản (đăng nhập lại, xác thực gần đây, chặn xoá quản trị viên cuối), xác minh chứng nhận bằng mã tại `/xac-minh-chung-chi/`, mã và địa chỉ xác minh in trên PDF | cùng tài liệu, mục 7 |
 | Giao diện | Gộp 6 lớp CSS chồng lấn thành `app/styles/*` có cascade layers (selector trùng 208 → 13, `!important` 23 → 5, CSS gzip −20%), một màu đỏ thương hiệu và token ngữ nghĩa, thay thành phần quét DOM bằng React, một điểm vào dùng chung cho GitHub Pages và vinext, tương phản và vùng chạm, tôn trọng reduced motion, icon SVG thay emoji | `app/styles/index.css` |
 | Quản trị repository | Hướng dẫn ruleset, secret scanning, Dependabot, chuyển repository sang tổ chức HDBank, dọn nhánh remote | `documentation/maintenance/*.md` |
+
+### Thiết kế `frontend-design.css` của chủ repo
+
+Commit `14006e9` thêm `app/frontend-design.css` (bản ghi đè lên CSS cũ). Trong nhánh này file đó được chuyển thành `app/styles/frontend-design.css`, nằm trong cascade layer `components`, viết lại theo token và component React hiện có; ý đồ thiết kế (thanh lệnh, dải trạng thái một hàng, "hồ sơ vụ việc" viền trái, màu navy, chữ thường cho nhãn) được giữ. Các khác biệt cố ý, cần chủ repo xác nhận:
+
+- Màu đỏ thương hiệu giữ `#b1122f` / `#7d0b20` (một màu duy nhất, khớp trang tĩnh `public/seo.css` và `consent.css`) thay vì `#a20f2d` / `#750b22`. Muốn dùng màu của bạn, đổi các token `--brand*` trong `app/styles/tokens.css` và `--seo-brand*` trong `public/seo.css`, `public/consent.css` cùng lúc.
+- Thẻ "coach" ở chế độ tối dùng nền navy (upstream hiện đỏ do selector `.dark` cũ).
+- Nút "Mẹo & tiến trình" nằm đầu khu vực chính để luôn nhìn thấy.
+- Cỡ chữ tối thiểu 12px, vùng chạm 44px trên mobile, viền ô nhập đạt tương phản 3:1, icon SVG thay emoji.
 
 ## 3. Trình tự triển khai tổng thể
 
@@ -54,9 +64,9 @@ Không merge thẳng vào `main`. Mở Pull Request và để CI chạy (lint, t
 
 ## 5. Mức xác minh đã thực hiện
 
-Trên bản clone mới của nhánh (không phụ thuộc tệp chưa commit): `pnpm install --frozen-lockfile`, lint không cảnh báo, typecheck 3 cấu hình, `pnpm test` (build vinext rồi 322 test), `build:pages`, `seo:audit`, quét bí mật, `pnpm audit --prod` không có lỗ hổng, chạy `content:compile` hai lần không sinh diff.
+Trên bản clone mới của nhánh (không phụ thuộc tệp chưa commit): `pnpm install --frozen-lockfile`, lint không cảnh báo, typecheck 3 cấu hình, `pnpm test` (build vinext rồi 331 test), `build:pages`, `seo:audit`, quét bí mật, `pnpm audit --prod` không có lỗ hổng, chạy `content:compile` hai lần không sinh diff.
 
-Kiểm thử trình duyệt thật (Chromium, desktop và Android): 120 ca e2e đạt, gồm banner cookie, chế độ khách, quên mật khẩu, xoá và xuất tài khoản, trang xác minh, trang hoạt hình dưới CSP chặt. Kiểm tra ảnh chụp trước và sau cho 276 trạng thái giao diện và axe không còn lỗi.
+Kiểm thử trình duyệt thật (Chromium, desktop và Android): 121 ca e2e đạt, gồm banner cookie, chế độ khách, quên mật khẩu, xoá và xuất tài khoản, trang xác minh, trang hoạt hình dưới CSP chặt. Kiểm tra ảnh chụp trước và sau cho 276 trạng thái giao diện và axe không còn lỗi.
 
 PostgreSQL 16 cục bộ với lớp giả lập Supabase: pgTAP 195/195, kiểm tra post-deploy, chạy lại migration hai lần giữ nguyên dữ liệu.
 
