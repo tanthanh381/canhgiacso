@@ -4,16 +4,17 @@ import { Icon } from "../../shared/icons";
 export type Drawer = "scenarios" | "insight";
 
 /**
- * Open state of the two slide-over panels of the challenge screen (scenario list and tips/progress) that
- * replace the side columns on small screens. Only one is open at a time; Escape closes it and focus goes
- * back to the button that opened it. The open drawer is exposed as a class on the app root for the CSS.
+ * Open state of the two slide-over panels of the challenge screen: the tips/progress panel (a slide-over at every width)
+ * and the scenario list (a slide-over only on small screens, where it replaces the side column). `available` says which
+ * of them are slide-overs right now. Only one is open at a time; Escape closes it and focus goes back to the button that
+ * opened it. The open drawer is exposed as a class on the app root for the CSS.
  */
-export function useDrawers(active: boolean) {
+export function useDrawers(available: Readonly<Record<Drawer, boolean>>) {
   const [requested, setOpen] = useState<Drawer | null>(null);
   const opener = useRef<HTMLElement | null>(null);
-  // The panels are slide-overs only on the challenge screen of a small viewport: leaving it (also with the browser's back button or by rotating the device) closes the drawer.
-  if (!active && requested) setOpen(null);
-  const open = active ? requested : null;
+  // Leaving the challenge screen (also with the browser's back button) or rotating the device so that the panel stops being a slide-over closes the drawer.
+  if (requested && !available[requested]) setOpen(null);
+  const open = requested && available[requested] ? requested : null;
 
   const show = useCallback((drawer: Drawer) => {
     opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;

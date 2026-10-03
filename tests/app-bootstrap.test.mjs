@@ -59,7 +59,7 @@ test("challenge widgets are plain components driven by props", () => {
   assert.match(page, /<LearningMoment safe=\{selectedOutcome\.correct\} redFlags=\{selected\.redFlags\} tip=\{selected\.tip\} \/>/);
   // The side panels are not reachable by keyboard while they are off-screen.
   assert.match(page, /inert=\{compactLayout && drawers\.open !== "scenarios"\}/);
-  assert.match(page, /inert=\{compactLayout && drawers\.open !== "insight"\}/);
+  assert.match(page, /inert=\{drawers\.open !== "insight"\}/);
 });
 
 test("the evidence box has a visible entry on the achievements page", () => {

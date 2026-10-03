@@ -63,7 +63,7 @@ export default function Home() {
   const guestNotice = useGuestNoticeDismissed();
   // Below 900px the status cards scroll sideways (so the strip must be reachable with the keyboard) and the side panels become slide-overs.
   const compactLayout = useMediaQuery("(max-width: 900px)");
-  const drawers = useDrawers(view === "game" && compactLayout);
+  const drawers = useDrawers({ scenarios: view === "game" && compactLayout, insight: view === "game" });
   const [conversionDismissed, setConversionDismissed] = useState(false);
   const stageRef = useRef<HTMLElement>(null);
   // Manual open/close of a locked group is only valid for the search text it was made under, so a new search auto-opens matches again.
@@ -984,7 +984,7 @@ export default function Home() {
             )}
           </section>
 
-          <aside className="insight-panel" inert={compactLayout && drawers.open !== "insight"}>
+          <aside className="insight-panel" inert={drawers.open !== "insight"}>
             <div className="coach-card">
               <span className="eyebrow">{siteContent.copy.coachEyebrow}</span><h3>Ghi nhớ trong tình huống này</h3><p>{selected.tip}</p>
               <button onClick={() => setGuide(true)}>Xem quy tắc 3 bước</button>
