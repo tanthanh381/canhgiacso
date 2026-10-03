@@ -218,7 +218,7 @@ export function PasswordRecoveryDialog({ onRequestNewLink }: { onRequestNewLink:
   return (
     <>
       <Modal open={open} onClose={() => undefined} labelledBy="password-recovery-title" className="password-recovery-modal">
-        <span className="eyebrow">CẢNH GIÁC SỐ · KHÔI PHỤC TÀI KHOẢN</span>
+        <span className="eyebrow">Cảnh Giác Số · Khôi phục tài khoản</span>
         {step === "done" ? (
           <>
             <h2 id="password-recovery-title">Đã đổi mật khẩu</h2>
@@ -264,7 +264,7 @@ export function PasswordRecoveryDialog({ onRequestNewLink }: { onRequestNewLink:
 
       <Modal open={Boolean(linkProblem)} onClose={closeLinkProblem} labelledBy="auth-link-problem-title" className="auth-link-problem-modal">
         <button className="modal-close" aria-label="Đóng thông báo" onClick={closeLinkProblem}><Icon name="close" size={18} /></button>
-        <span className="eyebrow">LIÊN KẾT KHÔNG DÙNG ĐƯỢC</span>
+        <span className="eyebrow">Liên kết không dùng được</span>
         <h2 id="auth-link-problem-title">Không mở được liên kết</h2>
         <p className="auth-error" role="alert">{authRedirectErrorMessage(linkProblem ?? "invalid")}</p>
         <div className="profile-actions">

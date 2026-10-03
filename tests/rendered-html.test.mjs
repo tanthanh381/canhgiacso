@@ -25,7 +25,7 @@ test("server renders the Cảnh Giác Số experience", async () => {
   const html = await response.text();
   assert.match(html, /<title>Cảnh Giác Số: Nhận diện lừa đảo trực tuyến \| HDBank<\/title>/);
   assert.match(html, /HDBANK · IT SECURITY/);
-  assert.match(html, /THƯ VIỆN TÌNH HUỐNG/);
+  assert.match(html, /Thư viện tình huống/);
   assert.match(html, /Cuộc gọi ‘điều tra khẩn cấp’/);
   assert.match(html, />Thử thách<\/button>/);
   assert.match(html, /Đăng nhập/);
@@ -73,7 +73,7 @@ test("ships product metadata and social artwork", async () => {
   assert.match(layout, /const siteTitle = "Cảnh Giác Số: Nhận diện lừa đảo trực tuyến \| HDBank"/);
   assert.match(layout, /lang="vi-VN"/);
   assert.match(storage, /localStorage/);
-  assert.match(appSource, /CẢNH GIÁC SỐ/);
+  assert.match(appSource, /Cảnh Giác Số · Tài khoản đồng bộ/);
   assert.match(appSource, /FooterNotice/);
   assert.match(ui, /footer-warning/);
   assert.match(ui, /split\(\/\\n\+\//);

@@ -156,7 +156,7 @@ export function AccountDialogs({
       <Modal open={showGuestLimitNotice} onClose={onDismissGuestNotice} labelledBy="guest-limit-title" className="guest-limit-modal">
         <button className="modal-close" aria-label="Đóng thông báo chế độ khách" onClick={onDismissGuestNotice}><Icon name="close" size={18} /></button>
         <span className="modal-symbol">K</span>
-        <span className="eyebrow">CHẾ ĐỘ KHÁCH</span>
+        <span className="eyebrow">Chế độ khách</span>
         <h2 id="guest-limit-title">Bạn đang sử dụng với tính năng giới hạn</h2>
         <p className="guest-limit-intro">Bạn vẫn có thể làm thử thách ngay, nhưng kết quả chỉ lưu trên thiết bị hiện tại và có thể mất khi xóa dữ liệu trình duyệt.</p>
         <div className="guest-limit-grid" aria-label="So sánh chế độ khách và tài khoản">
@@ -173,7 +173,7 @@ export function AccountDialogs({
       <Modal open={authOpen} onClose={closeAuthDialog} labelledBy="auth-title" className="auth-modal">
         <button className="modal-close" aria-label="Đóng đăng nhập" onClick={closeAuthDialog}><Icon name="close" size={18} /></button>
         <span className="modal-symbol">H</span>
-        <span className="eyebrow">CẢNH GIÁC SỐ · TÀI KHOẢN ĐỒNG BỘ</span>
+        <span className="eyebrow">Cảnh Giác Số · Tài khoản đồng bộ</span>
         <div className="auth-tabs" aria-label="Chọn hình thức tài khoản">
           <button type="button" aria-pressed={authMode === "login"} className={authMode === "login" ? "active" : ""} onClick={() => switchMode("login")}>Đăng nhập</button>
           <button type="button" aria-pressed={authMode === "register"} className={authMode === "register" ? "active" : ""} onClick={() => switchMode("register")}>Đăng ký</button>
@@ -220,7 +220,7 @@ export function AccountDialogs({
           <DeleteAccountView account={account} onCancel={() => setProfileView("main")} onDeleted={handleAccountDeleted} />
         ) : (
           <>
-            <span className="eyebrow">TÀI KHOẢN ĐÃ ĐĂNG NHẬP</span>
+            <span className="eyebrow">Tài khoản đã đăng nhập</span>
             <h2 id="profile-title">Hồ sơ của bạn</h2>
             <p className="account-username">@{account?.username} · {account?.email}</p>
             <label className="profile-name-field">

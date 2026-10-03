@@ -121,7 +121,7 @@ export function DeleteAccountView({
 
   return (
     <>
-      <span className="eyebrow">XÓA TÀI KHOẢN</span>
+      <span className="eyebrow">Xóa tài khoản</span>
       <h2 id="profile-title">Xóa tài khoản vĩnh viễn?</h2>
       <p className="account-username">@{account.username} · {account.email}</p>
       <div className="privacy-consequences">
@@ -163,7 +163,7 @@ export function AccountDeletedNotice({ open, onClose }: { open: boolean; onClose
   return (
     <Modal open={open} onClose={onClose} labelledBy="account-deleted-title" className="account-deleted-modal">
       <button className="modal-close" aria-label="Đóng thông báo" onClick={onClose}><Icon name="close" size={18} /></button>
-      <span className="eyebrow">TÀI KHOẢN ĐÃ ĐƯỢC XÓA</span>
+      <span className="eyebrow">Tài khoản đã được xóa</span>
       <h2 id="account-deleted-title">Đã xóa tài khoản</h2>
       <p className="auth-notice" role="status">Tài khoản và dữ liệu gắn với tài khoản đã được xóa, bạn đã được đăng xuất. Bạn vẫn có thể tiếp tục với tư cách khách hoặc đăng ký tài khoản mới bất cứ lúc nào.</p>
       <div className="profile-actions">

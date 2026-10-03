@@ -29,7 +29,7 @@ export function KnowledgeView({
       </div>
 
       <div className="knowledge-section-heading">
-        <div><span className="eyebrow">NỘI DUNG THAM KHẢO</span><h2>Cẩm nang thực hành</h2></div>
+        <div><span className="eyebrow">Nội dung tham khảo</span><h2>Cẩm nang thực hành</h2></div>
         <p>Các nguyên tắc ngắn gọn để nhận diện, xác minh và xử lý tình huống có dấu hiệu lừa đảo.</p>
       </div>
       <div className="knowledge-grid">
@@ -46,7 +46,7 @@ export function KnowledgeView({
       <section className="security-checklist" aria-labelledby="security-checklist-title">
         <div className="checklist-heading">
           <div>
-            <span className="eyebrow">TỰ KIỂM TRA AN TOÀN SỐ</span>
+            <span className="eyebrow">Tự kiểm tra an toàn số</span>
             <h2 id="security-checklist-title">Danh sách kiểm tra</h2>
             <p>Ưu tiên hoàn thành các mục “Thiết yếu”, sau đó tiếp tục với các mục “Nên làm”. Tiến độ được lưu riêng trên thiết bị này.</p>
           </div>

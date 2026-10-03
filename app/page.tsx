@@ -1046,7 +1046,7 @@ export default function Home() {
       {view === "quiz" && (
         <section className="content-page quiz-page">
           <div className="page-hero quiz-hero">
-            <span className="eyebrow">THỰC HÀNH TƯƠNG TÁC · JIGSAW / GOOGLE</span>
+            <span className="eyebrow">Thực hành tương tác · Jigsaw / Google</span>
             <h1>Trắc nghiệm email lừa đảo</h1>
             <p>Kiểm tra khả năng nhận diện email và trang đăng nhập giả mạo ngay trên Cảnh Giác Số. Bài thực hành được tải trực tiếp từ Jigsaw/Google.</p>
           </div>
@@ -1067,7 +1067,7 @@ export default function Home() {
 
       {view === "stats" && (
         <section className="content-page stats-page">
-          <div className="page-hero"><span className="eyebrow">HỒ SƠ PHÒNG VỆ</span><h1>{playerName}</h1><p>{sessionAccount ? "Tiến bộ của bạn được đồng bộ an toàn giữa các thiết bị." : "Đăng nhập để đồng bộ tiến bộ giữa các thiết bị."}</p></div>
+          <div className="page-hero"><span className="eyebrow">Hồ sơ phòng vệ</span><h1>{playerName}</h1><p>{sessionAccount ? "Tiến bộ của bạn được đồng bộ an toàn giữa các thiết bị." : "Đăng nhập để đồng bộ tiến bộ giữa các thiết bị."}</p></div>
           <div className="stats-overview"><article><small>Kịch bản đã thử</small><strong>{results.length}</strong><span>/ {scenarios.length}</span></article><article><small>Xử lý an toàn</small><strong>{safeIds.size}</strong><span>{results.length ? Math.round((safeIds.size / results.length) * 100) : 0}% chính xác</span></article><article><small>Điểm phòng vệ</small><strong>{score}</strong><span>cấp {Math.floor(score / 500) + 1}</span></article><article><small>Tài sản còn lại</small><strong className="money-stat">{money.format(balance)}đ</strong><span>bảo toàn {Math.round((balance / 300_000_000) * 100)}%</span></article></div>
           <button className="evidence-entry" onClick={() => setView("evidence")}>
             <span className="evidence-entry-icon" aria-hidden="true"><Icon name="folder" size={22} /></span>
@@ -1089,19 +1089,19 @@ export default function Home() {
             ) : (
               <article className={`training-certificate-card ${results.length >= scenarios.length ? "ready" : "locked"}`}>
                 <span className="certificate-card-mark" aria-hidden="true"><Icon name={results.length >= scenarios.length ? "check" : "diamond"} size={22} /></span>
-                <div className="certificate-card-copy"><span className="eyebrow">CHỨNG CHỈ HOÀN THÀNH</span><h2>{results.length >= scenarios.length ? "Khóa đào tạo đã hoàn thành" : "Hoàn thành khóa để mở chứng nhận"}</h2><p>{results.length >= scenarios.length ? "Kết quả đã đủ điều kiện. Xác nhận với máy chủ để cấp chứng nhận PDF." : `Tiến độ hiện tại ${results.length}/${scenarios.length} tình huống.`}</p></div>
+                <div className="certificate-card-copy"><span className="eyebrow">Chứng chỉ hoàn thành</span><h2>{results.length >= scenarios.length ? "Khóa đào tạo đã hoàn thành" : "Hoàn thành khóa để mở chứng nhận"}</h2><p>{results.length >= scenarios.length ? "Kết quả đã đủ điều kiện. Xác nhận với máy chủ để cấp chứng nhận PDF." : `Tiến độ hiện tại ${results.length}/${scenarios.length} tình huống.`}</p></div>
                 {results.length >= scenarios.length && <button className="primary-button certificate-download" onClick={() => void ensureCurrentCertificate()}>Cấp chứng nhận</button>}
               </article>
             )
           ) : (
             <article className={`training-certificate-card ${results.length >= scenarios.length ? "ready" : "locked"}`}>
               <span className="certificate-card-mark" aria-hidden="true"><Icon name={results.length >= scenarios.length ? "check" : "diamond"} size={22} /></span>
-              <div className="certificate-card-copy"><span className="eyebrow">BẢN GHI NHẬN HOÀN THÀNH</span><h2>{results.length >= scenarios.length ? "Khóa đào tạo đã hoàn thành" : "Bản ghi nhận sẽ mở khi hoàn thành khóa"}</h2><p>{results.length >= scenarios.length ? "Bạn có thể tải PDF ngay ở chế độ khách. Bản này lưu cục bộ và không thay thế chứng nhận nội bộ đã xác minh của tài khoản đăng nhập." : `Tiến độ hiện tại ${results.length}/${scenarios.length} tình huống.`}</p></div>
+              <div className="certificate-card-copy"><span className="eyebrow">Bản ghi nhận hoàn thành</span><h2>{results.length >= scenarios.length ? "Khóa đào tạo đã hoàn thành" : "Bản ghi nhận sẽ mở khi hoàn thành khóa"}</h2><p>{results.length >= scenarios.length ? "Bạn có thể tải PDF ngay ở chế độ khách. Bản này lưu cục bộ và không thay thế chứng nhận nội bộ đã xác minh của tài khoản đăng nhập." : `Tiến độ hiện tại ${results.length}/${scenarios.length} tình huống.`}</p></div>
               {results.length >= scenarios.length && <button className="primary-button certificate-download" disabled={certificateDownloading} onClick={() => void downloadCertificate(getOrCreateGuestCertificate())}>{certificateDownloading ? "Đang tạo PDF…" : <><Icon name="download" size={16} /> Tải bản ghi nhận PDF</>}</button>}
             </article>
           )}
           <div className="achievement-section">
-            <div className="achievement-heading"><div><span className="eyebrow">BỘ SƯU TẬP CHUYÊN MÔN</span><h2>Huy hiệu phòng vệ</h2><p>Mỗi huy hiệu phản ánh một kỹ năng hoặc cột mốc có thể kiểm chứng từ kết quả của bạn.</p></div><div className="achievement-summary"><strong>{unlockedBadgeCount}/{defenseBadges.length}</strong><span>đã mở khoá</span></div></div>
+            <div className="achievement-heading"><div><span className="eyebrow">Bộ sưu tập chuyên môn</span><h2>Huy hiệu phòng vệ</h2><p>Mỗi huy hiệu phản ánh một kỹ năng hoặc cột mốc có thể kiểm chứng từ kết quả của bạn.</p></div><div className="achievement-summary"><strong>{unlockedBadgeCount}/{defenseBadges.length}</strong><span>đã mở khoá</span></div></div>
             <div className="achievement-grid">{defenseBadges.map((badge) => <article className={`${badge.unlocked ? "unlocked" : ""} tone-${badge.tone}`} key={badge.name} aria-label={`${badge.name}: ${badge.unlocked ? "đã mở khoá" : `${badge.current} trên ${badge.target}`}`}><span className="achievement-icon" aria-hidden="true"><GlyphIcon glyph={badge.icon} size={24} /></span><div className="achievement-copy"><div className="achievement-name"><strong>{badge.name}</strong><em>{badge.tier}</em></div><p>{badge.description}</p><div className="achievement-progress"><i style={{ width: `${badge.progress}%` }} /><span>{badge.unlocked ? "Đã mở khoá" : `${badge.current}/${badge.target}`}</span></div></div></article>)}</div>
           </div>
           <button className="reset-button" disabled={savingChoice || !!pendingChoice || resetBusy} onClick={() => setResetConfirmOpen(true)}>{sessionAccount ? "Bắt đầu lượt chơi mới" : "Đặt lại tiến trình khách"}</button>
@@ -1112,7 +1112,7 @@ export default function Home() {
       {view === "evidence" && (
         <section className="content-page">
           <button className="back-button" onClick={() => setView("stats")}><Icon name="arrow-left" size={16} /> Quay lại thành tích</button>
-          <div className="page-hero"><span className="eyebrow">HỘP CHỨNG CỨ</span><h1>Dấu vết bạn đã thu thập</h1><p>Mỗi kịch bản xử lý đúng mở khoá một chứng cứ và một bài học có thể áp dụng ngoài đời.</p></div>
+          <div className="page-hero"><span className="eyebrow">Hộp chứng cứ</span><h1>Dấu vết bạn đã thu thập</h1><p>Mỗi kịch bản xử lý đúng mở khoá một chứng cứ và một bài học có thể áp dụng ngoài đời.</p></div>
           <div className="evidence-grid">{scenarios.map((item) => <article className={safeIds.has(item.id) ? "unlocked" : ""} key={item.id}><span className="evidence-icon" aria-hidden="true">{safeIds.has(item.id) ? <GlyphIcon glyph={item.icon} size={26} /> : "?"}</span><div><small>CHỨNG CỨ {String(item.id).padStart(2, "0")}</small><h2>{safeIds.has(item.id) ? item.evidence : "Chưa xác định"}</h2><p>{safeIds.has(item.id) ? item.tip : "Xử lý an toàn kịch bản này để mở khoá."}</p></div></article>)}</div>
         </section>
       )}
@@ -1149,7 +1149,7 @@ export default function Home() {
       {completionCertificate && !lossNotice && <Modal open onClose={() => setCompletionCertificate(null)} labelledBy="certificate-complete-title" className="certificate-complete-modal">
         <button className="modal-close" aria-label="Đóng thông báo chứng nhận" onClick={() => setCompletionCertificate(null)}><Icon name="close" size={18} /></button>
         <span className="certificate-complete-symbol" aria-hidden="true"><Icon name="check" size={30} /></span>
-        <span className="eyebrow">HOÀN THÀNH KHÓA ĐÀO TẠO</span>
+        <span className="eyebrow">Hoàn thành khóa đào tạo</span>
         <h2 id="certificate-complete-title">{completionCertificate.certificateCode.startsWith("CGS-GUEST-") ? "Chúc mừng, bạn đã hoàn thành khóa đào tạo" : "Chúc mừng, chứng nhận của bạn đã được cấp"}</h2>
         <p>Bạn đã hoàn thành {completionCertificate.completed}/{completionCertificate.scenarioTotal} tình huống với tỷ lệ đúng <strong>{completionCertificate.accuracy}%</strong> và xếp loại <strong>{completionCertificate.rating}</strong>. {completionCertificate.certificateCode.startsWith("CGS-GUEST-") && <span>Bản PDF chế độ khách chỉ là bản ghi nhận trên thiết bị, không phải chứng nhận nội bộ đã xác minh.</span>}</p>
         <div className="certificate-complete-code"><small>{completionCertificate.certificateCode.startsWith("CGS-GUEST-") ? "Mã bản ghi nhận" : "Mã chứng nhận"}</small><strong>{completionCertificate.certificateCode}</strong></div>
@@ -1159,7 +1159,7 @@ export default function Home() {
       {lossNotice && <Modal open onClose={() => setLossNotice(null)} labelledBy="loss-notice-title" className="loss-modal">
         <button className="modal-close" aria-label="Đóng cảnh báo tổn thất" onClick={() => setLossNotice(null)}><Icon name="close" size={18} /></button>
         <span className="loss-symbol" aria-hidden="true">!</span>
-        <span className="eyebrow">CẢNH BÁO TỪ CẢNH GIÁC SỐ</span>
+        <span className="eyebrow">Cảnh báo từ Cảnh Giác Số</span>
         <h2 id="loss-notice-title">{lossNotice.amountLost > 0 ? "Tài sản vừa bị tổn thất" : "Mức cảnh giác vừa giảm"}</h2>
         <p className="loss-context">Lựa chọn trong tình huống “{lossNotice.scenarioTitle}” đã tạo hậu quả:</p>
         <div className="loss-summary">
@@ -1211,7 +1211,7 @@ export default function Home() {
       <Modal open={resetConfirmOpen} onClose={() => { if (!resetBusy) setResetConfirmOpen(false); }} labelledBy="reset-confirm-title" className="reset-confirm-modal">
         <button className="modal-close" aria-label="Đóng xác nhận đặt lại" disabled={resetBusy} onClick={() => setResetConfirmOpen(false)}><Icon name="close" size={18} /></button>
         <span className="loss-symbol" aria-hidden="true">!</span>
-        <span className="eyebrow">XÁC NHẬN CHƠI LẠI</span>
+        <span className="eyebrow">Xác nhận chơi lại</span>
         <h2 id="reset-confirm-title">Bắt đầu lại từ đầu?</h2>
         <p>{sessionAccount ? "Lượt hiện tại sẽ được lưu vào lịch sử. Lượt mới bắt đầu với tài sản, huy hiệu và chứng cứ ban đầu; kết quả cũ vẫn được giữ để theo dõi quá trình học." : "Toàn bộ kết quả, huy hiệu, chứng cứ và tài sản mô phỏng của khách trên thiết bị này sẽ được đặt lại."}</p>
         {!sessionAccount && <p className="reset-warning">Thao tác này không thể hoàn tác.</p>}
