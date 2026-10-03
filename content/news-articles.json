@@ -1,5 +1,85 @@
 [
   {
+    "id": "gia-danh-can-bo-benh-vien-dat-mua-hang",
+    "slug": "gia-danh-can-bo-benh-vien-dat-mua-hang",
+    "status": "published",
+    "title": "Giả danh cán bộ bệnh viện đặt mua hàng rồi yêu cầu chuyển tiền",
+    "summary": "Kẻ gian giả danh cán bộ bệnh viện, đặt đơn hàng lớn và gửi ảnh chuyển khoản giả, sau đó yêu cầu người bán chuyển tiền cho một bên thứ ba để “xác nhận giao dịch”. Hãy kiểm tra người đặt hàng qua kênh chính thức và không chuyển tiền chỉ dựa trên ảnh chụp giao dịch.",
+    "category": "Cảnh báo lừa đảo",
+    "publishedAt": "2026-10-02",
+    "sourceName": "Bộ Công an",
+    "sourceUrl": "https://www.bocongan.gov.vn/bai-viet/quang-ninh-cong-an-phuong-mao-khe-kip-thoi-ngan-chan-nguy-co-lua-dao-qua-mang-voi-thu-doan-gia-danh-can-bo-benh-vien-dat-mua-hang-1790913523",
+    "featured": false,
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "heading",
+          "attrs": { "level": 2 },
+          "content": [{ "type": "text", "text": "Kịch bản lừa đảo" }]
+        },
+        {
+          "type": "paragraph",
+          "content": [{ "type": "text", "text": "Đối tượng liên hệ người bán qua mạng xã hội, tự xưng là cán bộ bệnh viện và đặt số lượng hàng lớn. Sau đó, chúng gửi ảnh chuyển khoản giả rồi yêu cầu người bán chuyển tiền cho một nhà cung cấp thứ ba để xác nhận giao dịch, đồng thời hứa sẽ hoàn lại cùng tiền hàng." }]
+        },
+        {
+          "type": "heading",
+          "attrs": { "level": 2 },
+          "content": [{ "type": "text", "text": "Cách xử lý an toàn" }]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Xác minh danh tính và nơi công tác của người đặt hàng qua số điện thoại hoặc đầu mối chính thức của đơn vị." }] }] },
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Kiểm tra số dư và lịch sử giao dịch trực tiếp trong ứng dụng ngân hàng; không xem ảnh chụp chuyển khoản là bằng chứng đã nhận tiền." }] }] },
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Không chuyển tiền cho tài khoản bên thứ ba hoặc nộp phí để xác nhận đơn hàng khi chưa kiểm chứng độc lập." }] }] },
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Dừng giao dịch, lưu tin nhắn và trình báo cơ quan Công an khi phát hiện dấu hiệu giả mạo hoặc thúc ép chuyển tiền." }] }] }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "gia-danh-cong-an-cap-dinh-danh-dien-tu-cho-tre",
+    "slug": "gia-danh-cong-an-cap-dinh-danh-dien-tu-cho-tre",
+    "status": "published",
+    "title": "Cảnh giác yêu cầu định danh điện tử cho trẻ qua điện thoại",
+    "summary": "Đối tượng giả danh Công an hoặc cán bộ dịch vụ công, báo dữ liệu của trẻ có sai sót rồi gửi link, ứng dụng giả hoặc yêu cầu mã OTP. Việc cấp tài khoản định danh điện tử mức độ 2 cho trẻ từ đủ 6 đến dưới 14 tuổi phải thực hiện trực tiếp tại cơ quan Công an.",
+    "category": "Cảnh báo lừa đảo",
+    "publishedAt": "2026-10-01",
+    "sourceName": "Bộ Công an",
+    "sourceUrl": "https://www.bocongan.gov.vn/bai-viet/cong-an-hai-phong-canh-bao-thu-doan-yeu-cau-dang-ki-dinh-danh-dien-tu-cho-tre-de-lua-dao-chiem-doat-tai-san-1790845850",
+    "featured": false,
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "heading",
+          "attrs": { "level": 2 },
+          "content": [{ "type": "text", "text": "Dấu hiệu giả mạo" }]
+        },
+        {
+          "type": "paragraph",
+          "content": [{ "type": "text", "text": "Người gọi tự xưng là Công an, cán bộ cư trú hoặc dịch vụ công, thông báo dữ liệu của trẻ bị sai và cần cập nhật gấp. Chúng có thể gửi liên kết, hướng dẫn cài ứng dụng giả, yêu cầu mã OTP hoặc gọi video trong trang phục giống lực lượng chức năng để tạo lòng tin." }]
+        },
+        {
+          "type": "heading",
+          "attrs": { "level": 2 },
+          "content": [{ "type": "text", "text": "Thực hiện đúng kênh chính thức" }]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Không làm thủ tục định danh cho trẻ qua cuộc gọi, Zalo, mạng xã hội hoặc đường link do người lạ gửi." }] }] },
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Với trẻ từ đủ 6 đến dưới 14 tuổi, việc cấp tài khoản định danh điện tử mức độ 2 được thực hiện trực tiếp tại cơ quan Công an." }] }] },
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Chỉ cài ứng dụng chính thức từ App Store hoặc Google Play; không cung cấp mật khẩu, mã OTP hay chuyển tiền để hoàn tất thủ tục." }] }] },
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Chủ động liên hệ cơ quan Công an địa phương qua kênh chính thức nếu nhận được yêu cầu bất thường." }] }] }
+          ]
+        }
+      ]
+    }
+  },
+  {
     "id": "fanpage-gia-danh-giao-xu-tu-thien",
     "slug": "fanpage-gia-danh-giao-xu-tu-thien",
     "status": "published",
