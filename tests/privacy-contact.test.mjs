@@ -34,7 +34,10 @@ test("privacy page covers operator, purposes, data, cookie table, retention, rig
   assert.match(html, /13 tháng/);
   assert.match(html, /tối đa 24 giờ/);
   assert.match(html, /Consent Mode v2/);
-  assert.match(html, /theo cấu hình dự án, sẽ công bố/);
+  // Vùng dữ liệu: dùng đúng giá trị đã công bố trong content/site-config.json; chỉ khi chưa điền mới hiện câu giữ chỗ.
+  const { dataRegion } = JSON.parse(await read("content/site-config.json"));
+  if (dataRegion) assert.ok(html.includes(`Vùng đặt dữ liệu: ${dataRegion}.`), "privacy page states the configured data region");
+  else assert.match(html, /theo cấu hình dự án, sẽ công bố/);
   assert.match(html, /href="\/consent\.css"/);
   assert.doesNotMatch(html, /đã có tính năng tự xóa tài khoản|tự xóa tài khoản trong ứng dụng/);
   for (const match of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) JSON.parse(match[1]);
