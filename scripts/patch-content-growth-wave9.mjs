@@ -313,7 +313,7 @@ const articles = [
   },
   {
     slug:"sms-brandname-gia-mao",
-    title:"SMS Brandname giả là gì? Vì sao tin nhắn cùng luồng vẫn có thể giả",
+    title:"SMS Brandname giả là gì? Cách nhận biết tin nhắn giả mạo",
     description:"SMS Brandname giả mạo có thể hiển thị cùng luồng tin nhắn thương hiệu. Cách kiểm tra link, nội dung, OTP và kênh ngân hàng trước khi đăng nhập hoặc chuyển tiền.",
     h1:"SMS Brandname giả là gì? Vì sao tin nhắn cùng luồng vẫn có thể giả",
     breadcrumb:"SMS Brandname giả",
@@ -658,7 +658,7 @@ const tools = [
     content:`<section><h2>Vì sao không dùng OCR/AI để kết luận biên lai?</h2><p>Biên lai có thể được chỉnh sửa rất tinh vi và mẫu giao diện ngân hàng thay đổi. Nguồn sự thật tốt hơn là trạng thái giao dịch phía tài khoản nhận. Xem <a href="/kien-thuc/bien-lai-chuyen-khoan-gia/">hướng dẫn biên lai chuyển khoản giả</a>.</p></section>`,
   },
   {
-    slug:"kiem-tra-tin-nhan-dang-ngo", title:"Kiểm tra tin nhắn đáng ngờ: Phát hiện tín hiệu phishing, OTP, link", description:"Dán SMS/tin nhắn đáng ngờ để kiểm tra cục bộ các tín hiệu phổ biến: link, OTP, áp lực, chuyển tiền, cài app và mạo danh tổ chức. Không gửi dữ liệu lên server.", h1:"Kiểm tra tin nhắn đáng ngờ", lead:"Dán nội dung SMS hoặc tin nhắn. Công cụ chỉ tìm các tín hiệu phổ biến và không thể chứng minh tin nhắn an toàn hay lừa đảo.",
+    slug:"kiem-tra-tin-nhan-dang-ngo", title:"Kiểm tra tin nhắn đáng ngờ: phát hiện phishing, OTP, link", description:"Dán SMS/tin nhắn đáng ngờ để kiểm tra cục bộ các tín hiệu phổ biến: link, OTP, áp lực, chuyển tiền, cài app và mạo danh tổ chức. Không gửi dữ liệu lên server.", h1:"Kiểm tra tin nhắn đáng ngờ", lead:"Dán nội dung SMS hoặc tin nhắn. Công cụ chỉ tìm các tín hiệu phổ biến và không thể chứng minh tin nhắn an toàn hay lừa đảo.",
     tool:`<section class="scam-tool-panel" data-scam-tool="sms-check"><label for="sms-input"><strong>Nội dung tin nhắn</strong></label><textarea id="sms-input" placeholder="Dán nội dung cần kiểm tra. Hãy xóa thông tin cá nhân không cần thiết trước khi phân tích."></textarea><button type="button" data-analyze>Phân tích tín hiệu</button>${resultBox()}</section>`,
     content:`<section><h2>Công cụ không làm gì?</h2><p>Công cụ không truy cập link, không gửi nội dung tới dịch vụ AI bên ngoài và không tra cứu chủ sở hữu số điện thoại. Với SMS Brandname, xem thêm <a href="/kien-thuc/sms-brandname-gia-mao/">vì sao cùng luồng tin nhắn vẫn cần kiểm tra link</a>.</p></section>`,
   },
@@ -777,6 +777,22 @@ for (const relative of ["gioi-thieu/index.html","quyen-rieng-tu/index.html","phu
   }
   await writeFile(file,html,"utf8");
 }
+
+// Every static page with the shared header loads /theme-init.js: it applies the saved/system theme before first
+// paint and adds the accessible light/dark toggle to .seo-nav. Idempotent; pages already loading it are untouched.
+async function ensureThemeInit(dir) {
+  for (const entry of await readdir(dir,{withFileTypes:true})) {
+    const full = path.join(dir,entry.name);
+    if (entry.isDirectory()) { await ensureThemeInit(full); continue; }
+    if (!entry.name.endsWith(".html")) continue;
+    const original = await readFile(full,"utf8");
+    if (!/class="[^"]*\bseo-nav\b/.test(original)) continue;
+    let html = original.replace(/<script>try\{if\(localStorage\.getItem\("khien-so-theme"\)===["']dark["']\)document\.documentElement\.dataset\.theme=["']dark["']\}catch\{\}<\/script>/g,THEME);
+    if (!html.includes('/theme-init.js')) html = html.replace(/<head(\s[^>]*)?>/i,(open)=>`${open}\n  ${THEME}`);
+    if (html !== original) await writeFile(full,html,"utf8");
+  }
+}
+await ensureThemeInit(PUBLIC);
 
 let hub = await read("kien-thuc/index.html");
 if (!hub.includes('data-growth-wave9="knowledge-hub"')) {

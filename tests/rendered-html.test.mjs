@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { access, readFile } from "node:fs/promises";
 import test from "node:test";
+import { declOf, readAppStyles } from "./helpers/styles.mjs";
+import { readAllShell } from "./helpers/shell.mjs";
 
 const root = new URL("../", import.meta.url);
 
@@ -23,23 +25,23 @@ test("server renders the Cảnh Giác Số experience", async () => {
   const html = await response.text();
   assert.match(html, /<title>Cảnh Giác Số: Nhận diện lừa đảo trực tuyến \| HDBank<\/title>/);
   assert.match(html, /HDBANK · IT SECURITY/);
-  assert.match(html, /THƯ VIỆN TÌNH HUỐNG/);
+  assert.match(html, /Thư viện tình huống/);
   assert.match(html, /Cuộc gọi ‘điều tra khẩn cấp’/);
   assert.match(html, />Thử thách<\/button>/);
   assert.match(html, /Đăng nhập/);
   assert.match(html, /Đăng ký/);
-  assert.match(html, /Đang tham gia với tư cách khách/);
+  // First visit must not be blocked by a dialog: the guest notice is a non-blocking region rendered after hydration.
+  assert.doesNotMatch(html, /guest-limit-modal|role="dialog"/);
   assert.doesNotMatch(html, />Dashboard</);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/i);
 });
 
 test("primary game navigation uses the Thử thách label without changing its route", async () => {
-  const shell = await readFile(new URL("../app/domains/shell/view.tsx", import.meta.url), "utf8");
-  const gameNavigation = /onClick=\{\(\) => onNavigate\("game"\)\}>([^<]+)<\/button>/g;
-  const labels = [...shell.matchAll(gameNavigation)].map((match) => match[1]);
+  const navigation = await readFile(new URL("../app/domains/shell/navigation.ts", import.meta.url), "utf8");
+  const gameItem = navigation.match(/\{ view: "game", label: "([^"]+)"/);
 
-  assert.ok(labels.includes("Thử thách"));
-  assert.ok(!labels.includes("Mô phỏng"));
+  assert.equal(gameItem?.[1], "Thử thách");
+  assert.doesNotMatch(navigation, /label: "Mô phỏng"/);
 });
 
 test("ships product metadata and social artwork", async () => {
@@ -49,7 +51,7 @@ test("ships product metadata and social artwork", async () => {
     readFile(new URL("../app/domains/dashboard/view.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/domains/security-awareness/view.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/domains/auth/dialogs.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../app/domains/shell/view.tsx", import.meta.url), "utf8"),
+    readAllShell(),
     readFile(new URL("../app/domains/auth/gateway.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/domains/training/gateway.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/domains/dashboard/gateway.ts", import.meta.url), "utf8"),
@@ -59,7 +61,7 @@ test("ships product metadata and social artwork", async () => {
     readFile(new URL("../supabase/schema.sql", import.meta.url), "utf8"),
     readFile(new URL("../supabase/content_roles.sql", import.meta.url), "utf8"),
     readFile(new URL("../package.json", import.meta.url), "utf8"),
-    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    readAppStyles(),
     readFile(new URL("../app/shared/ui-primitives.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/shared/browser-storage.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/domains/training/presentation.ts", import.meta.url), "utf8"),
@@ -71,7 +73,7 @@ test("ships product metadata and social artwork", async () => {
   assert.match(layout, /const siteTitle = "Cảnh Giác Số: Nhận diện lừa đảo trực tuyến \| HDBank"/);
   assert.match(layout, /lang="vi-VN"/);
   assert.match(storage, /localStorage/);
-  assert.match(appSource, /CẢNH GIÁC SỐ/);
+  assert.match(appSource, /Cảnh Giác Số · Tài khoản đồng bộ/);
   assert.match(appSource, /FooterNotice/);
   assert.match(ui, /footer-warning/);
   assert.match(ui, /split\(\/\\n\+\//);
@@ -84,12 +86,13 @@ test("ships product metadata and social artwork", async () => {
   assert.match(page, /validateAuthSubmission/);
   assert.match(authModel, /USERNAME_PATTERN/);
   assert.match(authModel, /PASSWORD_PATTERN/);
-  assert.match(authModel, /Mật khẩu cần 8–72 ký tự/);
+  assert.match(authModel, /Mật khẩu cần 10–72 ký tự/);
   assert.match(appSource, /supabase\.auth\.signInWithPassword/);
   assert.match(appSource, /supabase\.auth\.signOut\(\{ scope: "local" \}\)/);
   assert.match(page, /continueAsGuest/);
   assert.match(appSource, /Tiếp tục với tư cách khách/);
-  assert.match(page, /guestLimitOpen, setGuestLimitOpen\] = useState\(true\)/);
+  assert.match(page, /guestLimitOpen, setGuestLimitOpen\] = useState\(false\)/);
+  assert.match(page, /<GuestNotice/);
   assert.match(appSource, /guest-badge-button/);
   assert.match(appSource, /Bạn đang sử dụng với tính năng giới hạn/);
   assert.match(appSource, /Đồng bộ tiến trình, lưu lịch sử lượt chơi/);
@@ -112,7 +115,7 @@ test("ships product metadata and social artwork", async () => {
   assert.match(appSource, /Phân loại sử dụng nội bộ/);
   assert.match(page, /156 hoặc 5656/);
   assert.match(admin, /Kiểm soát trước khi xuất bản/);
-  assert.match(data, /Website được quản lý và vận hành bởi: IT Security Team - HDBank/);
+  assert.match(data, /Website được quản lý và vận hành bởi IT Security Team - HDBank/);
   assert.match(data, /nâng cao nhận thức cộng đồng về phòng chống tội phạm lừa đảo trực tuyến/);
   assert.match(appSource, /get_public_site_content/);
   assert.match(page, /#\/admin/);
@@ -161,6 +164,7 @@ test("ships product metadata and social artwork", async () => {
   assert.doesNotMatch(styles, /khien-logo-shield|khien-logo-signal/);
   assert.doesNotMatch(page, /hdbank-logo\.png|alt="HDBank"|className="hdbank-logo"/);
   assert.match(styles, /\.app \{[^}]*color: var\(--ink\)/);
-  assert.match(styles, /\.app\.dark \{[^}]*color-scheme: dark/);
+  // The dark theme is declared once, on <html data-theme="dark"> (React mirrors the theme there), and switches the native controls too.
+  assert.equal(declOf(styles, ':root[data-theme="dark"]', "color-scheme"), "dark");
   await assert.rejects(access(new URL("../app/_sites-preview", root)));
 });

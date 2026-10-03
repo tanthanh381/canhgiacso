@@ -1,3 +1,5 @@
+> **Tài liệu lịch sử, không còn phản ánh hiện trạng.** Báo cáo này ghi lại một đợt kiểm thử ngày 04/09/2026 trên nhánh `codex/more-scenarios` và bản public cũ (`tanthanh381.github.io/chongluadao`). Các lỗi và số liệu bên dưới đã lỗi thời; để biết cách kiểm thử hiện nay, xem `README.md` (mục "Kiểm thử") và `CONTRIBUTING.md`.
+
 # Báo cáo kiểm thử QC — Khiên Số
 
 - Ngày kiểm thử: 04/09/2026 (Asia/Ho_Chi_Minh)

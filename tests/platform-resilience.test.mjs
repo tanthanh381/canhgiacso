@@ -5,7 +5,8 @@ import test from "node:test";
 const read = (path) => readFileSync(path, "utf8");
 const page = read("app/page.tsx");
 const shell = read("app/domains/shell/view.tsx");
-const ux = read("app/ux-refresh.tsx");
+const mobileNav = read("app/domains/shell/mobile-nav.tsx");
+const managementMenu = read("app/domains/shell/management-menu.tsx");
 const seo = read("public/seo.css");
 const storage = read("app/shared/browser-storage.ts");
 
@@ -14,7 +15,9 @@ test("public scenario loading always unlocks the built-in fallback library", () 
   assert.match(block, /const normalized = normalizeSiteContent\(data\)/);
   assert.match(block, /setSiteContent\(normalized\)/);
   assert.match(block, /setContentReady\(true\)/);
-  assert.match(block, /đang dùng thư viện tích hợp sẵn/);
+  assert.match(block, /setDataStatus\(BUILT_IN_CONTENT_NOTICE\)/);
+  assert.match(page, /const BUILT_IN_CONTENT_NOTICE = "[^"]*đang dùng thư viện tích hợp sẵn\.";/);
+  assert.match(page, /noticeBeforeScoring === BUILT_IN_CONTENT_NOTICE/, "the notice survives a successful guest answer");
   assert.ok(block.indexOf("setContentReady(true)") > block.indexOf("if (normalized)"));
 });
 
@@ -32,18 +35,18 @@ test("loss feedback is shown before completion certificate instead of stacking t
 
 test("navigation popovers use native button keyboard semantics instead of incomplete ARIA menu behavior", () => {
   assert.match(shell, /className="knowledge-submenu" role="group"/);
-  assert.match(ux, /id="ux-mobile-knowledge-menu" className="ux-mobile-knowledge-menu" role="group"/);
-  assert.match(ux, /aria-haspopup="true"/);
-  assert.doesNotMatch(ux, /aria-controls="ux-utility-popover"/);
+  assert.match(mobileNav, /MOBILE_KNOWLEDGE_MENU_ID = "ux-mobile-knowledge-menu"/);
+  assert.match(mobileNav, /id=\{MOBILE_KNOWLEDGE_MENU_ID\} className="ux-mobile-knowledge-menu" role="group"/);
+  assert.match(managementMenu, /aria-haspopup="true"/);
+  assert.doesNotMatch(managementMenu, /aria-controls="ux-utility-popover"/);
   assert.doesNotMatch(shell, />Dashboard<\/button>/);
   assert.doesNotMatch(shell, />Quản lý nội dung<\/button>/);
-  assert.match(ux, /const hasContentManagement = managementRole === "admin" \|\| managementRole === "editor"/);
-  assert.match(ux, /const canUseManagementMenu = signedIn && hasContentManagement/);
-  assert.match(ux, /canUseManagementMenu && <div className="ux-utility-menu"/);
-  assert.match(ux, /hasAdmin && <button onClick=\{openDashboard\}>Dashboard<\/button>/);
-  assert.match(ux, /openDashboard/);
-  assert.match(ux, /openAdminTab\("traffic"\)/);
-  assert.match(ux, /openAdminTab\("users"\)/);
+  // The management menu is driven by the account and its role (React state), not by what the DOM happens to contain.
+  assert.match(managementMenu, /data === "admin" \|\| data === "editor"|loadManagementRole/);
+  assert.match(shell, /account && managementRole && \(\s*<ManagementMenu/);
+  assert.match(managementMenu, /role === "admin" && <button type="button" onClick=\{\(\) => go\("#\/dashboard"\)\}>Dashboard<\/button>/);
+  assert.match(managementMenu, /go\(adminHash\("content"\)\)\}>Quản lý nội dung/);
+  assert.match(managementMenu, /\["traffic", "users"\] as ManagementTab\[\]/);
 });
 
 test("SEO pages avoid root overflow scroll containers that can break sticky headers", () => {
@@ -59,5 +62,6 @@ test("guest progress tolerates browsers that restrict localStorage", () => {
   assert.match(page, /safeStorageSet\(SECURITY_CHECKLIST_KEY/);
   assert.match(page, /safeStorageSet\(THEME_KEY/);
   assert.match(page, /safeStorageSet\(progressKey\(null\)/);
-  assert.match(page, /safeStorageGet\(THEME_KEY\) === "dark"/);
+  assert.match(page, /preferredTheme\(\) === "dark"/);
+  assert.match(read("app/shared/theme.ts"), /safeStorageGet\(THEME_KEY\)/);
 });

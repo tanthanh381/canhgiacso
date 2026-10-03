@@ -73,7 +73,8 @@ test("analytics application wiring is canonical source while build instrumentati
   assert.match(admin, /Thống kê truy cập/);
   assert.match(traffic, /AdminCountryAnalytics/);
   assert.doesNotMatch(instrumentation, /patchAdmin|patchCountryAnalytics|admin\.tsx|admin-traffic-analytics\.tsx/);
-  assert.match(instrumentation, /web-analytics\.js/);
+  assert.match(instrumentation, /web-analytics/);
+  assert.match(instrumentation, /consent\.js/);
   assert.match(instrumentation, /connect-src/);
 });
 
@@ -129,9 +130,12 @@ test("database analytics remains private, separates legacy data and exposes prof
   assert.match(phase4Sql, /private\.is_google_organic_source/);
 });
 
-test("admin analytics edge endpoint includes Phase 4 monitor", async () => {
-  const edge = await read("supabase/functions/admin-analytics/index.ts");
-  assert.match(edge, /get_phase4_seo_monitor/);
-  assert.match(edge, /phase4/);
-  assert.match(edge, /2026-09-30-phase4/);
+test("admin analytics edge function is removed (dead code: RPCs need an admin user JWT)", async () => {
+  // supabase/functions/admin-analytics was deleted in the 2026-10 remediation: nothing in the
+  // frontend called it, it decoded the JWT without verifying the signature, and it called the
+  // admin-only RPCs with the service-role key (auth.uid() is NULL there, so every call failed).
+  // The dashboard calls the RPCs directly with the admin session (see admin-traffic-analytics.tsx).
+  await assert.rejects(read("supabase/functions/admin-analytics/index.ts"));
+  const component = await read("app/admin-traffic-analytics.tsx");
+  assert.match(component, /get_phase4_seo_monitor/);
 });

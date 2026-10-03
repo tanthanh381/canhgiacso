@@ -10,6 +10,9 @@
   const VISITOR_TTL_MS = 90 * 24 * 60 * 60 * 1000;
   const HEARTBEAT_MS = 60_000;
   const ALLOWED_HOSTS = new Set(['canhgiacso.com', 'www.canhgiacso.com']);
+  const CONSENT_KEY = 'cgs-consent-v1';
+  const CONSENT_VERSION = 1;
+  const CONSENT_MAX_AGE_MS = 365 * 24 * 60 * 60 * 1000;
 
   const TIMEZONE_COUNTRY = new Map([
     ['Asia/Ho_Chi_Minh', 'VN'], ['Asia/Saigon', 'VN'],
@@ -28,8 +31,34 @@
     ['Pacific/Auckland', 'NZ'], ['Africa/Johannesburg', 'ZA'], ['Africa/Cairo', 'EG'],
   ]);
 
+  // Trạng thái đồng ý: ưu tiên API của /consent.js; nếu chưa có thì đọc đúng khóa mà consent.js lưu.
+  function readConsent() {
+    const api = window.CGSConsent;
+    if (api && typeof api.get === 'function') {
+      const state = api.get();
+      return { granted: Boolean(state && state.analytics), explicit: Boolean(state && state.explicit) };
+    }
+    try {
+      const value = JSON.parse(window.localStorage.getItem(CONSENT_KEY) || 'null');
+      const now = Date.now();
+      const valid = value && value.v === CONSENT_VERSION && typeof value.analytics === 'boolean'
+        && Number.isFinite(value.ts) && now - value.ts <= CONSENT_MAX_AGE_MS;
+      return { granted: Boolean(valid && value.analytics), explicit: Boolean(valid) };
+    } catch {
+      return { granted: false, explicit: false };
+    }
+  }
+
+  function consentGranted() {
+    return readConsent().granted;
+  }
+
   if (!ALLOWED_HOSTS.has(window.location.hostname)) return;
-  if (navigator.doNotTrack === '1' || window.doNotTrack === '1') return;
+  // Chưa đồng ý thì thoát ngay: không đọc/ghi mã khách, mã phiên và không gửi request nào.
+  const initialConsent = readConsent();
+  if (!initialConsent.granted) return;
+  // Tín hiệu Không theo dõi vẫn được tôn trọng, trừ khi chính người dùng đã chủ động bấm chấp nhận phân tích.
+  if ((navigator.doNotTrack === '1' || window.doNotTrack === '1') && !initialConsent.explicit) return;
 
   function validUuid(value) {
     return typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
@@ -213,7 +242,10 @@
   let lastPath = '';
   let heartbeatTimer = 0;
 
+  let active = true;
+
   async function send(eventType) {
+    if (!active || !consentGranted()) return;
     if (document.visibilityState === 'hidden' && eventType === 'heartbeat') return;
     const session = activeSession();
     const effectiveEventType = eventType === 'heartbeat' && session.isNew ? 'pageview' : eventType;
@@ -250,6 +282,7 @@
   }
 
   function pageview(force = false) {
+    if (!active) return;
     const path = normalizedPath();
     if (!force && path === lastPath) return;
     lastPath = path;
@@ -263,21 +296,52 @@
 
   const originalPushState = history.pushState.bind(history);
   const originalReplaceState = history.replaceState.bind(history);
-  history.pushState = (...args) => {
+  const wrappedPushState = (...args) => {
     originalPushState(...args);
-    queueMicrotask(() => pageview());
+    if (active) queueMicrotask(() => pageview());
   };
-  history.replaceState = (...args) => {
+  const wrappedReplaceState = (...args) => {
     originalReplaceState(...args);
-    queueMicrotask(() => pageview());
+    if (active) queueMicrotask(() => pageview());
   };
-  window.addEventListener('popstate', () => pageview());
-  window.addEventListener('storage', (event) => {
+  history.pushState = wrappedPushState;
+  history.replaceState = wrappedReplaceState;
+
+  const onPopState = () => pageview();
+  const onStorage = (event) => {
+    if (event.key === CONSENT_KEY && !consentGranted()) {
+      stop();
+      return;
+    }
     if (event.key === SESSION_KEY && document.visibilityState === 'visible') void send('heartbeat');
-  });
-  document.addEventListener('visibilitychange', () => {
+  };
+  const onVisibilityChange = () => {
     if (document.visibilityState === 'visible') void send('heartbeat');
-  });
+  };
+  window.addEventListener('popstate', onPopState);
+  window.addEventListener('storage', onStorage);
+  document.addEventListener('visibilitychange', onVisibilityChange);
+
+  // Rút lại đồng ý: dừng hẳn bộ đếm nhịp, gỡ bộ lắng nghe và không ghi thêm gì vào localStorage.
+  function stop() {
+    if (!active) return;
+    active = false;
+    if (heartbeatTimer) window.clearInterval(heartbeatTimer);
+    heartbeatTimer = 0;
+    window.removeEventListener('popstate', onPopState);
+    window.removeEventListener('storage', onStorage);
+    document.removeEventListener('visibilitychange', onVisibilityChange);
+    if (history.pushState === wrappedPushState) history.pushState = originalPushState;
+    if (history.replaceState === wrappedReplaceState) history.replaceState = originalReplaceState;
+    if (typeof unsubscribe === 'function') unsubscribe();
+  }
+
+  let unsubscribe = null;
+  if (window.CGSConsent && typeof window.CGSConsent.onChange === 'function') {
+    unsubscribe = window.CGSConsent.onChange((state) => {
+      if (!state || !state.analytics) stop();
+    });
+  }
 
   pageview(true);
   startHeartbeat();

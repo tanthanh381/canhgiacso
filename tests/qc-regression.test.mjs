@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { declOf, readAppStyles } from "./helpers/styles.mjs";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
 
@@ -42,7 +43,9 @@ test("browser bundle contains no server secret and keeps auth validation", async
   assert.match(browserSource, /signOut\(\{ scope: "local" \}\)/);
   assert.match(client, /guestSupabase = guestClient/);
   assert.match(browserSource, /get_public_site_content/);
-  assert.match(page, /Guest gameplay is intentionally local/);
+  // Guest scoring: the answer key never ships to the browser; the page asks the gateway, which
+  // calls the per-choice RPC (see supabase/migrations/20261002102000_guest_choice_rpc.sql).
+  assert.match(page, /requestGuestChoiceOutcome\(selected, index\)/);
   assert.doesNotMatch(page, /supabase\.rpc\("evaluate_guest_choice"/);
   assert.doesNotMatch(page, /scenario_snapshot/);
   assert.doesNotMatch(page, /persistFullProgress|khien-so-migrated/);
@@ -60,22 +63,30 @@ test("answer keys are redacted and content management uses protected RPCs", asyn
   assert.match(migration, /choice_item - array\['correct', 'moneyDelta', 'awarenessDelta', 'feedback'\]/);
   assert.match(migration, /public\.get_managed_site_content/);
   assert.match(migration, /public\.save_managed_site_content/);
-  assert.match(page, /Guest gameplay is intentionally local/);
+  assert.match(page, /requestGuestChoiceOutcome/);
   assert.doesNotMatch(page, /supabase\.rpc\("evaluate_guest_choice"/);
   assert.match(admin, /save_managed_site_content/);
   const definitions = data.slice(data.indexOf("const scenarioDefinitions"), data.indexOf("export const scenarios"));
   assert.doesNotMatch(definitions, /correct:\s*(?:true|false)|moneyDelta:|awarenessDelta:|feedback:/);
 });
 
-test("guest choice scoring is local and obsolete privileged RPC access is revoked", async () => {
-  const [page, model, hardening] = await Promise.all([
+test("guest choice scoring uses the per-choice RPC and obsolete privileged RPC access is revoked", async () => {
+  const [page, model, gateway, hardening, guestRpc] = await Promise.all([
     read("../app/page.tsx"),
     read("../app/domains/training/model.ts"),
+    read("../app/domains/training/gateway.ts"),
     read("../supabase/migrations/20260923085000_enterprise_security_hardening_p0.sql"),
+    read("../supabase/migrations/20261002102000_guest_choice_rpc.sql"),
   ]);
-  assert.match(page, /evaluateGuestChoice\(selected, index\)/);
+  // The page delegates to the gateway; local scoring remains only as the legacy-payload path inside it.
+  assert.match(page, /requestGuestChoiceOutcome\(selected, index\)/);
   assert.match(model, /export function evaluateGuestChoice/);
+  assert.match(gateway, /evaluateGuestChoice\(/);
+  assert.match(gateway, /guestSupabase\.rpc\("evaluate_guest_choice"/);
+  // The 2026-09-23 migration revoked the old RPC; the 2026-10-02 migration deliberately re-creates it
+  // with a different, one-choice-only contract and grants it to anon.
   assert.match(hardening, /revoke all on function public\.evaluate_guest_choice\(integer,integer\)/);
+  assert.match(guestRpc, /grant execute on function public\.evaluate_guest_choice\(integer, ?integer\)\s+to anon, authenticated/);
   assert.doesNotMatch(page, /supabase\.rpc\("evaluate_guest_choice"/);
 });
 
@@ -83,7 +94,7 @@ test("critical UI states are accessible and responsive", async () => {
   const [page, shell, styles, ui] = await Promise.all([
     read("../app/page.tsx"),
     read("../app/domains/shell/view.tsx"),
-    read("../app/globals.css"),
+    readAppStyles(),
     read("../app/shared/ui-primitives.tsx"),
   ]);
   const uiSource = `${page}\n${shell}`;
@@ -103,7 +114,7 @@ test("QC fixes keep destructive reset explicit and mobile text readable", async 
   const [page, trainingGateway, styles, config] = await Promise.all([
     read("../app/page.tsx"),
     read("../app/domains/training/gateway.ts"),
-    read("../app/globals.css"),
+    readAppStyles(),
     read("../vite.github-pages.config.ts"),
   ]);
   assert.match(page, /resetConfirmOpen/);
@@ -113,8 +124,8 @@ test("QC fixes keep destructive reset explicit and mobile text readable", async 
   assert.match(page, /Xóa và bắt đầu lại/);
   assert.match(page, /Lịch sử lượt chơi/);
   assert.match(trainingGateway, /supabase\.rpc\("restart_game"/);
-  assert.match(styles, /\.topbar nav button \{ font-size: 12px/);
-  assert.match(styles, /footer-brand small \{ font-size: 12px/);
+  assert.ok(parseFloat(declOf(styles, ".topbar nav button", "font-size")) >= 12);
+  assert.ok(parseFloat(declOf(styles, ".footer-brand small", "font-size")) >= 12);
   assert.match(config, /manualChunks\(id\)/);
 });
 
@@ -125,9 +136,9 @@ test("GitHub Pages metadata and deployment target are consistent", async () => {
     read("../.github/workflows/pages.yml"),
   ]);
   assert.match(html, /Content-Security-Policy/);
-  const gaTags = html.match(/https:\/\/www\.googletagmanager\.com\/gtag\/js\?id=G-HH04Q7FYHM/g) ?? [];
-  assert.equal(gaTags.length, 1);
-  assert.match(html, /\/google-analytics-init\.js/);
+  // Google Analytics chỉ được nạp động bởi /consent.js sau khi người dùng đồng ý.
+  assert.doesNotMatch(html, /googletagmanager\.com\/gtag\/js|\/google-analytics-init\.js|\/web-analytics\.js/);
+  assert.equal((html.match(/<script src="\/consent\.js" defer><\/script>/g) ?? []).length, 1);
   assert.match(html, /https:\/\/www\.google-analytics\.com/);
   assert.match(html, /\/khien-so-logo\.png/);
   assert.match(config, /base:\s*"\/"/);

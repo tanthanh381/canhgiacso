@@ -9,14 +9,17 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
       - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
-        with:
-          version: 10
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
         with:
           node-version: 22
@@ -25,6 +28,29 @@ jobs:
       - run: node scripts/security-scan.mjs
       - run: pnpm audit --prod --audit-level low
       - run: pnpm run lint
+      - run: pnpm run typecheck
       - run: pnpm test
       - run: pnpm run build:pages
       - run: pnpm run seo:audit
+
+  # Browser smoke test of the production (GitHub Pages) bundle in Chromium.
+  # Cross-OS / cross-browser coverage stays in cross-os-qc.yml and
+  # cross-browser-qc.yml, which run after merge.
+  e2e-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build:pages
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Run E2E smoke (chromium)
+        env:
+          QC_BROWSER: chromium
+        run: pnpm exec playwright test --config=playwright.platform.config.ts

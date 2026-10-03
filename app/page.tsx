@@ -1,7 +1,7 @@
 "use client";
 
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { defaultSiteContent, Difficulty, normalizeSiteContent, repoNewsArticles, SiteContent } from "./data";
+import { defaultSiteContent, Difficulty, normalizeSiteContent, repoNewsArticles, Scenario, SiteContent } from "./data";
 import { loadPublishedSiteContent } from "./domains/content/gateway";
 import { NewsArticleView } from './news-article';
 import { publicNews, safeImage } from './news-content';
@@ -16,17 +16,29 @@ import { AccountDialogs } from "./domains/auth/dialogs";
 import { mapAnalyticsUsers, mapScenarioRisks, summarizeAnalytics, topScenarioRisks, type AnalyticsUser, type DashboardStatus, type ScenarioRisk } from "./domains/dashboard/model";
 import { DashboardView } from "./domains/dashboard/view";
 import { loadCisoDashboardData } from "./domains/dashboard/gateway";
-import { bestCorrectStreak, buildDefenseBadges, difficulties, difficultyTone, PHISHING_QUIZ_URL, scenarioCategoryLabel, scenarioChannelLabel } from "./domains/training/presentation";
-import { evaluateGuestChoice, type ChoiceOutcome, type GameHistory, type GameState, type PendingChoice, type Result, type StoredProgress } from "./domains/training/model";
-import { issueTrainingCertificate, loadTrainingAccountData, loadTrainingCertificates, restartTrainingRun, submitTrainingChoice } from "./domains/training/gateway";
-import { GUEST_CERTIFICATE_KEY, LEGACY_PROGRESS_KEY, THEME_KEY, progressKey, readStoredProgress, safeStorageGet, safeStorageRemove, safeStorageSet } from "./shared/browser-storage";
+import { bestCorrectStreak, buildDefenseBadges, difficultyTone, PHISHING_QUIZ_URL, scenarioCategoryLabel, scenarioChannelLabel } from "./domains/training/presentation";
+import { type ChoiceOutcome, type GameHistory, type GameState, type PendingChoice, type Result, type StoredProgress } from "./domains/training/model";
+import { issueTrainingCertificate, loadTrainingAccountData, loadTrainingCertificates, requestGuestChoiceOutcome, restartTrainingRun, submitTrainingChoice } from "./domains/training/gateway";
+import { GUEST_CERTIFICATE_KEY, LEGACY_PROGRESS_KEY, THEME_KEY, progressKey, readStoredProgress, safeStorageRemove, safeStorageSet } from "./shared/browser-storage";
 import { BadgeIcon, Modal } from "./shared/ui-primitives";
+import { GlyphIcon, Icon } from "./shared/icons";
+import { scrollBehavior } from "./shared/motion";
+import { useMediaQuery } from "./shared/media-query";
 import { canChangeHash, navigateBrowser, restoreHash, routeFromHash, type View } from "./domains/shell/navigation";
 import { AppFooter, AppHeader, SyncStatus } from "./domains/shell/view";
+import { GuestNotice, useGuestNoticeDismissed } from "./domains/shell/guest-notice";
+import { DrawerControls, useDrawers } from "./domains/shell/drawers";
+import { MainContentAnchor, SkipLink } from "./domains/shell/skip-link";
+import { useAppReady } from "./shared/app-ready";
+import { applyTheme, preferredTheme } from "./shared/theme";
+import { GUEST_CONVERSION_THRESHOLD, GuestConversion, LearningMoment, ProgressStat, ScenarioTools, StageActions } from "./domains/training/stage-widgets";
 
 const AdminPage = lazy(() => import("./admin").then((module) => ({ default: module.AdminPage })));
 
 const money = new Intl.NumberFormat("vi-VN");
+const BUILT_IN_CONTENT_NOTICE = "Không tải được nội dung cập nhật; đang dùng thư viện tích hợp sẵn.";
+// Data shown in the "loss" modal after a wrong choice (see setLossNotice call sites).
+type LossNotice = { scenarioTitle: string; amountLost: number; awarenessLost: number; balanceAfter: number };
 export default function Home() {
   const [view, setView] = useState<View>("game");
   const [siteContent, setSiteContent] = useState<SiteContent>(defaultSiteContent);
@@ -47,7 +59,15 @@ export default function Home() {
   const [checklistReady, setChecklistReady] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
-  const [guestLimitOpen, setGuestLimitOpen] = useState(true);
+  const [guestLimitOpen, setGuestLimitOpen] = useState(false);
+  const guestNotice = useGuestNoticeDismissed();
+  // Below 900px the status cards scroll sideways (so the strip must be reachable with the keyboard) and the side panels become slide-overs.
+  const compactLayout = useMediaQuery("(max-width: 900px)");
+  const drawers = useDrawers({ scenarios: view === "game" && compactLayout, insight: view === "game" });
+  const [conversionDismissed, setConversionDismissed] = useState(false);
+  const stageRef = useRef<HTMLElement>(null);
+  // Manual open/close of a locked group is only valid for the search text it was made under, so a new search auto-opens matches again.
+  const [lockedGroupChoice, setLockedGroupChoice] = useState<{ query: string; open: Partial<Record<Difficulty, boolean>> }>({ query: "", open: {} });
   const [authMode, setAuthMode] = useState<AuthMode>("login");
   const [authEmail, setAuthEmail] = useState("");
   const [authUsername, setAuthUsername] = useState("");
@@ -78,6 +98,7 @@ export default function Home() {
   const saveLock = useRef(false);
   const accountEpoch = useRef(0);
   const activeUser = useRef<string | null>(null);
+  useAppReady(hydrated && contentReady);
   const scenarios = siteContent.scenarios;
   const knowledgeCards = siteContent.knowledgeCards;
   const newsArticles = useMemo(() => publicNews(siteContent.newsArticles), [siteContent.newsArticles]);
@@ -149,7 +170,7 @@ export default function Home() {
         setSiteContent(normalized);
         setSiteContent({ ...normalized, newsArticles: repoNewsArticles });
       } else if (error) {
-        setDataStatus("Không tải được nội dung cập nhật; đang dùng thư viện tích hợp sẵn.");
+        setDataStatus(BUILT_IN_CONTENT_NOTICE);
       }
       setContentReady(true);
     })();
@@ -189,6 +210,11 @@ export default function Home() {
   // latest browser state when auth emits an event.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    // Mirror the theme on <html> so UI rendered outside .app (portals, drawers, native controls) follows it.
+    applyTheme(dark ? "dark" : "light");
+  }, [dark]);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -242,6 +268,7 @@ export default function Home() {
   const incompleteUnlockedScenarios = availableScenarios.filter((item) => !completedIds.has(item.id));
   const randomCandidates = incompleteUnlockedScenarios.length ? incompleteUnlockedScenarios : availableScenarios;
   const evidence = scenarios.filter((item) => safeIds.has(item.id));
+  const attemptedCount = scenarios.filter((item) => completedIds.has(item.id)).length;
   const score = results.reduce((total, result) => total + (result.correct ? 120 : 20), 0);
   const analytics = useMemo(() => summarizeAnalytics(analyticsUsers), [analyticsUsers]);
   const scenarioRisks = useMemo(
@@ -279,7 +306,7 @@ export default function Home() {
     setBalance(progress.balance);
     setAwareness(progress.awareness);
     setResults(progress.results);
-    setDark(safeStorageGet(THEME_KEY) === "dark" || progress.dark);
+    setDark(preferredTheme() === "dark" || progress.dark);
     setPlayerName(displayName || "Người chơi ẩn danh");
     setAnswer(null);
     setAnswerOutcome(null);
@@ -305,7 +332,7 @@ export default function Home() {
       balance: 300_000_000,
       awareness: 100,
       results: [],
-      dark: safeStorageGet(THEME_KEY) === "dark",
+      dark: preferredTheme() === "dark",
       playerName: "Người chơi ẩn danh",
     };
     setSessionAccount(null);
@@ -344,7 +371,7 @@ export default function Home() {
       balance: state.balance,
       awareness: state.awareness,
       results: state.results,
-      dark: safeStorageGet(THEME_KEY) === "dark",
+      dark: preferredTheme() === "dark",
       playerName: profile.display_name,
     };
 
@@ -388,11 +415,17 @@ export default function Home() {
     setAnswer(null);
     setAnswerOutcome(null);
     navigateTo("game");
-    if (window.innerWidth < 1050) document.querySelector(".stage")?.scrollIntoView({ behavior: "smooth" });
+    if (window.innerWidth < 1050) stageRef.current?.scrollIntoView({ behavior: scrollBehavior() });
+  }
+
+  function pickRandomScenario() {
+    const item = randomCandidates[Math.floor(Math.random() * randomCandidates.length)];
+    if (item) chooseScenario(item.id);
   }
 
   function navigateTo(nextView: View) {
     if (!navigateBrowser(view, nextView)) return;
+    drawers.close();
     setNewsSlug("");
     setView(nextView);
   }
@@ -414,16 +447,25 @@ export default function Home() {
       await syncChoice(pending);
       return;
     }
-    // Guest gameplay is intentionally local. The published scenario payload
-    // already contains the scoring deltas used to render the exercise, so an
-    // anonymous learner should not depend on a network RPC just to select an
-    // answer. Authenticated attempts continue to use submit_game_choice so
-    // server-side progress and certificates remain authoritative.
-    const outcome = evaluateGuestChoice(selected, index);
-    if (!outcome) {
-      setDataStatus("Không tìm thấy lựa chọn này. Vui lòng tải lại trang và thử lại.");
+    // Guest gameplay: progress stays local, but the answer key never ships to the
+    // browser. The server scores exactly the chosen option (evaluate_guest_choice,
+    // rate limited, writes nothing). If scoring is unavailable the answer is NOT
+    // recorded, so the guest can retry. Authenticated attempts use submit_game_choice.
+    saveLock.current = true;
+    setSavingChoice(true);
+    const noticeBeforeScoring = dataStatus;
+    setDataStatus("Đang chấm điểm lựa chọn…");
+    const evaluation = await requestGuestChoiceOutcome(selected, index);
+    saveLock.current = false;
+    setSavingChoice(false);
+    if (activeUser.current) return;
+    if (!evaluation.ok) {
+      setDataStatus(evaluation.message);
       return;
     }
+    // Giữ lại thông báo "đang dùng thư viện tích hợp sẵn" để khách biết nội dung chưa phải bản mới nhất.
+    setDataStatus(noticeBeforeScoring === BUILT_IN_CONTENT_NOTICE ? noticeBeforeScoring : "");
+    const outcome = evaluation.outcome;
     const nextBalance = Math.max(0, balance + outcome.moneyDelta);
     const nextAwareness = Math.max(0, Math.min(100, awareness + outcome.awarenessDelta));
     const nextResults = [...results, { scenarioId: selected.id, correct: outcome.correct, choiceIndex: index }];
@@ -486,8 +528,9 @@ export default function Home() {
 
   async function resetProgress() {
     if (resetBusy || saveLock.current || pendingChoice) return;
+    if (sessionAccount && !runId) { setDataStatus("Vui lòng chờ tải xong dữ liệu tài khoản."); return; }
     setResetBusy(true);
-    if (sessionAccount) {
+    if (sessionAccount && runId) {
       const epoch = accountEpoch.current;
       const { data, error } = await restartTrainingRun(runId);
       if (epoch !== accountEpoch.current) { setResetBusy(false); return; }
@@ -542,10 +585,11 @@ export default function Home() {
 
   function dismissGuestLimitNotice() {
     setGuestLimitOpen(false);
+    guestNotice.dismiss();
   }
 
   function openAuthFromGuestNotice(mode: AuthMode) {
-    dismissGuestLimitNotice();
+    setGuestLimitOpen(false);
     openAuth(mode);
   }
 
@@ -601,7 +645,7 @@ export default function Home() {
         } else {
           setAuthPassword("");
           setAuthConfirmPassword("");
-          setAuthNotice("Tài khoản đã được tạo. Bạn có thể đăng nhập ngay mà không cần xác nhận email.");
+          setAuthNotice("Đã gửi thư xác nhận. Hãy kiểm tra hộp thư để hoàn tất đăng ký.");
         }
       } else {
         await signOutLocal();
@@ -782,18 +826,39 @@ export default function Home() {
         : null;
   const visibleDashboardStatus: DashboardStatus = sessionAccount ? dashboardStatus : "forbidden";
   const showGuestLimitNotice = guestLimitOpen && hydrated && !sessionAccount && !authOpen;
+  const searching = query.trim().length > 0;
+  const unlockedFiltered = filtered.filter((item) => unlockedDifficulties.has(item.difficulty));
+  const lockedGroups = difficultyOrder
+    .map((level, index) => ({ level, previous: difficultyOrder[index - 1] }))
+    .filter(({ level }) => !unlockedDifficulties.has(level))
+    .map(({ level, previous }) => {
+      const requirementScenarios = scenarios.filter((item) => item.difficulty === previous);
+      return {
+        level,
+        items: filtered.filter((item) => item.difficulty === level),
+        total: scenarios.filter((item) => item.difficulty === level).length,
+        requirementLevel: previous,
+        requirementTotal: requirementScenarios.length,
+        requirementDone: requirementScenarios.filter((item) => completedIds.has(item.id)).length,
+      };
+    })
+    .filter((group) => group.items.length > 0);
+  function renderScenarioItem(item: Scenario) {
+    const unlocked = unlockedDifficulties.has(item.difficulty);
+    const completed = completedIds.has(item.id);
+    const correct = safeIds.has(item.id);
+    return (
+      <button key={item.id} aria-pressed={selected.id === item.id} aria-disabled={!unlocked} disabled={!unlocked} onClick={() => chooseScenario(item.id)} className={`scenario-item ${selected.id === item.id ? "selected" : ""} ${!unlocked ? "locked" : ""}`}>
+        <span className={`scenario-number ${correct ? "done" : completed ? "attempted" : !unlocked ? "locked" : ""}`}>{correct ? <Icon name="check" size={18} /> : completed ? <Icon name="dot-circle" size={16} /> : String(item.id).padStart(2, "0")}</span>
+        <span className="scenario-copy"><strong>{item.title}</strong><small>{unlocked ? `${scenarioChannelLabel(item.channel)} · ${scenarioCategoryLabel(item.category)}` : `Cấp ${item.difficulty} · Đang khóa`}</small>{correct ? <span className="visually-hidden">Đã xử lý an toàn</span> : completed ? <span className="visually-hidden">Đã làm</span> : null}</span>
+        <span className={`difficulty-dot ${difficultyTone[item.difficulty]}`} title={unlocked ? item.difficulty : `${item.difficulty} · Đang khóa`}></span>
+      </button>
+    );
+  }
 
   return (
-    <main className={dark ? "app dark" : "app"}>
-      <a
-        className="skip-link"
-        href="#main-content"
-        onClick={(event) => {
-          // Routing is hash-based, so focus the target directly instead of changing the hash.
-          event.preventDefault();
-          document.getElementById("main-content")?.focus();
-        }}
-      >Bỏ qua đến nội dung chính</a>
+    <main className={drawers.rootClassName(dark)}>
+      <SkipLink />
       <AppHeader
         view={view}
         copy={siteContent.copy}
@@ -812,61 +877,78 @@ export default function Home() {
         saving={savingChoice}
         onRetry={() => { if (pendingChoice) void syncChoice(pendingChoice); }}
       />
-      <div id="main-content" className="skip-target" tabIndex={-1} />
+      <MainContentAnchor />
 
       {view === "game" && (
         <div className="game-shell">
-          <aside className="scenario-panel">
+          <h1 className="visually-hidden">Luyện xử lý tình huống lừa đảo</h1>
+          <aside className="scenario-panel" aria-label="Thư viện tình huống" inert={compactLayout && drawers.open !== "scenarios"}>
             <div className="panel-heading">
-              <div><span className="eyebrow">{siteContent.copy.libraryEyebrow}</span><h1>{siteContent.copy.libraryTitle}</h1></div>
+              <div><span className="eyebrow">{siteContent.copy.libraryEyebrow}</span><h2>{siteContent.copy.libraryTitle}</h2></div>
               <span className="scenario-count">{safeIds.size}/{scenarios.length}</span>
             </div>
-            <div className="search-box"><span>⌕</span><input aria-label="Tìm kịch bản" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Tìm theo tên, kênh..." /></div>
-            <div className="difficulty-filter" aria-label="Lọc độ khó">
-              {difficulties.map((item) => {
-                const locked = item !== "Tất cả" && !unlockedDifficulties.has(item);
-                return <button key={item} aria-pressed={difficulty === item} className={difficulty === item ? "active" : ""} disabled={locked} title={locked ? `Hoàn thành cấp thấp hơn để mở ${item}` : undefined} onClick={() => setDifficulty(item)}>{locked ? "🔒 " : ""}{item}</button>;
-              })}
-            </div>
+            <div className="search-box"><span aria-hidden="true"><Icon name="search" size={18} /></span><input aria-label="Tìm kịch bản" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Tìm theo tên, kênh..." /></div>
+            <ScenarioTools
+              difficulty={difficulty}
+              unlocked={unlockedDifficulties}
+              canPickRandom={randomCandidates.length > 0}
+              onSelectDifficulty={setDifficulty}
+              onPickRandom={pickRandomScenario}
+            />
             <div className="unlock-progress" role="status" aria-live="polite">
-              <div><span aria-hidden="true">{levelProgress.nextDifficulty ? "🔓" : "🏆"}</span><strong>Cấp đang mở: {levelProgress.currentDifficulty}</strong></div>
+              <div><span aria-hidden="true"><Icon name={levelProgress.nextDifficulty ? "unlock" : "trophy"} size={18} /></span><strong>Cấp đang mở: {levelProgress.currentDifficulty}</strong></div>
               <small>{levelProgress.nextDifficulty
                 ? `Hoàn thành ${levelProgress.completed}/${levelProgress.total} thử thách ${levelProgress.currentDifficulty} để mở ${levelProgress.nextDifficulty}.`
                 : "Bạn đã mở khóa toàn bộ cấp độ."}</small>
               <div className="unlock-progress-bar"><i style={{ width: `${levelProgress.total ? Math.round((levelProgress.completed / levelProgress.total) * 100) : 100}%` }} /></div>
             </div>
             <div className="scenario-list">
-              {filtered.map((item) => {
-                const unlocked = unlockedDifficulties.has(item.difficulty);
-                const completed = completedIds.has(item.id);
-                const correct = safeIds.has(item.id);
+              {unlockedFiltered.map(renderScenarioItem)}
+              {lockedGroups.map((group, index) => {
+                const open = (lockedGroupChoice.query === query ? lockedGroupChoice.open[group.level] : undefined) ?? searching;
+                const panelId = `scenario-lock-panel-${index}`;
                 return (
-                  <button key={item.id} aria-pressed={selected.id === item.id} aria-disabled={!unlocked} disabled={!unlocked} onClick={() => chooseScenario(item.id)} className={`scenario-item ${selected.id === item.id ? "selected" : ""} ${!unlocked ? "locked" : ""}`}>
-                    <span className={`scenario-number ${correct ? "done" : completed ? "attempted" : !unlocked ? "locked" : ""}`}>{correct ? "✓" : completed ? "•" : !unlocked ? "🔒" : String(item.id).padStart(2, "0")}</span>
-                    <span className="scenario-copy"><strong>{item.title}</strong><small>{unlocked ? `${scenarioChannelLabel(item.channel)} · ${scenarioCategoryLabel(item.category)}` : `Cấp ${item.difficulty} · Hoàn thành cấp thấp hơn để mở khóa`}</small></span>
-                    <span className={`difficulty-dot ${difficultyTone[item.difficulty]}`} title={unlocked ? item.difficulty : `${item.difficulty} · Đang khóa`}></span>
-                  </button>
+                  <div className={`scenario-lock-group${open ? " open" : ""}`} key={group.level}>
+                    <button
+                      type="button"
+                      className="scenario-lock-toggle"
+                      aria-expanded={open}
+                      aria-controls={panelId}
+                      onClick={() => setLockedGroupChoice((current) => ({ query, open: { ...(current.query === query ? current.open : {}), [group.level]: !open } }))}
+                    >
+                      <span className="scenario-lock-icon" aria-hidden="true"><Icon name="lock" size={18} /></span>
+                      <span className="scenario-lock-copy">
+                        <strong>{group.level} · {group.total} tình huống</strong>
+                        <small>Mở khi hoàn thành {group.requirementDone}/{group.requirementTotal} {group.requirementLevel}{searching ? ` · ${group.items.length} kết quả` : ""}</small>
+                      </span>
+                      <span className="scenario-lock-chevron" aria-hidden="true"><Icon name="chevron-down" size={18} /></span>
+                    </button>
+                    <div id={panelId} className="scenario-lock-items" role="group" aria-label={`Tình huống cấp ${group.level} đang khóa`} hidden={!open}>
+                      {group.items.map(renderScenarioItem)}
+                    </div>
+                  </div>
                 );
               })}
               {!filtered.length && <p className="empty-state">Không tìm thấy tình huống phù hợp.</p>}
             </div>
-            <button className="random-button" disabled={!randomCandidates.length} onClick={() => {
-              const item = randomCandidates[Math.floor(Math.random() * randomCandidates.length)];
-              if (item) chooseScenario(item.id);
-            }}>⤨ Chọn tình huống đã mở ngẫu nhiên</button>
           </aside>
 
-          <section className="stage">
-            {!sessionAccount && <div className="guest-mode-note" role="note"><span><b>Đang tham gia với tư cách khách</b><small>Không cần tài khoản · Kết quả chỉ lưu trên thiết bị này</small></span><button onClick={() => openAuth("register")}>Đăng ký để lưu lượt chơi mới</button></div>}
+          <section className="stage" ref={stageRef}>
+            <StageActions onOpenScenarios={() => drawers.show("scenarios")} onOpenInsight={() => drawers.show("insight")} />
+            {!sessionAccount && attemptedCount >= GUEST_CONVERSION_THRESHOLD && !conversionDismissed && (
+              <GuestConversion onSave={() => openAuth("register")} onDismiss={() => setConversionDismissed(true)} />
+            )}
+            {!sessionAccount && guestNotice.visible && (
+              <GuestNotice onLogin={() => openAuth("login")} onRegister={() => openAuth("register")} onContinue={guestNotice.dismiss} onClose={guestNotice.dismiss} />
+            )}
             <div className="game-toolbar" aria-label="Tùy chọn lượt chơi">
               <span><strong>Muốn làm lại từ đầu?</strong><small>Tiến trình hiện tại sẽ được xác nhận trước khi đặt lại.</small></span>
-              <button className="reset-run-button" disabled={savingChoice || !!pendingChoice || resetBusy} onClick={() => setResetConfirmOpen(true)} aria-label="Chơi lại toàn bộ thử thách từ đầu">{resetBusy ? "Đang đặt lại…" : "↻ Chơi lại từ đầu"}</button>
+              <button className="reset-run-button" disabled={savingChoice || !!pendingChoice || resetBusy} onClick={() => setResetConfirmOpen(true)} aria-label="Chơi lại toàn bộ thử thách từ đầu">{resetBusy ? "Đang đặt lại…" : <><Icon name="refresh" size={16} /> Chơi lại từ đầu</>}</button>
             </div>
-            <div className="status-grid">
+            <div className="status-grid" {...(compactLayout ? { tabIndex: 0, role: "group", "aria-label": "Chỉ số của bạn, cuộn ngang để xem thêm" } : {})}>
               <div className="status-card"><BadgeIcon>₫</BadgeIcon><span><small>Tài sản an toàn</small><strong>{money.format(balance)}đ</strong></span></div>
               <div className="status-card"><BadgeIcon>⌁</BadgeIcon><span className="status-value"><small>Mức cảnh giác</small><strong>{awareness}%</strong><span className="meter" aria-hidden="true"><i style={{ width: `${awareness}%` }} /></span></span></div>
-              <div className="status-card compact"><BadgeIcon>◆</BadgeIcon><span><small>Điểm phòng vệ</small><strong>{score}</strong></span></div>
-              <button className="status-card compact evidence-link" onClick={() => setView("evidence")}><BadgeIcon>▤</BadgeIcon><span><small>Chứng cứ</small><strong>{evidence.length}</strong></span></button>
+              <ProgressStat completed={attemptedCount} total={scenarios.length} />
             </div>
 
             {(balance === 0 || awareness === 0) ? (
@@ -878,30 +960,31 @@ export default function Home() {
             ) : (
               <section className="scenario-stage card-surface">
                 <div className="scenario-meta"><span className={`level-pill ${difficultyTone[selected.difficulty]}`}>{selected.difficulty}</span><span>{scenarioChannelLabel(selected.channel)}</span><span>{scenarioCategoryLabel(selected.category)}</span></div>
-                <div className="scenario-title-row"><span className="scenario-hero-icon">{selected.icon}</span><div><span className="eyebrow">Tình huống {String(selected.id).padStart(2, "0")}</span><h2>{selected.title}</h2></div></div>
+                <div className="scenario-title-row"><span className="scenario-hero-icon" aria-hidden="true"><GlyphIcon glyph={selected.icon} size={26} /></span><div><span className="eyebrow">Tình huống {String(selected.id).padStart(2, "0")}</span><h2>{selected.title}</h2></div></div>
                 <div className="story-box"><span className="quote-mark">“</span><p>{selected.story}</p></div>
-                <div className="red-flags"><strong>Dấu hiệu cần quan sát</strong><div>{selected.redFlags.map((flag) => <span key={flag}>△ {flag}</span>)}</div></div>
+                <div className="red-flags"><strong>Dấu hiệu cần quan sát</strong><div>{selected.redFlags.map((flag) => <span key={flag}><Icon name="triangle" size={14} /> {flag}</span>)}</div></div>
                 <h3 className="decision-title">Đâu là hành động an toàn nhất đầu tiên?</h3>
                 <div className="choice-list">
                   {selected.choices.map((choice, index) => {
                     const isChosen = selectedAnswer === index;
                     const state = selectedAnswer === null ? "" : isChosen ? (selectedOutcome?.correct ? "correct" : "wrong") : "disabled";
                     return <button key={choice.text} className={`choice ${state}`} onClick={() => submitChoice(index)} disabled={!hydrated || !contentReady || savingChoice || !!pendingChoice || resetBusy || selectedAnswer !== null}>
-                      <span className="choice-letter">{String.fromCharCode(65 + index)}</span><span>{choice.text}</span>{isChosen && <b>{selectedOutcome?.correct ? "✓" : "×"}</b>}
+                      <span className="choice-letter">{String.fromCharCode(65 + index)}</span><span>{choice.text}</span>{isChosen && <b aria-label={selectedOutcome?.correct ? "Lựa chọn an toàn" : "Lựa chọn rủi ro"}><Icon name={selectedOutcome?.correct ? "check" : "close"} size={16} /></b>}
                     </button>;
                   })}
                 </div>
                 {selectedAnswer !== null && selectedOutcome && (
                   <div role="status" aria-live="polite" className={`feedback ${selectedOutcome.correct ? "success" : "danger"}`}>
-                    <div><strong>Dấu hiệu cần lưu ý</strong><p>{selectedOutcome.feedback}</p><small>{selectedOutcome.correct ? "Lựa chọn an toàn." : "Lựa chọn có rủi ro."} Mẹo ghi nhớ: {selected.tip}</small></div>
+                    <div className="feedback-copy"><strong>Dấu hiệu cần lưu ý</strong><p>{selectedOutcome.feedback}</p><small>{selectedOutcome.correct ? "Lựa chọn an toàn." : "Lựa chọn có rủi ro."} Mẹo ghi nhớ: {selected.tip}</small></div>
                     <button onClick={nextScenario}>{results.length >= scenarios.length ? "Xem chứng nhận PDF →" : "Kịch bản tiếp theo →"}</button>
+                    <LearningMoment safe={selectedOutcome.correct} redFlags={selected.redFlags} tip={selected.tip} />
                   </div>
                 )}
               </section>
             )}
           </section>
 
-          <aside className="insight-panel">
+          <aside className="insight-panel" inert={drawers.open !== "insight"}>
             <div className="coach-card">
               <span className="eyebrow">{siteContent.copy.coachEyebrow}</span><h3>Ghi nhớ trong tình huống này</h3><p>{selected.tip}</p>
               <button onClick={() => setGuide(true)}>Xem quy tắc 3 bước</button>
@@ -913,12 +996,14 @@ export default function Home() {
             </div>
             <div className="badge-card">
               <div className="section-title"><h3>Huy hiệu gần nhất</h3><button onClick={() => setView("stats")}>Xem tất cả</button></div>
-              <div className="badge-preview">{badgePreview.map((badge) => <span className={badge.unlocked ? "unlocked" : ""} key={badge.name} title={`${badge.name} · ${badge.current}/${badge.target}`} style={{ "--badge-progress": `${badge.progress * 3.6}deg` } as React.CSSProperties}><i>{badge.icon}</i></span>)}</div>
+              <div className="badge-preview">{badgePreview.map((badge) => <span className={badge.unlocked ? "unlocked" : ""} key={badge.name} title={`${badge.name} · ${badge.current}/${badge.target}`} style={{ "--badge-progress": `${badge.progress * 3.6}deg` } as React.CSSProperties}><i aria-hidden="true"><GlyphIcon glyph={badge.icon} size={20} /></i></span>)}</div>
             </div>
             <button className="emergency-card" onClick={() => setGuide(true)}><span>!</span><div><strong>Đã lỡ chuyển tiền?</strong><small>Mở hướng dẫn xử lý khẩn cấp</small></div><b>→</b></button>
           </aside>
         </div>
       )}
+
+      <DrawerControls open={drawers.open} onClose={drawers.close} />
 
       {view === "knowledge" && (
         <KnowledgeView
@@ -935,9 +1020,9 @@ export default function Home() {
             <div><span className="eyebrow">{siteContent.copy.newsEyebrow}</span><h1>{siteContent.copy.newsTitle}</h1></div>
             <p>{siteContent.copy.newsIntro}</p>
           </div>
-          {newsSlug ? <><button className="admin-secondary" onClick={() => { window.location.hash = '/news'; setNewsSlug(''); }}>← Tất cả tin tức</button>{readingArticle ? <NewsArticleView article={readingArticle} /> : <p>Không tìm thấy bài viết hoặc bài chưa được xuất bản.</p>}</> : <>
+          {newsSlug ? <><button className="admin-secondary" onClick={() => { window.location.hash = '/news'; setNewsSlug(''); }}><Icon name="arrow-left" size={16} /> Tất cả tin tức</button>{readingArticle ? <NewsArticleView article={readingArticle} /> : <p>Không tìm thấy bài viết hoặc bài chưa được xuất bản.</p>}</> : <>
           <div className="news-tools" aria-label="Tìm và lọc tin tức">
-            <label className="news-search"><span aria-hidden="true">⌕</span><input value={newsQuery} onChange={(event) => setNewsQuery(event.target.value)} placeholder="Tìm theo tiêu đề, nội dung, nguồn…" aria-label="Tìm tin tức" /></label>
+            <label className="news-search"><span aria-hidden="true"><Icon name="search" size={18} /></span><input value={newsQuery} onChange={(event) => setNewsQuery(event.target.value)} placeholder="Tìm theo tiêu đề, nội dung, nguồn…" aria-label="Tìm tin tức" /></label>
             <div className="news-filters" aria-label="Lọc theo chủ đề">{newsCategories.map((category) => <button key={category} className={newsCategory === category ? "active" : ""} aria-pressed={newsCategory === category} onClick={() => setNewsCategory(category)}>{category}</button>)}</div>
           </div>
           <div className="news-grid">
@@ -947,7 +1032,7 @@ export default function Home() {
                 <div className="news-meta"><span>{article.category}</span><time dateTime={article.publishedAt}>{new Date(`${article.publishedAt}T00:00:00Z`).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC" })}</time></div>
                 <h2><a href={`#/news/${article.slug || article.id}`}>{article.title}</a></h2>
                 <p>{article.summary}</p>
-                <div className="news-source"><a href={`#/news/${article.slug || article.id}`}>Đọc bài</a>{article.sourceUrl && <><span>Nguồn: <strong>{article.sourceName}</strong></span><a href={article.sourceUrl} target="_blank" rel="noopener noreferrer">Đọc tại nguồn <span aria-hidden="true">↗</span></a></>}</div>
+                <div className="news-source"><a href={`#/news/${article.slug || article.id}`}>Đọc bài</a>{article.sourceUrl && <><span>Nguồn: <strong>{article.sourceName}</strong></span><a href={article.sourceUrl} target="_blank" rel="noopener noreferrer">Đọc tại nguồn <Icon name="external" size={14} /></a></>}</div>
               </article>
             ))}
           </div>
@@ -960,13 +1045,13 @@ export default function Home() {
       {view === "quiz" && (
         <section className="content-page quiz-page">
           <div className="page-hero quiz-hero">
-            <span className="eyebrow">THỰC HÀNH TƯƠNG TÁC · JIGSAW / GOOGLE</span>
+            <span className="eyebrow">Thực hành tương tác · Jigsaw / Google</span>
             <h1>Trắc nghiệm email lừa đảo</h1>
             <p>Kiểm tra khả năng nhận diện email và trang đăng nhập giả mạo ngay trên Cảnh Giác Số. Bài thực hành được tải trực tiếp từ Jigsaw/Google.</p>
           </div>
           <div className="knowledge-safety-note quiz-safety-note"><strong>Lưu ý an toàn</strong><span>Không nhập mật khẩu ngân hàng, OTP, số thẻ hoặc dữ liệu thật trong bài thực hành.</span></div>
           <div className="phishing-quiz-shell quiz-standalone-shell">
-            <div className="phishing-quiz-toolbar"><span><i aria-hidden="true" /> Bài thực hành bên thứ ba</span><a href={PHISHING_QUIZ_URL} target="_blank" rel="noopener noreferrer">Mở tab riêng ↗</a></div>
+            <div className="phishing-quiz-toolbar"><span><i aria-hidden="true" /> Bài thực hành bên thứ ba</span><a href={PHISHING_QUIZ_URL} target="_blank" rel="noopener noreferrer">Mở tab riêng <Icon name="external" size={14} /></a></div>
             <iframe
               src={PHISHING_QUIZ_URL}
               title="Trắc nghiệm email lừa đảo của Jigsaw / Google"
@@ -975,14 +1060,19 @@ export default function Home() {
               sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"
             />
           </div>
-          <p className="phishing-quiz-fallback">Nếu trình duyệt hoặc chính sách của Google chặn nội dung nhúng, hãy <a href={PHISHING_QUIZ_URL} target="_blank" rel="noopener noreferrer">mở bài trắc nghiệm trong tab mới ↗</a>.</p>
+          <p className="phishing-quiz-fallback">Nếu trình duyệt hoặc chính sách của Google chặn nội dung nhúng, hãy <a href={PHISHING_QUIZ_URL} target="_blank" rel="noopener noreferrer">mở bài trắc nghiệm trong tab mới <Icon name="external" size={14} /></a>.</p>
         </section>
       )}
 
       {view === "stats" && (
         <section className="content-page stats-page">
-          <div className="page-hero"><span className="eyebrow">HỒ SƠ PHÒNG VỆ</span><h1>{playerName}</h1><p>{sessionAccount ? "Tiến bộ của bạn được đồng bộ an toàn giữa các thiết bị." : "Đăng nhập để đồng bộ tiến bộ giữa các thiết bị."}</p></div>
+          <div className="page-hero"><span className="eyebrow">Hồ sơ phòng vệ</span><h1>{playerName}</h1><p>{sessionAccount ? "Tiến bộ của bạn được đồng bộ an toàn giữa các thiết bị." : "Đăng nhập để đồng bộ tiến bộ giữa các thiết bị."}</p></div>
           <div className="stats-overview"><article><small>Kịch bản đã thử</small><strong>{results.length}</strong><span>/ {scenarios.length}</span></article><article><small>Xử lý an toàn</small><strong>{safeIds.size}</strong><span>{results.length ? Math.round((safeIds.size / results.length) * 100) : 0}% chính xác</span></article><article><small>Điểm phòng vệ</small><strong>{score}</strong><span>cấp {Math.floor(score / 500) + 1}</span></article><article><small>Tài sản còn lại</small><strong className="money-stat">{money.format(balance)}đ</strong><span>bảo toàn {Math.round((balance / 300_000_000) * 100)}%</span></article></div>
+          <button className="evidence-entry" onClick={() => setView("evidence")}>
+            <span className="evidence-entry-icon" aria-hidden="true"><Icon name="folder" size={22} /></span>
+            <span className="evidence-entry-copy"><strong>Hộp chứng cứ</strong><small>{evidence.length}/{scenarios.length} chứng cứ đã mở khóa từ các tình huống xử lý an toàn</small></span>
+            <Icon name="arrow-right" size={18} />
+          </button>
           {sessionAccount ? (
             latestCertificate ? (
               <article className="training-certificate-card issued">
@@ -993,25 +1083,25 @@ export default function Home() {
                   <p>{latestCertificate.displayName} · Xếp loại <strong>{latestCertificate.rating}</strong> · Tỷ lệ đúng {latestCertificate.accuracy}%</p>
                   <small>Mã chứng nhận {latestCertificate.certificateCode} · Cấp ngày {new Date(latestCertificate.issuedAt).toLocaleDateString("vi-VN")}</small>
                 </div>
-                <button className="primary-button certificate-download" disabled={certificateDownloading} onClick={() => void downloadCertificate(latestCertificate)}>{certificateDownloading ? "Đang tạo PDF…" : "⇩ Tải chứng nhận PDF"}</button>
+                <button className="primary-button certificate-download" disabled={certificateDownloading} onClick={() => void downloadCertificate(latestCertificate)}>{certificateDownloading ? "Đang tạo PDF…" : <><Icon name="download" size={16} /> Tải chứng nhận PDF</>}</button>
               </article>
             ) : (
               <article className={`training-certificate-card ${results.length >= scenarios.length ? "ready" : "locked"}`}>
-                <span className="certificate-card-mark" aria-hidden="true">{results.length >= scenarios.length ? "✓" : "◇"}</span>
-                <div className="certificate-card-copy"><span className="eyebrow">CHỨNG CHỈ HOÀN THÀNH</span><h2>{results.length >= scenarios.length ? "Khóa đào tạo đã hoàn thành" : "Hoàn thành khóa để mở chứng nhận"}</h2><p>{results.length >= scenarios.length ? "Kết quả đã đủ điều kiện. Xác nhận với máy chủ để cấp chứng nhận PDF." : `Tiến độ hiện tại ${results.length}/${scenarios.length} tình huống.`}</p></div>
+                <span className="certificate-card-mark" aria-hidden="true"><Icon name={results.length >= scenarios.length ? "check" : "diamond"} size={22} /></span>
+                <div className="certificate-card-copy"><span className="eyebrow">Chứng chỉ hoàn thành</span><h2>{results.length >= scenarios.length ? "Khóa đào tạo đã hoàn thành" : "Hoàn thành khóa để mở chứng nhận"}</h2><p>{results.length >= scenarios.length ? "Kết quả đã đủ điều kiện. Xác nhận với máy chủ để cấp chứng nhận PDF." : `Tiến độ hiện tại ${results.length}/${scenarios.length} tình huống.`}</p></div>
                 {results.length >= scenarios.length && <button className="primary-button certificate-download" onClick={() => void ensureCurrentCertificate()}>Cấp chứng nhận</button>}
               </article>
             )
           ) : (
             <article className={`training-certificate-card ${results.length >= scenarios.length ? "ready" : "locked"}`}>
-              <span className="certificate-card-mark" aria-hidden="true">{results.length >= scenarios.length ? "✓" : "◇"}</span>
-              <div className="certificate-card-copy"><span className="eyebrow">BẢN GHI NHẬN HOÀN THÀNH</span><h2>{results.length >= scenarios.length ? "Khóa đào tạo đã hoàn thành" : "Bản ghi nhận sẽ mở khi hoàn thành khóa"}</h2><p>{results.length >= scenarios.length ? "Bạn có thể tải PDF ngay ở chế độ khách. Bản này lưu cục bộ và không thay thế chứng nhận nội bộ đã xác minh của tài khoản đăng nhập." : `Tiến độ hiện tại ${results.length}/${scenarios.length} tình huống.`}</p></div>
-              {results.length >= scenarios.length && <button className="primary-button certificate-download" disabled={certificateDownloading} onClick={() => void downloadCertificate(getOrCreateGuestCertificate())}>{certificateDownloading ? "Đang tạo PDF…" : "⇩ Tải bản ghi nhận PDF"}</button>}
+              <span className="certificate-card-mark" aria-hidden="true"><Icon name={results.length >= scenarios.length ? "check" : "diamond"} size={22} /></span>
+              <div className="certificate-card-copy"><span className="eyebrow">Bản ghi nhận hoàn thành</span><h2>{results.length >= scenarios.length ? "Khóa đào tạo đã hoàn thành" : "Bản ghi nhận sẽ mở khi hoàn thành khóa"}</h2><p>{results.length >= scenarios.length ? "Bạn có thể tải PDF ngay ở chế độ khách. Bản này lưu cục bộ và không thay thế chứng nhận nội bộ đã xác minh của tài khoản đăng nhập." : `Tiến độ hiện tại ${results.length}/${scenarios.length} tình huống.`}</p></div>
+              {results.length >= scenarios.length && <button className="primary-button certificate-download" disabled={certificateDownloading} onClick={() => void downloadCertificate(getOrCreateGuestCertificate())}>{certificateDownloading ? "Đang tạo PDF…" : <><Icon name="download" size={16} /> Tải bản ghi nhận PDF</>}</button>}
             </article>
           )}
           <div className="achievement-section">
-            <div className="achievement-heading"><div><span className="eyebrow">BỘ SƯU TẬP CHUYÊN MÔN</span><h2>Huy hiệu phòng vệ</h2><p>Mỗi huy hiệu phản ánh một kỹ năng hoặc cột mốc có thể kiểm chứng từ kết quả của bạn.</p></div><div className="achievement-summary"><strong>{unlockedBadgeCount}/{defenseBadges.length}</strong><span>đã mở khoá</span></div></div>
-            <div className="achievement-grid">{defenseBadges.map((badge) => <article className={`${badge.unlocked ? "unlocked" : ""} tone-${badge.tone}`} key={badge.name} aria-label={`${badge.name}: ${badge.unlocked ? "đã mở khoá" : `${badge.current} trên ${badge.target}`}`}><span className="achievement-icon">{badge.icon}</span><div className="achievement-copy"><div className="achievement-name"><strong>{badge.name}</strong><em>{badge.tier}</em></div><p>{badge.description}</p><div className="achievement-progress"><i style={{ width: `${badge.progress}%` }} /><span>{badge.unlocked ? "Đã mở khoá" : `${badge.current}/${badge.target}`}</span></div></div></article>)}</div>
+            <div className="achievement-heading"><div><span className="eyebrow">Bộ sưu tập chuyên môn</span><h2>Huy hiệu phòng vệ</h2><p>Mỗi huy hiệu phản ánh một kỹ năng hoặc cột mốc có thể kiểm chứng từ kết quả của bạn.</p></div><div className="achievement-summary"><strong>{unlockedBadgeCount}/{defenseBadges.length}</strong><span>đã mở khoá</span></div></div>
+            <div className="achievement-grid">{defenseBadges.map((badge) => <article className={`${badge.unlocked ? "unlocked" : ""} tone-${badge.tone}`} key={badge.name} aria-label={`${badge.name}: ${badge.unlocked ? "đã mở khoá" : `${badge.current} trên ${badge.target}`}`}><span className="achievement-icon" aria-hidden="true"><GlyphIcon glyph={badge.icon} size={24} /></span><div className="achievement-copy"><div className="achievement-name"><strong>{badge.name}</strong><em>{badge.tier}</em></div><p>{badge.description}</p><div className="achievement-progress"><i style={{ width: `${badge.progress}%` }} /><span>{badge.unlocked ? "Đã mở khoá" : `${badge.current}/${badge.target}`}</span></div></div></article>)}</div>
           </div>
           <button className="reset-button" disabled={savingChoice || !!pendingChoice || resetBusy} onClick={() => setResetConfirmOpen(true)}>{sessionAccount ? "Bắt đầu lượt chơi mới" : "Đặt lại tiến trình khách"}</button>
           {sessionAccount && <article className="dashboard-card"><h2>Lịch sử lượt chơi</h2><p>Hiển thị tối đa 50 lượt gần nhất. Tiến trình khách được giữ riêng trên thiết bị.</p>{gameHistory.length ? <div className="analytics-table-wrap"><table><thead><tr><th>Kết thúc</th><th>Đã trả lời</th><th>Đúng</th><th>Tài sản còn lại</th></tr></thead><tbody>{gameHistory.map((run) => <tr key={run.runId}><td>{new Date(run.finishedAt).toLocaleString("vi-VN")}</td><td>{run.completed}</td><td>{run.correct}</td><td>{money.format(run.balance)}đ</td></tr>)}</tbody></table></div> : <p>Chưa có lượt chơi đã lưu trữ.</p>}</article>}
@@ -1020,9 +1110,9 @@ export default function Home() {
 
       {view === "evidence" && (
         <section className="content-page">
-          <button className="back-button" onClick={() => setView("game")}>← Quay lại màn chơi</button>
-          <div className="page-hero"><span className="eyebrow">HỘP CHỨNG CỨ</span><h1>Dấu vết bạn đã thu thập</h1><p>Mỗi kịch bản xử lý đúng mở khoá một chứng cứ và một bài học có thể áp dụng ngoài đời.</p></div>
-          <div className="evidence-grid">{scenarios.map((item) => <article className={safeIds.has(item.id) ? "unlocked" : ""} key={item.id}><span className="evidence-icon">{safeIds.has(item.id) ? item.icon : "?"}</span><div><small>CHỨNG CỨ {String(item.id).padStart(2, "0")}</small><h2>{safeIds.has(item.id) ? item.evidence : "Chưa xác định"}</h2><p>{safeIds.has(item.id) ? item.tip : "Xử lý an toàn kịch bản này để mở khoá."}</p></div></article>)}</div>
+          <button className="back-button" onClick={() => setView("stats")}><Icon name="arrow-left" size={16} /> Quay lại thành tích</button>
+          <div className="page-hero"><span className="eyebrow">Hộp chứng cứ</span><h1>Dấu vết bạn đã thu thập</h1><p>Mỗi kịch bản xử lý đúng mở khoá một chứng cứ và một bài học có thể áp dụng ngoài đời.</p></div>
+          <div className="evidence-grid">{scenarios.map((item) => <article className={safeIds.has(item.id) ? "unlocked" : ""} key={item.id}><span className="evidence-icon" aria-hidden="true">{safeIds.has(item.id) ? <GlyphIcon glyph={item.icon} size={26} /> : "?"}</span><div><small>CHỨNG CỨ {String(item.id).padStart(2, "0")}</small><h2>{safeIds.has(item.id) ? item.evidence : "Chưa xác định"}</h2><p>{safeIds.has(item.id) ? item.tip : "Xử lý an toàn kịch bản này để mở khoá."}</p></div></article>)}</div>
         </section>
       )}
 
@@ -1056,19 +1146,19 @@ export default function Home() {
       <AppFooter copy={siteContent.copy} onOpenGuide={() => setGuide(true)} />
 
       {completionCertificate && !lossNotice && <Modal open onClose={() => setCompletionCertificate(null)} labelledBy="certificate-complete-title" className="certificate-complete-modal">
-        <button className="modal-close" aria-label="Đóng thông báo chứng nhận" onClick={() => setCompletionCertificate(null)}>×</button>
-        <span className="certificate-complete-symbol" aria-hidden="true">✓</span>
-        <span className="eyebrow">HOÀN THÀNH KHÓA ĐÀO TẠO</span>
+        <button className="modal-close" aria-label="Đóng thông báo chứng nhận" onClick={() => setCompletionCertificate(null)}><Icon name="close" size={18} /></button>
+        <span className="certificate-complete-symbol" aria-hidden="true"><Icon name="check" size={30} /></span>
+        <span className="eyebrow">Hoàn thành khóa đào tạo</span>
         <h2 id="certificate-complete-title">{completionCertificate.certificateCode.startsWith("CGS-GUEST-") ? "Chúc mừng, bạn đã hoàn thành khóa đào tạo" : "Chúc mừng, chứng nhận của bạn đã được cấp"}</h2>
         <p>Bạn đã hoàn thành {completionCertificate.completed}/{completionCertificate.scenarioTotal} tình huống với tỷ lệ đúng <strong>{completionCertificate.accuracy}%</strong> và xếp loại <strong>{completionCertificate.rating}</strong>. {completionCertificate.certificateCode.startsWith("CGS-GUEST-") && <span>Bản PDF chế độ khách chỉ là bản ghi nhận trên thiết bị, không phải chứng nhận nội bộ đã xác minh.</span>}</p>
         <div className="certificate-complete-code"><small>{completionCertificate.certificateCode.startsWith("CGS-GUEST-") ? "Mã bản ghi nhận" : "Mã chứng nhận"}</small><strong>{completionCertificate.certificateCode}</strong></div>
-        <div className="certificate-complete-actions"><button className="primary-button" disabled={certificateDownloading} onClick={() => void downloadCertificate(completionCertificate)}>{certificateDownloading ? "Đang tạo PDF…" : completionCertificate.certificateCode.startsWith("CGS-GUEST-") ? "⇩ Tải bản ghi nhận PDF" : "⇩ Tải chứng nhận PDF"}</button><button className="admin-secondary" onClick={() => { setCompletionCertificate(null); setView("stats"); }}>Xem thành tích</button></div>
+        <div className="certificate-complete-actions"><button className="primary-button" disabled={certificateDownloading} onClick={() => void downloadCertificate(completionCertificate)}>{certificateDownloading ? "Đang tạo PDF…" : completionCertificate.certificateCode.startsWith("CGS-GUEST-") ? <><Icon name="download" size={16} /> Tải bản ghi nhận PDF</> : <><Icon name="download" size={16} /> Tải chứng nhận PDF</>}</button><button className="admin-secondary" onClick={() => { setCompletionCertificate(null); setView("stats"); }}>Xem thành tích</button></div>
       </Modal>}
 
       {lossNotice && <Modal open onClose={() => setLossNotice(null)} labelledBy="loss-notice-title" className="loss-modal">
-        <button className="modal-close" aria-label="Đóng cảnh báo tổn thất" onClick={() => setLossNotice(null)}>×</button>
+        <button className="modal-close" aria-label="Đóng cảnh báo tổn thất" onClick={() => setLossNotice(null)}><Icon name="close" size={18} /></button>
         <span className="loss-symbol" aria-hidden="true">!</span>
-        <span className="eyebrow">CẢNH BÁO TỪ CẢNH GIÁC SỐ</span>
+        <span className="eyebrow">Cảnh báo từ Cảnh Giác Số</span>
         <h2 id="loss-notice-title">{lossNotice.amountLost > 0 ? "Tài sản vừa bị tổn thất" : "Mức cảnh giác vừa giảm"}</h2>
         <p className="loss-context">Lựa chọn trong tình huống “{lossNotice.scenarioTitle}” đã tạo hậu quả:</p>
         <div className="loss-summary">
@@ -1080,7 +1170,7 @@ export default function Home() {
         <button className="primary-button loss-confirm" onClick={() => setLossNotice(null)}>Đã hiểu hậu quả</button>
       </Modal>}
 
-      <Modal open={guide} onClose={() => setGuide(false)} labelledBy="guide-title" className="response-guide-modal"><button className="modal-close" aria-label="Đóng hướng dẫn" onClick={() => setGuide(false)}>×</button><span className="modal-symbol">H</span><span className="eyebrow">HDBANK · IT SECURITY</span><h2 id="guide-title">Dừng — Khóa — Báo</h2><ol><li><b>01</b><div><strong>Dừng tương tác</strong><p>Không chuyển thêm tiền, không cài ứng dụng, không chia sẻ màn hình, mật khẩu hoặc OTP.</p></div></li><li><b>02</b><div><strong>Chặn tổn thất</strong><p>Nếu đã chuyển tiền hoặc lộ thông tin, tự mở ứng dụng hoặc liên hệ ngân hàng qua kênh chính thức để yêu cầu hỗ trợ, khóa dịch vụ cần thiết.</p></div></li><li><b>03</b><div><strong>Lưu bằng chứng và báo cáo</strong><p>Lưu số điện thoại, liên kết, tin nhắn và mã giao dịch; trình báo cơ quan công an gần nhất. Cuộc gọi có dấu hiệu lừa đảo có thể phản ánh tới 156 hoặc 5656.</p></div></li></ol><p className="guide-disclaimer">Không tin dịch vụ “thu hồi tiền” yêu cầu nộp phí trước. Hướng dẫn này phục vụ đào tạo và không thay thế quy trình xử lý sự cố của tổ chức.</p><button className="primary-button" onClick={() => setGuide(false)}>Tôi đã hiểu</button></Modal>
+      <Modal open={guide} onClose={() => setGuide(false)} labelledBy="guide-title" className="response-guide-modal"><button className="modal-close" aria-label="Đóng hướng dẫn" onClick={() => setGuide(false)}><Icon name="close" size={18} /></button><span className="modal-symbol">H</span><span className="eyebrow">HDBANK · IT SECURITY</span><h2 id="guide-title">Dừng — Khóa — Báo</h2><ol><li><b>01</b><div><strong>Dừng tương tác</strong><p>Không chuyển thêm tiền, không cài ứng dụng, không chia sẻ màn hình, mật khẩu hoặc OTP.</p></div></li><li><b>02</b><div><strong>Chặn tổn thất</strong><p>Nếu đã chuyển tiền hoặc lộ thông tin, tự mở ứng dụng hoặc liên hệ ngân hàng qua kênh chính thức để yêu cầu hỗ trợ, khóa dịch vụ cần thiết.</p></div></li><li><b>03</b><div><strong>Lưu bằng chứng và báo cáo</strong><p>Lưu số điện thoại, liên kết, tin nhắn và mã giao dịch; trình báo cơ quan công an gần nhất. Cuộc gọi có dấu hiệu lừa đảo có thể phản ánh tới 156 hoặc 5656.</p></div></li></ol><p className="guide-disclaimer">Không tin dịch vụ “thu hồi tiền” yêu cầu nộp phí trước. Hướng dẫn này phục vụ đào tạo và không thay thế quy trình xử lý sự cố của tổ chức.</p><button className="primary-button" onClick={() => setGuide(false)}>Tôi đã hiểu</button></Modal>
 
       <AccountDialogs
         showGuestLimitNotice={showGuestLimitNotice}
@@ -1118,9 +1208,9 @@ export default function Home() {
       />
 
       <Modal open={resetConfirmOpen} onClose={() => { if (!resetBusy) setResetConfirmOpen(false); }} labelledBy="reset-confirm-title" className="reset-confirm-modal">
-        <button className="modal-close" aria-label="Đóng xác nhận đặt lại" disabled={resetBusy} onClick={() => setResetConfirmOpen(false)}>×</button>
+        <button className="modal-close" aria-label="Đóng xác nhận đặt lại" disabled={resetBusy} onClick={() => setResetConfirmOpen(false)}><Icon name="close" size={18} /></button>
         <span className="loss-symbol" aria-hidden="true">!</span>
-        <span className="eyebrow">XÁC NHẬN CHƠI LẠI</span>
+        <span className="eyebrow">Xác nhận chơi lại</span>
         <h2 id="reset-confirm-title">Bắt đầu lại từ đầu?</h2>
         <p>{sessionAccount ? "Lượt hiện tại sẽ được lưu vào lịch sử. Lượt mới bắt đầu với tài sản, huy hiệu và chứng cứ ban đầu; kết quả cũ vẫn được giữ để theo dõi quá trình học." : "Toàn bộ kết quả, huy hiệu, chứng cứ và tài sản mô phỏng của khách trên thiết bị này sẽ được đặt lại."}</p>
         {!sessionAccount && <p className="reset-warning">Thao tác này không thể hoàn tác.</p>}

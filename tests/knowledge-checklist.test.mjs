@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { readAppStyles } from "./helpers/styles.mjs";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
 
@@ -8,7 +9,7 @@ test("Cẩm nang includes an interactive security checklist", async () => {
   const [page, view, styles, checklist] = await Promise.all([
     read("../app/page.tsx"),
     read("../app/domains/security-awareness/view.tsx"),
-    read("../app/globals.css"),
+    readAppStyles(),
     read("../app/domains/security-awareness/checklist.ts"),
   ]);
   const featureSource = `${page}\n${view}`;

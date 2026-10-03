@@ -30,6 +30,36 @@ export type TrainingCertificate = {
 const A4_LANDSCAPE_WIDTH = 841.89;
 const A4_LANDSCAPE_HEIGHT = 595.28;
 
+// Địa chỉ xác minh in trên chứng nhận. Luôn là tên miền chính thức (không dùng window.location để bản
+// PDF tạo ở môi trường thử không in địa chỉ localhost). Không dùng thư viện QR để tránh thêm phụ thuộc:
+// địa chỉ + mã được in dạng chữ và, trong PDF, vùng chân trang là liên kết bấm được.
+export const CERTIFICATE_VERIFY_ORIGIN = "https://canhgiacso.com";
+const CERTIFICATE_VERIFY_PATH = "/xac-minh-chung-chi/";
+const VERIFIABLE_CODE_PATTERN = /^CGS-\d{4}-[0-9A-F]{10,32}$/;
+
+// Chứng nhận do máy chủ cấp (không phải bản ghi nhận chế độ khách) mới xác minh được.
+export function certificateVerificationUrl(code: string) {
+  if (!VERIFIABLE_CODE_PATTERN.test(code)) return null;
+  return `${CERTIFICATE_VERIFY_ORIGIN}${CERTIFICATE_VERIFY_PATH}?code=${encodeURIComponent(code)}`;
+}
+
+export function certificateVerificationLine(code: string) {
+  const url = certificateVerificationUrl(code);
+  return url ? `Xác minh chứng nhận tại: ${url.replace("https://", "")}` : "";
+}
+
+type PdfLinkArea = { url: string; x: number; y: number; width: number; height: number };
+
+// Vùng (theo điểm ảnh của canvas 1754x1240) của chân trang chứa địa chỉ xác minh.
+function verificationLinkArea(certificate: TrainingCertificate, template: CertificateTemplate): PdfLinkArea | undefined {
+  const url = certificateVerificationUrl(certificate.certificateCode);
+  if (!url) return undefined;
+  const footer = template.design?.elements.footerNote;
+  return footer
+    ? { url, x: footer.x, y: footer.y, width: footer.width, height: footer.height }
+    : { url, x: 145, y: 1128, width: 1464, height: 64 };
+}
+
 function textBytes(value: string) {
   return new TextEncoder().encode(value);
 }
@@ -45,12 +75,25 @@ function concatBytes(parts: Uint8Array[]) {
   return output;
 }
 
-export function buildSinglePageJpegPdf(jpegBytes: Uint8Array, pixelWidth: number, pixelHeight: number) {
+const PDF_SAFE_URL = /^https:\/\/[A-Za-z0-9._~:/?#@!$&*+,;=%-]+$/;
+const roundPdf = (value: number) => Math.round(value * 100) / 100;
+
+export function buildSinglePageJpegPdf(jpegBytes: Uint8Array, pixelWidth: number, pixelHeight: number, link?: PdfLinkArea) {
   const content = textBytes(`q\n${A4_LANDSCAPE_WIDTH} 0 0 ${A4_LANDSCAPE_HEIGHT} 0 0 cm\n/Im0 Do\nQ`);
+  // Liên kết URI trên vùng chân trang. Địa chỉ được kiểm tra nghiêm ngặt (chỉ https, ký tự an toàn, không
+  // có dấu ngoặc hay gạch chéo ngược) nên không thể phá cú pháp chuỗi PDF; sai định dạng thì bỏ liên kết.
+  const annotation = link && PDF_SAFE_URL.test(link.url) ? textBytes(
+    `<< /Type /Annot /Subtype /Link /Border [0 0 0] /Rect [${[
+      link.x * (A4_LANDSCAPE_WIDTH / pixelWidth),
+      A4_LANDSCAPE_HEIGHT - (link.y + link.height) * (A4_LANDSCAPE_HEIGHT / pixelHeight),
+      (link.x + link.width) * (A4_LANDSCAPE_WIDTH / pixelWidth),
+      A4_LANDSCAPE_HEIGHT - link.y * (A4_LANDSCAPE_HEIGHT / pixelHeight),
+    ].map(roundPdf).join(" ")}] /A << /S /URI /URI (${link.url}) >> >>`,
+  ) : null;
   const objects: Uint8Array[] = [
     textBytes("<< /Type /Catalog /Pages 2 0 R >>"),
     textBytes("<< /Type /Pages /Kids [3 0 R] /Count 1 >>"),
-    textBytes(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${A4_LANDSCAPE_WIDTH} ${A4_LANDSCAPE_HEIGHT}] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>`),
+    textBytes(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${A4_LANDSCAPE_WIDTH} ${A4_LANDSCAPE_HEIGHT}] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R${annotation ? " /Annots [6 0 R]" : ""} >>`),
     concatBytes([
       textBytes(`<< /Type /XObject /Subtype /Image /Width ${pixelWidth} /Height ${pixelHeight} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpegBytes.length} >>\nstream\n`),
       jpegBytes,
@@ -61,6 +104,7 @@ export function buildSinglePageJpegPdf(jpegBytes: Uint8Array, pixelWidth: number
       content,
       textBytes("\nendstream"),
     ]),
+    ...(annotation ? [annotation] : []),
   ];
 
   const header = new Uint8Array([37, 80, 68, 70, 45, 49, 46, 52, 10, 37, 226, 227, 207, 211, 10]);
@@ -292,6 +336,12 @@ export async function renderCertificateCanvas(certificate: TrainingCertificate, 
   context.fillText(certificate.certificateCode.startsWith("CGS-GUEST-")
     ? "Bản ghi nhận chế độ khách - không phải chứng nhận nội bộ đã xác minh."
     : template.footerNote, 877, 1150);
+  const verificationLine = certificateVerificationLine(certificate.certificateCode);
+  if (verificationLine) {
+    context.fillStyle = "#475569";
+    context.font = "15px Arial, Helvetica, sans-serif";
+    context.fillText(verificationLine, 877, 1178);
+  }
   return canvas;
 }
 
@@ -304,7 +354,7 @@ export async function downloadTrainingCertificatePdf(certificate: TrainingCertif
     }, "image/jpeg", 0.96);
   });
   const jpegBytes = new Uint8Array(await jpegBlob.arrayBuffer());
-  const pdfBytes = buildSinglePageJpegPdf(jpegBytes, canvas.width, canvas.height);
+  const pdfBytes = buildSinglePageJpegPdf(jpegBytes, canvas.width, canvas.height, verificationLinkArea(certificate, template));
   const pdfBlob = new Blob([pdfBytes], { type: "application/pdf" });
   const url = URL.createObjectURL(pdfBlob);
   try {
@@ -353,7 +403,9 @@ async function renderDesignedCertificate(context: CanvasRenderingContext2D, cert
     description: applyCertificateTemplate(template.description, certificate, template),
     rating: `${template.ratingLabel}\n${certificate.rating}\n${certificate.score} PTS · ${certificate.accuracy}% đúng`,
     issued: `${template.issuedDateLabel}: ${formatIssuedDate(certificate.issuedAt)}${cyber ? '\n' : ' | '}${template.codeLabel}: ${certificate.certificateCode}`,
-    footerNote: certificate.certificateCode.startsWith('CGS-GUEST-') ? 'Bản ghi nhận chế độ khách - không phải chứng nhận nội bộ đã xác minh.' : template.footerNote,
+    footerNote: certificate.certificateCode.startsWith('CGS-GUEST-')
+      ? 'Bản ghi nhận chế độ khách - không phải chứng nhận nội bộ đã xác minh.'
+      : [template.footerNote, certificateVerificationLine(certificate.certificateCode)].filter(Boolean).join('\n'),
   };
   for (const key of certificateParts) {
     // HDBank branding is intentionally not rendered on certificates.

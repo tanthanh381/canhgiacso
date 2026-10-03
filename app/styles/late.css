@@ -1,0 +1,27 @@
+/* Generic content-page rules that originally came after every page-specific rule; this file must stay after all page files. */
+
+.content-page h1,
+.content-page h2 {
+  font-family: inherit;
+  letter-spacing: -.025em;
+}
+
+@media (max-width: 820px) {
+  .content-page {
+    padding: 45px 18px;
+  }
+}
+
+@media (max-width: 520px) {
+  .knowledge-page,
+  .news-page,
+  .quiz-page {
+    padding-top: 32px;
+  }
+}
+
+@media (max-width: 900px) {
+  .content-page {
+    padding-bottom: 32px;
+  }
+}

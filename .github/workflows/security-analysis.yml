@@ -10,12 +10,19 @@ on:
 
 permissions:
   contents: read
-  security-events: write
+
+concurrency:
+  group: security-analysis-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   codeql:
     name: CodeQL
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
       - name: Initialize CodeQL
@@ -28,9 +35,14 @@ jobs:
         with:
           category: /language:javascript-typescript
 
+  # Advisory signal only (continue-on-error): OSV cannot tell dev-only tooling
+  # from shipped code. The fail-closed gates are in `dependency-audit` below.
   osv:
     name: OSV full dependency visibility
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
       - name: Scan complete dependency graph
@@ -40,14 +52,33 @@ jobs:
           scan-args: |-
             --recursive
             ./
-      - name: Production dependency release gate
-        run: |
-          echo "Production dependencies are fail-closed by 'pnpm audit --prod --audit-level low' in the Verify workflow."
-          echo "OSV intentionally scans the complete build graph here as an advisory signal, including dev-only tooling not shipped to production."
+
+  dependency-audit:
+    name: Production dependency release gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      # Fail-closed: anything shipped to production, any severity. Running it on
+      # the weekly schedule also catches advisories published after the last PR.
+      - name: Audit production dependencies (any severity)
+        run: pnpm audit --prod --audit-level low
+      # Fail-closed for HIGH+ anywhere in the build graph (dev tooling included).
+      - name: Audit full dependency graph (high and above)
+        run: pnpm audit --audit-level high
 
   sbom:
     name: Generate SBOM
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
     steps:

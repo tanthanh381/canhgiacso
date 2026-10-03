@@ -1,7 +1,12 @@
 import type { SiteContent } from "../../data";
+import { Icon } from "../../shared/icons";
 import { BrandMark, FooterNotice } from "../../shared/ui-primitives";
 import type { SessionAccount } from "../auth/model";
-import { SIMULATION_BANNER_VIEWS, type View } from "./navigation";
+import { MENU_SURFACE_PROPS, useHeaderMenus } from "./header-menus";
+import { ManagementMenu, ManagementSheet, useManagementRole } from "./management-menu";
+import { MobileKnowledgeMenu, MobileNav } from "./mobile-nav";
+import { SimulationBanner, SimulationChip, useSimulationBanner } from "./simulation-banner";
+import { ABOUT_PATH, isNavItemActive, KNOWLEDGE_ARTICLES_PATH, PRIMARY_NAV, scrollToChecklist, SIMULATION_BANNER_VIEWS, type View } from "./navigation";
 
 export function AppHeader({
   view,
@@ -26,34 +31,51 @@ export function AppHeader({
   onOpenGuestNotice: () => void;
   onOpenAuth: (mode: "login" | "register") => void;
 }) {
+  const menus = useHeaderMenus();
+  const banner = useSimulationBanner();
+  const managementRole = useManagementRole(account?.id ?? null);
+  const knowledgeOpen = menus.open === "knowledge";
+  const bannerView = SIMULATION_BANNER_VIEWS.has(view);
+
+  const navigate = (next: View) => { menus.close(); onNavigate(next); };
+  const openChecklist = () => { navigate("knowledge"); scrollToChecklist(); };
+  const openArticles = () => { menus.close(); window.location.assign(KNOWLEDGE_ARTICLES_PATH); };
+
   return (
     <>
       <header className="topbar">
-        <button className="brand" onClick={() => onNavigate("game")} aria-label="Cảnh Giác Số — về màn chơi">
+        <button className="brand" onClick={() => navigate("game")} aria-label="Cảnh Giác Số — về màn chơi">
           <BrandMark />
           <span className="brand-divider" aria-hidden="true" />
           <span className="product-lockup"><strong>{copy.productName}</strong><small>{copy.departmentName}</small></span>
         </button>
         <nav aria-label="Điều hướng chính">
-          <button aria-current={view === "game" ? "page" : undefined} className={view === "game" ? "active" : ""} onClick={() => onNavigate("game")}>Thử thách</button>
-          <details className="knowledge-menu">
-            <summary aria-label="Mở menu Cẩm nang" aria-current={view === "knowledge" ? "page" : undefined} className={view === "knowledge" ? "active" : ""}>Cẩm nang</summary>
-            <div className="knowledge-submenu" role="group" aria-label="Cẩm nang">
-              <button type="button" onClick={() => window.location.assign("/kien-thuc/")}><strong>Bài viết kiến thức</strong><small>Hướng dẫn, cảnh báo và nội dung tra cứu</small></button>
-              <button type="button" onClick={() => {
-                document.querySelector<HTMLDetailsElement>(".knowledge-menu")?.removeAttribute("open");
-                onNavigate("knowledge");
-                window.setTimeout(() => document.getElementById("security-checklist-title")?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
-              }}><strong>Danh sách kiểm tra</strong><small>Tự kiểm tra an toàn số và lưu tiến độ</small></button>
-            </div>
-          </details>
-          <button aria-current={view === "news" ? "page" : undefined} className={view === "news" ? "active" : ""} onClick={() => onNavigate("news")}>Tin tức</button>
-          <button aria-current={view === "quiz" ? "page" : undefined} className={view === "quiz" ? "active" : ""} onClick={() => onNavigate("quiz")}>Thực hành</button>
-          <button aria-current={view === "stats" ? "page" : undefined} className={view === "stats" ? "active" : ""} onClick={() => onNavigate("stats")}>Thành tích</button>
-          <button type="button" onClick={() => window.location.assign("/gioi-thieu/")}>Giới thiệu</button>
+          {PRIMARY_NAV.map((item) => {
+            const active = isNavItemActive(item.view, view);
+            const current = active ? "page" : undefined;
+            if (item.view !== "knowledge") {
+              return <button key={item.view} aria-current={current} className={active ? "active" : ""} onClick={() => navigate(item.view)}>{item.label}</button>;
+            }
+            return (
+              <details key={item.view} className="knowledge-menu" open={knowledgeOpen && !menus.compact} {...MENU_SURFACE_PROPS}>
+                <summary
+                  ref={menus.triggerRef("knowledge-desktop")}
+                  aria-label="Mở menu Cẩm nang"
+                  aria-current={current}
+                  className={active ? "active" : ""}
+                  onClick={(event) => { event.preventDefault(); menus.toggle("knowledge"); }}
+                >{item.label}</summary>
+                <div className="knowledge-submenu" role="group" aria-label="Cẩm nang">
+                  <button type="button" onClick={openArticles}><strong>Bài viết kiến thức</strong><small>Hướng dẫn, cảnh báo và nội dung tra cứu</small></button>
+                  <button type="button" onClick={openChecklist}><strong>Danh sách kiểm tra</strong><small>Tự kiểm tra an toàn số và lưu tiến độ</small></button>
+                </div>
+              </details>
+            );
+          })}
+          <button type="button" onClick={() => window.location.assign(ABOUT_PATH)}>Giới thiệu</button>
         </nav>
         <div className="top-actions">
-          <button className="icon-button" aria-pressed={dark} onClick={onToggleDark} aria-label="Đổi chế độ sáng tối">{dark ? "☀" : "☾"}</button>
+          <button className="icon-button" aria-pressed={dark} onClick={onToggleDark} aria-label="Đổi chế độ sáng tối"><Icon name={dark ? "sun" : "moon"} size={20} /></button>
           {account ? (
             <button className="profile-button" onClick={onOpenProfile} aria-label={`Mở tài khoản của ${playerName}`}>
               <span>{playerName.trim().slice(0, 1).toUpperCase() || "N"}</span>{playerName}
@@ -65,14 +87,29 @@ export function AppHeader({
               <button className="signup-button" onClick={() => onOpenAuth("register")}>Đăng ký</button>
             </div>
           )}
+          {bannerView && banner.dismissed && <SimulationChip onRestore={banner.restore} />}
+          {account && managementRole && (
+            <ManagementMenu
+              role={managementRole}
+              open={menus.open === "management"}
+              compact={menus.compact}
+              onToggle={() => menus.toggle("management")}
+              onClose={menus.close}
+              triggerRef={menus.triggerRef("management")}
+            />
+          )}
         </div>
       </header>
-      {SIMULATION_BANNER_VIEWS.has(view) && (
-        <div className="security-awareness-banner" role="note">
-          <strong>Môi trường mô phỏng</strong>
-          <span>Không nhập mật khẩu ngân hàng, OTP, số thẻ hoặc dữ liệu thật. Mọi số tiền chỉ dùng cho đào tạo.</span>
-        </div>
-      )}
+      {bannerView && !banner.dismissed && <SimulationBanner onDismiss={banner.dismiss} />}
+      <MobileNav
+        view={view}
+        knowledgeOpen={knowledgeOpen}
+        onNavigate={navigate}
+        onToggleKnowledge={() => menus.toggle("knowledge")}
+        knowledgeTriggerRef={menus.triggerRef("knowledge-mobile")}
+      />
+      {menus.compact && menus.open === "management" && account && managementRole && <ManagementSheet role={managementRole} onClose={menus.close} />}
+      {menus.compact && knowledgeOpen && <MobileKnowledgeMenu onOpenArticles={openArticles} onOpenChecklist={openChecklist} onClose={menus.close} />}
     </>
   );
 }
@@ -97,6 +134,11 @@ export function SyncStatus({
   );
 }
 
+/** Older published copy repeats the product name ("Cảnh Giác Số · …"); the lockup above already says it. */
+function footerTagline(copy: SiteContent["copy"]) {
+  return copy.footerTagline.replace(/^c[ảa]nh\s+gi[áa]c\s+s[ốo]\s*[·•:–—-]\s*/i, "");
+}
+
 export function AppFooter({
   copy,
   onOpenGuide,
@@ -108,7 +150,7 @@ export function AppFooter({
     <footer>
       <div className="footer-brand" aria-label="Cảnh Giác Số">
         <BrandMark />
-        <span><b>{copy.departmentName}</b><small>{copy.footerTagline}</small></span>
+        <span><b>{copy.productName}</b><small>{copy.departmentName}</small><small className="footer-tagline">{footerTagline(copy)}</small></span>
       </div>
       <FooterNotice notice={copy.footerNotice} />
       <div className="footer-actions">

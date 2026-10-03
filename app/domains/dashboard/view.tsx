@@ -1,4 +1,5 @@
 import type { Scenario } from "../../data";
+import { Icon } from "../../shared/icons";
 import { BadgeIcon } from "../../shared/ui-primitives";
 import type { SessionAccount } from "../auth/model";
 import type { AnalyticsUser, DashboardStatus, ScenarioRisk } from "./model";
@@ -43,7 +44,7 @@ export function DashboardView({
         </div>
         {status === "ready" && (
           <button className="export-button" onClick={onExport} disabled={!users.length}>
-            ⇩ Xuất báo cáo CSV
+            <Icon name="download" size={16} /> Xuất báo cáo CSV
           </button>
         )}
       </div>

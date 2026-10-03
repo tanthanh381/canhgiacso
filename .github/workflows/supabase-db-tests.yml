@@ -1,0 +1,86 @@
+name: Supabase DB Tests
+
+# Chạy bộ kiểm thử SQL (pgTAP) trên PostgreSQL 16 cục bộ có STUB của Supabase
+# (supabase/tests/stubs/supabase_stub.sql). Đây KHÔNG phải Supabase thật: không có PostgREST,
+# GoTrue hay Dashboard. Xem documentation/security/REMEDIATION-2026-10.md, mục "Mức xác minh".
+# Workflow không dùng bí mật, không truy cập dự án Supabase production.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "supabase/**"
+      - ".github/workflows/supabase-db-tests.yml"
+  push:
+    branches: [main]
+    paths:
+      - "supabase/**"
+      - ".github/workflows/supabase-db-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-db-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  db-tests:
+    name: pgTAP (PostgreSQL 16)
+    # Cố định ubuntu-24.04 để gói postgresql-16 và postgresql-16-pgtap luôn có trong kho apt.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      PGHOST: /var/run/postgresql
+      PGUSER: runner
+    steps:
+      # SHA trùng với các workflow khác trong repo (actions/checkout v6).
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+
+      - name: Install PostgreSQL 16 and pgTAP
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            postgresql-16 postgresql-16-pgtap libtap-parser-sourcehandler-pgtap-perl
+          pg_prove --version
+
+      - name: Start the cluster and create a superuser for the runner
+        run: |
+          sudo pg_lsclusters
+          sudo pg_ctlcluster 16 main start || true
+          for i in $(seq 1 20); do
+            sudo -u postgres pg_isready -q && break
+            sleep 1
+          done
+          sudo -u postgres psql -v ON_ERROR_STOP=1 -c "do \$\$ begin if not exists (select 1 from pg_roles where rolname = 'runner') then create role runner superuser login; end if; end \$\$;"
+          psql -d postgres -Atc "select version()"
+
+      - name: Shell syntax check
+        run: |
+          bash -n supabase/tests/bootstrap.sh
+          bash -n supabase/tests/migration_guards.sh
+
+      - name: Build test database (schema + manual scripts + migrations)
+        run: supabase/tests/bootstrap.sh cgs_test
+
+      - name: Run pgTAP database tests
+        run: pg_prove --verbose -d cgs_test supabase/tests/database/*.test.sql
+
+      - name: Migration safety guards (CG003 guard, idempotency, data preservation)
+        run: supabase/tests/migration_guards.sh cgs_guard
+
+      - name: Build test database including the post-deploy script
+        run: supabase/tests/bootstrap.sh cgs_post --post-deploy
+
+      - name: Run pgTAP post-deploy tests
+        run: pg_prove --verbose -d cgs_post supabase/tests/post-deploy/*.test.sql
+
+      - name: Post-deploy script is idempotent
+        run: |
+          for i in 1 2; do
+            psql -X -v ON_ERROR_STOP=1 -q -d cgs_post -f supabase/post-deploy/20261002120000_revoke_public_answer_key_access.sql >/dev/null
+          done
+          pg_prove -d cgs_post supabase/tests/post-deploy/*.test.sql

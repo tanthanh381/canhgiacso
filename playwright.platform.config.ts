@@ -4,7 +4,7 @@ const browser = (process.env.QC_BROWSER || "chromium") as "chromium" | "firefox"
 
 export default defineConfig({
   testDir: "./tests/e2e",
-  testMatch: "platform-smoke.spec.ts",
+  testMatch: ["platform-smoke.spec.ts", "account-lifecycle.spec.ts"],
   timeout: 35_000,
   expect: { timeout: 10_000 },
   retries: 1,

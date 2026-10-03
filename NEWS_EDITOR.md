@@ -37,7 +37,7 @@ Chủ đề được hỗ trợ theo trường `category` sẵn có. Không thê
 - `app/admin.tsx`: tích hợp editor, lưu/xuất bản, cảnh báo chưa lưu, bắt lỗi kết nối và giới hạn dung lượng.
 - `app/data.ts`: mở rộng kiểu bài và validation tương thích dữ liệu cũ.
 - `app/page.tsx`: ảnh thumbnail, đọc bài theo slug, metadata và bảo vệ điều hướng khỏi admin.
-- `app/globals.css`: bố cục responsive, toolbar, vùng soạn, ảnh và dialog theo màu admin hiện tại.
+- `app/styles/admin.css` và `app/styles/news.css`: bố cục responsive, toolbar, vùng soạn, ảnh và dialog theo màu admin hiện tại.
 - `package.json`, `pnpm-lock.yaml`: Tiptap 3.31.3 và các extension liên quan, phiên bản cố định.
 - `vite.github-pages.config.ts`: giữ trình soạn thảo trong phần tải khi mở admin, tránh gom nhầm `@tiptap/react` vào gói React chung.
 - `tests/news-content.test.mjs`: kiểm tra dữ liệu cũ, Draft, slug, ngày, nội dung không an toàn và round trip.
@@ -50,7 +50,7 @@ Chủ đề được hỗ trợ theo trường `category` sẵn có. Không thê
 - `node --test tests/*.test.mjs`: 36/36 đạt.
 - `pnpm run lint`: không lỗi; còn 8 cảnh báo khuyến nghị dùng `next/image` thay `<img>` (dự án xuất bản tĩnh và đã nén ảnh tải lên).
 - `pnpm audit --prod --audit-level low`: không có lỗ hổng đã biết.
-- TypeScript cho toàn bộ thư mục `app`: đạt. `tsc --noEmit` toàn dự án vẫn bị chặn bởi khai báo kiểu Cloudflare có sẵn còn thiếu: `cloudflare:workers`, `Fetcher`, `D1Database` ở `db/index.ts`, `worker/index.ts`.
+- TypeScript cho toàn bộ thư mục `app`: đạt. `tsc --noEmit` toàn dự án khi đó vẫn bị chặn bởi khai báo kiểu Cloudflare còn thiếu (`cloudflare:workers`, `Fetcher`, `D1Database` ở `db/index.ts`, `worker/index.ts`). Ghi chú cập nhật: thư mục `db/` đã bị xóa cùng mã mẫu Drizzle không dùng, và `pnpm run typecheck` hiện chạy sạch.
 - Kiểm tra trình duyệt bằng fixture cục bộ, không ghi vào Supabase: thêm bài, nhập tiêu đề/tóm tắt/nội dung, đậm/căn giữa, tạo slug, preview, tải ảnh mẫu, alt text, dùng lại ảnh trong bài. Bố cục 390 px không tràn ngang.
 - Trang Tin tức công khai mở đúng khi khởi tạo và tải lại đường dẫn. Dữ liệu công khai nhận được trong lúc kiểm tra không có bài tin, nên chưa xác minh mở/lưu/xuất bản một bài thật bằng tài khoản quản trị trên hệ thống sản xuất.
 
@@ -66,4 +66,4 @@ Các file fixture/kiểm tra tạm không nằm trong bản giao. CI hiện có 
 - Kiểm tra mới: build vinext và build GitHub Pages đạt; 36/36 tests đạt; lint không lỗi, 8 cảnh báo ảnh như trước. TypeScript toàn dự án còn lỗi khai báo Cloudflare có sẵn, không có lỗi ở phần app.
 - Chrome với dữ liệu mẫu cục bộ: sửa bài có sẵn, tạo bài mới, slug, nhập rich text, chèn ảnh/alt/chú thích, upload PNG từ máy thành WebP cho ảnh đại diện, giờ xuất bản, preview, chuyển qua lại bài giữ dữ liệu, màn hình 390 px không tràn ngang đều đạt.
 - Chưa xác minh lưu/xuất bản với tài khoản quản trị thật trên Supabase; chưa push/deploy và không ghi dữ liệu sản xuất.
-- File sửa trong lần này: `app/news-editor.tsx`, `app/news-content.ts`, `app/news-article.tsx`, `app/data.ts`, `app/globals.css`, `tests/news-content.test.mjs`, `NEWS_EDITOR.md`.
+- File sửa trong lần này: `app/news-editor.tsx`, `app/news-content.ts`, `app/news-article.tsx`, `app/data.ts`, `app/styles/*.css`, `tests/news-content.test.mjs`, `NEWS_EDITOR.md`.

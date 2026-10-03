@@ -5,8 +5,9 @@ import test from "node:test";
 const root = new URL("../", import.meta.url);
 
 test("simulation warning is limited to interactive training views", async () => {
-  const [shellView, navigation] = await Promise.all([
+  const [shellView, banner, navigation] = await Promise.all([
     readFile(new URL("app/domains/shell/view.tsx", root), "utf8"),
+    readFile(new URL("app/domains/shell/simulation-banner.tsx", root), "utf8"),
     readFile(new URL("app/domains/shell/navigation.ts", root), "utf8"),
   ]);
   const match = navigation.match(/SIMULATION_BANNER_VIEWS[^=]*= new Set\(\[([^\]]+)]\)/);
@@ -15,7 +16,8 @@ test("simulation warning is limited to interactive training views", async () => 
   const views = [...match[1].matchAll(/"([^"]+)"/g)].map((item) => item[1]);
   assert.deepEqual(views, ["game", "quiz"]);
   assert.match(shellView, /SIMULATION_BANNER_VIEWS\.has\(view\)/);
-  assert.match(shellView, /className="security-awareness-banner"/);
+  assert.match(shellView, /bannerView && !banner\.dismissed && <SimulationBanner/);
+  assert.match(banner, /className="security-awareness-banner"/);
 });
 
 test("static information and SEO pages do not embed the simulation banner", async () => {

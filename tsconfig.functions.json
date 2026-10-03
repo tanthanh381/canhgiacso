@@ -1,0 +1,17 @@
+{
+  "//": "Supabase Edge Functions run on Deno. Remote specifiers are mapped to the npm copy of the same package and the Deno globals come from types/edge-runtime.d.ts, so plain tsc can check them.",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["esnext", "dom"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "types": [],
+    "paths": {
+      "npm:@supabase/supabase-js@*": ["./node_modules/@supabase/supabase-js"]
+    }
+  },
+  "include": ["supabase/functions/**/*.ts", "types/edge-runtime.d.ts"]
+}
