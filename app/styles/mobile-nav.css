@@ -77,25 +77,6 @@
   padding: 0;
 }
 
-.ux-practice-cta {
-  min-height: 36px;
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  padding: 0 11px;
-  font-size: 12px;
-  font-weight: 750;
-  cursor: pointer;
-  margin-top: 16px;
-  border-color: var(--brand-fill);
-  background: var(--brand-fill);
-  color: #fff;
-  width: max-content;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-
 .ux-simulation-chip {
   border: 1px solid color-mix(in srgb, var(--highlight) 65%, var(--line));
   background: color-mix(in srgb, var(--highlight) 11%, var(--surface));
@@ -138,9 +119,6 @@
   .ux-utility-trigger {
     width: 34px;
     height: 34px;
-  }
-  .ux-practice-cta {
-    width: 100%;
   }
 }
 

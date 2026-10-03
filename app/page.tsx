@@ -1011,7 +1011,6 @@ export default function Home() {
           knowledgeCards={knowledgeCards}
           completedChecklistIds={completedChecklistIds}
           onToggleChecklistItem={toggleChecklistItem}
-          onPractice={() => navigateTo("quiz")}
         />
       )}
 
