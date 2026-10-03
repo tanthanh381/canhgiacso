@@ -233,6 +233,26 @@ test.describe("desktop management menu", () => {
   });
 });
 
+test.describe("desktop tips and progress drawer", () => {
+  test.skip(({ viewport }) => (viewport?.width ?? 0) <= 900, "desktop viewport only");
+
+  test("opens from the stage actions and keeps the panel out of the tab order while closed", async ({ page }) => {
+    await waitForApp(page);
+    const panel = page.locator(".insight-panel");
+    await expect(page.getByRole("button", { name: /Danh sách tình huống/ })).toBeHidden();
+    await expect(panel).toHaveAttribute("inert", "");
+
+    await page.getByRole("button", { name: /Mẹo & tiến trình/ }).click();
+    await expect(page.locator(".app")).toHaveClass(/ux-insight-open/);
+    await expect(panel).not.toHaveAttribute("inert", "");
+    await expect(panel).toBeVisible();
+
+    await page.keyboard.press("Escape");
+    await expect(page.locator(".app")).not.toHaveClass(/ux-insight-open/);
+    await expect(panel).toHaveAttribute("inert", "");
+  });
+});
+
 test.describe("simulation notice", () => {
   test("can be hidden, stays hidden after a reload and can be brought back", async ({ page }) => {
     await waitForApp(page);
