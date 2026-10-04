@@ -1,0 +1,8 @@
+{
+  "_note": "Danh sách do ban biên tập Cảnh Giác Số duyệt. Chỉ thêm mục đã xác minh. Số điện thoại và email được băm SHA-256 khi build, không công bố dạng gốc.",
+  "domains": [],
+  "urls": [],
+  "ips": [],
+  "phones": [],
+  "emails": []
+}

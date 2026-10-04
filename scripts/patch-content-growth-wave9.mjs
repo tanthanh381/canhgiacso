@@ -734,6 +734,7 @@ const toolsCanonical = `${SITE}/cong-cu/`;
 const toolsTitle = "Trung tâm kiểm tra lừa đảo: Công cụ xác minh trước khi hành động";
 const toolsDesc = "Bộ công cụ chống lừa đảo: kiểm tra cuộc gọi, SMS, biên lai, quyền ứng dụng Android, checklist trước khi chuyển tiền, xử lý khi bị lừa và thư viện 30 kịch bản.";
 const toolCards = [
+ ["/cong-cu/kiem-tra-lua-dao/","Kiểm tra link, SĐT, email, IP","Nhận diện giả mạo và đối chiếu dữ liệu cảnh báo."],
  ["/cong-cu/kiem-tra-cuoc-goi-la/","Cuộc gọi lạ","Ai gọi và họ đang yêu cầu gì?"],
  ["/cong-cu/xu-ly-khi-bi-lua/","Tôi vừa bị lừa","Tạo thứ tự xử lý theo việc đã xảy ra."],
  ["/cong-cu/kiem-tra-bien-lai-chuyen-khoan/","Biên lai chuyển khoản","Kiểm tra tiền đã thực sự vào tài khoản chưa."],
