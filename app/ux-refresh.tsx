@@ -4,15 +4,15 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { supabase } from "./supabase";
 
-type PrimaryView = "Thử thách" | "Cẩm nang" | "Tin tức" | "Thành tích";
+type PrimaryView = "Thử thách" | "Cẩm nang" | "Tin tức" | "Thực hành" | "Thành tích";
 
-const PRIMARY_VIEWS: PrimaryView[] = ["Thử thách", "Cẩm nang", "Tin tức", "Thành tích"];
+const PRIMARY_VIEWS: PrimaryView[] = ["Thử thách", "Cẩm nang", "Tin tức", "Thực hành", "Thành tích"];
 const BANNER_KEY = "canhgiacso:simulation-banner-dismissed";
 
 function navButton(label: string) {
   if (typeof document === "undefined") return null;
-  return Array.from(document.querySelectorAll<HTMLButtonElement>(".topbar nav button"))
-    .find((button) => button.textContent?.trim() === label) ?? null;
+  return Array.from(document.querySelectorAll<HTMLButtonElement>(".left-rail-nav button"))
+    .find((button) => button.getAttribute("aria-label")?.includes(label)) ?? null;
 }
 
 function knowledgeSubmenuButton(label: string) {
@@ -44,7 +44,8 @@ export function UxRefresh() {
     let pending = false;
     const sync = () => {
       pending = false;
-      const label = document.querySelector<HTMLElement>(".topbar nav [aria-current='page']")?.textContent?.trim();
+      const activeButton = document.querySelector<HTMLElement>(".left-rail-nav [aria-current='page']");
+      const label = activeButton?.getAttribute("aria-label")?.split(" ")[0];
       setActive(PRIMARY_VIEWS.includes(label as PrimaryView) ? label as PrimaryView : null);
       setVersion((value) => value + 1);
     };
@@ -57,7 +58,7 @@ export function UxRefresh() {
       const target = event.target;
       if (!(target instanceof Element)) return;
       if (target.closest(".scenario-item")) setScenariosOpen(false);
-      if (target.closest(".topbar nav > button")) {
+      if (target.closest(".left-rail-nav button")) {
         document.querySelector<HTMLDetailsElement>(".knowledge-menu")?.removeAttribute("open");
       }
       if (!target.closest(".ux-utility-menu") && !target.closest(".ux-utility-popover-mobile")) {
@@ -228,7 +229,7 @@ export function UxRefresh() {
           aria-controls={item === "Cẩm nang" ? "ux-mobile-knowledge-menu" : undefined}
           onClick={() => item === "Cẩm nang" ? (setUtilityOpen(false), setMobileKnowledgeOpen((value) => !value)) : navigate(item)}
         >
-          <span aria-hidden="true">{{ "Thử thách": "◇", "Cẩm nang": "▤", "Tin tức": "◫", "Thành tích": "★" }[item]}</span>
+          <span aria-hidden="true">{{ "Thử thách": "◇", "Cẩm nang": "▤", "Tin tức": "◫", "Thực hành": "⚡", "Thành tích": "★" }[item]}</span>
           <small>{item}</small>
         </button>
       ))}
