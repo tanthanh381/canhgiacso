@@ -5,7 +5,7 @@ const ROOT = process.cwd();
 const PUBLIC = path.join(ROOT, "public");
 const HOME = path.join(ROOT, "github-pages", "index.html");
 const SITE = "https://canhgiacso.com";
-const SEO_CSS_VERSION = "20261004-app-shell";
+const SEO_CSS_VERSION = "20261004-parity";
 const BRAND_MARKUP = '<span class="seo-brand-logo" aria-hidden="true"></span><span class="seo-brand-divider" aria-hidden="true"></span><span class="seo-product-lockup"><strong>CẢNH GIÁC SỐ</strong><small>IT SECURITY</small></span>';
 const SEO_FOOTER_NAV = '<nav class="seo-footer-links" aria-label="Thông tin website"><a href="/gioi-thieu/">Giới thiệu</a><a href="/chinh-sach-bien-tap/">Biên tập</a><a href="/phuong-phap-kiem-chung/">Kiểm chứng</a><a href="/lien-he/">Liên hệ</a><a href="/quyen-rieng-tu/">Quyền riêng tư</a><a href="/bao-mat/">Bảo mật</a><a href="/sitemap/">Sơ đồ nội dung</a></nav>';
 const EDITORIAL_REVIEWER = {
@@ -54,13 +54,17 @@ function normalizeSeoFooter(html) {
 }
 
 const APP_NAV = [
-  ["/#/game", "Thử thách"],
-  ["/kien-thuc/", "Cẩm nang"],
-  ["/tin-tuc/", "Tin tức"],
-  ["/#/quiz", "Thực hành"],
-  ["/#/stats", "Thành tích"],
-  ["/gioi-thieu/", "Giới thiệu"],
+  ["/#/game", "Thử thách", "◇"],
+  ["/kien-thuc/", "Cẩm nang", "▤"],
+  ["/tin-tuc/", "Tin tức", "◫"],
+  ["/#/quiz", "Thực hành", "▶"],
+  ["/#/stats", "Thành tích", "★"],
+  ["/gioi-thieu/", "Giới thiệu", "ⓘ"],
 ];
+// Mobile order mirrors the homepage bottom navigation.
+const APP_MOBILE_ORDER = ["Thử thách", "Cẩm nang", "Tin tức", "Thành tích", "Thực hành", "Giới thiệu"];
+const APP_TRUST_NAV = '<nav class="seo-footer-links" aria-label="Chính sách và minh bạch"><a href="/chinh-sach-bien-tap/">Biên tập</a><a href="/phuong-phap-kiem-chung/">Kiểm chứng</a><a href="/lien-he/">Liên hệ</a><a href="/bao-mat/">Bảo mật</a><a href="/sitemap/">Sơ đồ nội dung</a></nav>';
+const APP_SHELL_CSS = '<link rel="stylesheet" href="/app-shell.css?v=20261004-parity" />';
 
 function appShellCurrent(file) {
   const normalized = file.split(path.sep).join("/");
@@ -74,15 +78,19 @@ function applyAppShell(html, file) {
   const normalized = file.split(path.sep).join("/");
   if (!normalized.includes("/public/") || !html.includes('<header class="seo-header">') || !html.includes('<footer class="seo-footer">')) return html;
   const current = appShellCurrent(file);
-  const nav = APP_NAV.map(([href, label]) => `<a href="${href}"${href === current ? ' aria-current="page"' : ""}>${label}</a>`).join("");
-  const header = `<header class="seo-header"><div class="app-topbar"><a class="seo-brand" href="/" aria-label="Cảnh Giác Số — về trang chủ">${BRAND_MARKUP}</a><nav class="seo-nav-links" aria-label="Điều hướng chính">${nav}</nav><div class="app-top-actions"><button type="button" class="app-theme-toggle" data-app-theme-toggle aria-label="Đổi chế độ sáng tối">☾</button></div></div></header>`;
+  const aria = (href) => (href === current ? ' aria-current="page"' : "");
+  const nav = APP_NAV.map(([href, label]) => `<a href="${href}"${aria(href)}>${label}</a>`).join("");
+  const mobile = APP_MOBILE_ORDER.map((label) => APP_NAV.find((item) => item[1] === label)).map(([href, label, icon]) => `<a href="${href}"${aria(href)}><span aria-hidden="true">${icon}</span><small>${label}</small></a>`).join("");
+  const header = `<header class="seo-header"><div class="app-topbar"><a class="seo-brand" href="/" aria-label="Cảnh Giác Số — về trang chủ">${BRAND_MARKUP}</a><nav class="seo-nav-links" aria-label="Điều hướng chính">${nav}</nav><div class="app-top-actions"><button type="button" class="app-theme-toggle" data-app-theme-toggle aria-label="Đổi chế độ sáng tối">☾</button></div></div><nav class="app-mobile-nav" aria-label="Điều hướng di động">${mobile}</nav></header>`;
   const oldFooter = html.match(/<footer class="seo-footer">([\s\S]*?)<\/footer>/i)[1];
   const extras = [...oldFooter.matchAll(/<p(?![^>]*app-footer-notice)[^>]*>[\s\S]*?<\/p>/gi)].map((m) => m[0]).join("");
-  const footer = `<footer class="seo-footer"><div class="app-footer"><div class="app-footer-brand" aria-label="Cảnh Giác Số"><span class="seo-brand-logo" aria-hidden="true"></span><span><b>IT SECURITY</b><small>Cảnh Giác Số · Đào tạo nhận thức an toàn thông tin</small></span></div><p class="app-footer-notice"><strong>Website được quản lý và vận hành bởi: IT Security Team - HDBank.</strong><span>Được xây dựng với mục tiêu nâng cao nhận thức cộng đồng về phòng chống tội phạm lừa đảo trực tuyến.</span><span class="app-footer-warning">Lưu ý: Nội dung và số tiền trên website chỉ là mô phỏng đào tạo.</span></p><div class="app-footer-actions">${SEO_FOOTER_NAV}</div>${extras ? `<div class="app-footer-extra">${extras}</div>` : ""}</div></footer>`;
+  const footer = `<footer class="seo-footer"><div class="app-footer"><div class="app-footer-brand" aria-label="Cảnh Giác Số"><span class="seo-brand-logo" aria-hidden="true"></span><span><b>IT SECURITY</b><small>Cảnh Giác Số · Đào tạo nhận thức an toàn thông tin</small></span></div><p class="app-footer-notice"><strong>Website được quản lý và vận hành bởi: IT Security Team - HDBank.</strong><span>Được xây dựng với mục tiêu nâng cao nhận thức về An toàn thông tin và phòng chống tội phạm lừa đảo trực tuyến.</span><span class="app-footer-warning">Lưu ý: Không cung cấp bất kỳ thông tin nhạy cảm, thông tin cá nhân cho website</span></p><div class="app-footer-actions"><nav aria-label="Thông tin website"><a href="/gioi-thieu/">Giới thiệu</a><a href="/quyen-rieng-tu/">Quyền riêng tư</a></nav><button type="button" class="app-footer-guide" data-app-guide>Hướng dẫn &amp; trợ giúp</button></div><div class="app-footer-extra">${APP_TRUST_NAV}${extras}</div></div></footer>`;
   let next = html
     .replace(/<header class="seo-header">[\s\S]*?<\/header>/i, () => header)
     .replace(/<footer class="seo-footer">[\s\S]*?<\/footer>/i, () => footer)
-    .replace(/href=(["'])\/seo\.css(\?v=[^"']*)*\1/g, `href="/seo.css?v=${SEO_CSS_VERSION}"`);
+    .replace(/href=(["'])\/seo\.css(\?v=[^"']*)*\1/g, `href="/seo.css?v=${SEO_CSS_VERSION}"`)
+    .replace(/<link rel="stylesheet" href="\/app-shell\.css[^>]*>/g, "");
+  next = next.replace(/(<link rel="stylesheet" href="\/seo\.css[^>]*>)/, `$1${APP_SHELL_CSS}`);
   if (!next.includes("/app-shell.js")) next = next.replace("</body>", '  <script src="/app-shell.js" defer></script>\n</body>');
   return next;
 }

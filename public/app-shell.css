@@ -1,0 +1,120 @@
+/* Header and footer of the static pages, mirroring the homepage (app/globals.css, design-system.css, frontend-design.css, ux-refresh.css). */
+:root {
+  --as-ink: #15212b; --as-muted: #5e6973; --as-paper: #f4f6f7; --as-surface: #ffffff; --as-line: #d9e0e5;
+  --as-brand: #a20f2d; --as-brand-strong: #750b22; --as-red: #b1122f; --as-night: #0c2538; --as-mint: #f2c94c;
+  --as-topbar-border: var(--as-night); --as-logo-title: var(--as-night);
+}
+:root[data-theme="dark"] {
+  --as-ink: #f2f6f8; --as-muted: #b6c1c8; --as-paper: #0b1721; --as-surface: #122330; --as-line: #2c414f;
+  --as-brand: #ff718a; --as-brand-strong: #d93f5e; --as-mint: #f5d45f;
+  --as-topbar-border: color-mix(in srgb, var(--as-mint) 62%, var(--as-line)); --as-logo-title: var(--as-ink);
+}
+
+/* Header */
+.seo-header:has(.app-topbar) {
+  border-bottom: 2px solid var(--as-topbar-border);
+  background: color-mix(in srgb, var(--as-surface) 94%, transparent);
+  box-shadow: 0 8px 28px rgba(12, 37, 56, .06);
+  backdrop-filter: blur(16px);
+}
+.app-topbar { height: 72px; display: grid; grid-template-columns: minmax(220px, 1fr) auto minmax(220px, 1fr); align-items: center; gap: 18px; padding-inline: clamp(16px, 3vw, 36px); color: var(--as-ink); }
+.app-topbar .seo-brand { display: flex; align-items: center; gap: 12px; width: max-content; color: var(--as-ink); text-decoration: none; }
+.app-topbar .seo-brand-logo, .app-footer-brand .seo-brand-logo {
+  display: block; flex: 0 0 auto; width: 52px; height: 52px; background-color: transparent; background-image: url("/khien-so-logo.png"), url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20800%20800%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22shield%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%3Cstop%20stop-color%3D%22%230b5684%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%2303243f%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20fill%3D%22url(%23shield)%22%20d%3D%22M401%20105Q235%20211%20146%20216C179%20390%20276%20542%20401%20627C526%20542%20623%20390%20657%20216Q567%20211%20401%20105Z%22%2F%3E%3C%2Fsvg%3E");
+  background-position: center; background-repeat: no-repeat; background-size: 54px 54px; -webkit-mask: none; mask: none; filter: drop-shadow(0 5px 12px rgba(87, 9, 24, .1));
+}
+.app-topbar .seo-brand-divider { width: 1px; height: 34px; background: var(--as-line); }
+.app-topbar .seo-product-lockup strong { display: block; color: var(--as-logo-title); font-size: 14px; font-weight: 820; letter-spacing: .055em; line-height: 1.5; white-space: nowrap; }
+.app-topbar .seo-product-lockup small { display: block; margin-top: 3px; color: var(--as-red); font-size: 11px; font-weight: 800; letter-spacing: .045em; }
+.app-topbar .seo-nav-links { display: flex; flex-wrap: nowrap; gap: 0; padding: 0; border: 0; border-radius: 0; background: transparent; }
+.app-topbar .seo-nav-links a {
+  position: relative; display: inline-flex; align-items: center; min-height: 42px; padding: 12px 15px; border-radius: 0; background: transparent;
+  color: var(--as-muted); font-size: 14px; font-weight: 680; line-height: 1.2; text-decoration: none; white-space: nowrap; box-shadow: none;
+}
+.app-topbar .seo-nav-links a:hover { color: var(--as-ink); background: color-mix(in srgb, var(--as-paper) 70%, transparent); }
+.app-topbar .seo-nav-links a[aria-current="page"] { color: var(--as-ink); background: transparent; }
+.app-topbar .seo-nav-links a[aria-current="page"]::after { content: ""; position: absolute; left: 15px; right: 15px; bottom: 2px; height: 3px; background: var(--as-red); }
+.app-top-actions { justify-self: end; display: flex; align-items: center; gap: 8px; }
+.app-theme-toggle { width: 39px; height: 39px; border: 1px solid var(--as-line); border-radius: 50%; background: var(--as-surface); color: var(--as-ink); cursor: pointer; font: inherit; }
+.app-mobile-nav { display: none; }
+
+/* Footer */
+.seo-footer:has(.app-footer) { padding: 0; border-top: 3px solid var(--as-brand); background: var(--as-surface); color: var(--as-muted); font-size: 12px; line-height: 1.5; }
+.app-footer { min-height: 104px; display: grid; grid-template-columns: minmax(270px, .85fr) minmax(420px, 1.55fr) auto; align-items: center; gap: clamp(22px, 4vw, 58px); padding: 20px clamp(22px, 4vw, 54px); }
+.app-footer-brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.app-footer-brand .seo-brand-logo { width: 54px; height: 54px; }
+.app-footer-brand > span:last-child { min-width: 0; border-left: 1px solid var(--as-line); padding-left: 14px; color: var(--as-ink); }
+.app-footer-brand b { display: block; color: var(--as-brand); font-size: 12px; font-weight: 700; letter-spacing: .08em; line-height: 1.5; }
+.app-footer-brand small { display: block; margin-top: 4px; color: var(--as-muted); font-size: 12px; line-height: 1.4; }
+.app-footer-notice { display: grid; gap: 4px; max-width: 760px; margin: 0; line-height: 1.5; text-align: left; }
+.app-footer-notice strong { display: block; color: var(--as-ink); font-size: 14px; line-height: 1.35; }
+.app-footer-notice span { display: block; font-size: 14px; }
+.app-footer-notice .app-footer-warning { margin-top: 2px; color: var(--as-red); font-size: 11px; font-weight: 700; }
+.app-footer-actions { justify-self: end; display: grid; gap: 10px; justify-items: end; }
+.app-footer-actions nav { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px 12px; }
+.app-footer-actions a { display: inline-flex; align-items: center; min-height: 32px; color: var(--as-muted); font-weight: 700; text-decoration: none; }
+.app-footer-actions a:hover, .app-footer-actions a:focus-visible { color: var(--as-brand); text-decoration: underline; }
+.app-footer-guide { justify-self: end; border: 1px solid var(--as-line); border-radius: 999px; background: var(--as-paper); color: var(--as-brand); padding: 10px 14px; cursor: pointer; font: inherit; font-size: 11px; font-weight: 750; white-space: nowrap; }
+.app-footer-guide:hover { border-color: var(--as-brand); background: color-mix(in srgb, var(--as-brand) 6%, var(--as-surface)); }
+.app-footer-extra { grid-column: 1 / -1; display: grid; gap: 6px; padding-top: 14px; border-top: 1px solid var(--as-line); }
+.app-footer-extra p { margin: 0; color: var(--as-muted); font-size: 12px; }
+.app-footer-extra a { color: var(--as-brand); font-weight: 700; }
+.app-footer-extra .seo-footer-links { margin: 0; gap: 4px 14px; }
+.app-footer-extra .seo-footer-links a { color: var(--as-muted); font-weight: 700; text-decoration: none; }
+.app-footer-extra .seo-footer-links a:hover { color: var(--as-brand); text-decoration: underline; }
+
+/* Help dialog opened from the footer button */
+.app-guide { width: min(560px, calc(100% - 32px)); max-height: 90vh; overflow: auto; padding: 34px; border: 0; border-radius: 18px; background: var(--as-surface); color: var(--as-ink); box-shadow: 0 30px 90px rgba(0, 0, 0, .3); }
+.app-guide::backdrop { background: rgba(10, 10, 10, .55); }
+.app-guide .eyebrow { display: block; color: var(--as-brand); font-size: 10px; font-weight: 800; letter-spacing: .14em; }
+.app-guide h2 { margin: 8px 0 16px; font-size: 26px; }
+.app-guide ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 14px; }
+.app-guide li { display: grid; grid-template-columns: 34px 1fr; gap: 12px; }
+.app-guide li b { color: var(--as-brand); }
+.app-guide li p { margin: 4px 0 0; color: var(--as-muted); font-size: 14px; }
+.app-guide .guide-disclaimer { margin: 16px 0; color: var(--as-muted); font-size: 12px; }
+.app-guide-close { padding: 10px 18px; border: 1px solid var(--as-brand-strong); border-radius: 10px; background: var(--as-brand-strong); color: #fff; font: inherit; font-weight: 800; cursor: pointer; }
+
+@media (max-width: 1180px) {
+  .app-topbar { grid-template-columns: auto 1fr auto; padding-inline: 18px; }
+  .app-topbar .seo-product-lockup small, .app-topbar .seo-brand-divider { display: none; }
+}
+@media (max-width: 900px) {
+  .seo-header:has(.app-topbar) { margin-bottom: 58px; }
+  .app-topbar { height: 62px; grid-template-columns: minmax(0, 1fr) auto; padding-inline: 14px; }
+  .app-topbar .seo-nav-links { display: none; }
+  .app-topbar .seo-brand { min-width: 0; }
+  .app-topbar .seo-brand-logo { width: 44px; height: 44px; background-size: 46px 46px; }
+  .app-topbar .seo-product-lockup { min-width: 0; overflow: hidden; }
+  .app-topbar .seo-product-lockup strong { font-size: 13px; }
+  .app-theme-toggle { width: 36px; height: 36px; }
+  .app-mobile-nav {
+    position: fixed; z-index: 72; top: 64px; left: 0; right: 0; height: 58px; display: grid; grid-template-columns: repeat(6, 1fr); padding: 4px 3px;
+    border-top: 1px solid var(--as-line); border-bottom: 1px solid var(--as-line); background: color-mix(in srgb, var(--as-surface) 97%, transparent);
+    backdrop-filter: blur(16px); box-shadow: 0 8px 20px rgba(20, 20, 20, .08);
+  }
+  .app-mobile-nav a { display: grid; place-items: center; align-content: center; gap: 1px; min-width: 0; border-radius: 12px; color: var(--as-muted); text-decoration: none; }
+  .app-mobile-nav a > span { font-size: 17px; line-height: 1; }
+  .app-mobile-nav a > small { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; font-weight: 750; }
+  .app-mobile-nav a[aria-current="page"] { color: #be1128; background: color-mix(in srgb, #be1128 7%, var(--as-surface)); }
+  :root[data-theme="dark"] .app-mobile-nav a[aria-current="page"] { color: var(--as-brand); }
+}
+@media (max-width: 820px) {
+  .app-footer { grid-template-columns: minmax(250px, .8fr) minmax(0, 1.2fr); gap: 18px 28px; }
+  .app-footer-actions { grid-column: 2; justify-self: start; justify-items: start; }
+  .app-footer-actions nav { justify-content: flex-start; }
+  .app-footer-guide { justify-self: start; }
+}
+@media (max-width: 560px) {
+  .app-topbar .seo-product-lockup strong { display: none; }
+  .app-mobile-nav { padding-inline: 2px; }
+  .app-mobile-nav a > small { font-size: 9px; }
+}
+@media (max-width: 520px) {
+  .app-footer { grid-template-columns: 1fr; gap: 16px; padding: 22px 18px; }
+  .app-footer-actions { grid-column: auto; }
+  .app-footer-notice strong { font-size: 13px; }
+  .app-footer-notice span { font-size: 12px; }
+}
+:root[data-theme="dark"] .app-footer-notice .app-footer-warning,
+:root[data-theme="dark"] .app-topbar .seo-product-lockup small { color: var(--as-brand); }
