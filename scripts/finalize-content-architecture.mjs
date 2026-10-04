@@ -53,6 +53,27 @@ function normalizeSeoFooter(html) {
   });
 }
 
+const APP_NAV = [
+  ["/#/game", "Thử thách"],
+  ["/kien-thuc/", "Cẩm nang"],
+  ["/tin-tuc/", "Tin tức"],
+  ["/#/quiz", "Thực hành"],
+  ["/#/stats", "Thành tích"],
+  ["/gioi-thieu/", "Giới thiệu"],
+];
+
+function applyAppShell(html, file) {
+  if (!file.split(path.sep).join("/").endsWith("/public/gioi-thieu/index.html")) return html;
+  const nav = APP_NAV.map(([href, label]) => `<a href="${href}"${href === "/gioi-thieu/" ? ' aria-current="page"' : ""}>${label}</a>`).join("");
+  const header = `<header class="seo-header"><div class="app-topbar"><a class="seo-brand" href="/" aria-label="Cảnh Giác Số — về trang chủ">${BRAND_MARKUP}</a><nav class="seo-nav-links" aria-label="Điều hướng chính">${nav}</nav><div class="app-top-actions"><button type="button" class="app-theme-toggle" data-app-theme-toggle aria-label="Đổi chế độ sáng tối">☾</button></div></div></header>`;
+  const footer = `<footer class="seo-footer"><div class="app-footer"><div class="app-footer-brand" aria-label="Cảnh Giác Số"><span class="seo-brand-logo" aria-hidden="true"></span><span><b>IT SECURITY</b><small>Cảnh Giác Số · Đào tạo nhận thức an toàn thông tin</small></span></div><p class="app-footer-notice"><strong>Website được quản lý và vận hành bởi: IT Security Team - HDBank.</strong><span>Được xây dựng với mục tiêu nâng cao nhận thức cộng đồng về phòng chống tội phạm lừa đảo trực tuyến.</span><span class="app-footer-warning">Lưu ý: Nội dung và số tiền trên website chỉ là mô phỏng đào tạo.</span></p><div class="app-footer-actions">${SEO_FOOTER_NAV}</div></div></footer>`;
+  let next = html
+    .replace(/<header class="seo-header">[\s\S]*?<\/header>/i, header)
+    .replace(/<footer class="seo-footer">[\s\S]*?<\/footer>/i, footer);
+  if (!next.includes("/app-shell.js")) next = next.replace("</body>", '  <script src="/app-shell.js" defer></script>\n</body>');
+  return next;
+}
+
 async function htmlFiles(dir) {
   const out = [];
   for (const entry of await readdir(dir, { withFileTypes: true })) {
@@ -184,6 +205,7 @@ for (const file of [HOME, ...(await htmlFiles(PUBLIC))]) {
   html = normalizeKnowledgeShell(html, file);
   html = normalizeSeoNavigation(html, file);
   html = normalizeSeoFooter(html);
+  html = applyAppShell(html, file);
   html = normalizeFavicon(html);
   html = ensureSearchMetadata(html);
   html = normalizeStructuredTrust(html);
