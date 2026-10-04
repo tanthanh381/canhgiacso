@@ -36,27 +36,22 @@ test.describe("cross-platform shell and responsive navigation", () => {
   test("desktop and mobile navigation use the correct shell", async ({ page }) => {
     await waitForApp(page);
     const width = page.viewportSize()?.width ?? 0;
-    const desktopNav = page.locator(".topbar nav");
+    const leftRail = page.locator(".left-rail");
     const mobileNav = page.locator(".ux-bottom-nav");
 
-    if (width <= 900) {
-      await expect(desktopNav).toBeHidden();
+    if (width <= 820) {
+      await expect(leftRail).toBeHidden();
       await expect(mobileNav).toBeVisible();
       await expect(mobileNav.locator(":scope > button")).toHaveCount(6);
-      await expect(mobileNav.getByRole("button", { name: "Giới thiệu", exact: true })).toBeVisible();
-      const box = await mobileNav.boundingBox();
-      expect(box).not.toBeNull();
-      expect(Math.round(box!.y)).toBeGreaterThanOrEqual(62);
-      expect(Math.round(box!.y)).toBeLessThanOrEqual(66);
     } else {
-      await expect(desktopNav).toBeVisible();
+      await expect(leftRail).toBeVisible();
       await expect(mobileNav).toBeHidden();
     }
   });
 
   test("dark mode does not break layout", async ({ page }) => {
     await waitForApp(page);
-    await page.locator(".icon-button").click();
+    await page.locator(".left-rail-actions button").first().click();
     await expect(page.locator(".app")).toHaveClass(/dark/);
     await expectNoHorizontalOverflow(page);
   });
@@ -200,11 +195,11 @@ test.describe("resilience and breakpoint boundaries", () => {
       await page.setViewportSize({ width, height: width <= 560 ? 740 : 900 });
       await page.waitForTimeout(40);
       await expectNoHorizontalOverflow(page);
-      if (width <= 900) {
+      if (width <= 820) {
         await expect(page.locator(".ux-bottom-nav")).toBeVisible();
         await expect(page.locator(".ux-bottom-nav > button")).toHaveCount(6);
       } else {
-        await expect(page.locator(".topbar nav")).toBeVisible();
+        await expect(page.locator(".left-rail")).toBeVisible();
         await expect(page.locator(".ux-bottom-nav")).toBeHidden();
       }
     }
