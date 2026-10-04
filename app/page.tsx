@@ -23,7 +23,6 @@ import { GUEST_CERTIFICATE_KEY, LEGACY_PROGRESS_KEY, THEME_KEY, progressKey, rea
 import { BadgeIcon, Modal } from "./shared/ui-primitives";
 import { canChangeHash, navigateBrowser, restoreHash, routeFromHash, type View } from "./domains/shell/navigation";
 import { AppFooter, AppHeader, SyncStatus } from "./domains/shell/view";
-import { UxRefresh } from "./ux-refresh";
 
 const AdminPage = lazy(() => import("./admin").then((module) => ({ default: module.AdminPage })));
 
@@ -1055,8 +1054,6 @@ export default function Home() {
         /></Suspense>}
 
       <AppFooter copy={siteContent.copy} onOpenGuide={() => setGuide(true)} />
-
-      <UxRefresh />
 
       {completionCertificate && !lossNotice && <Modal open onClose={() => setCompletionCertificate(null)} labelledBy="certificate-complete-title" className="certificate-complete-modal">
         <button className="modal-close" aria-label="Đóng thông báo chứng nhận" onClick={() => setCompletionCertificate(null)}>×</button>

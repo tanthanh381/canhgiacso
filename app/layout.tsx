@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import "./design-system.css";
 import "./frontend-design.css";
-import "./ux-refresh.css";
 
 const siteUrl = "https://canhgiacso.com";
 const siteTitle = "Cảnh Giác Số: Nhận diện lừa đảo trực tuyến | HDBank";
