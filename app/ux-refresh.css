@@ -246,6 +246,7 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
   .ux-guest-conversion > div:last-child { justify-content: flex-start; flex-wrap: wrap; }
 
   .ux-bottom-nav {
+    display: grid;
     position: fixed;
     z-index: 72;
     top: 64px;
@@ -253,7 +254,6 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
     right: 0;
     bottom: auto;
     height: 58px;
-    display: grid;
     grid-template-columns: repeat(6, 1fr);
     border: 0;
     border-top: 1px solid var(--line);
@@ -262,11 +262,11 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
     background: color-mix(in srgb, var(--surface) 97%, transparent);
     backdrop-filter: blur(16px);
     box-shadow: 0 8px 20px rgba(20, 20, 20, .08);
-    padding: 4px 8px;
+    padding: 4px 3px;
   }
   .ux-bottom-nav button { border: 0; background: transparent; color: var(--muted); border-radius: 12px; display: grid; place-items: center; align-content: center; gap: 1px; cursor: pointer; }
   .ux-bottom-nav button > span { font-size: 17px; line-height: 1; }
-  .ux-bottom-nav small { font-size: 10px; font-weight: 750; }
+  .ux-bottom-nav small { font-size: 10px; font-weight: 750; min-width: 0; }
   .ux-bottom-nav button.active { color: var(--ux-brand); background: color-mix(in srgb, var(--ux-brand) 7%, var(--surface)); }
   .ux-bottom-nav .ux-about-nav-item { order: 6; }
 
@@ -387,11 +387,11 @@ body, button, input, select, textarea { font-family: Inter, "Be Vietnam Pro", ui
 
 @media (max-width: 560px) {
   .ux-bottom-nav {
-    padding-inline: 4px;
+    padding-inline: 2px;
   }
   .ux-bottom-nav button {
     min-width: 0;
-    padding-inline: 2px;
+    padding-inline: 0;
   }
   .ux-bottom-nav small {
     max-width: 100%;
