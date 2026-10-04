@@ -114,7 +114,7 @@ const about = pageShell({
   lead: "Cảnh Giác Số là nền tảng giáo dục an toàn số, tập trung giúp người dùng nhận diện dấu hiệu lừa đảo, xác minh thông tin độc lập và chọn hành động an toàn trước khi chuyển tiền, đăng nhập, cài ứng dụng hoặc chia sẻ dữ liệu.",
   bare: true,
   body: `
-<section class="about-hero" aria-label="Hoạt hình giới thiệu Cảnh Giác Số"><div class="about-hero-frame"><iframe src="/gioi-thieu/hoat-hinh.html" title="Hoạt hình giới thiệu Cảnh Giác Số: các chiêu lừa đảo thường gặp và 4 nguyên tắc Dừng lại, Kiểm tra, Xác minh, Báo cáo"></iframe></div><div class="about-hero-actions"><a class="about-hero-cta" href="/">Bắt đầu thử thách</a><button type="button" class="about-hero-toggle" data-about-anim-toggle hidden>Tạm dừng</button><small>Hoạt hình tự lặp lại; bạn có thể tạm dừng bất cứ lúc nào.</small></div></section>
+<section class="about-hero" aria-label="Hoạt hình giới thiệu Cảnh Giác Số"><div class="about-hero-frame"><iframe src="/gioi-thieu/hoat-hinh.html" title="Hoạt hình giới thiệu Cảnh Giác Số: các chiêu lừa đảo thường gặp và 4 nguyên tắc Dừng lại, Kiểm tra, Xác minh, Báo cáo"></iframe></div><div class="about-hero-actions"><a class="about-hero-cta" href="/">Bắt đầu thử thách</a><button type="button" class="about-hero-toggle" data-about-anim-toggle hidden>Tạm dừng</button></div></section>
 <script src="/about-hero.js" defer></script>`,
 });
 
