@@ -8,7 +8,7 @@ test("P1 exposes one deterministic content compiler entrypoint", async () => {
   const pkg = JSON.parse(await read("package.json"));
   const architecture = JSON.parse(await read("content/content-architecture.json"));
   assert.equal(pkg.scripts["content:compile"], "node scripts/content-compiler.mjs");
-  assert.equal(pkg.scripts["build:pages"], "pnpm run content:compile && vite build --config vite.github-pages.config.ts");
+  assert.equal(pkg.scripts["build:pages"], "pnpm run content:compile && node scripts/build-threat-feed.mjs && vite build --config vite.github-pages.config.ts");
   const stages = architecture.phases.flatMap((phase) => phase.stages);
   assert.ok(stages.length >= 1);
   assert.ok(stages.length <= 16, `content pipeline should stay consolidated; found ${stages.length} stages`);
