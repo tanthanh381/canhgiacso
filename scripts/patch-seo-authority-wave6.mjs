@@ -15,7 +15,7 @@ async function write(relative, content) {
   await writeFile(file, content, "utf8");
 }
 
-function pageShell({ title, description, canonical, type, h1, eyebrow, lead, body }) {
+function pageShell({ title, description, canonical, type, h1, eyebrow, lead, body, bare }) {
   const schema = JSON.stringify({
     "@context": "https://schema.org",
     "@graph": [
@@ -91,13 +91,13 @@ function pageShell({ title, description, canonical, type, h1, eyebrow, lead, bod
 </head>
 <body>
 <header class="seo-header"><div class="seo-shell seo-nav"><a class="seo-brand" href="/">${BRAND}</a><nav class="seo-nav-links" aria-label="Điều hướng"><a href="/">Thử thách</a><a href="/kien-thuc/">Cẩm nang</a></nav></div></header>
-<main class="seo-article">
-  <div class="seo-breadcrumb"><a href="/">Cảnh Giác Số</a> › ${h1}</div>
+<main class="seo-article${bare ? " about-only-video" : ""}">
+  ${bare ? `<h1>${h1}</h1>` : `<div class="seo-breadcrumb"><a href="/">Cảnh Giác Số</a> › ${h1}</div>
   <span class="seo-eyebrow">${eyebrow}</span>
   <h1>${h1}</h1>
-  <p class="lead">${lead}</p>
+  <p class="lead">${lead}</p>`}
   ${body}
-  <section class="seo-related"><h2>Tiếp tục khám phá</h2><ul><li><a href="/kien-thuc/">Cẩm nang chống lừa đảo</a></li><li><a href="/phuong-phap-kiem-chung/">Phương pháp kiểm chứng & nguyên tắc biên tập</a></li><li><a href="/">Thử thách Cảnh Giác Số</a></li></ul></section>
+  ${bare ? "" : `<section class="seo-related"><h2>Tiếp tục khám phá</h2><ul><li><a href="/kien-thuc/">Cẩm nang chống lừa đảo</a></li><li><a href="/phuong-phap-kiem-chung/">Phương pháp kiểm chứng & nguyên tắc biên tập</a></li><li><a href="/">Thử thách Cảnh Giác Số</a></li></ul></section>`}
 </main>
 <footer class="seo-footer"><div class="seo-shell"><strong>Cảnh Giác Số</strong>${TRUST_NAV}<p class="seo-safety">Nội dung phục vụ giáo dục và nâng cao nhận thức an toàn thông tin.</p></div></footer>
 </body>
@@ -112,13 +112,10 @@ const about = pageShell({
   h1: "Giới thiệu Cảnh Giác Số",
   eyebrow: "VỀ CẢNH GIÁC SỐ",
   lead: "Cảnh Giác Số là nền tảng giáo dục an toàn số, tập trung giúp người dùng nhận diện dấu hiệu lừa đảo, xác minh thông tin độc lập và chọn hành động an toàn trước khi chuyển tiền, đăng nhập, cài ứng dụng hoặc chia sẻ dữ liệu.",
+  bare: true,
   body: `
 <section class="about-hero" aria-label="Hoạt hình giới thiệu Cảnh Giác Số"><div class="about-hero-frame"><iframe src="/gioi-thieu/hoat-hinh.html" title="Hoạt hình giới thiệu Cảnh Giác Số: các chiêu lừa đảo thường gặp và 4 nguyên tắc Dừng lại, Kiểm tra, Xác minh, Báo cáo"></iframe></div><div class="about-hero-actions"><a class="about-hero-cta" href="/">Bắt đầu thử thách</a><button type="button" class="about-hero-toggle" data-about-anim-toggle hidden>Tạm dừng</button><small>Hoạt hình tự lặp lại; bạn có thể tạm dừng bất cứ lúc nào.</small></div></section>
-<script src="/about-hero.js" defer></script>
-<section><h2>Website này giúp bạn làm gì?</h2><p>Nội dung được tổ chức theo các tình huống người dùng thường gặp: cuộc gọi mạo danh, phishing, website giả, lừa đảo ngân hàng, QR, OTP, deepfake, tuyển dụng, đầu tư và yêu cầu chuyển tiền khẩn cấp. Mỗi hướng dẫn ưu tiên các bước có thể thực hiện ngay thay vì chỉ mô tả thủ đoạn.</p></section>
-<section><h2>Nguyên tắc cốt lõi: Dừng — Kiểm tra — Xác minh — Báo cáo</h2><p>Khi có dấu hiệu bất thường, người dùng không cần tiếp tục tương tác để “thử xem có lừa đảo hay không”. Hướng dẫn mặc định là dừng thao tác có rủi ro, tự tìm kênh chính thức, xác minh qua nguồn độc lập và báo cáo khi có căn cứ phù hợp.</p></section>
-<section><h2>Nội dung được xây dựng và cập nhật như thế nào?</h2><p>Cảnh Giác Số ưu tiên nguồn từ cơ quan có thẩm quyền, tổ chức an ninh mạng, ngân hàng, nhà cung cấp dịch vụ và báo chí có danh tính rõ ràng. Các bài viết được gắn nguồn theo chủ đề, cập nhật khi thủ đoạn thay đổi và phân biệt rõ tín hiệu rủi ro với kết luận. Xem chi tiết tại <a href="/phuong-phap-kiem-chung/">phương pháp kiểm chứng & nguyên tắc biên tập</a>.</p></section>
-<section><h2>Phạm vi và giới hạn</h2><p>Cảnh Giác Số phục vụ giáo dục, tra cứu và nâng cao nhận thức. Nội dung không thay thế xác minh trực tiếp từ ngân hàng, cơ quan chức năng hoặc tổ chức có thẩm quyền trong từng vụ việc. Khi đã xảy ra thiệt hại tài chính hoặc mất quyền kiểm soát tài khoản, hãy ưu tiên khóa tài khoản, liên hệ đơn vị liên quan và lưu bằng chứng.</p></section>`,
+<script src="/about-hero.js" defer></script>`,
 });
 
 const privacy = pageShell({
