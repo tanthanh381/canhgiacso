@@ -890,3 +890,6 @@ a:hover { text-decoration-thickness: 2px; }
 }
 .app-topbar .seo-product-lockup strong { white-space: nowrap; }
 .app-topbar .seo-nav-links a { padding-inline: 12px; }
+.app-footer-extra { grid-column: 1 / -1; display: grid; gap: 4px; padding-top: 14px; border-top: 1px solid var(--seo-line); }
+.app-footer-extra p { margin: 0; color: var(--seo-muted); font-size: 12px; }
+.app-footer-extra a { color: var(--seo-link); font-weight: 700; }
