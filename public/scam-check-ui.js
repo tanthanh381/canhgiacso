@@ -73,7 +73,7 @@
       const button = el("button", "scam-check-ai-button", "Phân tích bằng AI");
       button.type = "button";
       button.addEventListener("click", () => runAi(result, ai, button));
-      ai.append(button, el("small", "", "Chế độ AI gửi nội dung bạn nhập đến máy chủ của Cảnh Giác Số để phân tích, không lưu lại. Cần đăng nhập."));
+      ai.append(button, el("small", "", "Chế độ AI gửi nội dung bạn nhập đến máy chủ Cảnh Giác Số và nhà cung cấp dịch vụ AI bên thứ ba để phân tích. Cảnh Giác Số không lưu nội dung này. Không nhập thông tin cá nhân nhạy cảm. Cần đăng nhập."));
       resultBox.append(ai);
     }
     resultBox.focus({ preventScroll: false });

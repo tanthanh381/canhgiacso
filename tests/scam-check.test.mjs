@@ -100,5 +100,7 @@ test("scam check page, edge function and pipeline stay wired together", async ()
   assert.match(pkg, /"build:pages": "[^"]*build-threat-feed\.mjs/);
   assert.match(fn, /is_anonymous/);
   assert.match(fn, /consume_scam_check_quota/);
+  assert.match(fn, /AI_API_KEY/);
+  assert.doesNotMatch(fn, /OLLAMA/);
   assert.doesNotMatch(ui, /innerHTML/);
 });
