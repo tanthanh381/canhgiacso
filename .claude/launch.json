@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "pages-preview",
+      "runtimeExecutable": "node_modules/.bin/vite",
+      "runtimeArgs": ["--config", "vite.github-pages.config.ts", "--port", "5174", "--strictPort"],
+      "port": 5174
+    },
+    {
+      "name": "pages-dist",
+      "runtimeExecutable": "node_modules/.bin/vite",
+      "runtimeArgs": ["preview", "--config", "vite.github-pages.config.ts", "--outDir", "/private/tmp/claude-501/-Users-tanthanh381-Projects-canhgiacso/98930040-7418-4b54-a965-e893f819f6d1/scratchpad/pages-dist", "--port", "5175", "--strictPort"],
+      "port": 5175
+    }
+  ]
+}
