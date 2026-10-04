@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { supabase } from "./supabase";
 
-type PrimaryView = "Thử thách" | "Cẩm nang" | "Tin tức" | "Thực hành" | "Thành tích";
+type PrimaryView = "Thử thách" | "Cẩm nang" | "Tin tức" | "Thành tích";
 
-const PRIMARY_VIEWS: PrimaryView[] = ["Thử thách", "Cẩm nang", "Tin tức", "Thực hành", "Thành tích"];
+const PRIMARY_VIEWS: PrimaryView[] = ["Thử thách", "Cẩm nang", "Tin tức", "Thành tích"];
 const BANNER_KEY = "canhgiacso:simulation-banner-dismissed";
 
 function navButton(label: string) {
@@ -229,7 +229,7 @@ export function UxRefresh() {
           aria-controls={item === "Cẩm nang" ? "ux-mobile-knowledge-menu" : undefined}
           onClick={() => item === "Cẩm nang" ? (setUtilityOpen(false), setMobileKnowledgeOpen((value) => !value)) : navigate(item)}
         >
-          <span aria-hidden="true">{{ "Thử thách": "◇", "Cẩm nang": "▤", "Tin tức": "◫", "Thực hành": "⚡", "Thành tích": "★" }[item]}</span>
+          <span aria-hidden="true">{{ "Thử thách": "◇", "Cẩm nang": "▤", "Tin tức": "◫", "Thành tích": "★" }[item]}</span>
           <small>{item}</small>
         </button>
       ))}

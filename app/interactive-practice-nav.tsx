@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 function findPracticeButton() {
-  return Array.from(document.querySelectorAll<HTMLButtonElement>(".topbar nav button"))
-    .find((button) => button.textContent?.trim() === "Thực hành") ?? null;
+  return Array.from(document.querySelectorAll<HTMLButtonElement>(".left-rail-nav button"))
+    .find((button) => button.getAttribute("aria-label")?.includes("Thực hành")) ?? null;
 }
 
 export function InteractivePracticeNav() {
