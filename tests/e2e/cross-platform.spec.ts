@@ -258,10 +258,11 @@ test.describe("trust/system page consistency", () => {
     test(`${path} shares the site brand shell and dark-mode preference`, async ({ page }) => {
       await page.addInitScript(() => localStorage.setItem("khien-so-theme", "dark"));
       await page.goto(path);
-      await expect(page.locator(".seo-header")).toBeVisible();
-      await expect(page.locator(".seo-brand-logo")).toBeVisible();
-      await expect(page.locator(".seo-brand-divider")).toBeVisible();
-      await expect(page.locator(".seo-product-lockup")).toBeVisible();
+      const header = page.locator(".seo-header");
+      await expect(header).toBeVisible();
+      await expect(header.locator(".seo-brand-logo")).toBeVisible();
+      await expect(header.locator(".seo-brand-divider")).toBeVisible();
+      await expect(header.locator(".seo-product-lockup")).toBeVisible();
       await expect(page.locator(".seo-footer")).toBeVisible();
       await expect(page.locator(".seo-footer-links a")).toHaveCount(7);
       await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
