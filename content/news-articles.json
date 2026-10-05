@@ -1,5 +1,125 @@
 [
   {
+    "id": "ma-doc-tong-tien-the-gentlemen",
+    "slug": "ma-doc-tong-tien-the-gentlemen",
+    "status": "published",
+    "title": "Cảnh báo mã độc tống tiền The Gentlemen",
+    "summary": "Nhóm ransomware The Gentlemen có thể đánh cắp dữ liệu trước khi mã hóa hệ thống để gây sức ép kép. Cơ quan, doanh nghiệp cần sao lưu theo nguyên tắc 3-2-1, vá lỗi, bật MFA cho tài khoản quản trị và chuẩn bị kịch bản ứng cứu sự cố.",
+    "category": "An toàn thông tin",
+    "publishedAt": "2026-10-02",
+    "sourceName": "Bộ Công an",
+    "sourceUrl": "https://bocongan.gov.vn/bai-viet/canh-bao-nguy-co-tu-ma-doc-tong-tien-the-gentlemen-va-bien-phap-phong-ngua-1790902923",
+    "featured": false,
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "heading",
+          "attrs": { "level": 2 },
+          "content": [{ "type": "text", "text": "Nguy cơ cần lưu ý" }]
+        },
+        {
+          "type": "paragraph",
+          "content": [{ "type": "text", "text": "The Gentlemen hoạt động theo mô hình ransomware-as-a-service. Sau khi xâm nhập, đối tượng có thể di chuyển trong mạng nội bộ, đánh cắp dữ liệu rồi mã hóa hệ thống để gây sức ép buộc nạn nhân trả tiền chuộc." }]
+        },
+        {
+          "type": "heading",
+          "attrs": { "level": 2 },
+          "content": [{ "type": "text", "text": "Biện pháp phòng ngừa" }]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Duy trì tối thiểu 3 bản sao dữ liệu trên 2 loại môi trường, trong đó có 1 bản ngoại tuyến, và kiểm tra khả năng khôi phục định kỳ." }] }] },
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Cập nhật bản vá, bật MFA cho tài khoản quản trị và hạn chế dịch vụ truy cập từ xa mở trực tiếp ra Internet." }] }] },
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Phân đoạn mạng, giám sát hoạt động bất thường và chuẩn bị trước trách nhiệm, quy trình cô lập, khôi phục khi xảy ra sự cố." }] }] },
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Khi nghi bị tấn công, cô lập thiết bị, bảo toàn nhật ký và dấu vết, rồi liên hệ lực lượng Công an hoặc đơn vị chuyên trách; không tự ý trả tiền chuộc." }] }] }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "gia-danh-can-bo-benh-vien-dat-mua-hang",
+    "slug": "gia-danh-can-bo-benh-vien-dat-mua-hang",
+    "status": "published",
+    "title": "Giả danh cán bộ bệnh viện đặt mua hàng số lượng lớn",
+    "summary": "Kẻ gian giả danh cán bộ bệnh viện, đặt đơn hàng giá trị lớn rồi gửi hình ảnh chuyển khoản và yêu cầu người bán chuyển tiền trước cho bên thứ ba. Hãy xác minh trực tiếp với đơn vị được nhắc đến và không coi ảnh sao kê là bằng chứng thanh toán.",
+    "category": "Cảnh báo lừa đảo",
+    "publishedAt": "2026-10-02",
+    "sourceName": "Bộ Công an",
+    "sourceUrl": "https://www.bocongan.gov.vn/bai-viet/quang-ninh-cong-an-phuong-mao-khe-kip-thoi-ngan-chan-nguy-co-lua-dao-qua-mang-voi-thu-doan-gia-danh-can-bo-benh-vien-dat-mua-hang-1790913523",
+    "featured": false,
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "heading",
+          "attrs": { "level": 2 },
+          "content": [{ "type": "text", "text": "Kịch bản lừa đảo" }]
+        },
+        {
+          "type": "paragraph",
+          "content": [{ "type": "text", "text": "Đối tượng liên hệ qua mạng xã hội, tự nhận là cán bộ của một bệnh viện và đặt mua hàng số lượng lớn. Sau khi gửi hình ảnh thể hiện đã chuyển tiền để tạo lòng tin, đối tượng đề nghị người bán chuyển một khoản tiền vào tài khoản bên thứ ba để “xác nhận giao dịch”." }]
+        },
+        {
+          "type": "heading",
+          "attrs": { "level": 2 },
+          "content": [{ "type": "text", "text": "Cách xử lý an toàn" }]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Xác minh danh tính và nhu cầu mua hàng qua số điện thoại, website hoặc đầu mối chính thức của cơ quan được nhắc đến." }] }] },
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Kiểm tra số dư và lịch sử giao dịch tại ngân hàng; không tin ảnh chụp sao kê hoặc giấy báo chuyển tiền do người mua gửi." }] }] },
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Không chuyển tiền trước cho nhà cung cấp hoặc tài khoản bên thứ ba khi chưa xác minh rõ mục đích và pháp nhân." }] }] },
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Dừng giao dịch, lưu tin nhắn và thông báo cơ quan Công an khi xuất hiện yêu cầu bất thường." }] }] }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "gia-danh-cong-an-dinh-danh-dien-tu-cho-tre",
+    "slug": "gia-danh-cong-an-dinh-danh-dien-tu-cho-tre",
+    "status": "published",
+    "title": "Cảnh báo giả danh Công an yêu cầu định danh điện tử cho trẻ",
+    "summary": "Đối tượng gọi điện cho phụ huynh, thông báo dữ liệu căn cước của trẻ cần xác thực gấp rồi gửi link, ứng dụng giả mạo hoặc hỏi mã OTP. Không làm thủ tục theo hướng dẫn từ người lạ; hãy xác minh trực tiếp tại cơ quan Công an.",
+    "category": "Cảnh báo lừa đảo",
+    "publishedAt": "2026-10-01",
+    "sourceName": "Bộ Công an",
+    "sourceUrl": "https://www.bocongan.gov.vn/bai-viet/cong-an-hai-phong-canh-bao-thu-doan-yeu-cau-dang-ki-dinh-danh-dien-tu-cho-tre-de-lua-dao-chiem-doat-tai-san-1790845850",
+    "featured": false,
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "heading",
+          "attrs": { "level": 2 },
+          "content": [{ "type": "text", "text": "Dấu hiệu nhận biết" }]
+        },
+        {
+          "type": "paragraph",
+          "content": [{ "type": "text", "text": "Người gọi tự xưng là cán bộ Công an hoặc người hỗ trợ dịch vụ công, cho rằng thông tin của trẻ bị sai hoặc cần xác thực gấp. Tiếp đó, họ có thể yêu cầu truy cập link, cài ứng dụng, cung cấp dữ liệu cá nhân, mật khẩu hoặc mã OTP." }]
+        },
+        {
+          "type": "heading",
+          "attrs": { "level": 2 },
+          "content": [{ "type": "text", "text": "Khuyến cáo cho phụ huynh" }]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Không làm thủ tục định danh điện tử cho trẻ theo hướng dẫn của người lạ qua điện thoại, Zalo hoặc mạng xã hội." }] }] },
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Không bấm link lạ, không cài ứng dụng được gửi riêng và không cung cấp mật khẩu, mã OTP hoặc dữ liệu ngân hàng." }] }] },
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Không chuyển tiền hay nộp phí kích hoạt, phí xác thực theo yêu cầu của người gọi." }] }] },
+            { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "Chủ động đến cơ quan Công an hoặc liên hệ kênh chính thức để kiểm tra khi nhận được yêu cầu đáng ngờ." }] }] }
+          ]
+        }
+      ]
+    }
+  },
+  {
     "id": "fanpage-gia-danh-giao-xu-tu-thien",
     "slug": "fanpage-gia-danh-giao-xu-tu-thien",
     "status": "published",
