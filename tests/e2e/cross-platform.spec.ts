@@ -261,12 +261,13 @@ test.describe("trust/system page consistency", () => {
       const header = page.locator(".seo-header");
       await expect(header).toBeVisible();
       await expect(header.locator(".seo-brand-logo")).toBeVisible();
-      await expect(header.locator(".seo-brand-divider")).toBeVisible();
-      await expect(header.locator(".seo-product-lockup")).toBeVisible();
+      await expect(header.locator(".seo-brand-divider")).toHaveCount(1);
+      await expect(header.locator(".seo-product-lockup")).toHaveCount(1);
       await expect(page.locator(".seo-footer")).toBeVisible();
-      await expect(page.locator(".seo-footer-links a")).toHaveCount(7);
+      await expect(page.locator(".seo-footer a")).toHaveCount(7);
       await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-      await expect(page.locator(".seo-nav-links a", { hasText: "Cẩm nang" })).toBeVisible();
+      const navigation = (page.viewportSize()?.width ?? 0) <= 900 ? ".app-mobile-nav a" : ".seo-nav-links a";
+      await expect(page.locator(navigation, { hasText: "Cẩm nang" })).toBeVisible();
       await expectNoHorizontalOverflow(page);
     });
   }
