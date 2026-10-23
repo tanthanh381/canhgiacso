@@ -318,3 +318,165 @@
 @media (prefers-reduced-motion: reduce) {
   .choice { transition: none !important; }
 }
+
+
+/* Frontend-design review 2026-10-23: the scenario becomes an incident brief. */
+.scenario-stage.card-surface {
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--fd-night) 22%, var(--line));
+  border-left: 1px solid color-mix(in srgb, var(--fd-night) 22%, var(--line));
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: 0 24px 64px rgba(12, 37, 56, .14);
+}
+
+.scenario-stage.card-surface::before {
+  z-index: 0;
+  top: -132px;
+  right: -94px;
+  opacity: .26;
+  pointer-events: none;
+}
+
+.scenario-meta,
+.scenario-title-row {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  background: var(--fd-night);
+}
+
+.scenario-meta {
+  padding: 22px clamp(22px, 3vw, 38px) 8px;
+  color: #d8e4ea;
+}
+
+.scenario-meta span {
+  border-color: rgba(255, 255, 255, .24);
+  background: rgba(255, 255, 255, .06);
+  color: #edf4f7;
+}
+
+.scenario-title-row {
+  padding: 7px clamp(22px, 3vw, 38px) 30px;
+  color: #fff;
+}
+
+.scenario-title-row .eyebrow {
+  color: var(--fd-signal);
+}
+
+.scenario-title-row h2,
+.dark .scenario-title-row h2 {
+  color: #fff;
+}
+
+.scenario-title-row .scenario-hero-icon {
+  flex: 0 0 auto;
+  border: 1px solid rgba(242, 201, 76, .48);
+  background: rgba(255, 255, 255, .07);
+  box-shadow: none;
+  color: var(--fd-signal);
+}
+
+.scenario-stage .story-box {
+  margin: 0;
+  padding: 28px clamp(22px, 3vw, 38px) 24px clamp(58px, 5vw, 76px);
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--fd-night) 3.5%, var(--surface));
+}
+
+.scenario-stage .story-box .quote-mark {
+  left: clamp(22px, 3vw, 38px);
+  top: 22px;
+}
+
+.scenario-stage .red-flags {
+  margin: 0;
+  padding: 18px clamp(22px, 3vw, 38px) 6px;
+}
+
+.scenario-stage .decision-title {
+  margin: 20px clamp(22px, 3vw, 38px) 13px;
+}
+
+.scenario-stage .choice-list {
+  padding: 0 clamp(22px, 3vw, 38px) 34px;
+}
+
+.scenario-stage .feedback {
+  margin: 0 clamp(22px, 3vw, 38px) 34px;
+}
+
+.scenario-stage .choice {
+  border-color: color-mix(in srgb, var(--fd-night) 18%, var(--line));
+}
+
+.scenario-stage .choice:hover:not(:disabled) {
+  border-left-color: var(--fd-alert);
+  box-shadow: 0 10px 24px rgba(12, 37, 56, .10);
+}
+
+.scenario-stage .choice:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--fd-signal) 80%, #fff);
+  outline-offset: 2px;
+}
+
+@media (max-width: 900px) {
+  .scenario-stage.card-surface {
+    border-left-width: 1px;
+    border-radius: 13px;
+    padding: 0;
+  }
+
+  .scenario-meta {
+    padding: 18px 16px 7px;
+  }
+
+  .scenario-title-row {
+    padding: 7px 16px 22px;
+  }
+
+  .scenario-stage .story-box {
+    padding: 22px 16px 20px 47px;
+  }
+
+  .scenario-stage .story-box .quote-mark {
+    left: 16px;
+    top: 17px;
+  }
+
+  .scenario-stage .red-flags {
+    padding: 16px 16px 5px;
+  }
+
+  .scenario-stage .decision-title {
+    margin: 18px 16px 12px;
+  }
+
+  .scenario-stage .choice-list {
+    padding: 0 16px 24px;
+  }
+
+  .scenario-stage .feedback {
+    margin: 0 16px 24px;
+  }
+}
+
+@media (max-width: 560px) {
+  .scenario-title-row {
+    align-items: center;
+  }
+
+  .scenario-title-row .scenario-hero-icon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .scenario-stage .story-box p {
+    font-size: 15px;
+    line-height: 1.65;
+  }
+}

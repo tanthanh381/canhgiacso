@@ -229,12 +229,20 @@ for (const config of targets) {
 if (await exists(HOME)) {
   let home = await readFile(HOME, "utf8");
   const anchors = [
-    ["Giả mạo ngân hàng và cách bảo vệ tài khoản", "Giả mạo ngân hàng: 6 dấu hiệu và cách xử lý an toàn"],
-    ["Cách kiểm tra link và website giả mạo", "Kiểm tra link lừa đảo: 6 dấu hiệu trước khi bấm"],
-    ["Bị lừa chuyển tiền phải làm gì ngay?", "Bị lừa chuyển tiền: 5 bước cần làm ngay"],
-    ["Kiểm tra số điện thoại lừa đảo", "Kiểm tra số điện thoại lừa đảo: 7 cách tra cứu số lạ"],
+    ["/kien-thuc/gia-mao-ngan-hang/", "Giả mạo ngân hàng: 6 dấu hiệu và cách xử lý an toàn"],
+    ["/kien-thuc/kiem-tra-link-gia-mao/", "Kiểm tra link lừa đảo: 6 dấu hiệu trước khi bấm"],
+    ["/kien-thuc/xu-ly-khi-bi-lua-dao-chuyen-tien/", "Bị lừa chuyển tiền: 5 bước cần làm ngay"],
+    ["/kien-thuc/kiem-tra-so-dien-thoai-lua-dao/", "Kiểm tra số điện thoại lừa đảo: 7 cách tra cứu số lạ"],
   ];
-  for (const [before, after] of anchors) home = home.replace(before, after);
+  for (const [href, label] of anchors) {
+    const openTag = `<a href="${href}">`;
+    const anchorStart = home.indexOf(openTag);
+    if (anchorStart < 0) continue;
+    const labelStart = anchorStart + openTag.length;
+    const labelEnd = home.indexOf("</a>", labelStart);
+    if (labelEnd < 0) continue;
+    home = `${home.slice(0, labelStart)}${label}${home.slice(labelEnd)}`;
+  }
   if (!home.includes("/kien-thuc/lua-dao-cong-tac-vien-viec-nhe-luong-cao/")) {
     home = home.replace(
       '<li><a href="/kien-thuc/deepfake-gia-giong-nguoi-than/">Deepfake giả giọng người thân</a></li>',
