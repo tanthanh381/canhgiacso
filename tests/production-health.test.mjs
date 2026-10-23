@@ -11,6 +11,8 @@ test("production health probes canonical public entry points without secrets", a
   }
   assert.match(health, /AbortController/);
   assert.match(health, /HEALTH_TIMEOUT_MS/);
+  assert.match(health, /reject: \/7 cách tra cứu số lạ/);
+  assert.match(health, /unexpected repeated SEO label/);
   assert.doesNotMatch(health, /SUPABASE_SECRET|service_role|password|Authorization/i);
 });
 

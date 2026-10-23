@@ -2,14 +2,19 @@ const BASE_URL = process.env.HEALTH_BASE_URL || "https://canhgiacso.com";
 const TIMEOUT_MS = Number(process.env.HEALTH_TIMEOUT_MS || 12000);
 
 const checks = [
-  { path: "/", expect: /Cảnh Giác Số|CẢNH GIÁC SỐ/i, contentType: /text\/html/i },
+  {
+    path: "/",
+    expect: /Cảnh Giác Số|CẢNH GIÁC SỐ/i,
+    reject: /7 cách tra cứu số lạ(?:: 7 cách tra cứu số lạ)+/i,
+    contentType: /text\/html/i,
+  },
   { path: "/kien-thuc/", expect: /Cẩm nang|Kiến thức/i, contentType: /text\/html/i },
   { path: "/cong-cu/", expect: /Công cụ|kiểm tra lừa đảo/i, contentType: /text\/html/i },
   { path: "/sitemap.xml", expect: /<urlset[\s>]/i, contentType: /xml/i },
   { path: "/robots.txt", expect: /Sitemap:\s*https:\/\/canhgiacso\.com\/sitemap\.xml/i, contentType: /text\/plain/i },
 ];
 
-async function check({ path, expect, contentType }) {
+async function check({ path, expect, reject, contentType }) {
   const url = new URL(path, BASE_URL);
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
@@ -26,6 +31,7 @@ async function check({ path, expect, contentType }) {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     if (contentType && !contentType.test(type)) throw new Error(`unexpected content-type: ${type}`);
     if (!expect.test(body)) throw new Error("expected content marker missing");
+    if (reject?.test(body)) throw new Error("unexpected repeated SEO label");
     return { path, status: response.status, elapsedMs };
   } finally {
     clearTimeout(timer);
