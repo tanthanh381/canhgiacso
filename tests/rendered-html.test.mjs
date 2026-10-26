@@ -131,9 +131,14 @@ test("ships product metadata and social artwork", async () => {
   assert.match(data, /normalizeSiteContent/);
   assert.doesNotMatch(data.slice(data.indexOf("const scenarioDefinitions"), data.indexOf("export const scenarios")), /correct:\s*(?:true|false)|moneyDelta:|awarenessDelta:|feedback:/);
   const scenarioIds = [...data.matchAll(/\bid:\s*(\d+),/g)].map((match) => Number(match[1]));
-  assert.equal(new Set(scenarioIds).size, 42);
-  assert.equal(Math.max(...scenarioIds), 42);
+  assert.equal(new Set(scenarioIds).size, 48);
+  assert.equal(Math.max(...scenarioIds), 48);
+  assert.match(data, /isNew\?: boolean/);
+  assert.equal((data.match(/isNew:\s*true/g) ?? []).length, 6);
+  assert.match(page, /scenario-new-badge/);
+  assert.match(admin, /Đánh dấu là thử thách mới/);
   assert.match(presentation, /Thợ săn xu hướng mới/);
+  assert.match(presentation, /target: 18/);
   assert.match(schema, /alter table public\.site_content enable row level security/);
   assert.match(schema, /site_content_public_read/);
   assert.match(schema, /private\.user_is_app_admin/);
