@@ -4,12 +4,12 @@ import test from "node:test";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
 
-test("scenario library has 42 valid three-choice scenarios", async () => {
+test("scenario library has 48 valid three-choice scenarios", async () => {
   const data = await read("../app/data.ts");
   const definitions = data.slice(data.indexOf("const scenarioDefinitions"), data.indexOf("export const scenarios"));
   const ids = [...definitions.matchAll(/\bid:\s*(\d+),/g)].map((match) => Number(match[1]));
-  assert.deepEqual(ids, Array.from({ length: 42 }, (_, index) => index + 1));
-  assert.equal((definitions.match(/\{ text:/g) ?? []).length, 126);
+  assert.deepEqual(ids, Array.from({ length: 48 }, (_, index) => index + 1));
+  assert.equal((definitions.match(/\{ text:/g) ?? []).length, 144);
   assert.doesNotMatch(definitions, /correct:\s*(?:true|false)|moneyDelta:|awarenessDelta:|feedback:/);
 });
 
