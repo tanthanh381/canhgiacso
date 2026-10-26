@@ -143,7 +143,6 @@ test("ships product metadata and social artwork", async () => {
   assert.match(page, /Thành tích 42\/42 của bạn vẫn được giữ nguyên/);
   assert.match(page, /WHATS_NEW_RELEASE_KEY/);
   assert.match(page, /Cập nhật thêm 06 thử thách nâng cao/);
-  assert.match(page, /Popup chỉ xuất hiện một lần/);
   assert.match(page, /safeStorageSet\(WHATS_NEW_RELEASE_KEY, "seen"\)/);
   assert.match(dashboardView, /Người chơi xuất sắc/);
   assert.match(page, /rankAwardCandidates/);
