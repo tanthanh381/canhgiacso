@@ -13,7 +13,7 @@ import { KnowledgeView } from "./domains/security-awareness/view";
 import { validateAuthSubmission, type AuthMode, type SessionAccount } from "./domains/auth/model";
 import { getCurrentAuthSession, loginAccount, registerAccount, signOutLocal, subscribeToAuthChanges, updateProfileDisplayName } from "./domains/auth/gateway";
 import { AccountDialogs } from "./domains/auth/dialogs";
-import { mapAnalyticsUsers, mapScenarioRisks, summarizeAnalytics, topScenarioRisks, type AnalyticsUser, type DashboardStatus, type ScenarioRisk } from "./domains/dashboard/model";
+import { mapAnalyticsUsers, mapScenarioRisks, rankAwardCandidates, summarizeAnalytics, topScenarioRisks, type AnalyticsUser, type DashboardStatus, type ScenarioRisk } from "./domains/dashboard/model";
 import { DashboardView } from "./domains/dashboard/view";
 import { loadCisoDashboardData } from "./domains/dashboard/gateway";
 import { bestCorrectStreak, buildDefenseBadges, difficulties, difficultyTone, PHISHING_QUIZ_URL, scenarioCategoryLabel, scenarioChannelLabel } from "./domains/training/presentation";
@@ -232,6 +232,14 @@ export default function Home() {
     () => new Set(results.filter((result) => result.correct).map((result) => result.scenarioId)),
     [results],
   );
+  const foundationScenarios = scenarios.filter((item) => item.id <= 42);
+  const advancedScenarios = scenarios.filter((item) => item.id >= 43);
+  const foundationCompleted = foundationScenarios.filter((item) => completedIds.has(item.id)).length;
+  const foundationSafe = foundationScenarios.filter((item) => safeIds.has(item.id)).length;
+  const advancedCompleted = advancedScenarios.filter((item) => completedIds.has(item.id)).length;
+  const advancedSafe = advancedScenarios.filter((item) => safeIds.has(item.id)).length;
+  const foundationComplete = foundationScenarios.length > 0 && foundationCompleted === foundationScenarios.length;
+  const advancedComplete = advancedScenarios.length > 0 && advancedCompleted === advancedScenarios.length;
   const unlockedDifficulties = getUnlockedDifficulties(scenarios, completedIds);
   const availableScenarios = scenarios.filter((item) => unlockedDifficulties.has(item.difficulty));
   const selectedCandidate = scenarios.find((item) => item.id === selectedId);
@@ -244,6 +252,10 @@ export default function Home() {
   const evidence = scenarios.filter((item) => safeIds.has(item.id));
   const score = results.reduce((total, result) => total + (result.correct ? 120 : 20), 0);
   const analytics = useMemo(() => summarizeAnalytics(analyticsUsers), [analyticsUsers]);
+  const awardCandidates = useMemo(
+    () => rankAwardCandidates(analyticsUsers, scenarios.length),
+    [analyticsUsers, scenarios.length],
+  );
   const scenarioRisks = useMemo(
     () => topScenarioRisks(scenarios, dashboardScenarioRisks),
     [dashboardScenarioRisks, scenarios],
@@ -744,7 +756,8 @@ export default function Home() {
   }
 
   function exportCisoReport() {
-    const header = ["Tên hiển thị", "Tên đăng nhập", "Ngày đăng ký", "Đã hoàn thành", "Chính xác (%)", "Cảnh giác (%)", "Tổn thất (VND)", "Mức rủi ro"];
+    const awardByUsername = new Map(awardCandidates.map((candidate) => [candidate.username, candidate]));
+    const header = ["Tên hiển thị", "Tên đăng nhập", "Ngày đăng ký", "Đã hoàn thành", "Nâng cao hoàn thành", "Nâng cao đúng", "Chính xác (%)", "Cảnh giác (%)", "Tổn thất (VND)", "Mức rủi ro", "Hạng đề cử", "Danh hiệu"];
     const escapeCell = (value: string | number) => {
       const text = String(value);
       const safe = typeof value === "string" && /^[\s]*[=+@-]/.test(text) ? `'${text}` : text;
@@ -755,10 +768,14 @@ export default function Home() {
       user.username,
       new Date(user.createdAt).toLocaleDateString("vi-VN"),
       user.completed,
+      user.advancedCompleted,
+      user.advancedCorrect,
       user.accuracy,
       user.awareness,
       user.loss,
       user.risk,
+      awardByUsername.get(user.username)?.rank ?? "",
+      awardByUsername.get(user.username)?.awardTier ?? "",
     ]);
     const csv = `\uFEFF${[header, ...rows].map((row) => row.map(escapeCell).join(",")).join("\n")}`;
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
@@ -813,6 +830,20 @@ export default function Home() {
         onRetry={() => { if (pendingChoice) void syncChoice(pendingChoice); }}
       />
       <div id="main-content" className="skip-target" tabIndex={-1} />
+
+      {view === "game" && foundationComplete && !advancedComplete && (
+        <section className="returning-player-banner" aria-label="Bộ thử thách nâng cao mới">
+          <div className="returning-player-mark" aria-hidden="true">42</div>
+          <div>
+            <strong>Thành tích 42/42 của bạn vẫn được giữ nguyên</strong>
+            <p>Có 6 thử thách nâng cao 2026 mới. Tiến độ nâng cao hiện tại: {advancedCompleted}/{advancedScenarios.length}.</p>
+          </div>
+          <button onClick={() => {
+            const next = availableScenarios.find((item) => item.id >= 43 && !completedIds.has(item.id));
+            if (next) chooseScenario(next.id);
+          }}>Tiếp tục bộ nâng cao</button>
+        </section>
+      )}
 
       {view === "game" && (
         <div className="game-shell">
@@ -982,6 +1013,18 @@ export default function Home() {
       {view === "stats" && (
         <section className="content-page stats-page">
           <div className="page-hero"><span className="eyebrow">HỒ SƠ PHÒNG VỆ</span><h1>{playerName}</h1><p>{sessionAccount ? "Tiến bộ của bạn được đồng bộ an toàn giữa các thiết bị." : "Đăng nhập để đồng bộ tiến bộ giữa các thiết bị."}</p></div>
+          <section className="learning-milestones" aria-label="Tiến độ theo bộ thử thách">
+            <div className={foundationComplete ? "complete" : ""}>
+              <span className="milestone-symbol" aria-hidden="true">{foundationComplete ? "✓" : "42"}</span>
+              <div><strong>Bộ nền tảng</strong><p>{foundationComplete ? "Đã hoàn thành 42/42. Thành tích và chứng nhận cũ được giữ nguyên." : `Đã hoàn thành ${foundationCompleted}/${foundationScenarios.length} tình huống.`}</p><i><b style={{ width: `${foundationScenarios.length ? Math.round((foundationCompleted / foundationScenarios.length) * 100) : 0}%` }} /></i></div>
+              <em>{foundationSafe}/{foundationScenarios.length} an toàn</em>
+            </div>
+            <div className={advancedComplete ? "complete advanced" : "advanced"}>
+              <span className="milestone-symbol" aria-hidden="true">{advancedComplete ? "✓" : "06"}</span>
+              <div><strong>Bộ nâng cao 2026</strong><p>{advancedComplete ? "Đã hoàn thành toàn bộ thử thách nâng cao." : `Đã hoàn thành ${advancedCompleted}/${advancedScenarios.length} thử thách mới.`}</p><i><b style={{ width: `${advancedScenarios.length ? Math.round((advancedCompleted / advancedScenarios.length) * 100) : 0}%` }} /></i></div>
+              <em>{advancedSafe}/{advancedScenarios.length} an toàn</em>
+            </div>
+          </section>
           <div className="stats-overview"><article><small>Kịch bản đã thử</small><strong>{results.length}</strong><span>/ {scenarios.length}</span></article><article><small>Xử lý an toàn</small><strong>{safeIds.size}</strong><span>{results.length ? Math.round((safeIds.size / results.length) * 100) : 0}% chính xác</span></article><article><small>Điểm phòng vệ</small><strong>{score}</strong><span>cấp {Math.floor(score / 500) + 1}</span></article><article><small>Tài sản còn lại</small><strong className="money-stat">{money.format(balance)}đ</strong><span>bảo toàn {Math.round((balance / 300_000_000) * 100)}%</span></article></div>
           {sessionAccount ? (
             latestCertificate ? (
