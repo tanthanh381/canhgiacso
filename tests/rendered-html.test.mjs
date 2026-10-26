@@ -142,6 +142,10 @@ test("ships product metadata and social artwork", async () => {
   assert.match(presentation, /target: 42/);
   assert.match(page, /Bộ thử thách nâng cao 2026/);
   assert.match(page, /Thành tích 42\/42 của bạn vẫn được giữ nguyên/);
+  assert.match(page, /WHATS_NEW_RELEASE_KEY/);
+  assert.match(page, /6 thử thách nâng cao đã sẵn sàng/);
+  assert.match(page, /Popup chỉ xuất hiện một lần/);
+  assert.match(page, /safeStorageSet\(WHATS_NEW_RELEASE_KEY, "seen"\)/);
   assert.match(dashboardView, /Người chơi xuất sắc/);
   assert.match(page, /rankAwardCandidates/);
   assert.match(schema, /alter table public\.site_content enable row level security/);
