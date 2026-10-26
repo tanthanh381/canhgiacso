@@ -1,7 +1,7 @@
 import type { Scenario } from "../../data";
 import { BadgeIcon } from "../../shared/ui-primitives";
 import type { SessionAccount } from "../auth/model";
-import type { AnalyticsUser, DashboardStatus, ScenarioRisk } from "./model";
+import { rankAwardCandidates, type AnalyticsUser, type DashboardStatus, type ScenarioRisk } from "./model";
 import type { summarizeAnalytics } from "./model";
 
 const money = new Intl.NumberFormat("vi-VN");
@@ -33,6 +33,8 @@ export function DashboardView({
   onLogin: () => void;
   onExport: () => void;
 }) {
+  const awardCandidates = rankAwardCandidates(users, scenarioCount);
+
   return (
     <section className="content-page dashboard-page">
       <div className="dashboard-heading">
@@ -89,6 +91,33 @@ export function DashboardView({
             <article className={analytics.highRisk ? "risk-kpi" : ""}><small>Người dùng rủi ro cao</small><strong>{analytics.highRisk}</strong><span>Cần ưu tiên đào tạo lại</span></article>
             <article><small>Tổn thất mô phỏng</small><strong className="dashboard-money">{money.format(analytics.totalLoss)}đ</strong><span>Tổng tác động từ lựa chọn sai</span></article>
           </div>
+
+          <article className="dashboard-card award-board">
+            <div className="dashboard-card-title">
+              <div><small>ĐỀ CỬ TRAO GIẢI</small><h2>Người chơi xuất sắc</h2></div>
+              <strong>{awardCandidates.length} đủ điều kiện</strong>
+            </div>
+            <p className="award-criteria">Điều kiện: hoàn thành 48/48 bằng kết quả máy chủ xác nhận. Thứ hạng lần lượt xét số câu nâng cao đúng, tổng câu đúng, tài sản bảo toàn, mức cảnh giác và thời điểm hoàn thành.</p>
+            <div className="analytics-table-wrap">
+              <table>
+                <thead><tr><th>Hạng</th><th>Người chơi</th><th>Nâng cao</th><th>Tổng đúng</th><th>Tài sản bảo toàn</th><th>Đề cử</th></tr></thead>
+                <tbody>
+                  {awardCandidates.map((candidate) => (
+                    <tr key={candidate.username} className={candidate.rank <= 3 ? `award-rank-${candidate.rank}` : ""}>
+                      <td><strong className="award-rank">#{candidate.rank}</strong></td>
+                      <td><strong>{candidate.displayName}</strong><small>@{candidate.username}</small></td>
+                      <td>{candidate.advancedCorrect}/6</td>
+                      <td>{candidate.correct}/{scenarioCount}</td>
+                      <td>{Math.round((candidate.balance / 300_000_000) * 100)}%</td>
+                      <td><span className="award-tier">{candidate.awardTier}</span></td>
+                    </tr>
+                  ))}
+                  {!awardCandidates.length && <tr><td colSpan={6} className="empty-table">Chưa có người chơi hoàn thành đủ bộ nâng cao để đề cử.</td></tr>}
+                </tbody>
+              </table>
+            </div>
+            <small className="award-policy">Kết quả mô phỏng chỉ là một căn cứ vinh danh. Quản trị viên cần rà soát tính hợp lệ trước khi công bố hoặc trao thưởng.</small>
+          </article>
 
           <div className="dashboard-grid">
             <article className="dashboard-card outcome-card">
