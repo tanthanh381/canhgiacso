@@ -547,3 +547,171 @@
     font-size: 0.64rem;
   }
 }
+
+
+/* Foundation preservation and award review */
+.returning-player-banner {
+  width: min(1180px, calc(100% - 2rem));
+  margin: 1.1rem auto 0;
+  padding: 1rem 1.15rem;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  border: 1px solid color-mix(in srgb, var(--fd-signal) 62%, var(--border));
+  border-left: 0.35rem solid var(--fd-signal);
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, var(--fd-signal) 9%, var(--surface));
+}
+
+.returning-player-mark {
+  display: grid;
+  width: 3rem;
+  height: 3rem;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--fd-night);
+  color: var(--fd-signal);
+  font-weight: 900;
+}
+
+.returning-player-banner strong {
+  color: var(--text);
+}
+
+.returning-player-banner p {
+  margin: 0.24rem 0 0;
+  color: var(--muted);
+}
+
+.returning-player-banner button {
+  min-height: 2.75rem;
+  padding-inline: 1rem;
+  border: 0;
+  border-radius: 0.7rem;
+  background: var(--fd-signal);
+  color: var(--fd-night);
+  font-weight: 800;
+}
+
+.learning-milestones {
+  margin: 1.2rem 0;
+  border-block: 1px solid var(--border);
+}
+
+.learning-milestones > div {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.learning-milestones > div + div {
+  border-top: 1px solid var(--border);
+}
+
+.learning-milestones .milestone-symbol {
+  display: grid;
+  width: 2.8rem;
+  height: 2.8rem;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--muted);
+  font-weight: 900;
+}
+
+.learning-milestones .complete .milestone-symbol {
+  border-color: #14875d;
+  background: #14875d;
+  color: #fff;
+}
+
+.learning-milestones .advanced .milestone-symbol {
+  border-color: var(--fd-signal);
+  color: var(--fd-night);
+  background: color-mix(in srgb, var(--fd-signal) 22%, var(--surface));
+}
+
+.learning-milestones p {
+  margin: 0.2rem 0 0.55rem;
+  color: var(--muted);
+}
+
+.learning-milestones i {
+  display: block;
+  height: 0.35rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--border) 75%, transparent);
+}
+
+.learning-milestones i b {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #14875d;
+}
+
+.learning-milestones .advanced i b {
+  background: var(--fd-signal);
+}
+
+.learning-milestones em {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-style: normal;
+  white-space: nowrap;
+}
+
+.award-board {
+  margin-block: 1rem 1.4rem;
+}
+
+.award-criteria,
+.award-policy {
+  color: var(--muted);
+}
+
+.award-rank {
+  color: var(--fd-night);
+  font-size: 1rem;
+}
+
+.dark .award-rank {
+  color: var(--fd-signal);
+}
+
+.award-tier {
+  display: inline-flex;
+  padding: 0.22rem 0.55rem;
+  border: 1px solid color-mix(in srgb, var(--fd-signal) 62%, var(--border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--fd-signal) 14%, var(--surface));
+  color: var(--text);
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.award-rank-1 {
+  background: color-mix(in srgb, var(--fd-signal) 11%, transparent);
+}
+
+@media (max-width: 720px) {
+  .returning-player-banner {
+    grid-template-columns: auto 1fr;
+  }
+
+  .returning-player-banner button {
+    grid-column: 1 / -1;
+  }
+
+  .learning-milestones > div {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .learning-milestones em {
+    grid-column: 2;
+  }
+}
