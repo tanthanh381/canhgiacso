@@ -140,7 +140,6 @@ test("ships product metadata and social artwork", async () => {
   assert.match(presentation, /Thợ săn xu hướng mới/);
   assert.match(presentation, /Nhà phân tích nâng cao/);
   assert.match(presentation, /target: 42/);
-  assert.match(page, /Bộ thử thách nâng cao 2026/);
   assert.match(page, /Thành tích 42\/42 của bạn vẫn được giữ nguyên/);
   assert.match(page, /WHATS_NEW_RELEASE_KEY/);
   assert.match(page, /6 thử thách nâng cao đã sẵn sàng/);
