@@ -200,7 +200,10 @@ export default function Home() {
 
   useEffect(() => {
     if (!contentReady || !hydrated || view === "admin") return;
-    if (safeStorageGet(WHATS_NEW_RELEASE_KEY) !== "seen") setWhatsNewOpen(true);
+    const frame = window.requestAnimationFrame(() => {
+      if (safeStorageGet(WHATS_NEW_RELEASE_KEY) !== "seen") setWhatsNewOpen(true);
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, [contentReady, hydrated, view]);
 
   useEffect(() => {
