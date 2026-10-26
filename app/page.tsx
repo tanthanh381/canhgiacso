@@ -240,6 +240,10 @@ export default function Home() {
   const advancedSafe = advancedScenarios.filter((item) => safeIds.has(item.id)).length;
   const foundationComplete = foundationScenarios.length > 0 && foundationCompleted === foundationScenarios.length;
   const advancedComplete = advancedScenarios.length > 0 && advancedCompleted === advancedScenarios.length;
+  const activeJourneyCompleted = foundationComplete ? advancedCompleted : foundationCompleted;
+  const activeJourneyTotal = foundationComplete ? advancedScenarios.length : foundationScenarios.length;
+  const activeJourneyPercent = activeJourneyTotal ? Math.round((activeJourneyCompleted / activeJourneyTotal) * 100) : 0;
+  const activeJourneyLabel = foundationComplete ? "nâng cao" : "nền tảng";
   const unlockedDifficulties = getUnlockedDifficulties(scenarios, completedIds);
   const availableScenarios = scenarios.filter((item) => unlockedDifficulties.has(item.difficulty));
   const selectedCandidate = scenarios.find((item) => item.id === selectedId);
@@ -850,7 +854,7 @@ export default function Home() {
           <aside className="scenario-panel">
             <div className="panel-heading">
               <div><span className="eyebrow">{siteContent.copy.libraryEyebrow}</span><h1>{siteContent.copy.libraryTitle}</h1></div>
-              <span className="scenario-count">{safeIds.size}/{scenarios.length}</span>
+              <span className="scenario-count">{foundationComplete ? `${advancedCompleted}/${advancedScenarios.length} mới` : `${foundationCompleted}/${foundationScenarios.length}`}</span>
             </div>
             <div className="search-box"><span>⌕</span><input aria-label="Tìm kịch bản" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Tìm theo tên, kênh..." /></div>
             <div className="difficulty-filter" aria-label="Lọc độ khó">
@@ -938,8 +942,8 @@ export default function Home() {
               <button onClick={() => setGuide(true)}>Xem quy tắc 3 bước</button>
             </div>
             <div className="progress-card">
-              <div className="section-title"><span><small>Tiến trình</small><strong>{Math.round((safeIds.size / scenarios.length) * 100)}%</strong></span></div>
-              <div className="ring" style={{ "--progress": `${(safeIds.size / scenarios.length) * 360}deg` } as React.CSSProperties}><span>{safeIds.size}<small>an toàn</small></span></div>
+              <div className="section-title"><span><small>Tiến trình {activeJourneyLabel}</small><strong>{activeJourneyPercent}%</strong></span></div>
+              <div className="ring" style={{ "--progress": `${activeJourneyPercent * 3.6}deg` } as React.CSSProperties}><span>{activeJourneyCompleted}<small>{activeJourneyLabel}</small></span></div>
               <div className="mini-stats"><span><strong>{streak}</strong> chuỗi tốt nhất</span><span><strong>{unlockedBadgeCount}</strong> / {defenseBadges.length} huy hiệu</span></div>
             </div>
             <div className="badge-card">
