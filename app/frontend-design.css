@@ -715,3 +715,112 @@
     grid-column: 2;
   }
 }
+
+
+/* Release note: a compact ledger makes the update concrete without looking like a campaign banner. */
+.whats-new-modal {
+  width: min(42rem, calc(100vw - 2rem));
+}
+
+.whats-new-heading {
+  padding-right: 2.5rem;
+}
+
+.whats-new-release {
+  display: inline-flex;
+  margin-bottom: 0.75rem;
+  padding: 0.32rem 0.68rem;
+  border: 1px solid color-mix(in srgb, var(--fd-signal) 72%, var(--border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--fd-signal) 12%, var(--surface));
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.whats-new-heading h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: clamp(1.65rem, 4vw, 2.35rem);
+  line-height: 1.08;
+}
+
+.whats-new-heading p {
+  max-width: 58ch;
+  margin: 0.85rem 0 0;
+  color: var(--muted);
+  line-height: 1.62;
+}
+
+.whats-new-ledger {
+  margin: 1.35rem 0;
+  border-block: 1px solid var(--border);
+}
+
+.whats-new-ledger article {
+  display: grid;
+  grid-template-columns: 4.8rem minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem;
+  padding: 0.95rem 0;
+}
+
+.whats-new-ledger article + article {
+  border-top: 1px solid var(--border);
+}
+
+.whats-new-ledger strong {
+  color: var(--fd-night);
+  font-size: 1.22rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+}
+
+.dark .whats-new-ledger strong {
+  color: var(--fd-signal);
+}
+
+.whats-new-ledger span {
+  color: var(--text);
+  line-height: 1.48;
+}
+
+.whats-new-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+.whats-new-actions button {
+  min-height: 2.9rem;
+}
+
+.whats-new-footnote {
+  display: block;
+  margin-top: 0.85rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+@media (max-width: 560px) {
+  .whats-new-modal {
+    width: calc(100vw - 1rem);
+  }
+
+  .whats-new-heading {
+    padding-right: 2rem;
+  }
+
+  .whats-new-ledger article {
+    grid-template-columns: 3.8rem minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+
+  .whats-new-actions {
+    display: grid;
+  }
+
+  .whats-new-actions button {
+    width: 100%;
+  }
+}
