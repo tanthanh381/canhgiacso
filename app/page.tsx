@@ -27,6 +27,7 @@ import { AppFooter, AppHeader, SyncStatus } from "./domains/shell/view";
 const AdminPage = lazy(() => import("./admin").then((module) => ({ default: module.AdminPage })));
 
 const money = new Intl.NumberFormat("vi-VN");
+const WHATS_NEW_RELEASE_KEY = "canh-giac-so:whats-new:advanced-2026-v1";
 export default function Home() {
   const [view, setView] = useState<View>("game");
   const [siteContent, setSiteContent] = useState<SiteContent>(defaultSiteContent);
@@ -43,6 +44,7 @@ export default function Home() {
   const [answerOutcome, setAnswerOutcome] = useState<ChoiceOutcome | null>(null);
   const [dark, setDark] = useState(false);
   const [guide, setGuide] = useState(false);
+  const [whatsNewOpen, setWhatsNewOpen] = useState(false);
   const [completedChecklistIds, setCompletedChecklistIds] = useState<string[]>([]);
   const [checklistReady, setChecklistReady] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -195,6 +197,11 @@ export default function Home() {
     safeStorageSet(THEME_KEY, dark ? "dark" : "light");
     if (!sessionAccount && !activeUser.current) safeStorageSet(progressKey(null), JSON.stringify({ balance, awareness, results, dark, playerName }));
   }, [balance, awareness, results, dark, playerName, hydrated, sessionAccount]);
+
+  useEffect(() => {
+    if (!contentReady || !hydrated || view === "admin") return;
+    if (safeStorageGet(WHATS_NEW_RELEASE_KEY) !== "seen") setWhatsNewOpen(true);
+  }, [contentReady, hydrated, view]);
 
   useEffect(() => {
     if (view !== "dashboard") return;
@@ -759,6 +766,20 @@ export default function Home() {
     if (remaining || fallback) chooseScenario((remaining ?? fallback).id);
   }
 
+  function dismissWhatsNew() {
+    safeStorageSet(WHATS_NEW_RELEASE_KEY, "seen");
+    setWhatsNewOpen(false);
+  }
+
+  function exploreWhatsNew() {
+    dismissWhatsNew();
+    const next = foundationComplete
+      ? availableScenarios.find((item) => item.id >= 43 && !completedIds.has(item.id))
+      : availableScenarios.find((item) => !completedIds.has(item.id));
+    if (next) chooseScenario(next.id);
+    else navigateTo("game");
+  }
+
   function exportCisoReport() {
     const awardByUsername = new Map(awardCandidates.map((candidate) => [candidate.username, candidate]));
     const header = ["Tên hiển thị", "Tên đăng nhập", "Ngày đăng ký", "Đã hoàn thành", "Nâng cao hoàn thành", "Nâng cao đúng", "Chính xác (%)", "Cảnh giác (%)", "Tổn thất (VND)", "Mức rủi ro", "Hạng đề cử", "Danh hiệu"];
@@ -1101,6 +1122,38 @@ export default function Home() {
         /></Suspense>}
 
       <AppFooter copy={siteContent.copy} onOpenGuide={() => setGuide(true)} />
+
+      {whatsNewOpen && !showGuestLimitNotice && !authOpen && !profileOpen && !guide && !lossNotice && !completionCertificate && view !== "admin" && (
+        <Modal open onClose={dismissWhatsNew} labelledBy="whats-new-title" className="whats-new-modal">
+          <button className="modal-close" aria-label="Đóng giới thiệu nội dung mới" onClick={dismissWhatsNew}>×</button>
+          <div className="whats-new-heading">
+            <span className="whats-new-release">Cập nhật tháng 10/2026</span>
+            <h2 id="whats-new-title">6 thử thách nâng cao đã sẵn sàng</h2>
+            <p>Hành trình Cảnh Giác Số vừa có thêm nội dung dành cho người muốn kiểm tra kỹ năng xử lý các thủ đoạn mới và phức tạp hơn.</p>
+          </div>
+          <div className="whats-new-ledger" aria-label="Điểm mới trong đợt cập nhật">
+            <article>
+              <strong>42/42</strong>
+              <span>Thành tích nền tảng và chứng nhận đã cấp vẫn được giữ nguyên.</span>
+            </article>
+            <article>
+              <strong>06</strong>
+              <span>Tình huống mới về hoàn tiền, mã QR, phạt nguội, deepfake, đơn hàng giả và tuyển dụng.</span>
+            </article>
+            <article>
+              <strong>Top 3</strong>
+              <span>Kết quả tài khoản hợp lệ được đưa vào danh sách đề cử trong Dashboard Quản trị.</span>
+            </article>
+          </div>
+          <div className="whats-new-actions">
+            <button className="primary-button" onClick={exploreWhatsNew}>
+              {foundationComplete ? "Bắt đầu bộ nâng cao" : "Tiếp tục hành trình"}
+            </button>
+            <button className="secondary-button" onClick={dismissWhatsNew}>Đã hiểu</button>
+          </div>
+          <small className="whats-new-footnote">Popup chỉ xuất hiện một lần cho đợt cập nhật này trên thiết bị hiện tại.</small>
+        </Modal>
+      )}
 
       {completionCertificate && !lossNotice && <Modal open onClose={() => setCompletionCertificate(null)} labelledBy="certificate-complete-title" className="certificate-complete-modal">
         <button className="modal-close" aria-label="Đóng thông báo chứng nhận" onClick={() => setCompletionCertificate(null)}>×</button>
