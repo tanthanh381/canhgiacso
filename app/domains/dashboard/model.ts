@@ -6,6 +6,9 @@ export type AnalyticsUser = {
   createdAt: string;
   completed: number;
   correct: number;
+  advancedCompleted: number;
+  advancedCorrect: number;
+  advancedCompletedAt: string | null;
   accuracy: number;
   awareness: number;
   balance: number;
@@ -23,6 +26,9 @@ export function mapAnalyticsUsers(rows: Array<Record<string, unknown>>): Analyti
     createdAt: String(user.created_at ?? ""),
     completed: Number(user.completed ?? 0),
     correct: Number(user.correct ?? 0),
+    advancedCompleted: Number(user.advanced_completed ?? 0),
+    advancedCorrect: Number(user.advanced_correct ?? 0),
+    advancedCompletedAt: user.advanced_completed_at ? String(user.advanced_completed_at) : null,
     accuracy: Number(user.accuracy ?? 0),
     awareness: Number(user.awareness ?? 100),
     balance: Number(user.balance ?? 300_000_000),
@@ -63,4 +69,29 @@ export function topScenarioRisks(scenarios: Scenario[], risks: ScenarioRisk[], l
     }))
     .sort((a, b) => b.rate - a.rate || b.attempts - a.attempts)
     .slice(0, limit);
+}
+
+
+export type AwardCandidate = AnalyticsUser & {
+  rank: number;
+  awardTier: "Quán quân" | "Á quân" | "Hạng ba" | "Bảng vàng";
+};
+
+export function rankAwardCandidates(users: AnalyticsUser[], scenarioCount: number, limit = 10): AwardCandidate[] {
+  return users
+    .filter((user) => user.completed >= scenarioCount && user.advancedCompleted >= 6)
+    .sort((a, b) =>
+      b.advancedCorrect - a.advancedCorrect
+      || b.correct - a.correct
+      || b.balance - a.balance
+      || b.awareness - a.awareness
+      || new Date(a.advancedCompletedAt ?? "9999-12-31").getTime() - new Date(b.advancedCompletedAt ?? "9999-12-31").getTime()
+      || a.username.localeCompare(b.username, "vi")
+    )
+    .slice(0, Math.max(1, limit))
+    .map((user, index) => ({
+      ...user,
+      rank: index + 1,
+      awardTier: index === 0 ? "Quán quân" : index === 1 ? "Á quân" : index === 2 ? "Hạng ba" : "Bảng vàng",
+    }));
 }
