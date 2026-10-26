@@ -138,7 +138,12 @@ test("ships product metadata and social artwork", async () => {
   assert.match(page, /scenario-new-badge/);
   assert.match(admin, /Đánh dấu là thử thách mới/);
   assert.match(presentation, /Thợ săn xu hướng mới/);
-  assert.match(presentation, /target: 18/);
+  assert.match(presentation, /Nhà phân tích nâng cao/);
+  assert.match(presentation, /target: 42/);
+  assert.match(page, /Bộ thử thách nâng cao 2026/);
+  assert.match(page, /Thành tích 42\/42 của bạn vẫn được giữ nguyên/);
+  assert.match(dashboardView, /Người chơi xuất sắc/);
+  assert.match(page, /rankAwardCandidates/);
   assert.match(schema, /alter table public\.site_content enable row level security/);
   assert.match(schema, /site_content_public_read/);
   assert.match(schema, /private\.user_is_app_admin/);
