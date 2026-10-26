@@ -180,6 +180,7 @@ export function AdminPage({
       redFlags: ["Dấu hiệu cảnh báo cần chú ý"],
       tip: "Mẹo an toàn người chơi cần ghi nhớ.",
       evidence: "Chứng cứ mới",
+      isNew: true,
       choices: [
         { text: "Lựa chọn an toàn", correct: true, moneyDelta: 0, awarenessDelta: 5, feedback: "Đây là cách xử lý an toàn." },
         { text: "Lựa chọn rủi ro", correct: false, moneyDelta: -1000000, awarenessDelta: -10, feedback: "Lựa chọn này có thể gây thiệt hại." },
@@ -425,7 +426,7 @@ export function AdminPage({
       </div>}
 
       {tab === "scenarios" && selectedScenario && <div className="scenario-admin-layout">
-        <aside className="admin-list"><div className="admin-list-heading"><strong>Danh sách tình huống</strong><button onClick={addScenario}>+ Thêm</button></div>{draft.scenarios.map((scenario) => <button className={scenario.id === selectedScenario.id ? "active" : ""} key={scenario.id} onClick={() => setSelectedScenarioId(scenario.id)}><span>{String(scenario.id).padStart(2, "0")}</span><b>{scenario.title}</b></button>)}</aside>
+        <aside className="admin-list"><div className="admin-list-heading"><strong>Danh sách tình huống</strong><button onClick={addScenario}>+ Thêm</button></div>{draft.scenarios.map((scenario) => <button className={scenario.id === selectedScenario.id ? "active" : ""} key={scenario.id} onClick={() => setSelectedScenarioId(scenario.id)}><span>{String(scenario.id).padStart(2, "0")}</span><b>{scenario.title}{scenario.isNew && <span className="scenario-new-badge">Mới</span>}</b></button>)}</aside>
         <div className="scenario-admin-form">
           <div className="admin-section-title"><div><span className="eyebrow">TÌNH HUỐNG {String(selectedScenario.id).padStart(2, "0")}</span><h2>{selectedScenario.title}</h2></div><button className="danger-link" onClick={removeScenario}>Xóa tình huống</button></div>
           <div className="admin-form-grid compact">
@@ -434,6 +435,7 @@ export function AdminPage({
             <label><span>Danh mục</span><input value={selectedScenario.category} onChange={(event) => changeScenario({ category: event.target.value })} /></label>
             <label><span>Độ khó</span><select value={selectedScenario.difficulty} onChange={(event) => changeScenario({ difficulty: event.target.value as Difficulty })}>{difficultyOptions.map((item) => <option key={item}>{item}</option>)}</select></label>
             <label><span>Biểu tượng</span><input value={selectedScenario.icon} maxLength={12} onChange={(event) => changeScenario({ icon: event.target.value })} /></label>
+            <label className="scenario-new-toggle"><input type="checkbox" checked={selectedScenario.isNew === true} onChange={(event) => changeScenario({ isNew: event.target.checked })} /><span>Đánh dấu là thử thách mới</span></label>
             <label className="admin-wide"><span>Bối cảnh</span><textarea rows={5} value={selectedScenario.story} onChange={(event) => changeScenario({ story: event.target.value })} /></label>
             <label className="admin-wide"><span>Dấu hiệu cảnh báo — mỗi dòng một dấu hiệu</span><textarea rows={4} value={selectedScenario.redFlags.join("\n")} onChange={(event) => changeScenario({ redFlags: event.target.value.split("\n").map((value) => value.trim()).filter(Boolean) })} /></label>
             <label className="admin-wide"><span>Mẹo ghi nhớ</span><textarea value={selectedScenario.tip} onChange={(event) => changeScenario({ tip: event.target.value })} /></label>
