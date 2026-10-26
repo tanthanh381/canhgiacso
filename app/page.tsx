@@ -1130,14 +1130,27 @@ export default function Home() {
         <Modal open onClose={dismissWhatsNew} labelledBy="whats-new-title" className="whats-new-modal">
           <button className="modal-close" aria-label="Đóng giới thiệu nội dung mới" onClick={dismissWhatsNew}>×</button>
           <div className="whats-new-heading">
-            <h2 id="whats-new-title">Cập nhật thêm 06 thử thách nâng cao</h2>
+            <span className="whats-new-release">Cập nhật tháng 10/2026</span>
+            <h2 id="whats-new-title">6 thử thách nâng cao đã sẵn sàng</h2>
+            <p>Hành trình Cảnh Giác Số vừa có thêm nội dung dành cho người muốn kiểm tra kỹ năng xử lý các thủ đoạn mới và phức tạp hơn.</p>
+          </div>
+          <div className="whats-new-ledger" aria-label="Điểm mới trong đợt cập nhật">
+            <article>
+              <strong>42/42</strong>
+              <span>Thành tích nền tảng và chứng nhận đã cấp vẫn được giữ nguyên.</span>
+            </article>
+            <article>
+              <strong>06</strong>
+              <span>Tình huống mới về hoàn tiền, mã QR, phạt nguội, deepfake, đơn hàng giả và tuyển dụng.</span>
+            </article>
           </div>
           <div className="whats-new-actions">
             <button className="primary-button" onClick={exploreWhatsNew}>
-              {foundationComplete ? "Bắt đầu thử thách" : "Tiếp tục"}
+              {foundationComplete ? "Bắt đầu bộ nâng cao" : "Tiếp tục hành trình"}
             </button>
-            <button className="secondary-button" onClick={dismissWhatsNew}>Đóng</button>
+            <button className="secondary-button" onClick={dismissWhatsNew}>Đã hiểu</button>
           </div>
+          <small className="whats-new-footnote">Popup chỉ xuất hiện một lần cho đợt cập nhật này trên thiết bị hiện tại.</small>
         </Modal>
       )}
 
