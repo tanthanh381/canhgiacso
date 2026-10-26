@@ -75,7 +75,7 @@ export function buildDefenseBadges(
     createBadge({ icon: "◒", name: "Miễn nhiễm đầu tư", description: "Vượt các bẫy sàn giả, tình cảm–đầu tư, airdrop và hội thảo trực tuyến.", tier: "Chuyên môn", tone: "expert", current: safeIn([7, 11, 25, 30]), target: 4 }),
     createBadge({ icon: "⚐", name: "Người tìm việc tỉnh táo", description: "Nhận diện đủ bẫy cộng tác viên, tuyển mẫu, vay phí trước và việc ở nước ngoài.", tier: "Chuyên môn", tone: "expert", current: safeIn([4, 17, 18, 28]), target: 4 }),
     createBadge({ icon: "◎", name: "Người giữ danh tính", description: "Bảo vệ OTP, sinh trắc học, tài khoản và quyền truy cập thiết bị.", tier: "Chuyên môn", tone: "expert", current: safeIn([6, 8, 14, 16, 19, 20, 27, 29]), target: 8 }),
-    createBadge({ icon: "✹", name: "Thợ săn xu hướng mới", description: "Vượt các thủ đoạn mới về nhập học, sự kiện, nhà ở, livestream, việc làm và thao túng tâm lý.", tier: "Cập nhật 2026", tone: "expert", current: safeIn([31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42]), target: 12 }),
+    createBadge({ icon: "✹", name: "Thợ săn xu hướng mới", description: "Vượt các thủ đoạn mới về mua sắm, QR, phạt nguội, deepfake, đặt hàng doanh nghiệp và tuyển dụng.", tier: "Cập nhật 2026", tone: "expert", current: safeIn([31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48]), target: 18 }),
     createBadge({ icon: "⬣", name: "Chuyên gia Cảnh Giác Số", description: "Xử lý an toàn toàn bộ thư viện tình huống hiện có.", tier: "Huyền thoại", tone: "legendary", current: safeIds.size, target: scenarioCount }),
   ];
 }
