@@ -843,7 +843,7 @@ export default function Home() {
                 return (
                   <button key={item.id} aria-pressed={selected.id === item.id} aria-disabled={!unlocked} disabled={!unlocked} onClick={() => chooseScenario(item.id)} className={`scenario-item ${selected.id === item.id ? "selected" : ""} ${!unlocked ? "locked" : ""}`}>
                     <span className={`scenario-number ${correct ? "done" : completed ? "attempted" : !unlocked ? "locked" : ""}`}>{correct ? "✓" : completed ? "•" : !unlocked ? "🔒" : String(item.id).padStart(2, "0")}</span>
-                    <span className="scenario-copy"><strong>{item.title}</strong><small>{unlocked ? `${scenarioChannelLabel(item.channel)} · ${scenarioCategoryLabel(item.category)}` : `Cấp ${item.difficulty} · Hoàn thành cấp thấp hơn để mở khóa`}</small></span>
+                    <span className="scenario-copy"><strong>{item.title}{item.isNew && <span className="scenario-new-badge">Mới</span>}</strong><small>{unlocked ? `${scenarioChannelLabel(item.channel)} · ${scenarioCategoryLabel(item.category)}` : `Cấp ${item.difficulty} · Hoàn thành cấp thấp hơn để mở khóa`}</small></span>
                     <span className={`difficulty-dot ${difficultyTone[item.difficulty]}`} title={unlocked ? item.difficulty : `${item.difficulty} · Đang khóa`}></span>
                   </button>
                 );
@@ -877,7 +877,7 @@ export default function Home() {
               </section>
             ) : (
               <section className="scenario-stage card-surface">
-                <div className="scenario-meta"><span className={`level-pill ${difficultyTone[selected.difficulty]}`}>{selected.difficulty}</span><span>{scenarioChannelLabel(selected.channel)}</span><span>{scenarioCategoryLabel(selected.category)}</span></div>
+                <div className="scenario-meta"><span className={`level-pill ${difficultyTone[selected.difficulty]}`}>{selected.difficulty}</span>{selected.isNew && <span className="scenario-new-badge scenario-new-badge-featured">Mới</span>}<span>{scenarioChannelLabel(selected.channel)}</span><span>{scenarioCategoryLabel(selected.category)}</span></div>
                 <div className="scenario-title-row"><span className="scenario-hero-icon">{selected.icon}</span><div><span className="eyebrow">Tình huống {String(selected.id).padStart(2, "0")}</span><h2>{selected.title}</h2></div></div>
                 <div className="story-box"><span className="quote-mark">“</span><p>{selected.story}</p></div>
                 <div className="red-flags"><strong>Dấu hiệu cần quan sát</strong><div>{selected.redFlags.map((flag) => <span key={flag}>△ {flag}</span>)}</div></div>
