@@ -824,3 +824,29 @@
     width: 100%;
   }
 }
+
+
+.stats-page-hero {
+  display: flex;
+  max-width: none;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.stats-page-hero .export-button {
+  flex: 0 0 auto;
+  min-height: 2.75rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .stats-page-hero {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .stats-page-hero .export-button {
+    width: 100%;
+  }
+}
