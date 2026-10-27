@@ -783,6 +783,36 @@ export default function Home() {
     else navigateTo("game");
   }
 
+  function exportPersonalProgress() {
+    const resultByScenario = new Map(results.map((result) => [result.scenarioId, result]));
+    const header = ["Tình huống", "Mức độ", "Kênh", "Kết quả", "Điểm", "Tài sản sau lượt"];
+    const escapeCell = (value: string | number) => {
+      const text = String(value);
+      const safe = typeof value === "string" && /^[\s]*[=+@-]/.test(text) ? `'${text}` : text;
+      return `"${safe.replaceAll('"', '""')}"`;
+    };
+    const rows = scenarios
+      .filter((scenario) => resultByScenario.has(scenario.id))
+      .map((scenario) => {
+        const result = resultByScenario.get(scenario.id)!;
+        return [
+          `#${String(scenario.id).padStart(2, "0")} ${scenario.title}`,
+          scenario.difficulty,
+          scenario.channel,
+          result.correct ? "Đúng" : "Chưa an toàn",
+          result.correct ? 120 : 20,
+          result.balanceAfter,
+        ];
+      });
+    const csv = `\uFEFF${[header, ...rows].map((row) => row.map(escapeCell).join(",")).join("\n")}`;
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `canh-giac-so-tien-do-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
   function exportCisoReport() {
     const awardByUsername = new Map(awardCandidates.map((candidate) => [candidate.username, candidate]));
     const header = ["Tên hiển thị", "Tên đăng nhập", "Ngày đăng ký", "Đã hoàn thành", "Nâng cao hoàn thành", "Nâng cao đúng", "Chính xác (%)", "Cảnh giác (%)", "Tổn thất (VND)", "Mức rủi ro", "Hạng đề cử", "Danh hiệu"];
@@ -1040,7 +1070,10 @@ export default function Home() {
 
       {view === "stats" && (
         <section className="content-page stats-page">
-          <div className="page-hero"><span className="eyebrow">HỒ SƠ PHÒNG VỆ</span><h1>{playerName}</h1><p>{sessionAccount ? "Tiến bộ của bạn được đồng bộ an toàn giữa các thiết bị." : "Đăng nhập để đồng bộ tiến bộ giữa các thiết bị."}</p></div>
+          <div className="page-hero stats-page-hero">
+            <div><span className="eyebrow">HỒ SƠ PHÒNG VỆ</span><h1>{playerName}</h1><p>{sessionAccount ? "Tiến bộ của bạn được đồng bộ an toàn giữa các thiết bị." : "Đăng nhập để đồng bộ tiến bộ giữa các thiết bị."}</p></div>
+            <button className="export-button" onClick={exportPersonalProgress} disabled={!results.length}>⇩ Tải tiến độ cá nhân</button>
+          </div>
           <section className="learning-milestones" aria-label="Tiến độ theo bộ thử thách">
             <div className={foundationComplete ? "complete" : ""}>
               <span className="milestone-symbol" aria-hidden="true">{foundationComplete ? "✓" : "42"}</span>
