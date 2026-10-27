@@ -6,12 +6,12 @@
 
 ## Tính năng
 
-- 42 kịch bản phân nhánh theo 4 cấp độ khó, mở khóa tuần tự từ Dễ đến Rất khó
+- 48 kịch bản phân nhánh theo 4 cấp độ khó, gồm 42 tình huống nền tảng và 06 thử thách nâng cao mở khóa tuần tự từ Dễ đến Rất khó
 - Hệ thống tài sản, cảnh giác và điểm phòng vệ
 - Phản hồi giải thích sau từng lựa chọn
 - Tìm kiếm và lọc tình huống
 - Chứng cứ, huy hiệu, chuỗi thành tích và thống kê
-- Cấp chứng chỉ hoàn thành theo kết quả đã được máy chủ xác minh và cho phép tải chứng chỉ dưới dạng PDF
+- Cấp chứng chỉ hoàn thành 48 tình huống theo kết quả đã được máy chủ xác minh và cho phép tải chứng chỉ dưới dạng PDF; chứng nhận 42/42 cũ vẫn được giữ nguyên
 - Cẩm nang xử lý khẩn cấp theo quy tắc Dừng — Kiểm — Báo
 - Chế độ sáng/tối và giao diện responsive
 - Đăng ký/đăng nhập email bằng Supabase Auth
@@ -25,6 +25,13 @@
 - `localStorage` chỉ dùng cho giao diện và tiến trình khách chưa đăng nhập
 - Không yêu cầu hoặc thu thập dữ liệu ngân hàng
 - Nhận diện Cảnh Giác Số riêng với biểu tượng đại bàng trong chiếc khiên do dự án cung cấp
+
+## Phạm vi cải tiến đã triển khai
+
+- Tiến độ tách riêng bộ nền tảng 42 tình huống và bộ nâng cao 06 tình huống.
+- Huy hiệu chuyên môn cho bộ nâng cao và danh sách đề cử trao giải trong Dashboard Quản trị.
+- Popup giới thiệu nội dung mới, chỉ hiển thị một lần cho mỗi đợt cập nhật trên từng thiết bị.
+- Kiểm thử tự động lint, regression, build, đa trình duyệt, đa hệ điều hành và kiểm tra bảo mật.
 
 ## Chạy cục bộ
 
